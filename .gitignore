@@ -1,0 +1,38 @@
+# Track only the project source and weekly reports
+/*
+/*.md
+!/.gitignore
+!/source_code/
+!/source_code/**
+!/report-weekly/
+!/report-weekly/**
+
+# Local environment files
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.sample
+!**/.env.template
+
+# Spring environment configuration
+**/application.properties
+**/application.yml
+**/application.yaml
+**/application-*.properties
+**/application-*.yml
+**/application-*.yaml
+!**/application-example.properties
+!**/application-example.yml
+!**/application-example.yaml
+!**/application.example.properties
+!**/application.example.yml
+!**/application.example.yaml
+
+# Credentials, private keys and local certificates
+**/*secret*
+**/*credential*
+**/*.key
+**/*.pem
+**/*.p12
+**/*.pfx
+**/*.jks
