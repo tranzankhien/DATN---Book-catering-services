@@ -1,9 +1,6 @@
 package org.aplication.backend.service.impl.order;
 
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import org.aplication.backend.common.constants.ErrorCode;
@@ -32,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class OrderServiceImpl implements OrderService {
     private static final String ORDER_CODE_PREFIX = "TMP-";
-    private static final DateTimeFormatter CODE_TIME = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(ZoneOffset.UTC);
     private final UserRepository userRepository;
     private final HallRepository hallRepository;
     private final DishRepository dishRepository;
@@ -52,7 +48,7 @@ public class OrderServiceImpl implements OrderService {
         if (!request.eventEnd().isAfter(request.eventStart())) throw new CustomBusinessException(ErrorCode.ORDER_INVALID_TIME_RANGE);
         if (request.serviceLocation() == ServiceLocation.AT_RESTAURANT && request.hallId() == null) throw new CustomBusinessException(ErrorCode.HALL_NOT_FOUND);
         UserEntity customer = userRepository.findById(customerId).orElseThrow(() -> new CustomBusinessException(ErrorCode.RESOURCE_NOT_FOUND));
-        HallEntity hall = request.hallId() == null ? null : hallRepository.findById(request.hallId()).filter(HallEntity::isActive)
+        HallEntity hall = request.hallId() == null ? null : hallRepository.findById(request.hallId()).filter(h -> h.isActive())
                 .orElseThrow(() -> new CustomBusinessException(ErrorCode.HALL_NOT_FOUND));
         OrderEntity order = new OrderEntity(ORDER_CODE_PREFIX + UUID.randomUUID(), customer, hall, request.serviceLocation(), request.eventStart(),
                 request.eventEnd(), request.guestCount(), request.contactName(), request.contactPhone(), request.eventAddress(), request.note());
@@ -61,11 +57,11 @@ public class OrderServiceImpl implements OrderService {
             if (item.quantity() <= 0) throw new CustomBusinessException(ErrorCode.ORDER_EMPTY_ITEMS);
             String name; BigDecimal price;
             if (item.itemType() == OrderItemType.DISH) {
-                DishEntity dish = dishRepository.findById(item.referenceId()).filter(DishEntity::isActive)
+                DishEntity dish = dishRepository.findById(item.referenceId()).filter(d -> d.isActive())
                         .orElseThrow(() -> new CustomBusinessException(ErrorCode.DISH_NOT_FOUND));
                 name = dish.getName(); price = dish.getSalePrice();
             } else {
-                AdditionalServiceEntity service = serviceRepository.findById(item.referenceId()).filter(AdditionalServiceEntity::isActive)
+                AdditionalServiceEntity service = serviceRepository.findById(item.referenceId()).filter(s -> s.isActive())
                         .orElseThrow(() -> new CustomBusinessException(ErrorCode.RESOURCE_NOT_FOUND));
                 name = service.getName(); price = service.getPrice();
             }

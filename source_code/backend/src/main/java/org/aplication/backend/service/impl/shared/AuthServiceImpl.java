@@ -112,7 +112,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override @Transactional
     public AuthResult loginUser(String email, String password) {
-        UserEntity user = users.findByEmailIgnoreCase(email.trim()).filter(UserEntity::isActive)
+        UserEntity user = users.findByEmailIgnoreCase(email.trim()).filter(u -> u.isActive())
                 .filter(u -> u.getRole() == UserRole.CUSTOMER).orElseThrow(this::invalidCredentials);
         if (!encoder.matches(password, user.getPasswordHash())) throw invalidCredentials();
         return issue(user);
@@ -120,7 +120,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override @Transactional
     public AuthResult loginAdminOrStaff(String email, String password) {
-        UserEntity user = users.findByEmailIgnoreCase(email.trim()).filter(UserEntity::isActive)
+        UserEntity user = users.findByEmailIgnoreCase(email.trim()).filter(u -> u.isActive())
                 .filter(u -> u.getRole() != UserRole.CUSTOMER).orElseThrow(this::invalidCredentials);
         if (!encoder.matches(password, user.getPasswordHash())) throw invalidCredentials();
         return issue(user);

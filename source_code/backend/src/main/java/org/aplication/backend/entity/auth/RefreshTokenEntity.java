@@ -43,6 +43,7 @@ public class RefreshTokenEntity extends BaseEntity {
     public String getTokenHash() { return tokenHash; }
     public Instant getExpiresAt() { return expiresAt; }
     public Instant getRevokedAt() { return revokedAt; }
+    public UUID getReplacedBy() { return replacedBy; }
     public boolean isExpired() { return !expiresAt.isAfter(Instant.now()); }
     public boolean isRevoked() { return revokedAt != null; }
 

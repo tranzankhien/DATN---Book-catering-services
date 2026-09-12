@@ -27,6 +27,8 @@ public class TwilioOtpService implements OtpService {
                 .build();
     }
 
+    public String getServiceSid() { return serviceSid; }
+
     @Override
     public void sendSms(String phone) {
         if (!enabled) return;
