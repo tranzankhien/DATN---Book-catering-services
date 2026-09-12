@@ -6,6 +6,10 @@
 !/source_code/**
 !/report-weekly/
 !/report-weekly/**
+!/docs/
+!/docs/**/
+!/docs/**/*.md
+!/implementation_plan.md
 
 # Local environment files
 **/.env
@@ -27,6 +31,8 @@
 !**/application.example.properties
 !**/application.example.yml
 !**/application.example.yaml
+!/source_code/backend/src/main/resources/application.properties
+!/source_code/backend/src/test/resources/application.properties
 
 # Credentials, private keys and local certificates
 **/*secret*

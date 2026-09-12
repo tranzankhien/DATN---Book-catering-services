@@ -1,0 +1,15 @@
+:root {
+  --color-page: #f4f3ed;
+  --color-surface: #ffffff;
+  --color-border: #b9c5ba;
+  --color-border-soft: #d9ded8;
+  --color-text: #17221d;
+  --color-muted: #66736a;
+  --color-primary: #315d43;
+  --color-primary-soft: #8eb59a;
+  --color-success: #287044;
+  --color-danger: #a52d2d;
+  --shadow-panel: 0 14px 34px #24312612;
+  --radius-control: 4px;
+  --space-page: 24px;
+}
