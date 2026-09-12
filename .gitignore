@@ -1,15 +1,13 @@
-# Track only the project source and weekly reports
-/*
-/*.md
+# Ignore docs, agent configs, and plan files
+/docs/
+/report-weekly/
+/.agents/
+/implementation_plan.md
+*.md
+
 !/.gitignore
 !/source_code/
 !/source_code/**
-!/report-weekly/
-!/report-weekly/**
-!/docs/
-!/docs/**/
-!/docs/**/*.md
-!/implementation_plan.md
 
 # Local environment files
 **/.env
