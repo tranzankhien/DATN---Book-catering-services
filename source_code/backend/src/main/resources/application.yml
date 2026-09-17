@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: banquet-hub-api
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:../.env[.properties]
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/banquet_hub}
+    username: ${SPRING_DATASOURCE_USERNAME:banquet_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: Asia/Ho_Chi_Minh
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:}
+    expiration-ms: ${APP_JWT_EXPIRATION_MS:86400000}
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  seed:
+    enabled: ${APP_SEED_ENABLED:true}
+    admin-email: ${APP_SEED_ADMIN_EMAIL:admin@banquethub.vn}
+    admin-password: ${APP_SEED_ADMIN_PASSWORD:}
+    employee-email: ${APP_SEED_EMPLOYEE_EMAIL:employee@banquethub.vn}
+    employee-password: ${APP_SEED_EMPLOYEE_PASSWORD:}
+    user-email: ${APP_SEED_USER_EMAIL:user@banquethub.vn}
+    user-password: ${APP_SEED_USER_PASSWORD:}
+
+logging:
+  level:
+    root: INFO
+    com.banquethub: INFO
+    org.springframework.security: INFO
