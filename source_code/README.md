@@ -107,6 +107,24 @@ npm run dev
 
 ---
 
+### *Cách chạy nhanh: Bật toàn bộ hệ thống bằng 1 lệnh duy nhất (One-click Startup)*
+
+Từ thư mục gốc `banquet-hub`, chạy script tiện ích PowerShell:
+
+```powershell
+.\run-dev.ps1
+```
+
+*Script trên sẽ tự động khởi động PostgreSQL 17 (nếu chưa bật) và mở 2 cửa sổ PowerShell riêng biệt cho Backend (:8080) và Frontend (:5173).*
+
+Hoặc chạy trực tiếp lệnh PowerShell một dòng:
+
+```powershell
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd backend; .\mvnw.cmd spring-boot:run"; Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd frontend; npm run dev"
+```
+
+---
+
 ## 5. Địa chỉ các dịch vụ (URLs)
 
 | Dịch vụ | Địa chỉ truy cập |
@@ -133,7 +151,9 @@ Các tài khoản demo được cấu hình thông qua biến môi trường (`A
 
 ---
 
-## 7. Kiểm thử tự động (Build & Test)
+## 7. Kiểm thử tự động & Bảng xác minh dịch vụ thực tế
+
+### 7.1. Chạy kiểm thử tự động (Build & Unit/Integration Tests)
 
 - **Chạy kiểm thử tích hợp Backend (JUnit 5 + MockMvc + PostgreSQL 17)**:
   ```powershell
@@ -145,6 +165,18 @@ Các tài khoản demo được cấu hình thông qua biến môi trường (`A
   cd frontend
   npm run build
   ```
+
+---
+
+### 7.2. Bảng kết quả kiểm tra thực tế hệ thống (Phase 1 Verification)
+
+| Hạng mục kiểm tra | Lệnh thực thi đúng chuẩn trên PowerShell | Kết quả thực tế |
+|-------------------|------------------------------------------|-----------------|
+| **Khởi tạo PostgreSQL 17** | `docker compose -f infra/docker-compose.yml up -d` | Container `banquet-hub-postgres` đạt trạng thái `running / healthy` trên cổng `5432` |
+| **Chạy JUnit 5 Integration Tests** | `cd backend; .\mvnw.cmd test` | `Tests run: 7, Failures: 0, Errors: 0, Skipped: 0 — BUILD SUCCESS` ([Phase1IntegrationTest.java](backend/src/test/java/com/banquethub/Phase1IntegrationTest.java)) |
+| **Build TypeScript & Vite Frontend** | `cd frontend; npm run build` | `tsc -b && vite build` thành công (`✓ built in 2.18s`), 0 lỗi |
+| **Khởi động Live Services** | `.\run-dev.ps1`<br>*(hoặc mở 2 tab: `cd backend; .\mvnw.cmd spring-boot:run` và `cd frontend; npm run dev`)* | Backend Spring Boot sẵn sàng tại `:8080`, Frontend React Vite sẵn sàng tại `:5173` |
+| **Kiểm tra Live API & Health Endpoints** | `Invoke-RestMethod -Uri "http://localhost:8080/api/v1/health"; (Invoke-WebRequest -Uri "http://localhost:5173" -UseBasicParsing).StatusCode` | `/api/v1/health` trả `status: UP`, `database: PostgreSQL Connected`, `timezone: Asia/Ho_Chi_Minh`; Frontend trả mã `200 OK` |
 
 ---
 
