@@ -102,11 +102,12 @@ export const RecipeConfigModal: React.FC<RecipeConfigModalProps> = ({
         quantity: Number(r.quantity),
         note: r.note?.trim() || undefined,
       }));
+
       const updated = await catalogService.updateDishRecipe(dish.id, payload);
-      showToast(`Đã lưu công thức định lượng cho món "${dish.name}".`, 'success');
+      showToast(`Đã cập nhật công thức cho món "${dish.name}" thành công!`, 'success');
       onSaved(updated);
     } catch (err) {
-      const msg = extractErrorMessage(err, 'Không thể lưu công thức định lượng.');
+      const msg = extractErrorMessage(err, 'Không thể cập nhật công thức định lượng.');
       setErrorMsg(msg);
       showToast(msg, 'error');
     } finally {
@@ -115,143 +116,136 @@ export const RecipeConfigModal: React.FC<RecipeConfigModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-      <div className="w-full max-w-3xl rounded-3xl border border-stone-800 bg-stone-900 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] gold-border-glow">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 backdrop-blur-xs p-4">
+      <div className="w-full max-w-xl rounded-2xl border border-stone-200 bg-white shadow-xl overflow-hidden flex flex-col max-h-[88vh]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-stone-800 px-7 py-5 bg-stone-950/80">
-          <div className="flex items-center gap-3.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-stone-950 font-black shadow-md">
-              <Scale className="h-6 w-6" />
+        <div className="flex items-center justify-between border-b border-stone-200 px-6 py-4 bg-stone-50">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-600 text-white font-bold shadow-xs">
+              <Scale className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-black font-serif-luxury text-white">
-                Cấu Hình Công Thức Định Lượng (FR-REC-01 / FR-REC-02)
+              <h2 className="text-base font-bold text-stone-900">
+                Định Lượng Công Thức: {dish.name}
               </h2>
-              <p className="text-xs text-stone-400">
-                Món: <strong className="text-amber-400">{dish.name}</strong> ({dish.code}) — Định mức cho 01 phần/bàn
+              <p className="text-xs text-stone-500">
+                Mã món: <span className="font-mono text-stone-700 font-semibold">{dish.code}</span> •
+                Tính chuẩn cho 01 phần phục vụ
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl p-2 text-stone-400 hover:bg-stone-800 hover:text-white transition-colors cursor-pointer"
+            className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-200 hover:text-stone-700 transition-colors cursor-pointer"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-7 space-y-5">
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs">
           {errorMsg && (
-            <div className="flex items-start gap-2.5 rounded-2xl border border-rose-900/60 bg-rose-950/40 p-4 text-xs font-medium text-rose-300">
-              <AlertCircle className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3 text-rose-800">
+              <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
               <span>{errorMsg}</span>
             </div>
           )}
 
-          <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-stone-600 font-medium">
+              Danh sách nguyên liệu và định mức tiêu hao (Quy tắc BR-02)
+            </p>
+            <button
+              type="button"
+              onClick={handleAddRow}
+              className="inline-flex items-center gap-1 rounded-lg border border-stone-300 bg-stone-50 px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer shadow-xs"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>+ Thêm nguyên liệu</span>
+            </button>
+          </div>
+
+          <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
             {rows.map((row, idx) => {
-              const selectedIng = ingredients.find((i) => i.id === Number(row.ingredientId));
+              const currentIng = ingredients.find((i) => i.id === Number(row.ingredientId));
               return (
                 <div
                   key={idx}
-                  className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center rounded-2xl border border-stone-800 bg-stone-950/70 p-4"
+                  className="flex items-center gap-2 rounded-lg border border-stone-200 bg-stone-50 p-2"
                 >
-                  <div className="sm:col-span-5">
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
-                      Nguyên Liệu #{idx + 1}
-                    </label>
-                    <select
-                      value={row.ingredientId}
-                      onChange={(e) =>
-                        handleChangeRow(idx, 'ingredientId', Number(e.target.value))
-                      }
-                      className="w-full rounded-xl border border-stone-800 bg-stone-900 px-3 py-2 text-xs font-bold text-stone-200 cursor-pointer"
-                    >
-                      {ingredients.map((ing) => (
-                        <option key={ing.id} value={ing.id}>
-                          {ing.name} ({ing.code} - {ing.unit})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <select
+                    value={row.ingredientId}
+                    onChange={(e) => handleChangeRow(idx, 'ingredientId', Number(e.target.value))}
+                    className="flex-1 rounded-md border border-stone-300 bg-white px-2 py-1 text-xs font-medium text-stone-800 focus:outline-none focus:border-amber-600 cursor-pointer"
+                  >
+                    {ingredients.map((ing) => (
+                      <option key={ing.id} value={ing.id}>
+                        {ing.code} - {ing.name} ({ing.unit})
+                      </option>
+                    ))}
+                  </select>
 
-                  <div className="sm:col-span-3">
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
-                      Định Lượng ({selectedIng?.unit || 'gốc'}) &gt; 0
-                    </label>
+                  <div className="flex items-center gap-1 w-28 shrink-0">
                     <input
                       type="number"
-                      step="0.001"
+                      step="0.01"
                       min="0.001"
                       required
                       value={row.quantity}
-                      onChange={(e) => handleChangeRow(idx, 'quantity', e.target.value)}
-                      className="w-full rounded-xl border border-stone-800 bg-stone-900 px-3 py-2 text-xs font-black text-amber-400 font-mono"
+                      onChange={(e) => handleChangeRow(idx, 'quantity', Number(e.target.value))}
+                      className="w-full rounded-md border border-stone-300 bg-white px-2 py-1 text-xs text-right font-bold text-amber-700 focus:outline-none focus:border-amber-600"
                     />
+                    <span className="text-[11px] font-semibold text-stone-500 w-8">
+                      {currentIng?.unit || ''}
+                    </span>
                   </div>
 
-                  <div className="sm:col-span-3">
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
-                      Ghi Chú Sơ Chế
-                    </label>
-                    <input
-                      type="text"
-                      value={row.note || ''}
-                      onChange={(e) => handleChangeRow(idx, 'note', e.target.value)}
-                      placeholder="VD: Thái mỏng, ướp tiêu"
-                      className="w-full rounded-xl border border-stone-800 bg-stone-900 px-3 py-2 text-xs text-stone-300"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    value={row.note || ''}
+                    onChange={(e) => handleChangeRow(idx, 'note', e.target.value)}
+                    placeholder="Ghi chú chế biến..."
+                    className="w-32 rounded-md border border-stone-300 bg-white px-2 py-1 text-xs text-stone-700 focus:outline-none focus:border-amber-600 hidden sm:block"
+                  />
 
-                  <div className="sm:col-span-1 flex justify-end pt-4">
-                    <button
-                      type="button"
-                      disabled={rows.length <= 1}
-                      onClick={() => handleRemoveRow(idx)}
-                      className="rounded-xl border border-rose-900/40 bg-rose-950/30 p-2 text-rose-400 hover:bg-rose-950/60 disabled:opacity-30 cursor-pointer"
-                      title="Xóa nguyên liệu này"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveRow(idx)}
+                    disabled={rows.length <= 1}
+                    className="p-1 text-stone-400 hover:text-rose-600 disabled:opacity-30 cursor-pointer"
+                    title="Xóa dòng"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               );
             })}
           </div>
 
-          <button
-            type="button"
-            onClick={handleAddRow}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20 cursor-pointer"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Thêm dòng nguyên liệu</span>
-          </button>
-
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-3 border-t border-stone-800 pt-5">
+          {/* Footer Controls */}
+          <div className="flex items-center justify-end gap-2.5 border-t border-stone-200 pt-3">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-2xl border border-stone-800 bg-stone-900 px-5 py-2.5 text-xs font-bold text-stone-300 hover:bg-stone-800 cursor-pointer"
+              className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
             >
               Hủy Bỏ
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 px-6 py-2.5 text-xs font-black text-stone-950 shadow-lg shadow-amber-500/20 hover:scale-102 disabled:opacity-50 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 px-4 py-2 text-xs font-semibold text-white shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
             >
               {saving ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Đang lưu...</span>
+                  <span>Đang lưu công thức...</span>
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  <span>Lưu Công Thức Định Lượng</span>
+                  <span>Lưu Công Thức</span>
                 </>
               )}
             </button>

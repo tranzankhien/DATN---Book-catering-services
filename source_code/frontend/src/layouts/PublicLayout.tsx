@@ -5,16 +5,12 @@ import {
   ShieldCheck,
   LogOut,
   UserCircle2,
-  Sparkles,
   Phone,
   Clock,
   MapPin,
-  ChevronRight,
   Menu,
   X,
-  Layers,
-  ChefHat,
-  Award,
+  ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
@@ -28,123 +24,115 @@ export const PublicLayout: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    showToast('Đã đăng xuất khỏi hệ thống an toàn.', 'info');
+    showToast('Đã đăng xuất khỏi hệ thống.', 'info');
     navigate('/');
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-950 text-stone-100 selection:bg-amber-500 selection:text-stone-950">
-      {/* Top Luxury Announcement Bar */}
-      <div className="border-b border-amber-900/30 bg-gradient-to-r from-stone-950 via-stone-900 to-stone-950 py-2 px-4 sm:px-8 text-[11px] text-stone-400">
+    <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900">
+      {/* Top utility strip */}
+      <div className="border-b border-stone-200/80 bg-stone-100/90 py-1.5 px-4 sm:px-6 lg:px-8 text-xs text-stone-600">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="flex items-center gap-6">
-            <span className="hidden sm:inline-flex items-center gap-1.5 text-amber-400 font-medium">
-              <Award className="h-3.5 w-3.5" />
-              Nền tảng Yến Tiệc & Hội Nghị Tiêu Chuẩn 5 Sao
+          <div className="flex items-center gap-5">
+            <span className="hidden sm:inline-flex items-center gap-1.5 text-stone-700 font-medium">
+              <MapPin className="h-3.5 w-3.5 text-amber-700" />
+              Cơ sở Yến Tiệc & Hội Nghị BanquetHub
             </span>
-            <span className="inline-flex items-center gap-1 text-stone-400">
-              <MapPin className="h-3 w-3 text-amber-500" />
-              01 Cơ sở Tiệc Độc Bản • 01 Kho Trung Tâm
+            <span className="hidden md:inline-flex items-center gap-1.5 text-stone-500">
+              <Clock className="h-3.5 w-3.5 text-amber-700" />
+              08:00 – 21:30 (Thứ 2 – Chủ Nhật)
             </span>
           </div>
-          <div className="flex items-center gap-5">
-            <span className="hidden md:inline-flex items-center gap-1.5 text-stone-400">
-              <Clock className="h-3 w-3 text-amber-500" />
-              Giờ phục vụ: 08:00 – 22:00 (Hằng ngày)
-            </span>
+          <div className="flex items-center gap-4 text-xs">
             <a
               href="tel:19008899"
-              className="inline-flex items-center gap-1 font-bold text-amber-400 hover:text-amber-300 transition-colors"
+              className="inline-flex items-center gap-1 font-bold text-amber-800 hover:text-amber-900 transition-colors"
             >
-              <Phone className="h-3 w-3" />
-              Hotline: 1900 8899
+              <Phone className="h-3.5 w-3.5" />
+              Hotline tư vấn: 1900 8899
             </a>
           </div>
         </div>
       </div>
 
-      {/* Main Glassmorphism Header */}
-      <header className="sticky top-0 z-40 border-b border-stone-800/80 bg-stone-950/85 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-20">
-          {/* Brand Logo */}
-          <Link to="/" className="flex items-center gap-3.5 group">
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 p-0.5 shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-transform duration-300 group-hover:scale-105">
-              <div className="flex h-full w-full items-center justify-center rounded-[14px] bg-stone-950">
-                <UtensilsCrossed className="h-5 w-5 text-amber-400 group-hover:rotate-12 transition-transform duration-300" />
-              </div>
+      {/* Main Navigation Header */}
+      <header className="sticky top-0 z-40 border-b border-stone-200/90 bg-white/95 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-18">
+          {/* Logo Brand */}
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-700 text-white shadow-xs group-hover:bg-amber-800 transition-colors">
+              <UtensilsCrossed className="h-5 w-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-black tracking-tight font-serif-luxury text-white">
-                  BANQUET<span className="gold-gradient-text">HUB</span>
+                <span className="text-xl font-extrabold tracking-tight text-stone-900">
+                  Banquet<span className="text-amber-700">Hub</span>
                 </span>
-                <span className="rounded-full bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.2 text-[9px] font-black uppercase text-amber-400 tracking-wider">
-                  LUXURY
+                <span className="rounded-md bg-amber-100 text-amber-800 px-1.5 py-0.2 text-[10px] font-bold tracking-wide uppercase">
+                  MVP
                 </span>
               </div>
-              <p className="text-[10px] font-medium tracking-wider uppercase text-stone-400 -mt-0.5">
-                Nền tảng Quản trị & Đặt tiệc
+              <p className="text-[11px] font-medium text-stone-500 -mt-0.5">
+                Nền tảng Đặt tiệc & Quản lý ẩm thực
               </p>
             </div>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-1 bg-stone-900/60 p-1.5 rounded-2xl border border-stone-800/60 shadow-inner">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-1.5">
             <NavLink
               to="/"
               end
               className={({ isActive }) =>
-                `rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 ${
+                `rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
                   isActive
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 shadow-md shadow-amber-500/20'
-                    : 'text-stone-300 hover:text-white hover:bg-stone-800/60'
+                    ? 'bg-amber-50 text-amber-900'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/80'
                 }`
               }
             >
-              Trang Chủ
+              Trang chủ
             </NavLink>
             <NavLink
               to="/dishes"
               className={({ isActive }) =>
-                `rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 ${
+                `rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
                   isActive
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 shadow-md shadow-amber-500/20'
-                    : 'text-stone-300 hover:text-white hover:bg-stone-800/60'
+                    ? 'bg-amber-50 text-amber-900'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/80'
                 }`
               }
             >
-              Danh Mục Món Tiệc
+              Thực đơn món tiệc
             </NavLink>
             {user?.role === 'ROLE_ADMIN' && (
               <NavLink
                 to="/admin/catalog"
                 className={({ isActive }) =>
-                  `inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 ${
+                  `inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-bold transition-colors ${
                     isActive
-                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30 shadow-md'
-                      : 'text-amber-400 hover:bg-amber-400/10'
+                      ? 'bg-stone-900 text-white'
+                      : 'text-stone-700 hover:bg-stone-100'
                   }`
                 }
               >
-                <ShieldCheck className="h-3.5 w-3.5" />
-                <span>Khu Vực Quản Trị</span>
+                <ShieldCheck className="h-4 w-4 text-amber-600" />
+                <span>Quản trị Admin</span>
               </NavLink>
             )}
           </nav>
 
-          {/* Right User Actions */}
+          {/* User Auth Section */}
           <div className="hidden sm:flex items-center gap-3">
             {isAuthenticated && user ? (
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2.5 rounded-2xl border border-stone-800 bg-stone-900/80 px-3.5 py-1.5 shadow-sm">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/30 text-amber-400 border border-amber-500/30">
-                    <UserCircle2 className="h-5 w-5" />
-                  </div>
+                <div className="flex items-center gap-2.5 rounded-xl border border-stone-200 bg-stone-50 px-3 py-1.5">
+                  <UserCircle2 className="h-5 w-5 text-amber-700" />
                   <div className="text-left">
-                    <p className="text-xs font-bold text-stone-100 leading-tight">
+                    <p className="text-xs font-bold text-stone-900 leading-tight">
                       {user.fullName}
                     </p>
-                    <p className="text-[10px] font-semibold text-amber-400 leading-tight">
+                    <p className="text-[11px] font-medium text-stone-500 leading-tight">
                       {getRoleLabel(user.role)}
                     </p>
                   </div>
@@ -153,17 +141,17 @@ export const PublicLayout: React.FC = () => {
                 {user.role === 'ROLE_ADMIN' && (
                   <Link
                     to="/admin/catalog"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-3.5 py-2 text-xs font-bold text-stone-950 hover:from-amber-400 hover:to-amber-500 transition-all shadow-md shadow-amber-500/20"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-stone-900 px-3.5 py-2 text-xs font-bold text-white hover:bg-stone-800 transition-colors shadow-xs"
                   >
-                    <ShieldCheck className="h-4 w-4" />
-                    <span>Admin Panel</span>
+                    <ShieldCheck className="h-3.5 w-3.5 text-amber-400" />
+                    <span>Admin</span>
                   </Link>
                 )}
 
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-stone-800 bg-stone-900/60 px-3 py-2 text-xs font-semibold text-stone-400 hover:text-rose-400 hover:border-rose-900/40 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 hover:text-rose-600 transition-colors cursor-pointer"
                   title="Đăng xuất"
                 >
                   <LogOut className="h-4 w-4" />
@@ -173,27 +161,26 @@ export const PublicLayout: React.FC = () => {
               <div className="flex items-center gap-2.5">
                 <Link
                   to="/login"
-                  className="rounded-xl border border-stone-800 bg-stone-900/60 px-4 py-2.5 text-xs font-bold text-stone-200 hover:bg-stone-800 hover:text-white transition-colors"
+                  className="rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-bold text-stone-700 hover:bg-stone-100 hover:text-stone-900 transition-colors"
                 >
-                  Đăng Nhập
+                  Đăng nhập
                 </Link>
                 <Link
                   to="/register"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 px-4 py-2.5 text-xs font-black text-stone-950 shadow-[0_0_20px_rgba(245,158,11,0.25)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] hover:scale-102 transition-all"
+                  className="rounded-xl bg-amber-700 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-amber-800 transition-colors"
                 >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>Đăng Ký Khách</span>
+                  Đăng ký tài khoản
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile menu button */}
           <div className="flex sm:hidden items-center gap-2">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="rounded-xl border border-stone-800 bg-stone-900 p-2 text-stone-300"
+              className="rounded-xl border border-stone-200 p-2 text-stone-600 hover:bg-stone-100"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -201,34 +188,34 @@ export const PublicLayout: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Dropdown Nav */}
+        {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
-          <div className="sm:hidden border-t border-stone-800 bg-stone-950/95 px-4 py-4 space-y-3">
+          <div className="sm:hidden border-t border-stone-200 bg-white px-4 py-3 space-y-2">
             <NavLink
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="block rounded-xl px-3 py-2 text-sm font-semibold text-stone-300 hover:bg-stone-900"
+              className="block rounded-lg px-3 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-100"
             >
-              Trang Chủ
+              Trang chủ
             </NavLink>
             <NavLink
               to="/dishes"
               onClick={() => setMobileMenuOpen(false)}
-              className="block rounded-xl px-3 py-2 text-sm font-semibold text-stone-300 hover:bg-stone-900"
+              className="block rounded-lg px-3 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-100"
             >
-              Danh Mục Món Tiệc
+              Thực đơn món tiệc
             </NavLink>
             {user?.role === 'ROLE_ADMIN' && (
               <NavLink
                 to="/admin/catalog"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block rounded-xl px-3 py-2 text-sm font-semibold text-amber-400 hover:bg-stone-900"
+                className="block rounded-lg px-3 py-2 text-sm font-bold text-amber-800 hover:bg-amber-50"
               >
-                Quản Trị Admin Panel
+                Quản trị Admin
               </NavLink>
             )}
 
-            <div className="border-t border-stone-800 pt-3 flex gap-2">
+            <div className="border-t border-stone-100 pt-2 flex gap-2">
               {isAuthenticated && user ? (
                 <button
                   type="button"
@@ -236,25 +223,25 @@ export const PublicLayout: React.FC = () => {
                     setMobileMenuOpen(false);
                     handleLogout();
                   }}
-                  className="w-full rounded-xl bg-stone-900 border border-stone-800 py-2.5 text-xs font-bold text-rose-400"
+                  className="w-full rounded-lg bg-stone-100 py-2 text-xs font-bold text-rose-600"
                 >
-                  Đăng Xuất ({user.fullName})
+                  Đăng xuất ({user.fullName})
                 </button>
               ) : (
                 <>
                   <Link
                     to="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 text-center rounded-xl border border-stone-800 py-2.5 text-xs font-bold text-stone-200"
+                    className="flex-1 text-center rounded-lg border border-stone-200 py-2 text-xs font-bold text-stone-700"
                   >
-                    Đăng Nhập
+                    Đăng nhập
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 text-center rounded-xl bg-amber-500 py-2.5 text-xs font-bold text-stone-950"
+                    className="flex-1 text-center rounded-lg bg-amber-700 py-2 text-xs font-bold text-white"
                   >
-                    Đăng Ký
+                    Đăng ký
                   </Link>
                 </>
               )}
@@ -263,101 +250,75 @@ export const PublicLayout: React.FC = () => {
         )}
       </header>
 
-      {/* Main Content Render */}
+      {/* Main Content Area */}
       <main className="flex-1">
         <Outlet />
       </main>
 
-      {/* High-end Luxury Footer */}
-      <footer className="border-t border-stone-800/80 bg-stone-950 mt-24 relative overflow-hidden">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
-            {/* Col 1: Brand Info */}
-            <div className="lg:col-span-5 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-stone-950 font-black">
-                  <UtensilsCrossed className="h-5 w-5" />
+      {/* Clean Light Footer */}
+      <footer className="border-t border-stone-200 bg-white mt-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-5 space-y-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-700 text-white">
+                  <UtensilsCrossed className="h-4 w-4" />
                 </div>
-                <span className="text-2xl font-black font-serif-luxury tracking-tight text-white">
-                  BANQUET<span className="gold-gradient-text">HUB</span>
+                <span className="text-lg font-bold text-stone-900">
+                  Banquet<span className="text-amber-700">Hub</span>
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-stone-400 leading-relaxed max-w-md">
-                Nền tảng đặt tiệc tích hợp quản lý cơ sở kinh doanh độc bản. Tối ưu hóa định lượng
-                nguyên liệu, kết nối thời gian thực giữa thực đơn bàn tiệc và tồn kho trung tâm
-                theo đặc tả <strong>SRS-PARTY-001</strong>.
+              <p className="text-xs text-stone-500 leading-relaxed max-w-sm">
+                Nền tảng đặt tiệc tích hợp quản lý cơ sở kinh doanh theo chuẩn MVP.
+                Định lượng nguyên liệu minh bạch cho 01 phần món, liên kết trực tiếp với kho nguyên liệu trung tâm.
               </p>
-              <div className="flex items-center gap-3 pt-2 text-xs text-stone-400">
-                <span className="inline-flex items-center gap-1.5 rounded-lg bg-stone-900 border border-stone-800 px-3 py-1.5">
-                  <ChefHat className="h-3.5 w-3.5 text-amber-400" />
-                  Định Lượng Chuẩn Cho 01 Phần Món
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-lg bg-stone-900 border border-stone-800 px-3 py-1.5">
-                  <Layers className="h-3.5 w-3.5 text-amber-400" />
-                  Đồng Bộ Tồn Khả Dụng
-                </span>
-              </div>
             </div>
 
-            {/* Col 2: Navigation Links */}
-            <div className="lg:col-span-3 space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-amber-400">
-                Hệ Thống Tiệc
+            <div className="lg:col-span-3 space-y-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-900">
+                Liên kết nhanh
               </h4>
-              <ul className="space-y-2 text-xs text-stone-400">
+              <ul className="space-y-1.5 text-xs text-stone-600">
                 <li>
-                  <Link to="/" className="hover:text-amber-400 transition-colors">
-                    Trang chủ BanquetHub
-                  </Link>
+                  <Link to="/" className="hover:text-amber-800 transition-colors">Trang chủ</Link>
                 </li>
                 <li>
-                  <Link to="/dishes" className="hover:text-amber-400 transition-colors">
-                    Danh mục món ăn & Định lượng
-                  </Link>
+                  <Link to="/dishes" className="hover:text-amber-800 transition-colors">Danh mục món & Bảng tính giá</Link>
                 </li>
                 <li>
-                  <Link to="/login" className="hover:text-amber-400 transition-colors">
-                    Đăng nhập khách hàng / Quản trị
-                  </Link>
+                  <Link to="/login" className="hover:text-amber-800 transition-colors">Đăng nhập tài khoản</Link>
                 </li>
                 <li>
-                  <Link to="/register" className="hover:text-amber-400 transition-colors">
-                    Đăng ký tài khoản tiệc mới
-                  </Link>
+                  <Link to="/register" className="hover:text-amber-800 transition-colors">Đăng ký khách hàng</Link>
                 </li>
               </ul>
             </div>
 
-            {/* Col 3: Tech & Standards */}
-            <div className="lg:col-span-4 space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-amber-400">
-                Tiêu Chuẩn Vận Hành
+            <div className="lg:col-span-4 space-y-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-900">
+                Tiêu chuẩn kỹ thuật
               </h4>
-              <p className="text-xs text-stone-400 leading-relaxed">
-                Đơn vị tiền tệ: <strong>VND</strong> • Múi giờ hệ thống: <strong>Asia/Ho_Chi_Minh (UTC+7)</strong>
-                <br />
-                Áp dụng quy tắc tính giá: <code className="text-amber-300">Tổng tiền = Số bàn × Giá thực đơn 01 bàn</code>
+              <p className="text-xs text-stone-500 leading-relaxed">
+                Đặc tả phần mềm: <strong>SRS-PARTY-001</strong><br />
+                Đơn vị tiền tệ: <strong>VND</strong> • Múi giờ: <strong>Asia/Ho_Chi_Minh</strong>
               </p>
-              <div className="pt-2">
+              <div className="pt-1">
                 <a
                   href="http://localhost:8080/swagger-ui.html"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-stone-800 bg-stone-900 px-3.5 py-2 text-xs font-semibold text-stone-300 hover:text-amber-400 hover:border-amber-500/40 transition-all"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 hover:text-amber-900"
                 >
-                  <span>Cổng API Swagger / OpenAPI</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
+                  <span>Mở OpenAPI Swagger (Port 8080)</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
                 </a>
               </div>
             </div>
           </div>
 
-          <div className="mt-12 pt-6 border-t border-stone-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-stone-400">
-            <p>© 2026 BanquetHub Luxury Catering & Convention. Bản quyền phần mềm đồ án tốt nghiệp CNTT.</p>
-            <p className="font-mono text-stone-400">
-              Modular Monolith • Spring Boot 3.5.16 • PostgreSQL 17 • React 19
-            </p>
+          <div className="mt-8 pt-6 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-400">
+            <p>© 2026 BanquetHub. Đồ án tốt nghiệp ngành Công nghệ thông tin.</p>
+            <p>Modular Monolith • Spring Boot 3.5 • PostgreSQL 17 • React 19</p>
           </div>
         </div>
       </footer>

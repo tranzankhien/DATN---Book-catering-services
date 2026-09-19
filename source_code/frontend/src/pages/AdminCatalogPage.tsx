@@ -9,10 +9,7 @@ import {
   Utensils,
   Package,
   RefreshCw,
-  Sparkles,
-  Layers,
   CheckCircle2,
-  AlertTriangle,
 } from 'lucide-react';
 import { catalogService } from '../services/catalogService';
 import { extractErrorMessage } from '../services/apiClient';
@@ -108,74 +105,74 @@ export const AdminCatalogPage: React.FC = () => {
   }, [dishes, ingredients]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* 4 Executive Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="rounded-3xl border border-stone-800 bg-stone-900/60 p-6 backdrop-blur-md shadow-xl flex items-center justify-between">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-500">
               Tổng số món tiệc
             </span>
-            <p className="text-3xl font-black font-serif-luxury text-white">{stats.totalDishes}</p>
-            <span className="text-[11px] text-amber-400">Trên {categories.length} danh mục</span>
+            <p className="text-2xl sm:text-3xl font-extrabold text-stone-900">{stats.totalDishes}</p>
+            <span className="text-xs text-amber-700 font-medium">Trên {categories.length} danh mục</span>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-            <Utensils className="h-6 w-6" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
+            <Utensils className="h-5 w-5" />
           </div>
         </div>
 
-        <div className="rounded-3xl border border-stone-800 bg-stone-900/60 p-6 backdrop-blur-md shadow-xl flex items-center justify-between">
+        <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-500">
               Món đang phục vụ
             </span>
-            <p className="text-3xl font-black font-serif-luxury text-emerald-400">{stats.activeCount}</p>
-            <span className="text-[11px] text-stone-400">Hiển thị cho khách đặt tiệc</span>
+            <p className="text-2xl sm:text-3xl font-extrabold text-emerald-700">{stats.activeCount}</p>
+            <span className="text-xs text-stone-500">Hiển thị cho khách đặt</span>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <CheckCircle2 className="h-6 w-6" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <CheckCircle2 className="h-5 w-5" />
           </div>
         </div>
 
-        <div className="rounded-3xl border border-stone-800 bg-stone-900/60 p-6 backdrop-blur-md shadow-xl flex items-center justify-between">
+        <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-500">
               Món đang tạm ẩn
             </span>
-            <p className="text-3xl font-black font-serif-luxury text-stone-400">{stats.hiddenCount}</p>
-            <span className="text-[11px] text-stone-400">Giữ nguyên lịch sử đơn cũ</span>
+            <p className="text-2xl sm:text-3xl font-extrabold text-stone-600">{stats.hiddenCount}</p>
+            <span className="text-xs text-stone-500">Giữ nguyên lịch sử đơn</span>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-stone-800/80 text-stone-400 border border-stone-700/50">
-            <EyeOff className="h-6 w-6" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-stone-100 text-stone-500 border border-stone-200">
+            <EyeOff className="h-5 w-5" />
           </div>
         </div>
 
-        <div className="rounded-3xl border border-stone-800 bg-stone-900/60 p-6 backdrop-blur-md shadow-xl flex items-center justify-between">
+        <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-500">
               Nguyên liệu kho gốc
             </span>
-            <p className="text-3xl font-black font-serif-luxury text-amber-400">
+            <p className="text-2xl sm:text-3xl font-extrabold text-amber-700">
               {stats.totalIngredients}
             </p>
-            <span className="text-[11px] text-stone-400">Chuẩn hóa theo kg, lít...</span>
+            <span className="text-xs text-stone-500">Chuẩn hóa theo kg, lít...</span>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-            <Package className="h-6 w-6" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
+            <Package className="h-5 w-5" />
           </div>
         </div>
       </div>
 
       {/* Tabs & Master Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-800 pb-5">
-        <div className="flex items-center gap-2 bg-stone-900/80 p-1.5 rounded-2xl border border-stone-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 pb-4">
+        <div className="flex items-center gap-1.5 bg-stone-200/60 p-1 rounded-xl">
           <button
             type="button"
             onClick={() => setActiveTab('dishes')}
-            className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-black transition-all cursor-pointer ${
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'dishes'
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 shadow-md shadow-amber-500/20'
-                : 'text-stone-300 hover:text-white hover:bg-stone-800/60'
+                ? 'bg-white text-stone-900 shadow-xs'
+                : 'text-stone-600 hover:text-stone-900'
             }`}
           >
             <Utensils className="h-4 w-4" />
@@ -185,10 +182,10 @@ export const AdminCatalogPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('ingredients')}
-            className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-black transition-all cursor-pointer ${
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'ingredients'
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 shadow-md shadow-amber-500/20'
-                : 'text-stone-300 hover:text-white hover:bg-stone-800/60'
+                ? 'bg-white text-stone-900 shadow-xs'
+                : 'text-stone-600 hover:text-stone-900'
             }`}
           >
             <Package className="h-4 w-4" />
@@ -196,11 +193,11 @@ export const AdminCatalogPage: React.FC = () => {
           </button>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => void loadAdminData()}
-            className="inline-flex items-center gap-1.5 rounded-2xl border border-stone-800 bg-stone-900/80 px-4 py-2.5 text-xs font-bold text-stone-300 hover:text-white hover:bg-stone-800 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer shadow-xs"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             <span>Làm Mới</span>
@@ -213,7 +210,7 @@ export const AdminCatalogPage: React.FC = () => {
                 setEditingDish(null);
                 setDishModalOpen(true);
               }}
-              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 px-5 py-2.5 text-xs font-black text-stone-950 shadow-lg shadow-amber-500/20 hover:scale-102 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
             >
               <Plus className="h-4 w-4" />
               <span>Thêm Món Ăn Mới</span>
@@ -225,7 +222,7 @@ export const AdminCatalogPage: React.FC = () => {
                 setEditingIngredient(null);
                 setIngredientModalOpen(true);
               }}
-              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 px-5 py-2.5 text-xs font-black text-stone-950 shadow-lg shadow-amber-500/20 hover:scale-102 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
             >
               <Plus className="h-4 w-4" />
               <span>Thêm Nguyên Liệu</span>
@@ -237,15 +234,15 @@ export const AdminCatalogPage: React.FC = () => {
       {activeTab === 'dishes' ? (
         <>
           {/* Dishes Filter Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 rounded-3xl border border-stone-800 bg-stone-900/60 p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 rounded-xl border border-stone-200 bg-white p-3.5 shadow-xs">
             <div className="sm:col-span-6 relative">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
               <input
                 type="text"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 placeholder="Tìm theo tên món, mã món, mô tả..."
-                className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 pl-11 pr-4 py-2.5 text-xs text-white placeholder:text-stone-500 focus:border-amber-500 focus:outline-none"
+                className="w-full rounded-lg border border-stone-300 bg-white pl-9 pr-3 py-2 text-xs text-stone-900 placeholder:text-stone-400 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
               />
             </div>
 
@@ -255,7 +252,7 @@ export const AdminCatalogPage: React.FC = () => {
                 onChange={(e) =>
                   setSelectedCategoryId(e.target.value ? Number(e.target.value) : undefined)
                 }
-                className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 px-4 py-2.5 text-xs font-bold text-stone-200 focus:border-amber-500 focus:outline-none cursor-pointer"
+                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs font-medium text-stone-800 focus:border-amber-600 focus:outline-none cursor-pointer"
               >
                 <option value="">Tất cả danh mục món</option>
                 {categories.map((cat) => (
@@ -270,7 +267,7 @@ export const AdminCatalogPage: React.FC = () => {
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value as DishStatus | '')}
-                className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 px-4 py-2.5 text-xs font-bold text-stone-200 focus:border-amber-500 focus:outline-none cursor-pointer"
+                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs font-medium text-stone-800 focus:border-amber-600 focus:outline-none cursor-pointer"
               >
                 <option value="">Tất cả trạng thái</option>
                 <option value="ACTIVE">Đang phục vụ (ACTIVE)</option>
@@ -290,25 +287,25 @@ export const AdminCatalogPage: React.FC = () => {
               description="Bạn có thể tạo món ăn mới hoặc xóa từ khóa tìm kiếm."
             />
           ) : (
-            <div className="overflow-hidden rounded-3xl border border-stone-800 bg-stone-900/60 shadow-2xl backdrop-blur-md">
+            <div className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-xs">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-stone-800 bg-stone-950/80 text-[11px] font-bold uppercase tracking-wider text-stone-400">
-                      <th className="py-4 px-5">Món Ăn</th>
-                      <th className="py-4 px-5">Danh Mục</th>
-                      <th className="py-4 px-5 text-right">Đơn Giá / 01 Phần</th>
-                      <th className="py-4 px-5">Công Thức Định Lượng (01 Phần)</th>
-                      <th className="py-4 px-5">Trạng Thái</th>
-                      <th className="py-4 px-5 text-right">Thao Tác Quản Trị</th>
+                    <tr className="border-b border-stone-200 bg-stone-50 text-[11px] font-semibold uppercase tracking-wider text-stone-600">
+                      <th className="py-3 px-4">Món Ăn</th>
+                      <th className="py-3 px-4">Danh Mục</th>
+                      <th className="py-3 px-4 text-right">Đơn Giá / 01 Phần</th>
+                      <th className="py-3 px-4">Công Thức Định Lượng (01 Phần)</th>
+                      <th className="py-3 px-4">Trạng Thái</th>
+                      <th className="py-3 px-4 text-right">Thao Tác Quản Trị</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-800/80 text-xs">
+                  <tbody className="divide-y divide-stone-100 text-xs">
                     {dishes.map((dish) => (
-                      <tr key={dish.id} className="hover:bg-stone-850/60 transition-colors align-top">
-                        <td className="py-4 px-5">
-                          <div className="flex items-start gap-3.5">
-                            <div className="h-12 w-14 shrink-0 overflow-hidden rounded-xl bg-stone-900 border border-stone-800">
+                      <tr key={dish.id} className="hover:bg-stone-50/70 transition-colors align-top">
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-start gap-3">
+                            <div className="h-10 w-12 shrink-0 overflow-hidden rounded-lg bg-stone-100 border border-stone-200">
                               {dish.imageUrl ? (
                                 <img
                                   src={dish.imageUrl}
@@ -316,42 +313,42 @@ export const AdminCatalogPage: React.FC = () => {
                                   className="h-full w-full object-cover"
                                 />
                               ) : (
-                                <div className="flex h-full w-full items-center justify-center text-stone-600">
+                                <div className="flex h-full w-full items-center justify-center text-stone-400">
                                   <Utensils className="h-4 w-4" />
                                 </div>
                               )}
                             </div>
                             <div>
-                              <span className="font-mono text-[10px] text-amber-400">
+                              <span className="font-mono text-[10px] text-stone-500 font-semibold">
                                 {dish.code}
                               </span>
-                              <p className="font-bold text-white text-sm">{dish.name}</p>
-                              <p className="text-stone-400 line-clamp-1 max-w-xs mt-0.5 text-[11px]">
+                              <p className="font-bold text-stone-900 text-xs sm:text-sm">{dish.name}</p>
+                              <p className="text-stone-500 line-clamp-1 max-w-xs mt-0.5 text-[11px]">
                                 {dish.description}
                               </p>
                             </div>
                           </div>
                         </td>
 
-                        <td className="py-4 px-5">
-                          <span className="inline-block rounded-xl bg-stone-800/80 border border-stone-700/60 px-3 py-1 font-bold text-stone-300 text-[11px]">
+                        <td className="py-3.5 px-4">
+                          <span className="inline-block rounded bg-stone-100 px-2 py-0.5 font-medium text-stone-700 text-[11px]">
                             {dish.categoryName}
                           </span>
                         </td>
 
-                        <td className="py-4 px-5 text-right font-black text-amber-400 text-sm whitespace-nowrap font-serif-luxury">
+                        <td className="py-3.5 px-4 text-right font-bold text-amber-700 text-xs sm:text-sm whitespace-nowrap">
                           {formatVnd(dish.price)}
                         </td>
 
-                        <td className="py-4 px-5">
-                          <div className="flex flex-wrap gap-1.5 max-w-md">
+                        <td className="py-3.5 px-4">
+                          <div className="flex flex-wrap gap-1 max-w-md">
                             {dish.recipeItems.map((item) => (
                               <span
                                 key={item.id}
-                                className="inline-flex items-center gap-1 rounded-lg border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300"
+                                className="inline-flex items-center gap-1 rounded bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-700"
                               >
                                 <span>{item.ingredientName}:</span>
-                                <strong>
+                                <strong className="text-stone-900">
                                   {formatQuantity(item.quantity)} {item.unit}
                                 </strong>
                               </span>
@@ -359,19 +356,19 @@ export const AdminCatalogPage: React.FC = () => {
                           </div>
                         </td>
 
-                        <td className="py-4 px-5 whitespace-nowrap">
+                        <td className="py-3.5 px-4 whitespace-nowrap">
                           <DishStatusBadge status={dish.status} />
                         </td>
 
-                        <td className="py-4 px-5 text-right whitespace-nowrap">
-                          <div className="inline-flex items-center gap-2">
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                          <div className="inline-flex items-center gap-1.5">
                             <button
                               type="button"
                               onClick={() => setRecipeModalDish(dish)}
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/15 px-3 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/25 transition-all cursor-pointer"
+                              className="inline-flex items-center gap-1 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-100 transition-colors cursor-pointer"
                               title="Cấu hình công thức định lượng nguyên liệu"
                             >
-                              <Scale className="h-3.5 w-3.5" />
+                              <Scale className="h-3.5 w-3.5 text-amber-700" />
                               <span>Định Lượng</span>
                             </button>
 
@@ -381,7 +378,7 @@ export const AdminCatalogPage: React.FC = () => {
                                 setEditingDish(dish);
                                 setDishModalOpen(true);
                               }}
-                              className="inline-flex items-center gap-1 rounded-xl border border-stone-800 bg-stone-800/80 px-3 py-1.5 text-xs font-bold text-stone-200 hover:bg-stone-700 transition-colors cursor-pointer"
+                              className="inline-flex items-center gap-1 rounded-lg border border-stone-300 bg-white px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer shadow-xs"
                               title="Chỉnh sửa thông tin món ăn"
                             >
                               <Edit3 className="h-3.5 w-3.5" />
@@ -391,10 +388,10 @@ export const AdminCatalogPage: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => void handleToggleStatus(dish)}
-                              className={`inline-flex items-center gap-1 rounded-xl border px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                              className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-colors cursor-pointer ${
                                 dish.status === 'ACTIVE'
-                                  ? 'border-stone-800 bg-stone-900 text-stone-400 hover:text-white'
-                                  : 'border-emerald-500/30 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25'
+                                  ? 'border-stone-300 bg-white text-stone-600 hover:bg-stone-50'
+                                  : 'border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
                               }`}
                               title={
                                 dish.status === 'ACTIVE'
@@ -404,12 +401,12 @@ export const AdminCatalogPage: React.FC = () => {
                             >
                               {dish.status === 'ACTIVE' ? (
                                 <>
-                                  <EyeOff className="h-3.5 w-3.5" />
+                                  <EyeOff className="h-3.5 w-3.5 text-stone-500" />
                                   <span>Ẩn</span>
                                 </>
                               ) : (
                                 <>
-                                  <Eye className="h-3.5 w-3.5" />
+                                  <Eye className="h-3.5 w-3.5 text-emerald-600" />
                                   <span>Hiện</span>
                                 </>
                               )}
@@ -426,49 +423,49 @@ export const AdminCatalogPage: React.FC = () => {
         </>
       ) : (
         /* Ingredients Master Table */
-        <div className="overflow-hidden rounded-3xl border border-stone-800 bg-stone-900/60 shadow-2xl backdrop-blur-md">
+        <div className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-stone-800 bg-stone-950/80 text-[11px] font-bold uppercase tracking-wider text-stone-400">
-                  <th className="py-4 px-5">Mã Nguyên Liệu</th>
-                  <th className="py-4 px-5">Tên Nguyên Liệu</th>
-                  <th className="py-4 px-5">Đơn Vị Gốc</th>
-                  <th className="py-4 px-5 text-right">Ngưỡng Tồn Tối Thiểu</th>
-                  <th className="py-4 px-5 text-right">Tồn Vật Lý Hiện Tại</th>
-                  <th className="py-4 px-5 text-right">Đơn Giá Vốn Bình Quân</th>
-                  <th className="py-4 px-5 text-right">Thao Tác</th>
+                <tr className="border-b border-stone-200 bg-stone-50 text-[11px] font-semibold uppercase tracking-wider text-stone-600">
+                  <th className="py-3 px-4">Mã Nguyên Liệu</th>
+                  <th className="py-3 px-4">Tên Nguyên Liệu</th>
+                  <th className="py-3 px-4">Đơn Vị</th>
+                  <th className="py-3 px-4 text-right">Ngưỡng Tồn Tối Thiểu</th>
+                  <th className="py-3 px-4 text-right">Tồn Vật Lý Hiện Tại</th>
+                  <th className="py-3 px-4 text-right">Đơn Giá Vốn Bình Quân</th>
+                  <th className="py-3 px-4 text-right">Thao Tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-800/80 text-xs">
+              <tbody className="divide-y divide-stone-100 text-xs">
                 {ingredients.map((ing) => (
-                  <tr key={ing.id} className="hover:bg-stone-850/60 transition-colors">
-                    <td className="py-4 px-5 font-mono font-bold text-amber-400">
+                  <tr key={ing.id} className="hover:bg-stone-50/70 transition-colors">
+                    <td className="py-3 px-4 font-mono font-semibold text-stone-700">
                       {ing.code}
                     </td>
-                    <td className="py-4 px-5 font-bold text-white">{ing.name}</td>
-                    <td className="py-4 px-5">
-                      <span className="rounded-lg bg-stone-800 px-2 py-0.5 font-bold text-stone-300">
+                    <td className="py-3 px-4 font-semibold text-stone-900">{ing.name}</td>
+                    <td className="py-3 px-4">
+                      <span className="rounded bg-stone-100 px-2 py-0.5 font-medium text-stone-700">
                         {ing.unit}
                       </span>
                     </td>
-                    <td className="py-4 px-5 text-right font-semibold text-stone-300">
+                    <td className="py-3 px-4 text-right font-medium text-stone-600">
                       {formatQuantity(ing.minStockThreshold)} {ing.unit}
                     </td>
-                    <td className="py-4 px-5 text-right font-black text-emerald-400 font-mono">
+                    <td className="py-3 px-4 text-right font-bold text-emerald-700 font-mono">
                       {formatQuantity(ing.currentStock)} {ing.unit}
                     </td>
-                    <td className="py-4 px-5 text-right font-bold text-stone-200">
+                    <td className="py-3 px-4 text-right font-semibold text-stone-800">
                       {formatVnd(ing.avgUnitCost)}
                     </td>
-                    <td className="py-4 px-5 text-right">
+                    <td className="py-3 px-4 text-right">
                       <button
                         type="button"
                         onClick={() => {
                           setEditingIngredient(ing);
                           setIngredientModalOpen(true);
                         }}
-                        className="inline-flex items-center gap-1 rounded-xl border border-stone-800 bg-stone-800/80 px-3 py-1.5 text-xs font-bold text-stone-300 hover:text-white hover:bg-stone-700 transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1 rounded-lg border border-stone-300 bg-white px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer shadow-xs"
                       >
                         <Edit3 className="h-3.5 w-3.5" />
                         <span>Sửa</span>

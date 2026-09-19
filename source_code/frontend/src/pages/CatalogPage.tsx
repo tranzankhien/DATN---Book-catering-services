@@ -136,70 +136,71 @@ export const CatalogPage: React.FC = () => {
   const estimatedGuests = tableCount * 10;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header Banner */}
-      <div className="rounded-3xl border border-stone-800 bg-gradient-to-r from-stone-900 via-stone-950 to-stone-900 p-8 sm:p-12 relative overflow-hidden shadow-2xl">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-bold text-amber-400">
-              <Sparkles className="h-3.5 w-3.5" />
+      <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900">
+              <Sparkles className="h-3.5 w-3.5 text-amber-600" />
               <span>Thực Đơn Công Khai & Định Mức Chuẩn Hóa</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black font-serif-luxury text-white tracking-tight">
-              Danh Mục Món Tiệc Hoàng Gia
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
+              Danh Mục Món Tiệc Chuẩn Vị
             </h1>
-            <p className="text-xs sm:text-sm text-stone-300 leading-relaxed">
-              Mỗi món ăn có đơn vị giá tính cho 01 phần trên mỗi bàn tiệc (chuẩn 10 khách). Bạn có
-              thể bấm <strong>+ Chọn vào bàn tiệc</strong> để mô phỏng tính giá toàn bộ tiệc theo
-              quy tắc <strong>BR-01</strong> tại thanh bên phải.
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              Mỗi món ăn có đơn vị giá tính cho 01 phần trên mỗi bàn tiệc (chuẩn 10 khách). Bấm{' '}
+              <strong className="text-stone-800">+ Chọn món</strong> để mô phỏng tính giá toàn bộ
+              bàn tiệc theo quy tắc <strong>BR-01</strong> tại bảng tính bên phải.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 bg-stone-950/80 border border-stone-800 rounded-2xl p-3 text-xs text-stone-300 shrink-0">
-            <Info className="h-4 w-4 text-amber-400 shrink-0" />
-            <span>Tiêu chuẩn tiệc: 01 bàn = 10 khách</span>
+          <div className="flex items-center gap-2.5 bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-xs text-stone-700 shrink-0">
+            <Info className="h-4 w-4 text-amber-600 shrink-0" />
+            <span className="font-medium">Tiêu chuẩn tiệc: 01 bàn = 10 khách</span>
           </div>
         </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="space-y-3.5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Search Box */}
           <div className="relative flex-1 max-w-md">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
             <input
               type="text"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              placeholder="Tìm theo tên món, mã món (VD: Tôm sú, Gỏi ngó sen...)"
-              className="w-full rounded-2xl border border-stone-800 bg-stone-900/80 pl-11 pr-4 py-3 text-xs sm:text-sm text-white placeholder:text-stone-400 focus:border-amber-500 focus:outline-none shadow-inner"
+              placeholder="Tìm theo tên món, mã món (VD: Tôm sú, Bò hầm...)"
+              className="w-full rounded-xl border border-stone-300 bg-white pl-10 pr-4 py-2.5 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none shadow-sm transition-colors"
             />
           </div>
 
           {/* Controls: Sort and View mode */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-2xl border border-stone-800 bg-stone-900/80 px-3 py-2 text-xs">
-              <span className="text-stone-400">Sắp xếp:</span>
+            <div className="flex items-center gap-2 rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs shadow-sm">
+              <span className="text-stone-500 font-medium">Sắp xếp:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-transparent font-bold text-amber-400 focus:outline-none cursor-pointer"
+                className="bg-transparent font-semibold text-stone-800 focus:outline-none cursor-pointer"
               >
-                <option value="default" className="bg-stone-900 text-white">Mặc định danh mục</option>
-                <option value="price-asc" className="bg-stone-900 text-white">Giá: Thấp đến Cao</option>
-                <option value="price-desc" className="bg-stone-900 text-white">Giá: Cao đến Thấp</option>
-                <option value="name" className="bg-stone-900 text-white">Tên món: A → Z</option>
+                <option value="default">Mặc định danh mục</option>
+                <option value="price-asc">Giá: Thấp đến Cao</option>
+                <option value="price-desc">Giá: Cao đến Thấp</option>
+                <option value="name">Tên món: A → Z</option>
               </select>
             </div>
 
-            <div className="flex items-center rounded-2xl border border-stone-800 bg-stone-900/80 p-1">
+            <div className="flex items-center rounded-xl border border-stone-300 bg-white p-0.5 shadow-sm">
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
-                className={`rounded-xl p-2 transition-colors cursor-pointer ${
-                  viewMode === 'grid' ? 'bg-amber-500 text-stone-950 font-bold' : 'text-stone-400 hover:text-white'
+                className={`rounded-lg p-1.5 transition-colors cursor-pointer ${
+                  viewMode === 'grid'
+                    ? 'bg-amber-100 text-amber-900 font-bold'
+                    : 'text-stone-500 hover:text-stone-900'
                 }`}
                 title="Dạng lưới"
               >
@@ -208,8 +209,10 @@ export const CatalogPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
-                className={`rounded-xl p-2 transition-colors cursor-pointer ${
-                  viewMode === 'list' ? 'bg-amber-500 text-stone-950 font-bold' : 'text-stone-400 hover:text-white'
+                className={`rounded-lg p-1.5 transition-colors cursor-pointer ${
+                  viewMode === 'list'
+                    ? 'bg-amber-100 text-amber-900 font-bold'
+                    : 'text-stone-500 hover:text-stone-900'
                 }`}
                 title="Dạng danh sách"
               >
@@ -220,19 +223,19 @@ export const CatalogPage: React.FC = () => {
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-400 mr-1">
-            <Filter className="h-3.5 w-3.5 text-amber-400" />
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-500 mr-1">
+            <Filter className="h-3.5 w-3.5 text-amber-700" />
             Danh mục:
           </span>
 
           <button
             type="button"
             onClick={() => handleSelectCategory(undefined)}
-            className={`rounded-2xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
+            className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
               selectedCategoryId === undefined
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 shadow-md shadow-amber-500/20'
-                : 'border border-stone-800 bg-stone-900/60 text-stone-300 hover:bg-stone-800 hover:text-white'
+                ? 'bg-amber-700 text-white shadow-sm'
+                : 'border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 hover:border-stone-400'
             }`}
           >
             Tất cả danh mục ({dishes.length})
@@ -243,10 +246,10 @@ export const CatalogPage: React.FC = () => {
               key={cat.id}
               type="button"
               onClick={() => handleSelectCategory(cat.id)}
-              className={`rounded-2xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
+              className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                 selectedCategoryId === cat.id
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 shadow-md shadow-amber-500/20'
-                  : 'border border-stone-800 bg-stone-900/60 text-stone-300 hover:bg-stone-800 hover:text-white'
+                  ? 'bg-amber-700 text-white shadow-sm'
+                  : 'border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 hover:border-stone-400'
               }`}
             >
               {cat.name}
@@ -274,7 +277,7 @@ export const CatalogPage: React.FC = () => {
                     setKeyword('');
                     handleSelectCategory(undefined);
                   }}
-                  className="rounded-2xl bg-amber-500 px-5 py-2.5 text-xs font-bold text-stone-950 hover:bg-amber-400 cursor-pointer shadow-md"
+                  className="rounded-xl bg-amber-700 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-800 cursor-pointer shadow-sm transition-colors"
                 >
                   Xem lại toàn bộ món ăn
                 </button>
@@ -282,57 +285,56 @@ export const CatalogPage: React.FC = () => {
             />
           ) : viewMode === 'grid' ? (
             /* Grid View */
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {sortedDishes.map((dish) => {
                 const draftItem = draftLines.find((l) => l.dish.id === dish.id);
                 return (
                   <article
                     key={dish.id}
-                    className="group flex flex-col overflow-hidden rounded-3xl border border-stone-800/80 bg-stone-900/50 hover:border-amber-500/40 hover:bg-stone-900/80 transition-all duration-300 shadow-xl"
+                    className="group flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-white hover:border-amber-300 hover:shadow-md transition-all shadow-sm"
                   >
-                    <div className="relative h-52 bg-stone-900 overflow-hidden">
+                    <div className="relative h-44 bg-stone-100 overflow-hidden">
                       {dish.imageUrl ? (
                         <img
                           src={dish.imageUrl}
                           alt={dish.name}
-                          className="h-full w-full object-cover group-hover:scale-108 transition-transform duration-700 brightness-95"
+                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                           loading="lazy"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-stone-600">
-                          <Utensils className="h-12 w-12" />
+                        <div className="flex h-full w-full items-center justify-center text-stone-400">
+                          <Utensils className="h-10 w-10" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-black/20" />
 
-                      <span className="absolute top-3 left-3 rounded-xl bg-stone-950/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-amber-300 border border-amber-500/30">
+                      <span className="absolute top-2.5 left-2.5 rounded-lg bg-white/95 backdrop-blur-sm px-2.5 py-1 text-xs font-semibold text-stone-800 shadow-sm border border-stone-200">
                         {dish.categoryName}
                       </span>
 
-                      <span className="absolute top-3 right-3 rounded-lg bg-stone-900/80 backdrop-blur-md px-2 py-0.5 text-[11px] font-mono text-stone-300 border border-stone-800">
+                      <span className="absolute top-2.5 right-2.5 rounded bg-stone-900/80 backdrop-blur-sm px-2 py-0.5 text-[10px] font-mono font-medium text-stone-200">
                         {dish.code}
                       </span>
                     </div>
 
-                    <div className="flex flex-1 flex-col p-6 space-y-4">
+                    <div className="flex flex-1 flex-col p-4 sm:p-5 space-y-3">
                       <div className="flex-1">
                         <Link
                           to={`/dishes/${dish.id}`}
-                          className="text-base sm:text-lg font-bold text-white hover:text-amber-400 transition-colors line-clamp-1"
+                          className="text-base font-bold text-stone-900 hover:text-amber-700 transition-colors line-clamp-1"
                         >
                           {dish.name}
                         </Link>
-                        <p className="mt-1.5 text-xs text-stone-400 line-clamp-2 leading-relaxed">
+                        <p className="mt-1 text-xs text-stone-500 line-clamp-2 leading-relaxed">
                           {dish.description || 'Món ăn tiệc tiêu chuẩn phục vụ 10 khách.'}
                         </p>
                       </div>
 
-                      <div className="pt-4 border-t border-stone-800/60 flex items-center justify-between gap-3">
+                      <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-3">
                         <div>
-                          <span className="block text-[10px] uppercase font-bold text-stone-400">
+                          <span className="block text-[10px] uppercase font-semibold text-stone-400">
                             Giá / 01 phần
                           </span>
-                          <span className="text-lg font-black text-amber-400 font-serif-luxury">
+                          <span className="text-base font-bold text-amber-700">
                             {formatVnd(dish.price)}
                           </span>
                         </div>
@@ -341,16 +343,16 @@ export const CatalogPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => addDishToCalculator(dish)}
-                            className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-black transition-all cursor-pointer ${
+                            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                               draftItem
-                                ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
-                                : 'bg-stone-800 text-stone-200 hover:bg-stone-700 hover:text-white border border-stone-700'
+                                ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                : 'bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200'
                             }`}
                             title="Thêm món này vào bàn tiệc dự tính"
                           >
                             {draftItem ? (
                               <>
-                                <Check className="h-3.5 w-3.5 text-amber-400" />
+                                <Check className="h-3.5 w-3.5 text-amber-700" />
                                 <span>Đã chọn ({draftItem.portionsPerTable})</span>
                               </>
                             ) : (
@@ -363,7 +365,7 @@ export const CatalogPage: React.FC = () => {
 
                           <Link
                             to={`/dishes/${dish.id}`}
-                            className="inline-flex items-center justify-center h-8 w-8 rounded-xl bg-stone-800 text-stone-300 hover:bg-amber-500 hover:text-stone-950 transition-colors"
+                            className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-stone-100 text-stone-600 hover:bg-amber-50 hover:text-amber-800 transition-colors"
                             title="Xem chi tiết công thức định lượng"
                           >
                             <ArrowRight className="h-4 w-4" />
@@ -377,15 +379,15 @@ export const CatalogPage: React.FC = () => {
             </div>
           ) : (
             /* List View */
-            <div className="space-y-4">
+            <div className="space-y-3">
               {sortedDishes.map((dish) => {
                 const draftItem = draftLines.find((l) => l.dish.id === dish.id);
                 return (
                   <article
                     key={dish.id}
-                    className="flex flex-col sm:flex-row items-center gap-4 rounded-3xl border border-stone-800/80 bg-stone-900/50 p-4 hover:border-amber-500/40 hover:bg-stone-900/80 transition-all shadow-md"
+                    className="flex flex-col sm:flex-row items-center gap-4 rounded-xl border border-stone-200 bg-white p-3.5 hover:border-amber-300 hover:shadow-sm transition-all shadow-sm"
                   >
-                    <div className="h-24 w-28 shrink-0 rounded-2xl overflow-hidden bg-stone-900">
+                    <div className="h-20 w-24 shrink-0 rounded-lg overflow-hidden bg-stone-100">
                       {dish.imageUrl ? (
                         <img
                           src={dish.imageUrl}
@@ -393,28 +395,28 @@ export const CatalogPage: React.FC = () => {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-stone-600">
-                          <Utensils className="h-8 w-8" />
+                        <div className="flex h-full w-full items-center justify-center text-stone-400">
+                          <Utensils className="h-6 w-6" />
                         </div>
                       )}
                     </div>
 
                     <div className="flex-1 min-w-0 space-y-1 text-center sm:text-left">
                       <div className="flex items-center justify-center sm:justify-start gap-2">
-                        <span className="rounded-md bg-stone-800 px-2 py-0.5 text-[10px] font-mono text-stone-400">
+                        <span className="rounded bg-stone-100 px-1.5 py-0.5 text-[10px] font-mono text-stone-600">
                           {dish.code}
                         </span>
-                        <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">
+                        <span className="rounded bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
                           {dish.categoryName}
                         </span>
                       </div>
                       <Link
                         to={`/dishes/${dish.id}`}
-                        className="text-base font-bold text-white hover:text-amber-400 transition-colors truncate block"
+                        className="text-sm font-bold text-stone-900 hover:text-amber-700 transition-colors truncate block"
                       >
                         {dish.name}
                       </Link>
-                      <p className="text-xs text-stone-400 line-clamp-1">
+                      <p className="text-xs text-stone-500 line-clamp-1">
                         {dish.description}
                       </p>
                     </div>
@@ -422,7 +424,7 @@ export const CatalogPage: React.FC = () => {
                     <div className="flex items-center gap-4 shrink-0">
                       <div className="text-right">
                         <span className="block text-[10px] text-stone-400">01 phần</span>
-                        <span className="text-base font-black text-amber-400 font-serif-luxury">
+                        <span className="text-sm font-bold text-amber-700">
                           {formatVnd(dish.price)}
                         </span>
                       </div>
@@ -430,7 +432,7 @@ export const CatalogPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => addDishToCalculator(dish)}
-                        className="rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2 text-xs font-black text-stone-950 hover:from-amber-400 hover:to-amber-500 transition-all cursor-pointer shadow-sm"
+                        className="rounded-lg bg-amber-700 hover:bg-amber-800 text-white px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer shadow-sm"
                       >
                         {draftItem ? `Đã chọn (${draftItem.portionsPerTable})` : '+ Chọn món'}
                       </button>
@@ -443,19 +445,21 @@ export const CatalogPage: React.FC = () => {
         </div>
 
         {/* Right Sticky: Luxury Banquet Calculator (BR-01) */}
-        <aside className="lg:col-span-4 sticky top-28 space-y-4">
-          <div className="rounded-3xl border border-amber-500/30 bg-stone-900/95 backdrop-blur-xl p-6 shadow-2xl space-y-5 gold-border-glow">
+        <aside className="lg:col-span-4 sticky top-24 space-y-4">
+          <div className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-6 shadow-sm space-y-4">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-stone-800 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-stone-950 shadow-md">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-800">
                   <Calculator className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-white font-serif-luxury">
-                    Bảng Tính Bàn Tiệc Hoàng Gia
+                  <h2 className="text-sm font-bold text-stone-900">
+                    Bảng Tính Bàn Tiệc
                   </h2>
-                  <p className="text-[10px] text-amber-400 font-medium">Quy tắc BR-01: Giá 01 bàn × Số bàn</p>
+                  <p className="text-[10px] text-stone-500 font-medium">
+                    Quy tắc BR-01: Giá 01 bàn × Số bàn
+                  </p>
                 </div>
               </div>
 
@@ -463,7 +467,7 @@ export const CatalogPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setDraftLines([])}
-                  className="text-xs text-rose-400 hover:text-rose-300 font-semibold inline-flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-rose-600 hover:text-rose-700 font-semibold inline-flex items-center gap-1 cursor-pointer"
                   title="Xóa toàn bộ món đã chọn"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -474,42 +478,42 @@ export const CatalogPage: React.FC = () => {
 
             {/* Selected dishes list */}
             {draftLines.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-stone-800 bg-stone-950/60 p-6 text-center space-y-2">
-                <Utensils className="h-7 w-7 text-stone-600 mx-auto" />
-                <p className="text-xs font-medium text-stone-400">Chưa có món nào trong bàn tiệc</p>
+              <div className="rounded-xl border border-dashed border-stone-200 bg-stone-50 p-5 text-center space-y-1.5">
+                <Utensils className="h-6 w-6 text-stone-400 mx-auto" />
+                <p className="text-xs font-medium text-stone-600">Chưa có món nào trong bàn tiệc</p>
                 <p className="text-[11px] text-stone-400 leading-relaxed">
                   Bấm nút <strong>+ Chọn món</strong> ở danh sách bên trái để thêm món vào bàn tiệc.
                 </p>
               </div>
             ) : (
-              <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                 {draftLines.map((line) => (
                   <div
                     key={line.dish.id}
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-stone-800/80 bg-stone-950/70 p-3 text-xs"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-stone-100 bg-stone-50 p-2.5 text-xs"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-white truncate">{line.dish.name}</p>
-                      <p className="text-[11px] text-amber-400">
+                      <p className="font-semibold text-stone-800 truncate">{line.dish.name}</p>
+                      <p className="text-[11px] text-amber-700 font-medium">
                         {formatVnd(line.dish.price)} / phần
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <button
                         type="button"
                         onClick={() => updatePortion(line.dish.id, -1)}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-stone-700 bg-stone-900 text-stone-300 hover:bg-stone-800 hover:text-white cursor-pointer"
+                        className="flex h-6 w-6 items-center justify-center rounded border border-stone-300 bg-white text-stone-700 hover:bg-stone-100 cursor-pointer"
                       >
                         <Minus className="h-3 w-3" />
                       </button>
-                      <span className="w-6 text-center font-bold text-white">
+                      <span className="w-5 text-center font-bold text-stone-800">
                         {line.portionsPerTable}
                       </span>
                       <button
                         type="button"
                         onClick={() => updatePortion(line.dish.id, 1)}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-stone-700 bg-stone-900 text-stone-300 hover:bg-stone-800 hover:text-white cursor-pointer"
+                        className="flex h-6 w-6 items-center justify-center rounded border border-stone-300 bg-white text-stone-700 hover:bg-stone-100 cursor-pointer"
                       >
                         <Plus className="h-3 w-3" />
                       </button>
@@ -520,15 +524,15 @@ export const CatalogPage: React.FC = () => {
             )}
 
             {/* Calculations Breakdown */}
-            <div className="border-t border-stone-800 pt-4 space-y-3.5">
+            <div className="border-t border-stone-100 pt-3.5 space-y-3">
               {/* Table Count Selector */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <label htmlFor="tableSlider" className="font-bold text-stone-300 flex items-center gap-1.5">
-                    <Users className="h-3.5 w-3.5 text-amber-400" />
+                  <label htmlFor="tableSlider" className="font-semibold text-stone-700 flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5 text-amber-700" />
                     <span>Quy mô bàn tiệc:</span>
                   </label>
-                  <span className="text-sm font-black text-amber-400 font-mono">
+                  <span className="text-xs font-bold text-amber-800 font-mono">
                     {tableCount} bàn (~{estimatedGuests} khách)
                   </span>
                 </div>
@@ -539,28 +543,28 @@ export const CatalogPage: React.FC = () => {
                   max={50}
                   value={tableCount}
                   onChange={(e) => setTableCount(Number(e.target.value))}
-                  className="w-full accent-amber-500 cursor-pointer"
+                  className="w-full accent-amber-700 cursor-pointer"
                 />
               </div>
 
               {/* Subtotal 1 Table */}
-              <div className="flex items-center justify-between text-xs text-stone-400 pt-1">
+              <div className="flex items-center justify-between text-xs text-stone-500 pt-1">
                 <span>Đơn giá thực đơn 01 bàn:</span>
-                <span className="font-bold text-stone-200">{formatVnd(pricePerTable)}</span>
+                <span className="font-semibold text-stone-800">{formatVnd(pricePerTable)}</span>
               </div>
 
               {/* Grand Total */}
-              <div className="rounded-2xl border border-amber-500/40 bg-gradient-to-br from-amber-500/10 via-stone-900 to-amber-500/5 p-4 space-y-1">
+              <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3.5 space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                  <span className="text-xs font-semibold text-amber-900 uppercase tracking-wide">
                     Tổng tiền dự kiến ({tableCount} bàn):
                   </span>
                 </div>
-                <p className="text-2xl font-black text-amber-400 font-serif-luxury text-right">
+                <p className="text-xl font-extrabold text-amber-700 text-right tracking-tight">
                   {formatVnd(totalOrderPrice)}
                 </p>
-                <p className="text-[10px] text-stone-400 text-right">
-                  Chưa bao gồm thuế/phí dịch vụ • Trả trước 100% qua VNPAY ở Phase 4
+                <p className="text-[10px] text-stone-500 text-right">
+                  Chưa bao gồm thuế/phí • Thanh toán qua VNPAY Sandbox ở Phase 4
                 </p>
               </div>
             </div>
