@@ -62,7 +62,7 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
       showToast(
         isEdit
           ? `Đã cập nhật nguyên liệu "${saved.name}".`
-          : `Đã thêm nguyên liệu "${saved.name}" vào danh mục.`,
+          : `Đã thêm nguyên liệu "${saved.name}" vào kho trung tâm.`,
         'success'
       );
       onSaved(saved);
@@ -76,42 +76,42 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-stone-950/60 backdrop-blur-xs p-4">
-      <div className="w-full max-w-lg rounded-3xl border border-stone-200 bg-white shadow-xl overflow-hidden">
-        <div className="flex items-center justify-between border-b border-stone-200 px-6 py-4 bg-stone-50">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
-              <PackagePlus className="h-5 w-5" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+      <div className="w-full max-w-lg rounded-3xl border border-stone-800 bg-stone-900 shadow-2xl overflow-hidden gold-border-glow">
+        <div className="flex items-center justify-between border-b border-stone-800 px-7 py-5 bg-stone-950/80">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-stone-950 font-black shadow-md">
+              <PackagePlus className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-stone-900">
-                {isEdit ? 'Cập nhật nguyên liệu' : 'Thêm nguyên liệu mới (FR-INV-01)'}
+              <h2 className="text-lg font-black font-serif-luxury text-white">
+                {isEdit ? 'Cập Nhật Nguyên Liệu' : 'Thêm Nguyên Liệu Mới (FR-INV-01)'}
               </h2>
-              <p className="text-xs text-stone-500">
-                Khai báo đơn vị gốc chuẩn dùng chung cho kho và công thức
+              <p className="text-xs text-stone-400">
+                Khai báo đơn vị gốc chuẩn (BR-03) dùng chung cho kho và công thức
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-200 hover:text-stone-700 cursor-pointer"
+            className="rounded-xl p-2 text-stone-400 hover:bg-stone-800 hover:text-white transition-colors cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-7 space-y-4">
           {errorMsg && (
-            <div className="flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-medium text-rose-800">
-              <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2.5 rounded-2xl border border-rose-900/60 bg-rose-950/40 p-4 text-xs font-medium text-rose-300">
+              <AlertCircle className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-bold text-stone-700 mb-1">
-              Mã nguyên liệu <span className="text-rose-600">*</span>
+            <label className="block text-xs font-bold text-stone-300 mb-1.5">
+              Mã Nguyên Liệu <span className="text-amber-400">*</span>
             </label>
             <input
               type="text"
@@ -119,13 +119,13 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="VD: ING-CUA-BIEN"
-              className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs font-mono font-semibold text-stone-900 focus:border-amber-600 focus:outline-none"
+              className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 px-4 py-2.5 text-xs font-mono font-bold text-amber-400 focus:border-amber-500 focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-stone-700 mb-1">
-              Tên nguyên liệu <span className="text-rose-600">*</span>
+            <label className="block text-xs font-bold text-stone-300 mb-1.5">
+              Tên Nguyên Liệu <span className="text-amber-400">*</span>
             </label>
             <input
               type="text"
@@ -133,14 +133,14 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="VD: Cua biển Cà Mau tươi sống"
-              className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs font-semibold text-stone-900 focus:border-amber-600 focus:outline-none"
+              className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 px-4 py-2.5 text-xs font-bold text-white focus:border-amber-500 focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-stone-700 mb-1">
-                Đơn vị gốc (BR-03) <span className="text-rose-600">*</span>
+              <label className="block text-xs font-bold text-stone-300 mb-1.5">
+                Đơn Vị Gốc (BR-03) <span className="text-amber-400">*</span>
               </label>
               <input
                 type="text"
@@ -148,13 +148,13 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 placeholder="kg, lít, cái..."
-                className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs font-semibold text-stone-900 focus:border-amber-600 focus:outline-none"
+                className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 px-4 py-2.5 text-xs font-bold text-stone-200 focus:border-amber-500 focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-stone-700 mb-1">
-                Ngưỡng tồn tối thiểu
+              <label className="block text-xs font-bold text-stone-300 mb-1.5">
+                Ngưỡng Tồn Tối Thiểu
               </label>
               <input
                 type="number"
@@ -163,36 +163,36 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
                 required
                 value={minStockThreshold}
                 onChange={(e) => setMinStockThreshold(e.target.value)}
-                className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs font-bold text-stone-900 focus:border-amber-600 focus:outline-none"
+                className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 px-4 py-2.5 text-xs font-black text-amber-400 font-mono focus:border-amber-500 focus:outline-none"
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-2 pt-1">
+          <div className="flex items-center gap-2.5 pt-2">
             <input
               id="ingActiveCheckbox"
               type="checkbox"
               checked={active}
               onChange={(e) => setActive(e.target.checked)}
-              className="h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+              className="h-4 w-4 rounded border-stone-800 bg-stone-950 text-amber-500 focus:ring-amber-500 cursor-pointer"
             />
-            <label htmlFor="ingActiveCheckbox" className="text-xs font-medium text-stone-700">
-              Nguyên liệu đang hoạt động
+            <label htmlFor="ingActiveCheckbox" className="text-xs font-semibold text-stone-300 cursor-pointer">
+              Kích hoạt nguyên liệu đang dùng cho thực đơn
             </label>
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-stone-200 pt-4">
+          <div className="flex items-center justify-end gap-3 border-t border-stone-800 pt-5">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-100 cursor-pointer"
+              className="rounded-2xl border border-stone-800 bg-stone-900 px-5 py-2.5 text-xs font-bold text-stone-300 hover:bg-stone-800 cursor-pointer"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700 disabled:opacity-60 cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 px-6 py-2.5 text-xs font-black text-stone-950 shadow-lg shadow-amber-500/20 hover:scale-102 disabled:opacity-50 transition-all cursor-pointer"
             >
               {saving ? (
                 <>
@@ -202,7 +202,7 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  <span>Lưu nguyên liệu</span>
+                  <span>Lưu Nguyên Liệu</span>
                 </>
               )}
             </button>

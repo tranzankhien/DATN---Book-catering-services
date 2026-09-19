@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Plus, Trash2, UtensilsCrossed, AlertCircle, Loader2, Save } from 'lucide-react';
+import { X, Plus, Trash2, UtensilsCrossed, AlertCircle, Loader2, Save, Sparkles } from 'lucide-react';
 import type {
   CategoryDto,
   DishDetailDto,
@@ -153,44 +153,44 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-stone-950/60 backdrop-blur-xs p-4">
-      <div className="w-full max-w-3xl rounded-3xl border border-stone-200 bg-white shadow-xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+      <div className="w-full max-w-3xl rounded-3xl border border-stone-800 bg-stone-900 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] gold-border-glow">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-stone-200 px-6 py-4 bg-stone-50">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
-              <UtensilsCrossed className="h-5 w-5" />
+        <div className="flex items-center justify-between border-b border-stone-800 px-7 py-5 bg-stone-950/80">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-stone-950 font-black shadow-md">
+              <UtensilsCrossed className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-stone-900">
-                {isEdit ? `Chỉnh sửa món ăn: ${initialDish?.name}` : 'Thêm món ăn mới (FR-CAT-02)'}
+              <h2 className="text-lg font-black font-serif-luxury text-white">
+                {isEdit ? `Chỉnh sửa món ăn: ${initialDish?.name}` : 'Thêm Món Ăn Mới (FR-CAT-02)'}
               </h2>
-              <p className="text-xs text-stone-500">
-                Thiết lập thông tin món ăn, giá 01 phần (VND) và công thức nguyên liệu
+              <p className="text-xs text-stone-400">
+                Khai báo thông tin món tiệc, đơn giá 01 phần (VND) và công thức nguyên liệu chuẩn
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-200 hover:text-stone-700 cursor-pointer"
+            className="rounded-xl p-2 text-stone-400 hover:bg-stone-800 hover:text-white transition-colors cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-7 space-y-6">
           {errorMsg && (
-            <div className="flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-medium text-rose-800">
-              <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2.5 rounded-2xl border border-rose-900/60 bg-rose-950/40 p-4 text-xs font-medium text-rose-300">
+              <AlertCircle className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
             <div className="sm:col-span-4">
-              <label className="block text-xs font-bold text-stone-700 mb-1">
-                Mã món ăn <span className="text-rose-600">*</span>
+              <label className="block text-xs font-bold text-stone-300 mb-1.5">
+                Mã Món Ăn <span className="text-amber-400">*</span>
               </label>
               <input
                 type="text"
@@ -198,32 +198,32 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="VD: DISH-011"
-                className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs font-mono font-semibold text-stone-900 focus:border-amber-600 focus:outline-none"
+                className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 px-4 py-2.5 text-xs font-mono font-bold text-amber-400 focus:border-amber-500 focus:outline-none"
               />
             </div>
 
             <div className="sm:col-span-8">
-              <label className="block text-xs font-bold text-stone-700 mb-1">
-                Tên món ăn <span className="text-rose-600">*</span>
+              <label className="block text-xs font-bold text-stone-300 mb-1.5">
+                Tên Món Ăn <span className="text-amber-400">*</span>
               </label>
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="VD: Tôm Càng Xanh Nướng Phô Mai"
-                className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs font-semibold text-stone-900 focus:border-amber-600 focus:outline-none"
+                placeholder="VD: Bào Ngư Vi Cá Sốt Hoàng Kim"
+                className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 px-4 py-2.5 text-xs font-bold text-white focus:border-amber-500 focus:outline-none"
               />
             </div>
 
             <div className="sm:col-span-5">
-              <label className="block text-xs font-bold text-stone-700 mb-1">
-                Danh mục món <span className="text-rose-600">*</span>
+              <label className="block text-xs font-bold text-stone-300 mb-1.5">
+                Danh Mục Món <span className="text-amber-400">*</span>
               </label>
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(Number(e.target.value))}
-                className="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-xs font-semibold text-stone-900 focus:border-amber-600 focus:outline-none"
+                className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 px-4 py-2.5 text-xs font-bold text-stone-200 focus:border-amber-500 focus:outline-none cursor-pointer"
               >
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
@@ -234,8 +234,8 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
             </div>
 
             <div className="sm:col-span-4">
-              <label className="block text-xs font-bold text-stone-700 mb-1">
-                Giá bán / 01 phần (VND) <span className="text-rose-600">*</span>
+              <label className="block text-xs font-bold text-stone-300 mb-1.5">
+                Đơn Giá / 01 Phần (VND) <span className="text-amber-400">*</span>
               </label>
               <input
                 type="number"
@@ -244,16 +244,16 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                 step={1000}
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs font-bold text-stone-900 focus:border-amber-600 focus:outline-none"
+                className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 px-4 py-2.5 text-xs font-black text-amber-400 font-mono focus:border-amber-500 focus:outline-none"
               />
             </div>
 
             <div className="sm:col-span-3">
-              <label className="block text-xs font-bold text-stone-700 mb-1">Trạng thái</label>
+              <label className="block text-xs font-bold text-stone-300 mb-1.5">Trạng Thái</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as DishStatus)}
-                className="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-xs font-semibold text-stone-900 focus:border-amber-600 focus:outline-none"
+                className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 px-4 py-2.5 text-xs font-bold text-stone-200 focus:border-amber-500 focus:outline-none cursor-pointer"
               >
                 <option value="ACTIVE">Đang phục vụ (ACTIVE)</option>
                 <option value="HIDDEN">Đang ẩn (HIDDEN)</option>
@@ -261,58 +261,58 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
             </div>
 
             <div className="sm:col-span-12">
-              <label className="block text-xs font-bold text-stone-700 mb-1">
-                URL hình ảnh món ăn
+              <label className="block text-xs font-bold text-stone-300 mb-1.5">
+                URL Hình Ảnh Món Ăn
               </label>
               <input
                 type="url"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://images.unsplash.com/..."
-                className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs text-stone-900 focus:border-amber-600 focus:outline-none"
+                className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 px-4 py-2.5 text-xs text-stone-200 focus:border-amber-500 focus:outline-none"
               />
             </div>
 
             <div className="sm:col-span-12">
-              <label className="block text-xs font-bold text-stone-700 mb-1">Mô tả món ăn</label>
+              <label className="block text-xs font-bold text-stone-300 mb-1.5">Mô Tả Ẩm Thực</label>
               <textarea
                 rows={2}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Mô tả hương vị, cách chế biến và món ăn kèm trên bàn tiệc..."
-                className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs text-stone-900 focus:border-amber-600 focus:outline-none"
+                placeholder="Mô tả hương vị, nguyên liệu chủ đạo và tiêu chuẩn phục vụ..."
+                className="w-full rounded-2xl border border-stone-800 bg-stone-950/80 px-4 py-2.5 text-xs text-stone-200 focus:border-amber-500 focus:outline-none"
               />
             </div>
           </div>
 
           {/* Recipe Items Section */}
-          <div className="border-t border-stone-200 pt-4 space-y-3">
+          <div className="border-t border-stone-800 pt-5 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-stone-800">
-                  Công thức định lượng cho 01 phần món (FR-REC-01)
+                <h3 className="text-xs font-bold uppercase tracking-widest text-amber-400">
+                  Công Thức Định Lượng Cho 01 Phần Món (FR-REC-01)
                 </h3>
-                <p className="text-[11px] text-stone-500">
-                  Định lượng nguyên liệu bắt buộc phải lớn hơn 0
+                <p className="text-[11px] text-stone-400">
+                  Bắt buộc tối thiểu 01 nguyên liệu, định lượng &gt; 0 (chuẩn kg, lít...)
                 </p>
               </div>
               <button
                 type="button"
                 onClick={addRecipeRow}
-                className="inline-flex items-center gap-1 rounded-xl border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-900 hover:bg-amber-100 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3.5 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20 cursor-pointer"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>Thêm nguyên liệu</span>
+                <span>Thêm dòng nguyên liệu</span>
               </button>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {recipeRows.map((row, idx) => {
                 const ing = ingredients.find((i) => i.id === Number(row.ingredientId));
                 return (
                   <div
                     key={idx}
-                    className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center rounded-xl border border-stone-200 bg-stone-50 p-3"
+                    className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center rounded-2xl border border-stone-800 bg-stone-950/70 p-3.5"
                   >
                     <div className="sm:col-span-5">
                       <select
@@ -320,7 +320,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                         onChange={(e) =>
                           updateRecipeRow(idx, 'ingredientId', Number(e.target.value))
                         }
-                        className="w-full rounded-lg border border-stone-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-stone-900"
+                        className="w-full rounded-xl border border-stone-800 bg-stone-900 px-3 py-2 text-xs font-bold text-stone-200 cursor-pointer"
                       >
                         {ingredients.map((i) => (
                           <option key={i.id} value={i.id}>
@@ -330,7 +330,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                       </select>
                     </div>
 
-                    <div className="sm:col-span-3 flex items-center gap-1.5">
+                    <div className="sm:col-span-3 flex items-center gap-2">
                       <input
                         type="number"
                         step="0.001"
@@ -338,9 +338,9 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                         required
                         value={row.quantity}
                         onChange={(e) => updateRecipeRow(idx, 'quantity', e.target.value)}
-                        className="w-full rounded-lg border border-stone-300 bg-white px-2.5 py-1.5 text-xs font-bold text-stone-900"
+                        className="w-full rounded-xl border border-stone-800 bg-stone-900 px-3 py-2 text-xs font-black text-amber-400 font-mono"
                       />
-                      <span className="text-xs font-medium text-stone-500 shrink-0">
+                      <span className="text-xs font-bold text-stone-400 shrink-0">
                         {ing?.unit || ''}
                       </span>
                     </div>
@@ -351,7 +351,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                         value={row.note || ''}
                         onChange={(e) => updateRecipeRow(idx, 'note', e.target.value)}
                         placeholder="Ghi chú sơ chế"
-                        className="w-full rounded-lg border border-stone-300 bg-white px-2.5 py-1.5 text-xs text-stone-900"
+                        className="w-full rounded-xl border border-stone-800 bg-stone-900 px-3 py-2 text-xs text-stone-300"
                       />
                     </div>
 
@@ -360,9 +360,9 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                         type="button"
                         disabled={recipeRows.length <= 1}
                         onClick={() => removeRecipeRow(idx)}
-                        className="rounded-lg border border-rose-200 bg-white p-1.5 text-rose-600 hover:bg-rose-50 disabled:opacity-40 cursor-pointer"
+                        className="rounded-xl border border-rose-900/40 bg-rose-950/30 p-2 text-rose-400 hover:bg-rose-950/60 disabled:opacity-30 cursor-pointer"
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -371,18 +371,19 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-stone-200 pt-4">
+          {/* Modal Footer */}
+          <div className="flex items-center justify-end gap-3 border-t border-stone-800 pt-5">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-xs font-semibold text-stone-700 hover:bg-stone-100 cursor-pointer"
+              className="rounded-2xl border border-stone-800 bg-stone-900 px-5 py-2.5 text-xs font-bold text-stone-300 hover:bg-stone-800 cursor-pointer"
             >
-              Đóng
+              Hủy Bỏ
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-amber-700 disabled:opacity-60 cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 px-6 py-2.5 text-xs font-black text-stone-950 shadow-lg shadow-amber-500/20 hover:scale-102 disabled:opacity-50 transition-all cursor-pointer"
             >
               {saving ? (
                 <>
@@ -392,7 +393,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  <span>{isEdit ? 'Cập nhật món ăn' : 'Tạo món ăn mới'}</span>
+                  <span>{isEdit ? 'Lưu Thay Đổi' : 'Tạo Món Ăn Mới'}</span>
                 </>
               )}
             </button>

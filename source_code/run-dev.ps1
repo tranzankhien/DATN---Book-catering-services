@@ -23,3 +23,4 @@ Write-Host "  - Frontend: http://localhost:5173" -ForegroundColor White
 Write-Host "  - Backend API: http://localhost:8080/api/v1" -ForegroundColor White
 Write-Host "  - Swagger UI: http://localhost:8080/swagger-ui.html" -ForegroundColor White
 Write-Host "  - Health Check: http://localhost:8080/api/v1/health" -ForegroundColor White
+

@@ -1,13 +1,20 @@
 import React from 'react';
-import { AlertTriangle, Inbox, Loader2, RefreshCw } from 'lucide-react';
+import { AlertCircle, Inbox, RefreshCw, ChefHat, Sparkles } from 'lucide-react';
 import type { DishStatus } from '../services/types';
 
 export const LoadingState: React.FC<{ label?: string }> = ({
-  label = 'Đang tải dữ liệu từ hệ thống...',
+  label = 'Đang đồng bộ dữ liệu với máy chủ...',
 }) => (
-  <div className="flex flex-col items-center justify-center rounded-2xl border border-stone-200 bg-white py-16 px-6 text-center shadow-xs">
-    <Loader2 className="h-9 w-9 animate-spin text-amber-600 mb-3" />
-    <p className="text-sm font-medium text-stone-600">{label}</p>
+  <div className="flex flex-col items-center justify-center rounded-3xl border border-stone-800 bg-stone-900/60 backdrop-blur-md py-20 px-6 text-center shadow-2xl">
+    <div className="relative mb-5 flex h-16 w-16 items-center justify-center">
+      <div className="absolute inset-0 rounded-full border-2 border-amber-500/20 animate-ping" />
+      <div className="absolute inset-0 rounded-full border-2 border-t-amber-500 border-r-transparent border-b-transparent border-l-transparent animate-spin" />
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10 text-amber-400">
+        <ChefHat className="h-6 w-6 animate-pulse" />
+      </div>
+    </div>
+    <h4 className="text-base font-semibold text-stone-200">{label}</h4>
+    <p className="mt-1 text-xs text-stone-500">Hệ thống xử lý định lượng & thực đơn thời gian thực</p>
   </div>
 );
 
@@ -16,20 +23,20 @@ export const ErrorState: React.FC<{
   message: string;
   onRetry?: () => void;
 }> = ({ title = 'Không thể tải dữ liệu', message, onRetry }) => (
-  <div className="flex flex-col items-center justify-center rounded-2xl border border-rose-200 bg-rose-50/70 py-12 px-6 text-center">
-    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-600 mb-3">
-      <AlertTriangle className="h-6 w-6" />
+  <div className="flex flex-col items-center justify-center rounded-3xl border border-rose-900/50 bg-rose-950/20 backdrop-blur-md py-16 px-6 text-center shadow-xl">
+    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-900/30 text-rose-400 border border-rose-800/40 mb-4 shadow-inner">
+      <AlertCircle className="h-7 w-7" />
     </div>
-    <h3 className="text-base font-semibold text-rose-950">{title}</h3>
-    <p className="mt-1 max-w-md text-sm text-rose-800">{message}</p>
+    <h3 className="text-lg font-bold text-rose-200">{title}</h3>
+    <p className="mt-1.5 max-w-md text-xs sm:text-sm text-rose-300/80 leading-relaxed">{message}</p>
     {onRetry && (
       <button
         type="button"
         onClick={onRetry}
-        className="mt-4 inline-flex items-center gap-2 rounded-xl bg-rose-700 px-4 py-2 text-sm font-medium text-white hover:bg-rose-800 transition-colors cursor-pointer"
+        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-700 to-rose-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg hover:from-rose-600 hover:to-rose-500 transition-all cursor-pointer"
       >
-        <RefreshCw className="h-4 w-4" />
-        Thử lại
+        <RefreshCw className="h-3.5 w-3.5" />
+        <span>Thử kết nối lại</span>
       </button>
     )}
   </div>
@@ -40,13 +47,13 @@ export const EmptyState: React.FC<{
   description?: string;
   action?: React.ReactNode;
 }> = ({ title, description, action }) => (
-  <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-white py-14 px-6 text-center">
-    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-stone-100 text-stone-500 mb-3">
-      <Inbox className="h-6 w-6" />
+  <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-stone-800 bg-stone-900/40 backdrop-blur-sm py-18 px-6 text-center">
+    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-800/60 text-stone-400 border border-stone-700/50 mb-4 shadow-inner">
+      <Inbox className="h-7 w-7" />
     </div>
-    <h3 className="text-base font-semibold text-stone-900">{title}</h3>
-    {description && <p className="mt-1 max-w-md text-sm text-stone-600">{description}</p>}
-    {action && <div className="mt-4">{action}</div>}
+    <h3 className="text-base font-bold text-stone-200">{title}</h3>
+    {description && <p className="mt-1.5 max-w-md text-xs text-stone-400 leading-relaxed">{description}</p>}
+    {action && <div className="mt-5">{action}</div>}
   </div>
 );
 
@@ -54,16 +61,16 @@ export const DishStatusBadge: React.FC<{ status: DishStatus }> = ({ status }) =>
   const isActive = status === 'ACTIVE';
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold tracking-wide uppercase ${
         isActive
-          ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-          : 'bg-stone-200 text-stone-700 border border-stone-300'
+          ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.2)]'
+          : 'bg-stone-800 text-stone-400 border border-stone-700'
       }`}
     >
       <span
-        className={`h-1.5 w-1.5 rounded-full ${isActive ? 'bg-emerald-600' : 'bg-stone-500'}`}
+        className={`h-1.5 w-1.5 rounded-full ${isActive ? 'bg-emerald-400 animate-pulse' : 'bg-stone-500'}`}
       />
-      {isActive ? 'Đang phục vụ' : 'Đang ẩn'}
+      {isActive ? 'Đang phục vụ' : 'Tạm ngừng'}
     </span>
   );
 };
