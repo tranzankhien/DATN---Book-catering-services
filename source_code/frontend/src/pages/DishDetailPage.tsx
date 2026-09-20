@@ -23,7 +23,7 @@ export const DishDetailPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // BR-02 Simulation: Lượng tiêu hao = Số bàn × Số phần/bàn × Định lượng 01 phần
+  // Tính lượng tiêu hao = Số bàn × Số phần/bàn × Định lượng 01 phần
   const [portionsPerTable, setPortionsPerTable] = useState<number>(1);
   const [tableCount, setTableCount] = useState<number>(6);
 
@@ -93,7 +93,7 @@ export const DishDetailPage: React.FC = () => {
             className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-100 transition-colors shadow-sm"
           >
             <ShieldCheck className="h-4 w-4 text-amber-700" />
-            <span>Mở Trang Quản Trị Công Thức (Admin)</span>
+            <span>Cấu Hình Công Thức Món Ăn</span>
           </Link>
         )}
       </div>
@@ -170,7 +170,7 @@ export const DishDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Interactive Ingredient Consumption Breakdown (BR-02) */}
+      {/* Interactive Ingredient Consumption Breakdown */}
       <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8 shadow-sm space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-100 pb-5">
           <div className="flex items-start gap-3">
@@ -179,7 +179,7 @@ export const DishDetailPage: React.FC = () => {
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-bold text-stone-900">
-                Bảng Định Lượng Công Thức & Ước Tính Tiêu Hao (Quy Tắc BR-02)
+                Bảng Định Lượng Công Thức & Ước Tính Tiêu Hao Nguyên Liệu
               </h2>
               <p className="text-xs text-stone-500 mt-0.5">
                 Công thức: <code className="text-stone-700 font-mono font-semibold">Tiêu hao = Số bàn × Số phần/bàn × Định lượng 01 phần</code>

@@ -2,19 +2,19 @@ import React, { useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   UtensilsCrossed,
-  ShieldCheck,
-  LogOut,
-  UserCircle2,
   Phone,
   Clock,
   MapPin,
+  LogOut,
+  UserCircle2,
   Menu,
   X,
-  ExternalLink,
+  ShieldCheck,
+  CalendarCheck,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
-import { getRoleLabel } from '../hooks/useFormatters';
 
 export const PublicLayout: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -24,29 +24,43 @@ export const PublicLayout: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    showToast('Đã đăng xuất khỏi hệ thống.', 'info');
-    navigate('/');
+    showToast('Đã đăng xuất khỏi tài khoản an toàn.', 'info');
+    navigate('/login');
+  };
+
+  const getRoleLabel = (role?: string) => {
+    switch (role) {
+      case 'ROLE_ADMIN':
+        return 'Quản trị viên';
+      case 'ROLE_EMPLOYEE':
+        return 'Nhân viên';
+      case 'ROLE_USER':
+        return 'Khách hàng';
+      default:
+        return 'Khách';
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900">
-      {/* Top utility strip */}
-      <div className="border-b border-stone-200/80 bg-stone-100/90 py-1.5 px-4 sm:px-6 lg:px-8 text-xs text-stone-600">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="flex items-center gap-5">
-            <span className="hidden sm:inline-flex items-center gap-1.5 text-stone-700 font-medium">
+      {/* Top Notification Bar */}
+      <div className="border-b border-stone-200/80 bg-stone-100/70 text-xs text-stone-600">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 py-2">
+          <div className="flex items-center gap-4 text-[11px] sm:text-xs">
+            <span className="flex items-center gap-1.5 font-medium">
               <MapPin className="h-3.5 w-3.5 text-amber-700" />
-              Cơ sở Yến Tiệc & Hội Nghị BanquetHub
+              <span>Trung tâm Yến tiệc & Hội nghị BanquetHub • TP. Hồ Chí Minh</span>
             </span>
-            <span className="hidden md:inline-flex items-center gap-1.5 text-stone-500">
-              <Clock className="h-3.5 w-3.5 text-amber-700" />
-              08:00 – 21:30 (Thứ 2 – Chủ Nhật)
+            <span className="hidden md:flex items-center gap-1.5 text-stone-500">
+              <Clock className="h-3.5 w-3.5 text-stone-400" />
+              <span>Mở cửa: 08:00 – 22:00 hằng ngày</span>
             </span>
           </div>
-          <div className="flex items-center gap-4 text-xs">
+
+          <div className="flex items-center gap-3 text-[11px] sm:text-xs font-semibold text-stone-700">
             <a
               href="tel:19008899"
-              className="inline-flex items-center gap-1 font-bold text-amber-800 hover:text-amber-900 transition-colors"
+              className="flex items-center gap-1 text-amber-800 hover:text-amber-900 transition-colors"
             >
               <Phone className="h-3.5 w-3.5" />
               Hotline tư vấn: 1900 8899
@@ -58,7 +72,7 @@ export const PublicLayout: React.FC = () => {
       {/* Main Navigation Header */}
       <header className="sticky top-0 z-40 border-b border-stone-200/90 bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-18">
-          {/* Logo Brand */}
+          {/* Logo Brand (Clean, no internal MVP tags) */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-700 text-white shadow-xs group-hover:bg-amber-800 transition-colors">
               <UtensilsCrossed className="h-5 w-5" />
@@ -68,12 +82,9 @@ export const PublicLayout: React.FC = () => {
                 <span className="text-xl font-extrabold tracking-tight text-stone-900">
                   Banquet<span className="text-amber-700">Hub</span>
                 </span>
-                <span className="rounded-md bg-amber-100 text-amber-800 px-1.5 py-0.2 text-[10px] font-bold tracking-wide uppercase">
-                  MVP
-                </span>
               </div>
               <p className="text-[11px] font-medium text-stone-500 -mt-0.5">
-                Nền tảng Đặt tiệc & Quản lý ẩm thực
+                Nền tảng Đặt tiệc & Quản lý ẩm thực cao cấp
               </p>
             </div>
           </Link>
@@ -109,7 +120,7 @@ export const PublicLayout: React.FC = () => {
               <NavLink
                 to="/admin/catalog"
                 className={({ isActive }) =>
-                  `inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-bold transition-colors ${
+                  `inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
                     isActive
                       ? 'bg-stone-900 text-white'
                       : 'text-stone-700 hover:bg-stone-100'
@@ -117,7 +128,7 @@ export const PublicLayout: React.FC = () => {
                 }
               >
                 <ShieldCheck className="h-4 w-4 text-amber-600" />
-                <span>Quản trị Admin</span>
+                <span>Trang Quản Trị</span>
               </NavLink>
             )}
           </nav>
@@ -141,10 +152,10 @@ export const PublicLayout: React.FC = () => {
                 {user.role === 'ROLE_ADMIN' && (
                   <Link
                     to="/admin/catalog"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-stone-900 px-3.5 py-2 text-xs font-bold text-white hover:bg-stone-800 transition-colors shadow-xs"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-stone-900 px-3.5 py-2 text-xs font-semibold text-white hover:bg-stone-800 transition-colors shadow-xs"
                   >
                     <ShieldCheck className="h-3.5 w-3.5 text-amber-400" />
-                    <span>Admin</span>
+                    <span>Quản Trị</span>
                   </Link>
                 )}
 
@@ -161,13 +172,13 @@ export const PublicLayout: React.FC = () => {
               <div className="flex items-center gap-2.5">
                 <Link
                   to="/login"
-                  className="rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-bold text-stone-700 hover:bg-stone-100 hover:text-stone-900 transition-colors"
+                  className="rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-100 hover:text-stone-900 transition-colors"
                 >
                   Đăng nhập
                 </Link>
                 <Link
                   to="/register"
-                  className="rounded-xl bg-amber-700 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-amber-800 transition-colors"
+                  className="rounded-xl bg-amber-700 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-amber-800 transition-colors"
                 >
                   Đăng ký tài khoản
                 </Link>
@@ -209,9 +220,9 @@ export const PublicLayout: React.FC = () => {
               <NavLink
                 to="/admin/catalog"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block rounded-lg px-3 py-2 text-sm font-bold text-amber-800 hover:bg-amber-50"
+                className="block rounded-lg px-3 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-50"
               >
-                Quản trị Admin
+                Trang Quản Trị
               </NavLink>
             )}
 
@@ -223,7 +234,7 @@ export const PublicLayout: React.FC = () => {
                     setMobileMenuOpen(false);
                     handleLogout();
                   }}
-                  className="w-full rounded-lg bg-stone-100 py-2 text-xs font-bold text-rose-600"
+                  className="w-full rounded-lg bg-stone-100 py-2 text-xs font-semibold text-rose-600"
                 >
                   Đăng xuất ({user.fullName})
                 </button>
@@ -232,14 +243,14 @@ export const PublicLayout: React.FC = () => {
                   <Link
                     to="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 text-center rounded-lg border border-stone-200 py-2 text-xs font-bold text-stone-700"
+                    className="flex-1 text-center rounded-lg border border-stone-200 py-2 text-xs font-semibold text-stone-700"
                   >
                     Đăng nhập
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 text-center rounded-lg bg-amber-700 py-2 text-xs font-bold text-white"
+                    className="flex-1 text-center rounded-lg bg-amber-700 py-2 text-xs font-semibold text-white"
                   >
                     Đăng ký
                   </Link>
@@ -255,7 +266,7 @@ export const PublicLayout: React.FC = () => {
         <Outlet />
       </main>
 
-      {/* Clean Light Footer */}
+      {/* Clean Light Footer (Professional Hospitality Tone) */}
       <footer className="border-t border-stone-200 bg-white mt-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8">
@@ -269,56 +280,46 @@ export const PublicLayout: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-stone-500 leading-relaxed max-w-sm">
-                Nền tảng đặt tiệc tích hợp quản lý cơ sở kinh doanh theo chuẩn MVP.
-                Định lượng nguyên liệu minh bạch cho 01 phần món, liên kết trực tiếp với kho nguyên liệu trung tâm.
+                Hệ thống đặt tiệc và quản lý ẩm thực yến tiệc chuyên nghiệp.
+                Minh bạch định lượng cho từng phần món, liên kết trực tiếp với kho nguyên liệu trung tâm.
               </p>
             </div>
 
             <div className="lg:col-span-3 space-y-2">
               <h4 className="text-xs font-bold uppercase tracking-wider text-stone-900">
-                Liên kết nhanh
+                Dịch vụ & Thực đơn
               </h4>
               <ul className="space-y-1.5 text-xs text-stone-600">
                 <li>
                   <Link to="/" className="hover:text-amber-800 transition-colors">Trang chủ</Link>
                 </li>
                 <li>
-                  <Link to="/dishes" className="hover:text-amber-800 transition-colors">Danh mục món & Bảng tính giá</Link>
+                  <Link to="/dishes" className="hover:text-amber-800 transition-colors">Khám phá thực đơn món tiệc</Link>
                 </li>
                 <li>
                   <Link to="/login" className="hover:text-amber-800 transition-colors">Đăng nhập tài khoản</Link>
                 </li>
                 <li>
-                  <Link to="/register" className="hover:text-amber-800 transition-colors">Đăng ký khách hàng</Link>
+                  <Link to="/register" className="hover:text-amber-800 transition-colors">Đăng ký thành viên</Link>
                 </li>
               </ul>
             </div>
 
             <div className="lg:col-span-4 space-y-2">
               <h4 className="text-xs font-bold uppercase tracking-wider text-stone-900">
-                Tiêu chuẩn kỹ thuật
+                Tiêu chuẩn phục vụ
               </h4>
               <p className="text-xs text-stone-500 leading-relaxed">
-                Đặc tả phần mềm: <strong>SRS-PARTY-001</strong><br />
-                Đơn vị tiền tệ: <strong>VND</strong> • Múi giờ: <strong>Asia/Ho_Chi_Minh</strong>
+                Quy chuẩn bàn tiệc: <strong>10 khách / bàn</strong><br />
+                Đơn vị tiền tệ: <strong>VND (Việt Nam Đồng)</strong><br />
+                Thời gian phục vụ: <strong>08:00 – 22:00 các ngày trong tuần</strong>
               </p>
-              <div className="pt-1">
-                <a
-                  href="http://localhost:8080/swagger-ui.html"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 hover:text-amber-900"
-                >
-                  <span>Mở OpenAPI Swagger (Port 8080)</span>
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </a>
-              </div>
             </div>
           </div>
 
           <div className="mt-8 pt-6 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-400">
-            <p>© 2026 BanquetHub. Đồ án tốt nghiệp ngành Công nghệ thông tin.</p>
-            <p>Modular Monolith • Spring Boot 3.5 • PostgreSQL 17 • React 19</p>
+            <p>© 2026 BanquetHub. Nền tảng đặt tiệc & ẩm thực yến tiệc cao cấp.</p>
+            <p>Hệ thống phục vụ chuẩn 5 sao</p>
           </div>
         </div>
       </footer>

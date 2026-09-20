@@ -42,7 +42,7 @@ export const CatalogPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Bảng tính thử thực đơn bàn tiệc theo BR-01
+  // Bảng tính thử thực đơn bàn tiệc
   const [draftLines, setDraftLines] = useState<DraftMenuLine[]>([]);
   const [tableCount, setTableCount] = useState<number>(6);
 
@@ -149,9 +149,9 @@ export const CatalogPage: React.FC = () => {
               Danh Mục Món Tiệc Chuẩn Vị
             </h1>
             <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-              Mỗi món ăn có đơn vị giá tính cho 01 phần trên mỗi bàn tiệc (chuẩn 10 khách). Bấm{' '}
-              <strong className="text-stone-800">+ Chọn món</strong> để mô phỏng tính giá toàn bộ
-              bàn tiệc theo quy tắc <strong>BR-01</strong> tại bảng tính bên phải.
+              Mỗi món ăn có đơn giá tính cho 01 phần trên mỗi bàn tiệc (chuẩn 10 khách). Bấm{' '}
+              <strong className="text-stone-800">Chọn món</strong> để mô phỏng tính giá toàn bộ
+              bàn tiệc theo quy chuẩn bàn tiệc tại bảng tính bên phải.
             </p>
           </div>
 
@@ -358,7 +358,7 @@ export const CatalogPage: React.FC = () => {
                             ) : (
                               <>
                                 <Plus className="h-3.5 w-3.5" />
-                                <span>+ Chọn món</span>
+                                <span>Chọn món</span>
                               </>
                             )}
                           </button>
@@ -434,7 +434,7 @@ export const CatalogPage: React.FC = () => {
                         onClick={() => addDishToCalculator(dish)}
                         className="rounded-lg bg-amber-700 hover:bg-amber-800 text-white px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer shadow-sm"
                       >
-                        {draftItem ? `Đã chọn (${draftItem.portionsPerTable})` : '+ Chọn món'}
+                        {draftItem ? `Đã chọn (${draftItem.portionsPerTable})` : 'Chọn món'}
                       </button>
                     </div>
                   </article>
@@ -444,7 +444,7 @@ export const CatalogPage: React.FC = () => {
           )}
         </div>
 
-        {/* Right Sticky: Luxury Banquet Calculator (BR-01) */}
+        {/* Right Sticky: Luxury Banquet Calculator */}
         <aside className="lg:col-span-4 sticky top-24 space-y-4">
           <div className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-6 shadow-sm space-y-4">
             {/* Header */}
@@ -458,7 +458,7 @@ export const CatalogPage: React.FC = () => {
                     Bảng Tính Bàn Tiệc
                   </h2>
                   <p className="text-[10px] text-stone-500 font-medium">
-                    Quy tắc BR-01: Giá 01 bàn × Số bàn
+                    Giá 01 bàn × Số lượng bàn tiệc
                   </p>
                 </div>
               </div>
@@ -482,7 +482,7 @@ export const CatalogPage: React.FC = () => {
                 <Utensils className="h-6 w-6 text-stone-400 mx-auto" />
                 <p className="text-xs font-medium text-stone-600">Chưa có món nào trong bàn tiệc</p>
                 <p className="text-[11px] text-stone-400 leading-relaxed">
-                  Bấm nút <strong>+ Chọn món</strong> ở danh sách bên trái để thêm món vào bàn tiệc.
+                  Bấm nút <strong>Chọn món</strong> ở danh sách bên trái để thêm món vào bàn tiệc.
                 </p>
               </div>
             ) : (
@@ -564,7 +564,7 @@ export const CatalogPage: React.FC = () => {
                   {formatVnd(totalOrderPrice)}
                 </p>
                 <p className="text-[10px] text-stone-500 text-right">
-                  Chưa bao gồm thuế/phí • Thanh toán qua VNPAY Sandbox ở Phase 4
+                  Chưa bao gồm thuế/phí • Hỗ trợ thanh toán trực tuyến an toàn
                 </p>
               </div>
             </div>

@@ -90,7 +90,7 @@ export const HomePage: React.FC = () => {
                     className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white px-5 py-3.5 text-sm font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-400 transition-colors shadow-sm"
                   >
                     <ShieldCheck className="h-4 w-4 text-amber-700" />
-                    <span>Quản Trị Admin Panel</span>
+                    <span>Trang Quản Trị Hệ Thống</span>
                   </Link>
                 ) : (
                   <Link
@@ -114,7 +114,7 @@ export const HomePage: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">15 Phút</p>
-                  <p className="text-xs font-medium text-stone-500 mt-0.5">Giữ tồn kho an toàn khi đặt</p>
+                  <p className="text-xs font-medium text-stone-500 mt-0.5">Giữ chỗ an toàn khi đặt tiệc</p>
                 </div>
               </div>
             </div>
@@ -140,7 +140,7 @@ export const HomePage: React.FC = () => {
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-semibold text-amber-300">Tiêu chuẩn thực đơn 01 bàn (10 khách)</span>
                       <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">
-                        Quy tắc BR-01
+                        Định mức chuẩn
                       </span>
                     </div>
                     <p className="text-xs text-stone-300 leading-snug">
@@ -154,7 +154,7 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 4 Core Pillars of BanquetHub (SRS-PARTY-001) */}
+      {/* 4 Core Pillars of BanquetHub */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12 space-y-2">
           <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
@@ -164,8 +164,7 @@ export const HomePage: React.FC = () => {
             Vì Sao Chọn Nền Tảng BanquetHub?
           </h2>
           <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-            Áp dụng triệt để các nguyên tắc nghiệp vụ trong đặc tả phần mềm MVP, kết hợp tính thẩm mỹ
-            và độ chính xác tính toán mức cao nhất.
+            Quy chuẩn yến tiệc chuyên nghiệp, đảm bảo định lượng minh bạch và trải nghiệm dịch vụ đẳng cấp nhất.
           </p>
         </div>
 
@@ -177,7 +176,7 @@ export const HomePage: React.FC = () => {
                 <Scale className="h-5 w-5" />
               </div>
               <h3 className="text-base font-bold text-stone-900">
-                Minh Bạch Định Lượng (BR-02)
+                Minh Bạch Định Lượng Từng Món
               </h3>
               <p className="text-xs text-stone-600 leading-relaxed">
                 Mỗi món ăn đi kèm công thức tiêu hao chuẩn cho 01 phần. Tự động nhân cấp theo số phần
@@ -197,11 +196,11 @@ export const HomePage: React.FC = () => {
                 <Clock className="h-5 w-5" />
               </div>
               <h3 className="text-base font-bold text-stone-900">
-                Khóa Tồn Tạm 15 Phút (BR-04)
+                Giữ Chỗ Tạm 15 Phút Khi Đặt Tiệc
               </h3>
               <p className="text-xs text-stone-600 leading-relaxed">
                 Tồn khả dụng được tính toán theo thời gian thực (Tồn vật lý − Đang giữ). Tự giải phóng
-                kho nếu đơn tiệc quá hạn chưa thanh toán.
+                kho nếu đơn tiệc quá hạn chưa hoàn tất.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-stone-100 flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
@@ -220,8 +219,8 @@ export const HomePage: React.FC = () => {
                 Trợ Lý Gợi Ý Thực Đơn AI
               </h3>
               <p className="text-xs text-stone-600 leading-relaxed">
-                Tích hợp AI Gemini phân tích bối cảnh tiệc (cưới hỏi, thôi nôi, liên hoan) để gợi ý
-                tối đa 03 phương án thực đơn tối ưu chi phí.
+                Tích hợp AI phân tích bối cảnh tiệc (cưới hỏi, thôi nôi, liên hoan) để gợi ý
+                các phương án thực đơn tối ưu chi phí và hương vị.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-stone-100 flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
@@ -237,16 +236,16 @@ export const HomePage: React.FC = () => {
                 <Layers className="h-5 w-5" />
               </div>
               <h3 className="text-base font-bold text-stone-900">
-                Bảo Vệ Lịch Sử Đơn Cũ (BR-05)
+                Bảo Đảm Giá Cố Định Theo Hợp Đồng
               </h3>
               <p className="text-xs text-stone-600 leading-relaxed">
-                Chốt bản sao giá và định lượng tại thời điểm tạo đơn. Sửa giá hoặc công thức sau này
-                không bao giờ làm sai lệch báo cáo cũ.
+                Chốt bản sao giá và định lượng tại thời điểm tạo đơn. Thay đổi giá thị trường sau này
+                không bao giờ làm ảnh hưởng đến đơn đã đặt.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-stone-100 flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
               <CheckCircle2 className="h-3.5 w-3.5" />
-              <span>Toàn vẹn số liệu kế toán</span>
+              <span>Toàn vẹn số liệu minh bạch</span>
             </div>
           </div>
         </div>
@@ -413,8 +412,8 @@ export const HomePage: React.FC = () => {
                 Tự Thiết Kế Thực Đơn Bàn Tiệc & Nhận Báo Giá Ngay
               </h2>
               <p className="text-xs sm:text-sm text-stone-600 leading-relaxed max-w-2xl">
-                Thử nghiệm bảng tính giá bàn tiệc theo thời gian thực (BR-01), xem định lượng nguyên
-                liệu xuất kho (BR-02) và chuẩn bị cho quy trình thanh toán VNPAY Sandbox tự động.
+                Thử nghiệm bảng tính giá bàn tiệc theo thời gian thực, xem định lượng nguyên
+                liệu xuất kho chi tiết và trải nghiệm quy trình đặt tiệc trực tuyến tiện lợi.
               </p>
             </div>
             <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
@@ -430,7 +429,7 @@ export const HomePage: React.FC = () => {
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white px-5 py-3 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors shadow-sm"
               >
                 <CalendarCheck className="h-4 w-4 text-amber-700" />
-                <span>Đăng Ký Tài Khoản Tiệc</span>
+                <span>Đăng Ký Thành Viên</span>
               </Link>
             </div>
           </div>

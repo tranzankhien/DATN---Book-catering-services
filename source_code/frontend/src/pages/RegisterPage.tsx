@@ -100,7 +100,7 @@ export const RegisterPage: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-amber-400 shrink-0" />
-              <span>Sử dụng trợ lý AI Gemini gợi ý thực đơn thông minh</span>
+              <span>Sử dụng trợ lý AI gợi ý thực đơn thông minh</span>
             </div>
           </div>
         </div>
@@ -110,7 +110,7 @@ export const RegisterPage: React.FC = () => {
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-0.5 text-xs font-semibold text-amber-900">
               <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-              <span>Tài Khoản Khách Hàng (ROLE_USER)</span>
+              <span>Đăng Ký Thành Viên Đặt Tiệc</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
               Đăng Ký Thành Viên
