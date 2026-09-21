@@ -172,7 +172,7 @@ export const CatalogPage: React.FC = () => {
               type="text"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              placeholder="Tìm theo tên món, mã món (VD: Tôm sú, Bò hầm...)"
+              placeholder="Tìm theo tên món, loại món (VD: Tôm sú, Gà ta, Bò hầm, Lẩu...)"
               className="w-full rounded-xl border border-stone-300 bg-white pl-10 pr-4 py-2.5 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none shadow-sm transition-colors"
             />
           </div>
@@ -310,10 +310,6 @@ export const CatalogPage: React.FC = () => {
                       <span className="absolute top-2.5 left-2.5 rounded-lg bg-white/95 backdrop-blur-sm px-2.5 py-1 text-xs font-semibold text-stone-800 shadow-sm border border-stone-200">
                         {dish.categoryName}
                       </span>
-
-                      <span className="absolute top-2.5 right-2.5 rounded bg-stone-900/80 backdrop-blur-sm px-2 py-0.5 text-[10px] font-mono font-medium text-stone-200">
-                        {dish.code}
-                      </span>
                     </div>
 
                     <div className="flex flex-1 flex-col p-4 sm:p-5 space-y-3">
@@ -403,9 +399,6 @@ export const CatalogPage: React.FC = () => {
 
                     <div className="flex-1 min-w-0 space-y-1 text-center sm:text-left">
                       <div className="flex items-center justify-center sm:justify-start gap-2">
-                        <span className="rounded bg-stone-100 px-1.5 py-0.5 text-[10px] font-mono text-stone-600">
-                          {dish.code}
-                        </span>
                         <span className="rounded bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
                           {dish.categoryName}
                         </span>

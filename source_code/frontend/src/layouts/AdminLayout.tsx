@@ -24,7 +24,7 @@ export const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
 
   // isPinned: Nếu true -> Sidebar luôn mở cố định (w-64).
-  // Nếu false -> Sidebar ở chế độ Rail (w-18) và tự động bung mở (w-64) khi người dùng rê chuột vào.
+  // Nếu false -> Sidebar ở chế độ Rail (w-20) và tự động bung mở (w-64) khi người dùng rê chuột vào.
   const [isPinned, setIsPinned] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('banquethub_admin_sidebar_pinned');
@@ -73,26 +73,16 @@ export const AdminLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex bg-stone-50 text-stone-900">
-      {/* 
-        Container cho Aside:
-        - Khi isPinned = true: chiếm không gian thực w-64
-        - Khi isPinned = false: chỉ chiếm không gian w-18 trong layout để vùng bảng bên phải luôn rộng rãi
-      */}
-      <div
-        className={`shrink-0 transition-all duration-300 ease-in-out ${
-          isPinned ? 'w-64' : 'w-18'
+      {/* Executive Floating/Docked Sidebar with Auto/Pinned Expand */}
+      <aside
+        onMouseEnter={() => !isPinned && setIsHovered(true)}
+        onMouseLeave={() => !isPinned && setIsHovered(false)}
+        className={`sticky top-0 h-screen shrink-0 bg-stone-900 text-stone-200 border-r border-stone-800 flex flex-col justify-between z-30 transition-all duration-300 ease-in-out select-none overflow-y-auto overflow-x-hidden ${
+          isOpen
+            ? 'w-64 shadow-xl'
+            : 'w-20 shadow-sm'
         }`}
       >
-        {/* Executive Floating/Docked Sidebar */}
-        <aside
-          onMouseEnter={() => !isPinned && setIsHovered(true)}
-          onMouseLeave={() => !isPinned && setIsHovered(false)}
-          className={`fixed top-0 bottom-0 left-0 bg-stone-900 text-stone-200 border-r border-stone-800 flex flex-col justify-between z-40 transition-all duration-300 ease-in-out ${
-            isOpen
-              ? 'w-64 shadow-2xl shadow-stone-950/40'
-              : 'w-18 shadow-sm'
-          }`}
-        >
           <div>
             {/* Brand Header */}
             <div
@@ -304,10 +294,9 @@ export const AdminLayout: React.FC = () => {
             )}
           </div>
         </aside>
-      </div>
 
-      {/* Main Content Viewport */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Main Content Viewport: Adaptive width that expands and contracts smoothly with aside */}
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
         {/* Executive Header Bar */}
         <header className="h-16 border-b border-stone-200 bg-white px-5 sm:px-8 flex items-center justify-between shadow-xs sticky top-0 z-20">
           <div className="flex items-center gap-3">

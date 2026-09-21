@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -8,11 +8,13 @@ import {
   Layers,
   Flame,
   ChevronRight,
+  ChevronLeft,
   CheckCircle2,
   Clock,
   Compass,
   CalendarCheck,
   Calculator,
+  ChefHat,
   Award,
 } from 'lucide-react';
 import { catalogService } from '../services/catalogService';
@@ -20,14 +22,56 @@ import { extractErrorMessage } from '../services/apiClient';
 import type { CategoryDto, DishSummaryDto } from '../services/types';
 import { formatVnd } from '../hooks/useFormatters';
 import { ErrorState, LoadingState } from '../components/StatusStates';
-import { useAuth } from '../hooks/useAuth';
+
+// Dữ liệu fallback cho Hero Carousel nếu chưa tải xong dữ liệu từ API
+const defaultHeroDishes = [
+  {
+    id: 1,
+    name: 'Gỏi Củ Hủ Dừa Tôm Thịt Hoàng Gia',
+    categoryName: 'Món Khai Vị & Gỏi',
+    price: 260000,
+    imageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1200&q=85',
+    description: 'Khai vị truyền thống thanh mát, tôm sú tươi ngọt kết hợp củ hủ dừa giòn thơm.',
+    highlight: 'Khai vị truyền thống thanh mát, tôm sú tươi ngọt kết hợp củ hủ dừa giòn thơm.',
+  },
+  {
+    id: 7,
+    name: 'Gà Ta Hấp Lá Chanh Xôi Hạt Sen',
+    categoryName: 'Thịt & Gia Cầm Đặc Sắc',
+    price: 390000,
+    imageUrl: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=1200&q=85',
+    description: 'Gà thả vườn hấp chín tới da giòn thịt ngọt, xôi hạt sen Huế dẻo bùi thơm lừng.',
+    highlight: 'Gà thả vườn hấp chín tới da giòn thịt ngọt, xôi hạt sen Huế dẻo bùi thơm lừng.',
+  },
+  {
+    id: 9,
+    name: 'Lẩu Hải Sản Chua Cay Thập Cẩm',
+    categoryName: 'Món Lẩu & Canh Tiềm',
+    price: 520000,
+    imageUrl: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=85',
+    description: 'Nước lẩu đậm đà tròn vị, mực ống giòn sần sật, tôm sú và cá chẽm phi lê tươi ngon.',
+    highlight: 'Nước lẩu đậm đà tròn vị, mực ống giòn sần sật, tôm sú và cá chẽm phi lê tươi ngon.',
+  },
+  {
+    id: 5,
+    name: 'Bò Úc Hầm Tiêu Xanh Bánh Mì',
+    categoryName: 'Thịt & Gia Cầm Đặc Sắc',
+    price: 450000,
+    imageUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85',
+    description: 'Thịt bò mềm tan trong miệng, sốt tiêu xanh Phú Quốc nồng nàn ấm áp.',
+    highlight: 'Thịt bò mềm tan trong miệng, sốt tiêu xanh Phú Quốc nồng nàn ấm áp.',
+  },
+];
 
 export const HomePage: React.FC = () => {
-  const { user } = useAuth();
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [featuredDishes, setFeaturedDishes] = useState<DishSummaryDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Carousel State cho Hero Section
+  const [currentSlide, setCurrentSlide] = useState<number>(0);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
 
   const loadHomeData = async () => {
     setLoading(true);
@@ -50,15 +94,36 @@ export const HomePage: React.FC = () => {
     void loadHomeData();
   }, []);
 
+  // Danh sách các món chạy trong Carousel
+  const carouselItems = featuredDishes.length >= 3 ? featuredDishes : defaultHeroDishes;
+
+  // Auto-play vòng tròn sau mỗi 3.8 giây
+  useEffect(() => {
+    if (isPaused || carouselItems.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
+    }, 3800);
+    return () => clearInterval(timer);
+  }, [isPaused, carouselItems.length]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + carouselItems.length) % carouselItems.length);
+  };
+
+  const activeDish = carouselItems[currentSlide] || carouselItems[0];
+
   return (
     <div className="space-y-16 sm:space-y-24 pb-16">
-      {/* Luxury Hero Section with Taste-Skill Inspired Entrance Motion */}
+      {/* Luxury Hero Section with Rotary Carousel & Taste-Skill Entrance Motion */}
       <section className="relative overflow-hidden pt-8 pb-12 sm:pt-14 sm:pb-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
             {/* Left Content (Staggered Animation Entrance) */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              {/* Badge with gentle pulse */}
               <div className="animate-fade-up-1">
                 <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/90 bg-amber-50 px-4 py-1.5 text-xs font-semibold text-amber-900 shadow-xs">
                   <Sparkles className="h-3.5 w-3.5 text-amber-700 animate-spin" style={{ animationDuration: '8s' }} />
@@ -81,7 +146,7 @@ export const HomePage: React.FC = () => {
                 và theo dõi định mức tiêu hao nguyên liệu thực tế.
               </p>
 
-              {/* Action Buttons (Strictly Guest-Focused: NO ADMIN BUTTONS HERE) */}
+              {/* Action Buttons (Strictly Guest-Focused) */}
               <div className="animate-fade-up-4 flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
                 <Link
                   to="/dishes"
@@ -118,34 +183,91 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Hero Showcase Card (Floating Ambient Elevation) */}
-            <div className="lg:col-span-5 relative animate-hero-showcase">
+            {/* Right Hero: Rotary Circular Slideshow Showcase */}
+            <div
+              className="lg:col-span-5 relative animate-hero-showcase"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
               <div className="animate-float-subtle">
-                <div className="rounded-2xl border border-stone-200/90 bg-white p-2.5 shadow-xl shadow-stone-900/8 transition-all hover:shadow-2xl">
-                  <div className="relative h-80 sm:h-96 rounded-xl overflow-hidden bg-stone-100">
+                <div className="rounded-2xl border border-stone-200/90 bg-white p-3 shadow-xl shadow-stone-900/8 transition-all hover:shadow-2xl">
+                  {/* Image Display Area with Smooth Crossfade */}
+                  <div className="relative h-84 sm:h-96 rounded-xl overflow-hidden bg-stone-100 group">
                     <img
-                      src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85"
-                      alt="Banquet Culinary Art"
-                      className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                      key={activeDish.id}
+                      src={activeDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85'}
+                      alt={activeDish.name}
+                      className="h-full w-full object-cover transition-all duration-700 group-hover:scale-105 animate-hero-showcase"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950/75 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-black/20" />
 
-                    {/* Floating Badges */}
+                    {/* Top Badges */}
                     <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-lg bg-white/95 backdrop-blur-sm border border-stone-200 px-3 py-1 text-xs font-semibold text-stone-900 shadow-sm">
                       <Flame className="h-3.5 w-3.5 text-amber-600" />
-                      <span>Món Đặc Biệt: Sườn Bò Nướng Sốt Tiêu Xanh</span>
+                      <span>{activeDish.categoryName || 'Món Ăn Nổi Bật'}</span>
                     </div>
 
+                    <div className="absolute top-3 right-3 rounded-lg bg-stone-900/80 backdrop-blur-sm px-2.5 py-1 text-xs font-bold text-amber-300">
+                      {formatVnd(activeDish.price)}
+                    </div>
+
+                    {/* Navigation Buttons (< >) */}
+                    <button
+                      type="button"
+                      onClick={prevSlide}
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-stone-800 shadow-md hover:bg-white hover:scale-110 transition-all cursor-pointer opacity-80 group-hover:opacity-100"
+                      aria-label="Món trước"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={nextSlide}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-stone-800 shadow-md hover:bg-white hover:scale-110 transition-all cursor-pointer opacity-80 group-hover:opacity-100"
+                      aria-label="Món tiếp theo"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+
+                    {/* Bottom Floating Info Card */}
                     <div className="absolute bottom-3 inset-x-3 rounded-xl border border-white/20 bg-stone-900/90 backdrop-blur-md p-3.5 text-white space-y-1.5">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-amber-300">Tiêu chuẩn thực đơn 01 bàn (10 khách)</span>
-                        <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">
-                          Định mức chuẩn
+                        <Link
+                          to={`/dishes/${activeDish.id}`}
+                          className="font-bold text-sm text-white hover:text-amber-300 transition-colors line-clamp-1"
+                        >
+                          {activeDish.name}
+                        </Link>
+                        <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 shrink-0">
+                          Quy chuẩn 10 khách
                         </span>
                       </div>
-                      <p className="text-xs text-stone-300 leading-snug">
-                        Tổng tiền = Số bàn × Giá 01 bàn. Định lượng nguyên liệu chi tiết cho từng phần ăn, tươi mới chuẩn hóa.
+                      <p className="text-xs text-stone-300 line-clamp-1">
+                        {(activeDish as any).highlight || activeDish.description || 'Chế biến tươi mới theo từng bàn tiệc chuẩn 5 sao.'}
                       </p>
+                    </div>
+                  </div>
+
+                  {/* Circular Rotary Dots Indicator below carousel */}
+                  <div className="flex items-center justify-between pt-3 px-2">
+                    <span className="text-[11px] font-medium text-stone-500">
+                      Tuyển tập món tiệc đặc sắc ({currentSlide + 1}/{carouselItems.length})
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {carouselItems.map((_, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setCurrentSlide(idx)}
+                          className={`h-2 rounded-full transition-all cursor-pointer ${
+                            currentSlide === idx
+                              ? 'w-6 bg-amber-700'
+                              : 'w-2 bg-stone-300 hover:bg-stone-400'
+                          }`}
+                          aria-label={`Chuyển đến món ${idx + 1}`}
+                        />
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -252,7 +374,7 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Culinary Categories Section */}
+      {/* Culinary Categories Section (NO TECHNICAL CODES!) */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
@@ -278,19 +400,18 @@ export const HomePage: React.FC = () => {
           <ErrorState message={error} onRetry={loadHomeData} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {categories.map((cat, idx) => (
+            {categories.map((cat) => (
               <Link
                 key={cat.id}
                 to={`/dishes?categoryId=${cat.id}`}
                 className="group rounded-xl border border-stone-200 bg-white p-4 shadow-xs hover:border-amber-400 hover:shadow-md transition-all"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <span className="rounded bg-stone-100 px-2 py-0.5 text-[10px] font-mono font-bold text-stone-600">
-                    {cat.code}
+                  <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 border border-amber-200 flex items-center gap-1">
+                    <Sparkles className="h-3 w-3 text-amber-600" />
+                    <span>Thực đơn tiệc</span>
                   </span>
-                  <span className="text-xs font-bold text-stone-400 group-hover:text-amber-700 transition-colors">
-                    #0{idx + 1}
-                  </span>
+                  <ChefHat className="h-4 w-4 text-stone-400 group-hover:text-amber-700 transition-colors" />
                 </div>
                 <h3 className="text-sm font-bold text-stone-900 group-hover:text-amber-700 transition-colors">
                   {cat.name}
@@ -308,7 +429,7 @@ export const HomePage: React.FC = () => {
         )}
       </section>
 
-      {/* Featured Signature Dishes Showcase */}
+      {/* Featured Signature Dishes Showcase (NO TECHNICAL CODES!) */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
@@ -355,10 +476,6 @@ export const HomePage: React.FC = () => {
 
                   <span className="absolute top-2.5 left-2.5 rounded-lg bg-white/95 backdrop-blur-sm px-2.5 py-1 text-xs font-semibold text-stone-800 shadow-xs border border-stone-200">
                     {dish.categoryName}
-                  </span>
-
-                  <span className="absolute top-2.5 right-2.5 rounded bg-stone-900/80 backdrop-blur-sm px-2 py-0.5 text-[10px] font-mono font-medium text-stone-200">
-                    {dish.code}
                   </span>
                 </div>
 

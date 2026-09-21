@@ -68,39 +68,54 @@ export const RegisterPage: React.FC = () => {
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:py-16">
       <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm grid grid-cols-1 lg:grid-cols-12">
-        {/* Left Side: Brand Story Panel */}
-        <div className="lg:col-span-5 relative hidden lg:flex flex-col justify-between p-8 bg-stone-900 text-white">
+        {/* Left Side: Warm Light Brand Story Panel (BRIGHT & ELEGANT) */}
+        <div className="lg:col-span-5 relative hidden lg:flex flex-col justify-between p-8 bg-gradient-to-br from-amber-50 via-stone-50 to-amber-100/50 border-r border-stone-200">
           <img
-            src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1000&q=80"
+            src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1000&q=85"
             alt="Banquet Culinary Experience"
-            className="absolute inset-0 h-full w-full object-cover opacity-25"
+            className="absolute inset-0 h-full w-full object-cover opacity-20"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-900/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-amber-50/50" />
 
           <div className="relative z-10 space-y-3">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-600 text-white font-bold">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-700 text-white font-bold shadow-xs">
                 <UtensilsCrossed className="h-5 w-5" />
               </div>
-              <span className="text-lg font-extrabold tracking-tight">
-                BANQUET<span className="text-amber-400">HUB</span>
-              </span>
+              <div>
+                <span className="text-xl font-extrabold tracking-tight text-stone-900">
+                  Banquet<span className="text-amber-700">Hub</span>
+                </span>
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-amber-800 -mt-0.5">
+                  Dịch Vụ Yến Tiệc 5 Sao
+                </span>
+              </div>
             </div>
-            <p className="text-xs text-stone-300 font-medium">Đặc Quyền Thành Viên Đặt Tiệc</p>
+            <p className="text-xs text-stone-600 leading-relaxed font-medium">
+              Đăng ký tài khoản để khám phá thực đơn tiệc độc bản, chuẩn hóa nguyên liệu và nhận tư vấn chuyên nghiệp.
+            </p>
           </div>
 
-          <div className="relative z-10 space-y-2.5 text-xs text-stone-300">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-amber-400 shrink-0" />
-              <span>Chủ động xây dựng thực đơn theo từng bàn tiệc</span>
+          <div className="relative z-10 space-y-3">
+            <div className="space-y-2 text-xs text-stone-700">
+              <div className="flex items-center gap-2 font-medium">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                <span>Chủ động xây dựng thực đơn theo từng bàn tiệc</span>
+              </div>
+              <div className="flex items-center gap-2 font-medium">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                <span>Được giữ chỗ và giữ nguyên liệu an toàn 15 phút</span>
+              </div>
+              <div className="flex items-center gap-2 font-medium">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                <span>Gợi ý thực đơn thông minh & tối ưu chi phí</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-amber-400 shrink-0" />
-              <span>Được giữ chỗ và giữ nguyên liệu trong 15 phút</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-amber-400 shrink-0" />
-              <span>Sử dụng trợ lý AI gợi ý thực đơn thông minh</span>
+
+            <div className="pt-3 border-t border-stone-200/80">
+              <p className="text-[11px] text-stone-500 italic">
+                "Khởi đầu trọn vẹn cho những sự kiện yến tiệc đáng nhớ nhất."
+              </p>
             </div>
           </div>
         </div>
