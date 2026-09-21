@@ -6,7 +6,6 @@ import {
   Utensils,
   Layers,
   CheckCircle2,
-  ShieldCheck,
   Sparkles,
 } from 'lucide-react';
 import { catalogService } from '../services/catalogService';
@@ -14,11 +13,9 @@ import { extractErrorMessage } from '../services/apiClient';
 import type { DishDetailDto } from '../services/types';
 import { formatDateTimeVn, formatQuantity, formatVnd } from '../hooks/useFormatters';
 import { DishStatusBadge, ErrorState, LoadingState } from '../components/StatusStates';
-import { useAuth } from '../hooks/useAuth';
 
 export const DishDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
   const [dish, setDish] = useState<DishDetailDto | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,8 +74,8 @@ export const DishDetailPage: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Top Breadcrumb & Admin shortcut */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      {/* Top Breadcrumb */}
+      <div className="flex items-center justify-between">
         <Link
           to="/dishes"
           className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-400 transition-colors shadow-sm"
@@ -86,16 +83,6 @@ export const DishDetailPage: React.FC = () => {
           <ArrowLeft className="h-4 w-4 text-stone-500" />
           <span>Quay Lại Thực Đơn Món Tiệc</span>
         </Link>
-
-        {user?.role === 'ROLE_ADMIN' && (
-          <Link
-            to="/admin/catalog"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-100 transition-colors shadow-sm"
-          >
-            <ShieldCheck className="h-4 w-4 text-amber-700" />
-            <span>Cấu Hình Công Thức Món Ăn</span>
-          </Link>
-        )}
       </div>
 
       {/* Main Luxury Presentation Card */}

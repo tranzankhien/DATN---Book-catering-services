@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   UtensilsCrossed,
@@ -10,8 +10,9 @@ import {
   Menu,
   X,
   ShieldCheck,
-  CalendarCheck,
-  ChevronRight,
+  ChevronDown,
+  User,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
@@ -21,8 +22,22 @@ export const PublicLayout: React.FC = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
+    setUserDropdownOpen(false);
     logout();
     showToast('Đã đăng xuất khỏi tài khoản an toàn.', 'info');
     navigate('/login');
@@ -43,7 +58,7 @@ export const PublicLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900">
-      {/* Top Notification Bar */}
+      {/* Top Hospitality Notification Bar */}
       <div className="border-b border-stone-200/80 bg-stone-100/70 text-xs text-stone-600">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 py-2">
           <div className="flex items-center gap-4 text-[11px] sm:text-xs">
@@ -53,7 +68,7 @@ export const PublicLayout: React.FC = () => {
             </span>
             <span className="hidden md:flex items-center gap-1.5 text-stone-500">
               <Clock className="h-3.5 w-3.5 text-stone-400" />
-              <span>Mở cửa: 08:00 – 22:00 hằng ngày</span>
+              <span>Phục vụ tiệc: 08:00 – 22:00 hằng ngày</span>
             </span>
           </div>
 
@@ -63,16 +78,16 @@ export const PublicLayout: React.FC = () => {
               className="flex items-center gap-1 text-amber-800 hover:text-amber-900 transition-colors"
             >
               <Phone className="h-3.5 w-3.5" />
-              Hotline tư vấn: 1900 8899
+              Hotline đặt tiệc: 1900 8899
             </a>
           </div>
         </div>
       </div>
 
-      {/* Main Navigation Header */}
+      {/* Main Navigation Header (Clean, Strictly Guest-Facing) */}
       <header className="sticky top-0 z-40 border-b border-stone-200/90 bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-18">
-          {/* Logo Brand (Clean, no internal MVP tags) */}
+          {/* Logo Brand */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-700 text-white shadow-xs group-hover:bg-amber-800 transition-colors">
               <UtensilsCrossed className="h-5 w-5" />
@@ -89,15 +104,15 @@ export const PublicLayout: React.FC = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1.5">
+          {/* Desktop Navigation (STRICTLY FOR GUESTS, NO ADMIN BUTTONS HERE) */}
+          <nav className="hidden md:flex items-center gap-2">
             <NavLink
               to="/"
               end
               className={({ isActive }) =>
-                `rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
+                `rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
                   isActive
-                    ? 'bg-amber-50 text-amber-900'
+                    ? 'bg-amber-50 text-amber-900 font-bold'
                     : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/80'
                 }`
               }
@@ -107,72 +122,72 @@ export const PublicLayout: React.FC = () => {
             <NavLink
               to="/dishes"
               className={({ isActive }) =>
-                `rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
+                `rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
                   isActive
-                    ? 'bg-amber-50 text-amber-900'
+                    ? 'bg-amber-50 text-amber-900 font-bold'
                     : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/80'
                 }`
               }
             >
               Thực đơn món tiệc
             </NavLink>
-            {user?.role === 'ROLE_ADMIN' && (
-              <NavLink
-                to="/admin/catalog"
-                className={({ isActive }) =>
-                  `inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
-                    isActive
-                      ? 'bg-stone-900 text-white'
-                      : 'text-stone-700 hover:bg-stone-100'
-                  }`
-                }
-              >
-                <ShieldCheck className="h-4 w-4 text-amber-600" />
-                <span>Trang Quản Trị</span>
-              </NavLink>
-            )}
           </nav>
 
-          {/* User Auth Section */}
+          {/* User Auth Section (Discreet Profile Menu) */}
           <div className="hidden sm:flex items-center gap-3">
             {isAuthenticated && user ? (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2.5 rounded-xl border border-stone-200 bg-stone-50 px-3 py-1.5">
-                  <UserCircle2 className="h-5 w-5 text-amber-700" />
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-stone-900 leading-tight">
-                      {user.fullName}
-                    </p>
-                    <p className="text-[11px] font-medium text-stone-500 leading-tight">
-                      {getRoleLabel(user.role)}
-                    </p>
-                  </div>
-                </div>
-
-                {user.role === 'ROLE_ADMIN' && (
-                  <Link
-                    to="/admin/catalog"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-stone-900 px-3.5 py-2 text-xs font-semibold text-white hover:bg-stone-800 transition-colors shadow-xs"
-                  >
-                    <ShieldCheck className="h-3.5 w-3.5 text-amber-400" />
-                    <span>Quản Trị</span>
-                  </Link>
-                )}
-
+              <div className="relative" ref={dropdownRef}>
                 <button
                   type="button"
-                  onClick={handleLogout}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 hover:text-rose-600 transition-colors cursor-pointer"
-                  title="Đăng xuất"
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="flex items-center gap-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 px-3 py-1.5 transition-colors cursor-pointer shadow-xs"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <UserCircle2 className="h-5 w-5 text-amber-700" />
+                  <span className="text-xs font-bold text-stone-900 max-w-36 truncate">
+                    {user.fullName}
+                  </span>
+                  <ChevronDown className="h-3.5 w-3.5 text-stone-400" />
                 </button>
+
+                {/* Dropdown Menu */}
+                {userDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 rounded-xl border border-stone-200 bg-white py-1.5 shadow-lg shadow-stone-900/10 z-50 animate-fade-up-1">
+                    <div className="px-3.5 py-2 border-b border-stone-100">
+                      <p className="text-xs font-bold text-stone-900 truncate">{user.fullName}</p>
+                      <p className="text-[11px] text-stone-500 truncate">{user.email}</p>
+                      <span className="inline-block mt-1 rounded bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.2 text-[10px] font-semibold">
+                        {getRoleLabel(user.role)}
+                      </span>
+                    </div>
+
+                    {/* Discreet link to Admin for users with ROLE_ADMIN */}
+                    {user.role === 'ROLE_ADMIN' && (
+                      <Link
+                        to="/admin/catalog"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-stone-700 hover:bg-amber-50 hover:text-amber-900 transition-colors"
+                      >
+                        <ShieldCheck className="h-4 w-4 text-amber-700" />
+                        <span>Vào Bảng Quản Trị Hệ Thống</span>
+                      </Link>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Đăng xuất tài khoản</span>
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-2.5">
                 <Link
                   to="/login"
-                  className="rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-100 hover:text-stone-900 transition-colors"
+                  className="rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:text-stone-900 transition-colors shadow-xs"
                 >
                   Đăng nhập
                 </Link>
@@ -180,7 +195,7 @@ export const PublicLayout: React.FC = () => {
                   to="/register"
                   className="rounded-xl bg-amber-700 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-amber-800 transition-colors"
                 >
-                  Đăng ký tài khoản
+                  Đăng ký thành viên
                 </Link>
               </div>
             )}
@@ -216,30 +231,33 @@ export const PublicLayout: React.FC = () => {
             >
               Thực đơn món tiệc
             </NavLink>
-            {user?.role === 'ROLE_ADMIN' && (
-              <NavLink
-                to="/admin/catalog"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block rounded-lg px-3 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-50"
-              >
-                Trang Quản Trị
-              </NavLink>
-            )}
 
-            <div className="border-t border-stone-100 pt-2 flex gap-2">
+            <div className="border-t border-stone-100 pt-2 flex flex-col gap-2">
               {isAuthenticated && user ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    handleLogout();
-                  }}
-                  className="w-full rounded-lg bg-stone-100 py-2 text-xs font-semibold text-rose-600"
-                >
-                  Đăng xuất ({user.fullName})
-                </button>
-              ) : (
                 <>
+                  {user.role === 'ROLE_ADMIN' && (
+                    <Link
+                      to="/admin/catalog"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-lg bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-800"
+                    >
+                      <ShieldCheck className="h-4 w-4 text-amber-700" />
+                      <span>Vào Bảng Quản Trị Hệ Thống</span>
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-left rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600"
+                  >
+                    Đăng xuất ({user.fullName})
+                  </button>
+                </>
+              ) : (
+                <div className="flex gap-2 pt-1">
                   <Link
                     to="/login"
                     onClick={() => setMobileMenuOpen(false)}
@@ -254,7 +272,7 @@ export const PublicLayout: React.FC = () => {
                   >
                     Đăng ký
                   </Link>
-                </>
+                </div>
               )}
             </div>
           </div>
@@ -297,7 +315,7 @@ export const PublicLayout: React.FC = () => {
                   <Link to="/dishes" className="hover:text-amber-800 transition-colors">Khám phá thực đơn món tiệc</Link>
                 </li>
                 <li>
-                  <Link to="/login" className="hover:text-amber-800 transition-colors">Đăng nhập tài khoản</Link>
+                  <Link to="/login" className="hover:text-amber-800 transition-colors">Đăng nhập thành viên</Link>
                 </li>
                 <li>
                   <Link to="/register" className="hover:text-amber-800 transition-colors">Đăng ký thành viên</Link>
