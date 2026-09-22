@@ -307,7 +307,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                 className="inline-flex items-center gap-1 rounded-lg border border-stone-300 bg-stone-50 px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-100 cursor-pointer shadow-xs"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>+ Thêm nguyên liệu</span>
+                <span>Thêm nguyên liệu</span>
               </button>
             </div>
 

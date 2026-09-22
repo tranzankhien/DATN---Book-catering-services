@@ -290,9 +290,9 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Hero: Orbital 3-Card Revolving Showcase */}
+            {/* Right Hero: Orbital 3-Card Revolving Showcase (Physical card swapping motion) */}
             <div
-              className="lg:col-span-6 relative h-[490px] sm:h-[530px] w-full flex items-center justify-center animate-hero-showcase select-none"
+              className="lg:col-span-6 relative h-[500px] sm:h-[540px] w-full flex items-center justify-center animate-hero-showcase select-none"
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
@@ -304,7 +304,7 @@ export const HomePage: React.FC = () => {
               >
                 {/* Orbital Arc Sweeping from Top to Center to Bottom */}
                 <path
-                  d="M 390 50 C 500 130, 510 360, 370 450"
+                  d="M 380 50 C 490 130, 500 360, 360 450"
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeDasharray="6 8"
@@ -312,7 +312,7 @@ export const HomePage: React.FC = () => {
                 />
                 {/* Flow Arrow Indicators */}
                 <path
-                  d="M 470 180 L 464 205 L 440 200"
+                  d="M 465 180 L 458 205 L 434 200"
                   stroke="currentColor"
                   strokeWidth="2.5"
                   strokeLinecap="round"
@@ -320,7 +320,7 @@ export const HomePage: React.FC = () => {
                   className="text-amber-600/60"
                 />
                 <path
-                  d="M 450 330 L 440 355 L 415 348"
+                  d="M 445 330 L 435 355 L 410 348"
                   stroke="currentColor"
                   strokeWidth="2.5"
                   strokeLinecap="round"
@@ -329,159 +329,198 @@ export const HomePage: React.FC = () => {
                 />
               </svg>
 
-              {/* 1. TOP CARD: Orbit Item (Previous / Upcoming in rotation) */}
-              <div
-                onClick={prevSlide}
-                className="absolute top-2 sm:top-4 right-0 sm:right-3 w-[72%] sm:w-[75%] max-w-[340px] z-20 cursor-pointer transform transition-all duration-700 ease-out hover:scale-95 hover:opacity-100 opacity-75 rotate-3 hover:rotate-0"
-                title="Bấm để xoay về món này"
-              >
-                <div className="rounded-2xl border border-stone-200/90 bg-white/90 backdrop-blur-md p-2.5 shadow-lg hover:shadow-xl transition-all">
-                  <div className="relative h-22 sm:h-26 rounded-xl overflow-hidden bg-stone-100">
-                    <img
-                      src={prevDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'}
-                      alt={prevDish.name}
-                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950/75 via-transparent to-transparent" />
-                    <span className="absolute top-2 left-2 rounded-md bg-stone-900/80 backdrop-blur-xs px-2 py-0.5 text-[10px] font-bold text-amber-300 flex items-center gap-1">
-                      <RotateCcw className="h-2.5 w-2.5" />
-                      <span>Món trước</span>
-                    </span>
-                    <span className="absolute bottom-2 right-2 text-[11px] font-bold text-white bg-stone-900/70 px-2 py-0.5 rounded-md font-mono">
-                      {formatVnd(prevDish.price)}
-                    </span>
-                  </div>
-                  <div className="pt-2 px-1">
-                    <p className="text-xs font-bold text-stone-800 truncate">{prevDish.name}</p>
-                    <p className="text-[10px] text-stone-500 truncate">{prevDish.categoryName}</p>
-                  </div>
-                </div>
-              </div>
+              {/* Persistent Card Elements: Physically translate, scale and swap positions */}
+              {carouselItems.map((dish, idx) => {
+                const total = carouselItems.length;
+                const offset = (idx - currentSlide + total) % total;
+                const isCenter = offset === 0;
+                const isTop = offset === total - 1;
+                const isBottom = offset === 1;
+                const dishTheme = getDishTheme(dish);
 
-              {/* 2. CENTER SPOTLIGHT CARD: Active Main Showcase */}
-              <div
-                className="absolute left-0 sm:left-4 top-1/2 -translate-y-1/2 w-[85%] sm:w-[88%] max-w-[420px] z-30 transition-all duration-700 ease-out"
-              >
-                <div
-                  className={`rounded-3xl border-2 bg-white/95 backdrop-blur-md p-3.5 shadow-2xl transition-all duration-700 ${activeTheme.ringColor} ring-4 ring-offset-2 ring-offset-white/80`}
-                >
-                  <div className="relative h-56 sm:h-64 rounded-2xl overflow-hidden bg-stone-100 group">
-                    <img
-                      key={activeDish.id}
-                      src={activeDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85'}
-                      alt={activeDish.name}
-                      className="h-full w-full object-cover transition-all duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/20 to-black/30" />
+                // Tính toán transform, opacity, z-index để thẻ bài thực sự bay/trượt đổi chỗ
+                let transformStyle = 'translate3d(55%, -50%, 0) scale(0.4) rotate(0deg)';
+                let opacityStyle = 0;
+                let zIndexStyle = 10;
+                let pointerEventsStyle: 'auto' | 'none' = 'none';
 
-                    {/* Top Badges */}
-                    <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-xl bg-white/95 backdrop-blur-sm px-3 py-1 text-xs font-bold text-stone-900 shadow-sm border border-stone-200">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                      </span>
-                      <span>{activeDish.categoryName || 'Món Tiệc Đặc Sắc'}</span>
-                    </div>
+                if (isCenter) {
+                  transformStyle = 'translate3d(2%, -50%, 0) scale(1) rotate(0deg)';
+                  opacityStyle = 1;
+                  zIndexStyle = 30;
+                  pointerEventsStyle = 'auto';
+                } else if (isTop) {
+                  transformStyle = 'translate3d(22%, -96%, 0) scale(0.82) rotate(3.5deg)';
+                  opacityStyle = 0.82;
+                  zIndexStyle = 20;
+                  pointerEventsStyle = 'auto';
+                } else if (isBottom) {
+                  transformStyle = 'translate3d(22%, -4%, 0) scale(0.82) rotate(-3.5deg)';
+                  opacityStyle = 0.82;
+                  zIndexStyle = 20;
+                  pointerEventsStyle = 'auto';
+                }
 
-                    <div className="absolute top-3 right-3 rounded-xl bg-amber-950/80 backdrop-blur-sm border border-amber-500/30 px-3 py-1 text-xs font-extrabold text-amber-300 shadow-sm font-mono">
-                      {formatVnd(activeDish.price)}
-                    </div>
-
-                    {/* Navigation Buttons inside spotlight card */}
-                    <button
-                      type="button"
-                      onClick={prevSlide}
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-stone-800 shadow-md hover:bg-white hover:scale-110 transition-all cursor-pointer opacity-85 hover:opacity-100"
-                      aria-label="Món trước"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={nextSlide}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-stone-800 shadow-md hover:bg-white hover:scale-110 transition-all cursor-pointer opacity-85 hover:opacity-100"
-                      aria-label="Món kế tiếp"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
-
-                    {/* Bottom Info inside Spotlight */}
-                    <div className="absolute bottom-3 inset-x-3 rounded-xl border border-white/20 bg-stone-900/90 backdrop-blur-md p-3.5 text-white space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <Link
-                          to={`/dishes/${activeDish.id}`}
-                          className="font-bold text-sm sm:text-base text-white hover:text-amber-300 transition-colors line-clamp-1"
-                        >
-                          {activeDish.name}
-                        </Link>
-                        <span className="rounded-md bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 shrink-0 font-medium">
-                          10 khách / bàn
-                        </span>
-                      </div>
-                      <p className="text-xs text-stone-300 line-clamp-1">
-                        {(activeDish as any).highlight || activeDish.description || 'Chế biến tươi mới theo từng bàn tiệc chuẩn 5 sao.'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Active Card Bottom Bar with CTA & Play/Pause Control */}
-                  <div className="pt-3 px-1 flex items-center justify-between">
-                    <Link
-                      to={`/dishes/${activeDish.id}`}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-900 transition-colors group"
-                    >
-                      <span>Xem công thức & định lượng</span>
-                      <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setIsPaused((prev) => !prev)}
-                        className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-colors cursor-pointer ${
-                          isPaused
-                            ? 'bg-amber-100 text-amber-900'
-                            : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                        }`}
-                        title={isPaused ? 'Tiếp tục tự động quay' : 'Tạm dừng tự động quay'}
+                return (
+                  <div
+                    key={dish.id}
+                    onClick={() => {
+                      if (!isCenter) {
+                        setCurrentSlide(idx);
+                      }
+                    }}
+                    style={{
+                      transform: transformStyle,
+                      opacity: opacityStyle,
+                      zIndex: zIndexStyle,
+                      pointerEvents: pointerEventsStyle,
+                      top: '50%',
+                    }}
+                    className={`absolute left-0 sm:left-3 w-[84%] sm:w-[88%] max-w-[420px] transition-all duration-700 ease-out select-none will-change-transform ${
+                      !isCenter ? 'cursor-pointer hover:opacity-100 hover:scale-85' : ''
+                    }`}
+                  >
+                    {isCenter ? (
+                      /* CENTER SPOTLIGHT CARD */
+                      <div
+                        className={`rounded-3xl border-2 bg-white/95 backdrop-blur-md p-3.5 shadow-2xl transition-all duration-500 ${dishTheme.ringColor} ring-4 ring-offset-2 ring-offset-white/80`}
                       >
-                        {isPaused ? <Play className="h-3 w-3 text-amber-700" /> : <Pause className="h-3 w-3" />}
-                        <span className="hidden sm:inline">{isPaused ? 'Đã dừng' : 'Đang quay'}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                        <div className="relative h-54 sm:h-62 rounded-2xl overflow-hidden bg-stone-100 group">
+                          <img
+                            src={dish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85'}
+                            alt={dish.name}
+                            className="h-full w-full object-cover transition-all duration-700 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/20 to-black/30" />
 
-              {/* 3. BOTTOM CARD: Orbit Item (Next in rotation) */}
-              <div
-                onClick={nextSlide}
-                className="absolute bottom-2 sm:bottom-4 right-0 sm:right-3 w-[72%] sm:w-[75%] max-w-[340px] z-20 cursor-pointer transform transition-all duration-700 ease-out hover:scale-95 hover:opacity-100 opacity-75 -rotate-3 hover:rotate-0"
-                title="Bấm để chuyển sang món này"
-              >
-                <div className="rounded-2xl border border-stone-200/90 bg-white/90 backdrop-blur-md p-2.5 shadow-lg hover:shadow-xl transition-all">
-                  <div className="relative h-22 sm:h-26 rounded-xl overflow-hidden bg-stone-100">
-                    <img
-                      src={nextDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'}
-                      alt={nextDish.name}
-                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950/75 via-transparent to-transparent" />
-                    <span className="absolute top-2 left-2 rounded-md bg-stone-900/80 backdrop-blur-xs px-2 py-0.5 text-[10px] font-bold text-amber-300 flex items-center gap-1">
-                      <Sparkles className="h-2.5 w-2.5 text-amber-400" />
-                      <span>Món kế tiếp</span>
-                    </span>
-                    <span className="absolute bottom-2 right-2 text-[11px] font-bold text-white bg-stone-900/70 px-2 py-0.5 rounded-md font-mono">
-                      {formatVnd(nextDish.price)}
-                    </span>
+                          {/* Top Badges */}
+                          <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-xl bg-white/95 backdrop-blur-sm px-3 py-1 text-xs font-bold text-stone-900 shadow-sm border border-stone-200">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                            </span>
+                            <span>{dish.categoryName || 'Món Tiệc Đặc Sắc'}</span>
+                          </div>
+
+                          <div className="absolute top-3 right-3 rounded-xl bg-amber-950/80 backdrop-blur-sm border border-amber-500/30 px-3 py-1 text-xs font-extrabold text-amber-300 shadow-sm font-mono">
+                            {formatVnd(dish.price)}
+                          </div>
+
+                          {/* Navigation Buttons inside spotlight card */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              prevSlide();
+                            }}
+                            className="absolute left-2.5 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-stone-800 shadow-md hover:bg-white hover:scale-110 transition-all cursor-pointer opacity-85 hover:opacity-100"
+                            aria-label="Món trước"
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              nextSlide();
+                            }}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-stone-800 shadow-md hover:bg-white hover:scale-110 transition-all cursor-pointer opacity-85 hover:opacity-100"
+                            aria-label="Món kế tiếp"
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </button>
+
+                          {/* Bottom Info inside Spotlight */}
+                          <div className="absolute bottom-3 inset-x-3 rounded-xl border border-white/20 bg-stone-900/90 backdrop-blur-md p-3.5 text-white space-y-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <Link
+                                to={`/dishes/${dish.id}`}
+                                className="font-bold text-sm sm:text-base text-white hover:text-amber-300 transition-colors line-clamp-1"
+                              >
+                                {dish.name}
+                              </Link>
+                              <span className="rounded-md bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 shrink-0 font-medium">
+                                10 khách / bàn
+                              </span>
+                            </div>
+                            <p className="text-xs text-stone-300 line-clamp-1">
+                              {(dish as any).highlight || dish.description || 'Chế biến tươi mới theo từng bàn tiệc chuẩn 5 sao.'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Active Card Bottom Bar with CTA & Play/Pause Control */}
+                        <div className="pt-3 px-1 flex items-center justify-between">
+                          <Link
+                            to={`/dishes/${dish.id}`}
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-900 transition-colors group"
+                          >
+                            <span>Xem công thức & định lượng</span>
+                            <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+                          </Link>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsPaused((prev) => !prev);
+                              }}
+                              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-colors cursor-pointer ${
+                                isPaused
+                                  ? 'bg-amber-100 text-amber-900'
+                                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                              }`}
+                              title={isPaused ? 'Tiếp tục tự động quay' : 'Tạm dừng tự động quay'}
+                            >
+                              {isPaused ? <Play className="h-3 w-3 text-amber-700" /> : <Pause className="h-3 w-3" />}
+                              <span className="hidden sm:inline">{isPaused ? 'Đã dừng' : 'Đang quay'}</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* COMPACT ORBIT CARD (Top or Bottom in rotation) */
+                      <div className="rounded-2xl border border-stone-200/90 bg-white/90 backdrop-blur-md p-2.5 shadow-lg hover:shadow-xl transition-all">
+                        <div className="relative h-24 sm:h-28 rounded-xl overflow-hidden bg-stone-100">
+                          <img
+                            src={dish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'}
+                            alt={dish.name}
+                            className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/75 via-transparent to-transparent" />
+                          <span className="absolute top-2 left-2 rounded-md bg-stone-900/80 backdrop-blur-xs px-2 py-0.5 text-[10px] font-bold text-amber-300 flex items-center gap-1">
+                            {isTop ? (
+                              <>
+                                <RotateCcw className="h-2.5 w-2.5" />
+                                <span>Món trước</span>
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="h-2.5 w-2.5 text-amber-400" />
+                                <span>Món kế tiếp</span>
+                              </>
+                            )}
+                          </span>
+                          <span className="absolute bottom-2 right-2 text-[11px] font-bold text-white bg-stone-900/70 px-2 py-0.5 rounded-md font-mono">
+                            {formatVnd(dish.price)}
+                          </span>
+                        </div>
+                        <div className="pt-2 px-1 flex items-center justify-between">
+                          <div className="min-w-0 flex-1 pr-2">
+                            <p className="text-xs font-bold text-stone-800 truncate">{dish.name}</p>
+                            <p className="text-[10px] text-stone-500 truncate">{dish.categoryName}</p>
+                          </div>
+                          <span className="text-[10px] text-amber-700 font-semibold shrink-0">
+                            Chạm để đổi →
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="pt-2 px-1">
-                    <p className="text-xs font-bold text-stone-800 truncate">{nextDish.name}</p>
-                    <p className="text-[10px] text-stone-500 truncate">{nextDish.categoryName}</p>
-                  </div>
-                </div>
-              </div>
+                );
+              })}
 
               {/* Rotary Dots Indicator below cards */}
               <div className="absolute -bottom-6 sm:-bottom-8 inset-x-0 flex items-center justify-between px-3 text-xs">
