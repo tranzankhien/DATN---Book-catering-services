@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -16,9 +16,8 @@ import {
   Calculator,
   ChefHat,
   Award,
-  Play,
-  Pause,
   RotateCcw,
+  GripVertical,
 } from 'lucide-react';
 import { catalogService } from '../services/catalogService';
 import { extractErrorMessage } from '../services/apiClient';
@@ -174,31 +173,77 @@ export const HomePage: React.FC = () => {
   // Danh sách các món chạy trong Carousel
   const carouselItems = featuredDishes.length >= 3 ? featuredDishes : defaultHeroDishes;
 
-  // Auto-play vòng tròn liên tục không ngừng nghỉ
+  // Xoay từ trên xuống: Món ở trên rơi xuống tâm điểm, tâm điểm rơi xuống dưới
+  const rotateDown = () => {
+    setCurrentSlide((prev) => (prev - 1 + carouselItems.length) % carouselItems.length);
+  };
+
+  // Xoay từ dưới lên
+  const rotateUp = () => {
+    setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
+  };
+
+  // Hiệu ứng mặc định: Chạy liên tục từ trên xuống dưới (Top-to-Bottom cascade) mỗi 3.8s
   useEffect(() => {
     if (carouselItems.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
+      rotateDown();
     }, 3800);
     return () => clearInterval(timer);
   }, [carouselItems.length]);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
+  // Xử lý giữ chuột & kéo để xoay tự nhiên (Mouse Drag / Touch Drag)
+  const dragStartY = useRef<number | null>(null);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    dragStartY.current = e.clientY;
   };
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + carouselItems.length) % carouselItems.length);
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (dragStartY.current === null) return;
+    const deltaY = e.clientY - dragStartY.current;
+    if (deltaY > 35) {
+      rotateDown();
+      dragStartY.current = e.clientY;
+    } else if (deltaY < -35) {
+      rotateUp();
+      dragStartY.current = e.clientY;
+    }
   };
 
-  // Tính toán 3 món hiển thị cùng lúc trên quỹ đạo xoay (Orbit)
-  const prevIndex = (currentSlide - 1 + carouselItems.length) % carouselItems.length;
-  const nextIndex = (currentSlide + 1) % carouselItems.length;
+  const handleMouseUp = () => {
+    dragStartY.current = null;
+  };
 
-  const prevDish = carouselItems[prevIndex] || carouselItems[0];
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length > 0) {
+      dragStartY.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (dragStartY.current === null || e.touches.length === 0) return;
+    const deltaY = e.touches[0].clientY - dragStartY.current;
+    if (deltaY > 35) {
+      rotateDown();
+      dragStartY.current = e.touches[0].clientY;
+    } else if (deltaY < -35) {
+      rotateUp();
+      dragStartY.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (Math.abs(e.deltaY) > 30) {
+      if (e.deltaY > 0) {
+        rotateDown();
+      } else {
+        rotateUp();
+      }
+    }
+  };
+
   const activeDish = carouselItems[currentSlide] || carouselItems[0];
-  const nextDish = carouselItems[nextIndex] || carouselItems[0];
-
   const activeTheme = getDishTheme(activeDish);
 
   return (
@@ -293,44 +338,20 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Hero: Orbital 3-Card Revolving Showcase (Physical card swapping, non-overlapping, spatial depth) */}
+            {/* Right Hero: Orbital 3-Card Cascade (Top-to-Bottom Flow, Drag/Wheel to Rotate, Zero Overlap) */}
             <div
-              className="lg:col-span-6 relative h-[540px] sm:h-[580px] w-full flex items-center justify-center animate-hero-showcase select-none"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleMouseUp}
+              onWheel={handleWheel}
+              className="lg:col-span-6 relative h-[530px] sm:h-[570px] w-full flex items-center justify-center animate-hero-showcase select-none cursor-grab active:cursor-grabbing"
+              title="Giữ chuột và kéo lên/xuống để xoay đổi món tiệc"
             >
-              {/* Background SVG Orbital Track (Curved trajectory with direction arrows) */}
-              <svg
-                className="absolute inset-0 w-full h-full pointer-events-none select-none"
-                viewBox="0 0 540 540"
-                fill="none"
-              >
-                {/* Orbital Arc Sweeping from Top to Center to Bottom */}
-                <path
-                  d="M 370 40 C 490 120, 500 420, 350 490"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeDasharray="6 8"
-                  className="text-amber-600/40"
-                />
-                {/* Flow Arrow Indicators */}
-                <path
-                  d="M 455 170 L 448 195 L 424 190"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-amber-700/70"
-                />
-                <path
-                  d="M 435 360 L 425 385 L 400 378"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-amber-700/70"
-                />
-              </svg>
-
-              {/* Persistent Card Elements: Physically translate, scale and swap positions without covering each other */}
+              {/* Persistent Card Elements: Top-to-Bottom Cascade without Overlap */}
               {carouselItems.map((dish, idx) => {
                 const total = carouselItems.length;
                 const offset = (idx - currentSlide + total) % total;
@@ -339,26 +360,26 @@ export const HomePage: React.FC = () => {
                 const isBottom = offset === 1;
                 const dishTheme = getDishTheme(dish);
 
-                // Tọa độ translate3d độc lập: Thẻ trên ở góc trên phải, thẻ dưới ở góc dưới phải, thẻ giữa ở giữa trái
-                // Đảm bảo không bị lấp nhau, 2 thẻ bên nhỏ hơn và mờ hơn tạo chiều sâu không gian
-                let transformStyle = 'translate3d(90%, 180px, 0) scale(0.4) rotate(0deg)';
+                // Tọa độ GPU translate3d: Thẻ chính bên trái, 2 thẻ phụ tách biệt 100% sang bên phải (không đè lấp)
+                // Chạy mượt mà từ trên xuống dưới
+                let transformStyle = 'translate3d(calc(100% - 195px), -140px, 0) scale(0.7)';
                 let opacityStyle = 0;
                 let zIndexStyle = 10;
                 let pointerEventsStyle: 'auto' | 'none' = 'none';
 
                 if (isCenter) {
-                  transformStyle = 'translate3d(0%, 95px, 0) scale(1) rotate(0deg)';
+                  transformStyle = 'translate3d(0px, 65px, 0) scale(1)';
                   opacityStyle = 1;
                   zIndexStyle = 30;
                   pointerEventsStyle = 'auto';
                 } else if (isTop) {
-                  transformStyle = 'translate3d(36%, 10px, 0) scale(0.76) rotate(4deg)';
-                  opacityStyle = 0.62;
+                  transformStyle = 'translate3d(calc(100% - 195px), 15px, 0) scale(1)';
+                  opacityStyle = 0.65;
                   zIndexStyle = 20;
                   pointerEventsStyle = 'auto';
                 } else if (isBottom) {
-                  transformStyle = 'translate3d(36%, 335px, 0) scale(0.76) rotate(-4deg)';
-                  opacityStyle = 0.62;
+                  transformStyle = 'translate3d(calc(100% - 195px), 335px, 0) scale(1)';
+                  opacityStyle = 0.65;
                   zIndexStyle = 20;
                   pointerEventsStyle = 'auto';
                 }
@@ -379,22 +400,25 @@ export const HomePage: React.FC = () => {
                       top: 0,
                       left: 0,
                     }}
-                    className={`absolute w-[325px] sm:w-[365px] transition-all duration-700 ease-out select-none will-change-transform ${
-                      !isCenter ? 'cursor-pointer hover:opacity-95 hover:scale-80' : ''
+                    className={`absolute transition-all duration-700 ease-out select-none will-change-transform ${
+                      isCenter
+                        ? 'w-[310px] sm:w-[340px]'
+                        : 'w-[180px] sm:w-[195px] cursor-pointer hover:opacity-100'
                     }`}
                   >
                     {isCenter ? (
-                      /* CENTER SPOTLIGHT CARD (Tâm điểm to rõ, sắc nét, đầy đủ thông tin) */
-                      <div
-                        className={`rounded-3xl border-2 bg-white/95 backdrop-blur-md p-3.5 shadow-2xl transition-all duration-500 ${dishTheme.ringColor} ring-4 ring-offset-2 ring-offset-white/80`}
+                      /* CENTER SPOTLIGHT CARD (Tâm điểm to rõ, thoáng đãng, sắc nét) */
+                      <Link
+                        to={`/dishes/${dish.id}`}
+                        className={`block rounded-3xl border-2 bg-white/95 backdrop-blur-md p-3.5 shadow-2xl transition-all duration-500 ${dishTheme.ringColor} ring-4 ring-offset-2 ring-offset-white/80 group hover:shadow-amber-950/20`}
                       >
-                        <div className="relative h-52 sm:h-58 rounded-2xl overflow-hidden bg-stone-100 group">
+                        <div className="relative h-64 sm:h-72 rounded-2xl overflow-hidden bg-stone-100">
                           <img
                             src={dish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85'}
                             alt={dish.name}
-                            className="h-full w-full object-cover transition-all duration-700 group-hover:scale-105"
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/20 to-black/30" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/25 to-black/30" />
 
                           {/* Top Badges */}
                           <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-xl bg-white/95 backdrop-blur-sm px-3 py-1 text-xs font-bold text-stone-900 shadow-sm border border-stone-200">
@@ -405,108 +429,48 @@ export const HomePage: React.FC = () => {
                             <span>{dish.categoryName || 'Món Tiệc Đặc Sắc'}</span>
                           </div>
 
-                          <div className="absolute top-3 right-3 rounded-xl bg-amber-950/80 backdrop-blur-sm border border-amber-500/30 px-3 py-1 text-xs font-extrabold text-amber-300 shadow-sm font-mono">
+                          <div className="absolute top-3 right-3 rounded-xl bg-amber-950/85 backdrop-blur-sm border border-amber-500/30 px-3 py-1 text-xs font-extrabold text-amber-300 shadow-sm font-mono">
                             {formatVnd(dish.price)}
                           </div>
 
-                          {/* Navigation Buttons inside spotlight card */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              prevSlide();
-                            }}
-                            className="absolute left-2.5 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-stone-800 shadow-md hover:bg-white hover:scale-110 transition-all cursor-pointer opacity-85 hover:opacity-100"
-                            aria-label="Món trước"
-                          >
-                            <ChevronLeft className="h-4 w-4" />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              nextSlide();
-                            }}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-stone-800 shadow-md hover:bg-white hover:scale-110 transition-all cursor-pointer opacity-85 hover:opacity-100"
-                            aria-label="Món kế tiếp"
-                          >
-                            <ChevronRight className="h-4 w-4" />
-                          </button>
-
                           {/* Bottom Info inside Spotlight */}
-                          <div className="absolute bottom-3 inset-x-3 rounded-xl border border-white/20 bg-stone-900/90 backdrop-blur-md p-3 text-white space-y-1">
+                          <div className="absolute bottom-3 inset-x-3 rounded-xl border border-white/20 bg-stone-900/90 backdrop-blur-md p-3.5 text-white space-y-1">
                             <div className="flex items-center justify-between text-xs">
-                              <Link
-                                to={`/dishes/${dish.id}`}
-                                className="font-bold text-sm sm:text-base text-white hover:text-amber-300 transition-colors line-clamp-1"
-                              >
+                              <span className="font-bold text-sm sm:text-base text-white group-hover:text-amber-300 transition-colors line-clamp-1">
                                 {dish.name}
-                              </Link>
+                              </span>
                               <span className="rounded-md bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 shrink-0 font-medium">
                                 10 khách / bàn
                               </span>
                             </div>
-                            <p className="text-xs text-stone-300 line-clamp-1">
+                            <p className="text-xs text-stone-300 line-clamp-2 leading-relaxed">
                               {(dish as any).highlight || dish.description || 'Chế biến tươi mới theo từng bàn tiệc chuẩn 5 sao.'}
                             </p>
                           </div>
                         </div>
-
-                        {/* Active Card Bottom Bar with CTA Link (No pause button, continuous rotation) */}
-                        <div className="pt-3 px-1 flex items-center justify-between">
-                          <Link
-                            to={`/dishes/${dish.id}`}
-                            className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-900 transition-colors group"
-                          >
-                            <span>Xem công thức & định lượng</span>
-                            <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-                          </Link>
-
-                          <div className="flex items-center gap-1.5 rounded-full bg-amber-100/90 border border-amber-300 px-2.5 py-0.5 text-[10px] font-bold text-amber-900 shadow-xs">
-                            <span className="relative flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75" />
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-600" />
-                            </span>
-                            <span>Tự động xoay 3D</span>
-                          </div>
-                        </div>
-                      </div>
+                      </Link>
                     ) : (
-                      /* COMPACT ORBIT CARD (Thẻ bên nhỏ hơn và mờ hơn tạo chiều sâu không gian, không bị lấp) */
-                      <div className="rounded-2xl border border-stone-200/90 bg-white/90 backdrop-blur-md p-2.5 shadow-lg hover:shadow-xl transition-all">
-                        <div className="relative h-24 sm:h-28 rounded-xl overflow-hidden bg-stone-100">
+                      /* COMPACT ORBIT CARD (Tách biệt 100% bên phải, không bị che lấp, mờ hơn tạo chiều sâu) */
+                      <div className="rounded-2xl border border-stone-200/90 bg-white/95 backdrop-blur-md p-2 shadow-lg hover:shadow-xl transition-all duration-300 group">
+                        <div className="relative h-24 sm:h-26 rounded-xl overflow-hidden bg-stone-100">
                           <img
                             src={dish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'}
                             alt={dish.name}
-                            className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/75 via-transparent to-transparent" />
-                          <span className="absolute top-2 left-2 rounded-md bg-stone-900/80 backdrop-blur-xs px-2 py-0.5 text-[10px] font-bold text-amber-300 flex items-center gap-1">
-                            {isTop ? (
-                              <>
-                                <RotateCcw className="h-2.5 w-2.5" />
-                                <span>Món trước</span>
-                              </>
-                            ) : (
-                              <>
-                                <Sparkles className="h-2.5 w-2.5 text-amber-400" />
-                                <span>Món kế tiếp</span>
-                              </>
-                            )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent" />
+                          <span className="absolute top-2 left-2 rounded-md bg-stone-900/80 backdrop-blur-xs px-2 py-0.5 text-[10px] font-bold text-amber-300">
+                            {isTop ? 'Món sắp tới' : 'Món kế tiếp'}
                           </span>
-                          <span className="absolute bottom-2 right-2 text-[11px] font-bold text-white bg-stone-900/70 px-2 py-0.5 rounded-md font-mono">
+                          <span className="absolute bottom-2 right-2 text-[10px] font-bold text-white bg-stone-900/75 px-1.5 py-0.5 rounded font-mono">
                             {formatVnd(dish.price)}
                           </span>
                         </div>
-                        <div className="pt-2 px-1 flex items-center justify-between">
-                          <div className="min-w-0 flex-1 pr-2">
-                            <p className="text-xs font-bold text-stone-800 truncate">{dish.name}</p>
-                            <p className="text-[10px] text-stone-500 truncate">{dish.categoryName}</p>
-                          </div>
-                          <span className="text-[10px] text-amber-700 font-semibold shrink-0">
-                            Chạm để đổi →
-                          </span>
+                        <div className="pt-2 px-1">
+                          <p className="text-xs font-bold text-stone-800 truncate group-hover:text-amber-700 transition-colors">
+                            {dish.name}
+                          </p>
+                          <p className="text-[10px] text-stone-500 truncate">{dish.categoryName}</p>
                         </div>
                       </div>
                     )}
@@ -514,10 +478,11 @@ export const HomePage: React.FC = () => {
                 );
               })}
 
-              {/* Rotary Dots Indicator below cards */}
+              {/* Drag Indicator & Rotary Dots */}
               <div className="absolute -bottom-6 sm:-bottom-8 inset-x-0 flex items-center justify-between px-3 text-xs">
-                <span className="text-[11px] font-medium text-stone-500">
-                  Tuyển tập món tiệc ({currentSlide + 1}/{carouselItems.length})
+                <span className="text-[11px] font-medium text-stone-700 flex items-center gap-1">
+                  <GripVertical className="h-3.5 w-3.5 text-amber-700 animate-pulse" />
+                  <span>Kéo chuột để xoay ({currentSlide + 1}/{carouselItems.length})</span>
                 </span>
                 <div className="flex items-center gap-1.5">
                   {carouselItems.map((_, idx) => (
