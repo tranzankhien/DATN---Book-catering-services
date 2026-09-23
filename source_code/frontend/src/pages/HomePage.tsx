@@ -26,7 +26,7 @@ import type { CategoryDto, DishSummaryDto } from '../services/types';
 import { formatVnd } from '../hooks/useFormatters';
 import { ErrorState, LoadingState } from '../components/StatusStates';
 
-// Cấu hình theme màu và ánh sáng background linh hoạt theo từng món ăn
+// Cấu hình theme màu và ánh sáng background rực rỡ, ấn tượng linh hoạt theo từng món ăn
 interface DishTheme {
   categoryLabel: string;
   badgeStyle: string;
@@ -41,59 +41,63 @@ const getDishTheme = (dish: { name?: string; categoryName?: string }): DishTheme
   const cat = (dish.categoryName || '').toLowerCase();
   const name = (dish.name || '').toLowerCase();
 
+  // Khai Vị & Gỏi: Ngọc Lục Bảo & Vàng Chanh Hoàng Gia tươi sáng
   if (cat.includes('khai vị') || cat.includes('gỏi') || name.includes('gỏi')) {
     return {
       categoryLabel: 'Khai Vị Hoàng Gia',
-      badgeStyle: 'bg-emerald-50 text-emerald-900 border-emerald-200',
-      bgSection: 'from-emerald-50/70 via-amber-50/40 to-stone-50',
-      glowGradient: 'from-emerald-400/30 to-teal-300/15',
-      secondaryGlow: 'from-amber-300/30 to-emerald-200/20',
-      ringColor: 'ring-emerald-500/40',
-      accentText: 'text-emerald-800',
+      badgeStyle: 'bg-emerald-100 text-emerald-950 border-emerald-300',
+      bgSection: 'from-emerald-200/80 via-teal-100/70 to-amber-100/80',
+      glowGradient: 'from-emerald-500/60 via-teal-400/50 to-lime-300/40',
+      secondaryGlow: 'from-emerald-400/50 to-teal-200/40',
+      ringColor: 'ring-emerald-500/70',
+      accentText: 'text-emerald-950',
     };
   }
+  // Lẩu & Canh: Đỏ San Hô Ruby & Ánh Lửa Yến Tiệc Nồng Ấm
   if (cat.includes('lẩu') || cat.includes('canh') || name.includes('lẩu')) {
     return {
       categoryLabel: 'Lẩu Thảo Mộc & Tiềm',
-      badgeStyle: 'bg-rose-50 text-rose-900 border-rose-200',
-      bgSection: 'from-rose-50/70 via-amber-50/40 to-stone-50',
-      glowGradient: 'from-rose-400/30 to-amber-400/20',
-      secondaryGlow: 'from-orange-300/30 to-rose-200/20',
-      ringColor: 'ring-rose-500/40',
-      accentText: 'text-rose-800',
+      badgeStyle: 'bg-rose-100 text-rose-950 border-rose-300',
+      bgSection: 'from-rose-200/85 via-orange-100/75 to-amber-100/80',
+      glowGradient: 'from-rose-500/60 via-orange-500/50 to-amber-400/40',
+      secondaryGlow: 'from-red-400/50 to-orange-300/40',
+      ringColor: 'ring-rose-500/70',
+      accentText: 'text-rose-950',
     };
   }
+  // Bò & Món Nướng: Nâu Hổ Phách Nướng & Vàng Gold Thượng Hạng
   if (name.includes('bò') || cat.includes('thịt')) {
     return {
       categoryLabel: 'Món Thịt & Bò Thượng Hạng',
-      badgeStyle: 'bg-amber-100/80 text-amber-950 border-amber-300',
-      bgSection: 'from-orange-100/60 via-stone-50/70 to-stone-50',
-      glowGradient: 'from-amber-600/30 to-orange-400/20',
-      secondaryGlow: 'from-amber-300/30 to-amber-200/20',
-      ringColor: 'ring-amber-500/40',
-      accentText: 'text-amber-800',
+      badgeStyle: 'bg-amber-200 text-amber-950 border-amber-400',
+      bgSection: 'from-amber-300/75 via-orange-200/70 to-stone-200/80',
+      glowGradient: 'from-amber-600/60 via-orange-500/50 to-yellow-500/40',
+      secondaryGlow: 'from-amber-500/50 to-orange-400/40',
+      ringColor: 'ring-amber-600/70',
+      accentText: 'text-amber-950',
     };
   }
+  // Hải Sản Tươi Sống: Xanh Biển Ngọc & Bích Ngọc Biển Đông
   if (cat.includes('hải sản') || name.includes('tôm') || name.includes('mực') || name.includes('cá')) {
     return {
       categoryLabel: 'Hải Sản Tươi Sống',
-      badgeStyle: 'bg-sky-50 text-sky-900 border-sky-200',
-      bgSection: 'from-sky-50/60 via-amber-50/30 to-stone-50',
-      glowGradient: 'from-sky-400/25 to-amber-300/15',
-      secondaryGlow: 'from-cyan-300/20 to-sky-100/20',
-      ringColor: 'ring-sky-500/40',
-      accentText: 'text-sky-800',
+      badgeStyle: 'bg-sky-100 text-sky-950 border-sky-300',
+      bgSection: 'from-sky-200/80 via-cyan-100/70 to-amber-100/70',
+      glowGradient: 'from-sky-500/60 via-cyan-400/50 to-blue-300/40',
+      secondaryGlow: 'from-cyan-400/50 to-teal-300/40',
+      ringColor: 'ring-sky-500/70',
+      accentText: 'text-sky-950',
     };
   }
-  // Mặc định: Gà ta xôi sen, món yến tiệc cung đình
+  // Gà Ta Xôi Sen & Món Đặc Biệt: Hoàng Kim & Lụa Champagne
   return {
     categoryLabel: 'Mỹ Vị Yến Tiệc',
-    badgeStyle: 'bg-amber-50 text-amber-900 border-amber-200',
-    bgSection: 'from-amber-100/70 via-orange-50/40 to-stone-50',
-    glowGradient: 'from-amber-500/30 to-yellow-300/20',
-    secondaryGlow: 'from-amber-200/30 to-orange-100/20',
-    ringColor: 'ring-amber-500/40',
-    accentText: 'text-amber-800',
+    badgeStyle: 'bg-amber-200 text-amber-950 border-amber-400',
+    bgSection: 'from-amber-200/85 via-yellow-100/80 to-amber-100/80',
+    glowGradient: 'from-amber-500/60 via-yellow-400/50 to-orange-400/40',
+    secondaryGlow: 'from-yellow-400/50 to-amber-300/40',
+    ringColor: 'ring-amber-500/70',
+    accentText: 'text-amber-900',
   };
 };
 
@@ -143,9 +147,8 @@ export const HomePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Carousel State cho Hero Section
+  // Carousel State cho Hero Section (Luôn xoay tự động liên tục không ngừng)
   const [currentSlide, setCurrentSlide] = useState<number>(0);
-  const [isPaused, setIsPaused] = useState<boolean>(false);
 
   const loadHomeData = async () => {
     setLoading(true);
@@ -171,14 +174,14 @@ export const HomePage: React.FC = () => {
   // Danh sách các món chạy trong Carousel
   const carouselItems = featuredDishes.length >= 3 ? featuredDishes : defaultHeroDishes;
 
-  // Auto-play vòng tròn sau mỗi 4.2 giây
+  // Auto-play vòng tròn liên tục không ngừng nghỉ
   useEffect(() => {
-    if (isPaused || carouselItems.length <= 1) return;
+    if (carouselItems.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
-    }, 4200);
+    }, 3800);
     return () => clearInterval(timer);
-  }, [isPaused, carouselItems.length]);
+  }, [carouselItems.length]);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
@@ -208,11 +211,11 @@ export const HomePage: React.FC = () => {
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {/* Main Ambient Glow Orb (morphs dynamically with active dish) */}
           <div
-            className={`absolute -top-24 -right-24 w-[580px] h-[580px] rounded-full blur-3xl opacity-60 transition-all duration-1000 ease-in-out bg-gradient-to-br ${activeTheme.glowGradient} animate-pulse-glow`}
+            className={`absolute -top-24 -right-24 w-[680px] h-[680px] rounded-full blur-3xl opacity-75 transition-all duration-1000 ease-in-out bg-gradient-to-br ${activeTheme.glowGradient} animate-pulse-glow`}
           />
           {/* Secondary Ambient Accent Orb */}
           <div
-            className={`absolute top-1/2 right-1/4 w-[380px] h-[380px] rounded-full blur-2xl opacity-45 transition-all duration-1000 ease-in-out bg-gradient-to-tr ${activeTheme.secondaryGlow}`}
+            className={`absolute top-1/3 right-1/4 w-[460px] h-[460px] rounded-full blur-2xl opacity-60 transition-all duration-1000 ease-in-out bg-gradient-to-tr ${activeTheme.secondaryGlow}`}
           />
           {/* Diffused ambient photo of active dish */}
           {activeDish.imageUrl && (
@@ -220,11 +223,11 @@ export const HomePage: React.FC = () => {
               key={`ambient-${activeDish.id}`}
               src={activeDish.imageUrl}
               alt=""
-              className="absolute right-0 top-1/3 -translate-y-1/2 w-[520px] h-[520px] object-cover rounded-full blur-[115px] opacity-25 pointer-events-none select-none transition-all duration-1000"
+              className="absolute right-0 top-1/3 -translate-y-1/2 w-[560px] h-[560px] object-cover rounded-full blur-[90px] opacity-35 pointer-events-none select-none transition-all duration-1000"
             />
           )}
           {/* Subtle Radial Dot Texture */}
-          <div className="absolute inset-0 bg-[radial-gradient(#d6d3d1_1px,transparent_1px)] [background-size:24px_24px] opacity-35" />
+          <div className="absolute inset-0 bg-[radial-gradient(#a8a29e_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -290,46 +293,44 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Hero: Orbital 3-Card Revolving Showcase (Physical card swapping motion) */}
+            {/* Right Hero: Orbital 3-Card Revolving Showcase (Physical card swapping, non-overlapping, spatial depth) */}
             <div
-              className="lg:col-span-6 relative h-[500px] sm:h-[540px] w-full flex items-center justify-center animate-hero-showcase select-none"
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
+              className="lg:col-span-6 relative h-[540px] sm:h-[580px] w-full flex items-center justify-center animate-hero-showcase select-none"
             >
               {/* Background SVG Orbital Track (Curved trajectory with direction arrows) */}
               <svg
                 className="absolute inset-0 w-full h-full pointer-events-none select-none"
-                viewBox="0 0 540 500"
+                viewBox="0 0 540 540"
                 fill="none"
               >
                 {/* Orbital Arc Sweeping from Top to Center to Bottom */}
                 <path
-                  d="M 380 50 C 490 130, 500 360, 360 450"
+                  d="M 370 40 C 490 120, 500 420, 350 490"
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeDasharray="6 8"
-                  className="text-amber-500/35"
+                  className="text-amber-600/40"
                 />
                 {/* Flow Arrow Indicators */}
                 <path
-                  d="M 465 180 L 458 205 L 434 200"
+                  d="M 455 170 L 448 195 L 424 190"
                   stroke="currentColor"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="text-amber-600/60"
+                  className="text-amber-700/70"
                 />
                 <path
-                  d="M 445 330 L 435 355 L 410 348"
+                  d="M 435 360 L 425 385 L 400 378"
                   stroke="currentColor"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="text-amber-600/60"
+                  className="text-amber-700/70"
                 />
               </svg>
 
-              {/* Persistent Card Elements: Physically translate, scale and swap positions */}
+              {/* Persistent Card Elements: Physically translate, scale and swap positions without covering each other */}
               {carouselItems.map((dish, idx) => {
                 const total = carouselItems.length;
                 const offset = (idx - currentSlide + total) % total;
@@ -338,25 +339,26 @@ export const HomePage: React.FC = () => {
                 const isBottom = offset === 1;
                 const dishTheme = getDishTheme(dish);
 
-                // Tính toán transform, opacity, z-index để thẻ bài thực sự bay/trượt đổi chỗ
-                let transformStyle = 'translate3d(55%, -50%, 0) scale(0.4) rotate(0deg)';
+                // Tọa độ translate3d độc lập: Thẻ trên ở góc trên phải, thẻ dưới ở góc dưới phải, thẻ giữa ở giữa trái
+                // Đảm bảo không bị lấp nhau, 2 thẻ bên nhỏ hơn và mờ hơn tạo chiều sâu không gian
+                let transformStyle = 'translate3d(90%, 180px, 0) scale(0.4) rotate(0deg)';
                 let opacityStyle = 0;
                 let zIndexStyle = 10;
                 let pointerEventsStyle: 'auto' | 'none' = 'none';
 
                 if (isCenter) {
-                  transformStyle = 'translate3d(2%, -50%, 0) scale(1) rotate(0deg)';
+                  transformStyle = 'translate3d(0%, 95px, 0) scale(1) rotate(0deg)';
                   opacityStyle = 1;
                   zIndexStyle = 30;
                   pointerEventsStyle = 'auto';
                 } else if (isTop) {
-                  transformStyle = 'translate3d(22%, -96%, 0) scale(0.82) rotate(3.5deg)';
-                  opacityStyle = 0.82;
+                  transformStyle = 'translate3d(36%, 10px, 0) scale(0.76) rotate(4deg)';
+                  opacityStyle = 0.62;
                   zIndexStyle = 20;
                   pointerEventsStyle = 'auto';
                 } else if (isBottom) {
-                  transformStyle = 'translate3d(22%, -4%, 0) scale(0.82) rotate(-3.5deg)';
-                  opacityStyle = 0.82;
+                  transformStyle = 'translate3d(36%, 335px, 0) scale(0.76) rotate(-4deg)';
+                  opacityStyle = 0.62;
                   zIndexStyle = 20;
                   pointerEventsStyle = 'auto';
                 }
@@ -374,18 +376,19 @@ export const HomePage: React.FC = () => {
                       opacity: opacityStyle,
                       zIndex: zIndexStyle,
                       pointerEvents: pointerEventsStyle,
-                      top: '50%',
+                      top: 0,
+                      left: 0,
                     }}
-                    className={`absolute left-0 sm:left-3 w-[84%] sm:w-[88%] max-w-[420px] transition-all duration-700 ease-out select-none will-change-transform ${
-                      !isCenter ? 'cursor-pointer hover:opacity-100 hover:scale-85' : ''
+                    className={`absolute w-[325px] sm:w-[365px] transition-all duration-700 ease-out select-none will-change-transform ${
+                      !isCenter ? 'cursor-pointer hover:opacity-95 hover:scale-80' : ''
                     }`}
                   >
                     {isCenter ? (
-                      /* CENTER SPOTLIGHT CARD */
+                      /* CENTER SPOTLIGHT CARD (Tâm điểm to rõ, sắc nét, đầy đủ thông tin) */
                       <div
                         className={`rounded-3xl border-2 bg-white/95 backdrop-blur-md p-3.5 shadow-2xl transition-all duration-500 ${dishTheme.ringColor} ring-4 ring-offset-2 ring-offset-white/80`}
                       >
-                        <div className="relative h-54 sm:h-62 rounded-2xl overflow-hidden bg-stone-100 group">
+                        <div className="relative h-52 sm:h-58 rounded-2xl overflow-hidden bg-stone-100 group">
                           <img
                             src={dish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85'}
                             alt={dish.name}
@@ -432,7 +435,7 @@ export const HomePage: React.FC = () => {
                           </button>
 
                           {/* Bottom Info inside Spotlight */}
-                          <div className="absolute bottom-3 inset-x-3 rounded-xl border border-white/20 bg-stone-900/90 backdrop-blur-md p-3.5 text-white space-y-1">
+                          <div className="absolute bottom-3 inset-x-3 rounded-xl border border-white/20 bg-stone-900/90 backdrop-blur-md p-3 text-white space-y-1">
                             <div className="flex items-center justify-between text-xs">
                               <Link
                                 to={`/dishes/${dish.id}`}
@@ -450,7 +453,7 @@ export const HomePage: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Active Card Bottom Bar with CTA & Play/Pause Control */}
+                        {/* Active Card Bottom Bar with CTA Link (No pause button, continuous rotation) */}
                         <div className="pt-3 px-1 flex items-center justify-between">
                           <Link
                             to={`/dishes/${dish.id}`}
@@ -460,28 +463,17 @@ export const HomePage: React.FC = () => {
                             <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
                           </Link>
 
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setIsPaused((prev) => !prev);
-                              }}
-                              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-colors cursor-pointer ${
-                                isPaused
-                                  ? 'bg-amber-100 text-amber-900'
-                                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                              }`}
-                              title={isPaused ? 'Tiếp tục tự động quay' : 'Tạm dừng tự động quay'}
-                            >
-                              {isPaused ? <Play className="h-3 w-3 text-amber-700" /> : <Pause className="h-3 w-3" />}
-                              <span className="hidden sm:inline">{isPaused ? 'Đã dừng' : 'Đang quay'}</span>
-                            </button>
+                          <div className="flex items-center gap-1.5 rounded-full bg-amber-100/90 border border-amber-300 px-2.5 py-0.5 text-[10px] font-bold text-amber-900 shadow-xs">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-600" />
+                            </span>
+                            <span>Tự động xoay 3D</span>
                           </div>
                         </div>
                       </div>
                     ) : (
-                      /* COMPACT ORBIT CARD (Top or Bottom in rotation) */
+                      /* COMPACT ORBIT CARD (Thẻ bên nhỏ hơn và mờ hơn tạo chiều sâu không gian, không bị lấp) */
                       <div className="rounded-2xl border border-stone-200/90 bg-white/90 backdrop-blur-md p-2.5 shadow-lg hover:shadow-xl transition-all">
                         <div className="relative h-24 sm:h-28 rounded-xl overflow-hidden bg-stone-100">
                           <img
