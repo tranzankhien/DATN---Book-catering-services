@@ -25,9 +25,14 @@ import { extractErrorMessage } from '../services/apiClient';
 import type { CategoryDto, DishSummaryDto } from '../services/types';
 import { formatVnd } from '../hooks/useFormatters';
 import { ErrorState, LoadingState } from '../components/StatusStates';
+import { TextRotate } from '@/components/ui/text-rotate';
+import { motion, AnimatePresence } from 'motion/react';
 
 // Cấu hình theme màu và ánh sáng background rực rỡ, ấn tượng linh hoạt theo từng món ăn
+export type ThemeKey = 'emerald' | 'rose' | 'amber' | 'sky' | 'champagne';
+
 interface DishTheme {
+  key: ThemeKey;
   categoryLabel: string;
   badgeStyle: string;
   bgSection: string;
@@ -37,68 +42,81 @@ interface DishTheme {
   accentText: string;
 }
 
+const THEME_PRESETS: Record<ThemeKey, DishTheme> = {
+  emerald: {
+    key: 'emerald',
+    categoryLabel: 'Khai Vị Hoàng Gia',
+    badgeStyle: 'bg-emerald-100 text-emerald-950 border-emerald-300',
+    bgSection: 'from-emerald-200/85 via-teal-100/75 to-amber-100/80',
+    glowGradient: 'from-emerald-500/60 via-teal-400/50 to-lime-300/40',
+    secondaryGlow: 'from-emerald-400/50 to-teal-200/40',
+    ringColor: 'ring-emerald-500/70 border-emerald-300',
+    accentText: 'text-emerald-950',
+  },
+  rose: {
+    key: 'rose',
+    categoryLabel: 'Lẩu Thảo Mộc & Tiềm',
+    badgeStyle: 'bg-rose-100 text-rose-950 border-rose-300',
+    bgSection: 'from-rose-200/90 via-orange-100/75 to-amber-100/80',
+    glowGradient: 'from-rose-500/60 via-orange-500/50 to-amber-400/40',
+    secondaryGlow: 'from-red-400/50 to-orange-300/40',
+    ringColor: 'ring-rose-500/70 border-rose-300',
+    accentText: 'text-rose-950',
+  },
+  amber: {
+    key: 'amber',
+    categoryLabel: 'Món Thịt & Bò Thượng Hạng',
+    badgeStyle: 'bg-amber-200 text-amber-950 border-amber-400',
+    bgSection: 'from-amber-300/80 via-orange-200/70 to-stone-200/80',
+    glowGradient: 'from-amber-600/60 via-orange-500/50 to-yellow-500/40',
+    secondaryGlow: 'from-amber-500/50 to-orange-400/40',
+    ringColor: 'ring-amber-600/70 border-amber-300',
+    accentText: 'text-amber-950',
+  },
+  sky: {
+    key: 'sky',
+    categoryLabel: 'Hải Sản Tươi Sống',
+    badgeStyle: 'bg-sky-100 text-sky-950 border-sky-300',
+    bgSection: 'from-sky-200/85 via-cyan-100/70 to-amber-100/70',
+    glowGradient: 'from-sky-500/60 via-cyan-400/50 to-blue-300/40',
+    secondaryGlow: 'from-cyan-400/50 to-teal-300/40',
+    ringColor: 'ring-sky-500/70 border-sky-300',
+    accentText: 'text-sky-950',
+  },
+  champagne: {
+    key: 'champagne',
+    categoryLabel: 'Mỹ Vị Yến Tiệc',
+    badgeStyle: 'bg-amber-200 text-amber-950 border-amber-400',
+    bgSection: 'from-amber-200/85 via-yellow-100/80 to-amber-100/80',
+    glowGradient: 'from-amber-500/60 via-yellow-400/50 to-orange-400/40',
+    secondaryGlow: 'from-yellow-400/50 to-amber-300/40',
+    ringColor: 'ring-amber-500/70 border-amber-300',
+    accentText: 'text-amber-900',
+  },
+};
+
 const getDishTheme = (dish: { name?: string; categoryName?: string }): DishTheme => {
   const cat = (dish.categoryName || '').toLowerCase();
   const name = (dish.name || '').toLowerCase();
 
   // Khai Vị & Gỏi: Ngọc Lục Bảo & Vàng Chanh Hoàng Gia tươi sáng
   if (cat.includes('khai vị') || cat.includes('gỏi') || name.includes('gỏi')) {
-    return {
-      categoryLabel: 'Khai Vị Hoàng Gia',
-      badgeStyle: 'bg-emerald-100 text-emerald-950 border-emerald-300',
-      bgSection: 'from-emerald-200/80 via-teal-100/70 to-amber-100/80',
-      glowGradient: 'from-emerald-500/60 via-teal-400/50 to-lime-300/40',
-      secondaryGlow: 'from-emerald-400/50 to-teal-200/40',
-      ringColor: 'ring-emerald-500/70',
-      accentText: 'text-emerald-950',
-    };
+    return THEME_PRESETS.emerald;
   }
   // Lẩu & Canh: Đỏ San Hô Ruby & Ánh Lửa Yến Tiệc Nồng Ấm
   if (cat.includes('lẩu') || cat.includes('canh') || name.includes('lẩu')) {
-    return {
-      categoryLabel: 'Lẩu Thảo Mộc & Tiềm',
-      badgeStyle: 'bg-rose-100 text-rose-950 border-rose-300',
-      bgSection: 'from-rose-200/85 via-orange-100/75 to-amber-100/80',
-      glowGradient: 'from-rose-500/60 via-orange-500/50 to-amber-400/40',
-      secondaryGlow: 'from-red-400/50 to-orange-300/40',
-      ringColor: 'ring-rose-500/70',
-      accentText: 'text-rose-950',
-    };
+    return THEME_PRESETS.rose;
   }
   // Bò & Món Nướng: Nâu Hổ Phách Nướng & Vàng Gold Thượng Hạng
   if (name.includes('bò') || cat.includes('thịt')) {
-    return {
-      categoryLabel: 'Món Thịt & Bò Thượng Hạng',
-      badgeStyle: 'bg-amber-200 text-amber-950 border-amber-400',
-      bgSection: 'from-amber-300/75 via-orange-200/70 to-stone-200/80',
-      glowGradient: 'from-amber-600/60 via-orange-500/50 to-yellow-500/40',
-      secondaryGlow: 'from-amber-500/50 to-orange-400/40',
-      ringColor: 'ring-amber-600/70',
-      accentText: 'text-amber-950',
-    };
+    return THEME_PRESETS.amber;
   }
   // Hải Sản Tươi Sống: Xanh Biển Ngọc & Bích Ngọc Biển Đông
   if (cat.includes('hải sản') || name.includes('tôm') || name.includes('mực') || name.includes('cá')) {
-    return {
-      categoryLabel: 'Hải Sản Tươi Sống',
-      badgeStyle: 'bg-sky-100 text-sky-950 border-sky-300',
-      bgSection: 'from-sky-200/80 via-cyan-100/70 to-amber-100/70',
-      glowGradient: 'from-sky-500/60 via-cyan-400/50 to-blue-300/40',
-      secondaryGlow: 'from-cyan-400/50 to-teal-300/40',
-      ringColor: 'ring-sky-500/70',
-      accentText: 'text-sky-950',
-    };
+    return THEME_PRESETS.sky;
   }
   // Gà Ta Xôi Sen & Món Đặc Biệt: Hoàng Kim & Lụa Champagne
-  return {
-    categoryLabel: 'Mỹ Vị Yến Tiệc',
-    badgeStyle: 'bg-amber-200 text-amber-950 border-amber-400',
-    bgSection: 'from-amber-200/85 via-yellow-100/80 to-amber-100/80',
-    glowGradient: 'from-amber-500/60 via-yellow-400/50 to-orange-400/40',
-    secondaryGlow: 'from-yellow-400/50 to-amber-300/40',
-    ringColor: 'ring-amber-500/70',
-    accentText: 'text-amber-900',
-  };
+  return THEME_PRESETS.champagne;
 };
 
 // Dữ liệu fallback cho Hero Carousel nếu chưa tải xong dữ liệu từ API
@@ -149,6 +167,8 @@ export const HomePage: React.FC = () => {
 
   // Carousel State cho Hero Section (Luôn xoay tự động liên tục không ngừng)
   const [currentSlide, setCurrentSlide] = useState<number>(0);
+  const [slideDirection, setSlideDirection] = useState<'down' | 'up'>('down');
+  const [bgThemeKey, setBgThemeKey] = useState<ThemeKey>('emerald');
 
   const loadHomeData = async () => {
     setLoading(true);
@@ -174,22 +194,39 @@ export const HomePage: React.FC = () => {
   // Danh sách các món chạy trong Carousel
   const carouselItems = featuredDishes.length >= 3 ? featuredDishes : defaultHeroDishes;
 
-  // Xoay từ trên xuống: Món ở trên rơi xuống tâm điểm, tâm điểm rơi xuống dưới
-  const rotateDown = () => {
-    setCurrentSlide((prev) => (prev - 1 + carouselItems.length) % carouselItems.length);
-  };
+  // Cập nhật màu nền theo độ trễ có chủ đích (Deliberate latency):
+  // Thẻ chuyển động chạy trước, sau 220ms không gian nền mới bắt đầu chuyển màu lan tỏa theo
+  useEffect(() => {
+    const dish = carouselItems[currentSlide] || carouselItems[0];
+    if (!dish) return;
+    const theme = getDishTheme(dish);
+    const timer = setTimeout(() => {
+      setBgThemeKey(theme.key);
+    }, 220);
+    return () => clearTimeout(timer);
+  }, [currentSlide, carouselItems]);
 
-  // Xoay từ dưới lên
-  const rotateUp = () => {
+  // Xoay tiến: Món kế tiếp bước lên
+  const rotateNext = () => {
+    setSlideDirection('down');
     setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
   };
 
-  // Hiệu ứng mặc định: Chạy liên tục từ trên xuống dưới (Top-to-Bottom cascade) mỗi 3.8s
+  // Xoay lùi: Món trước đó quay lại
+  const rotatePrev = () => {
+    setSlideDirection('up');
+    setCurrentSlide((prev) => (prev - 1 + carouselItems.length) % carouselItems.length);
+  };
+
+  const rotateDown = rotateNext;
+  const rotateUp = rotatePrev;
+
+  // Hiệu ứng mặc định: Tự động xoay sau 4.5s (đủ độ trễ để mắt thường cảm nhận trọn vẹn)
   useEffect(() => {
     if (carouselItems.length <= 1) return;
     const timer = setInterval(() => {
-      rotateDown();
-    }, 3800);
+      rotateNext();
+    }, 4500);
     return () => clearInterval(timer);
   }, [carouselItems.length]);
 
@@ -250,34 +287,51 @@ export const HomePage: React.FC = () => {
   return (
     <div className="space-y-16 sm:space-y-24 pb-16">
       {/* Luxury Hero Section with Rotary Orbit Showcase & Dynamic Atmospheric Background */}
-      <section
-        className={`relative overflow-hidden pt-8 pb-14 sm:pt-14 sm:pb-22 transition-all duration-1000 ease-in-out bg-gradient-to-br ${activeTheme.bgSection}`}
-      >
-        {/* Dynamic Atmospheric Blurred Orbs & Ambient Culinary Glow */}
+      <section className="relative overflow-hidden pt-8 pb-14 sm:pt-14 sm:pb-22">
+        {/* Dynamic Atmospheric Background with Layered Cross-fade and Deliberate Stagger Delay */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Main Ambient Glow Orb (morphs dynamically with active dish) */}
-          <div
-            className={`absolute -top-24 -right-24 w-[680px] h-[680px] rounded-full blur-3xl opacity-75 transition-all duration-1000 ease-in-out bg-gradient-to-br ${activeTheme.glowGradient} animate-pulse-glow`}
-          />
-          {/* Secondary Ambient Accent Orb */}
-          <div
-            className={`absolute top-1/3 right-1/4 w-[460px] h-[460px] rounded-full blur-2xl opacity-60 transition-all duration-1000 ease-in-out bg-gradient-to-tr ${activeTheme.secondaryGlow}`}
-          />
+          {(Object.keys(THEME_PRESETS) as ThemeKey[]).map((key) => {
+            const t = THEME_PRESETS[key];
+            const isActive = bgThemeKey === key;
+            return (
+              <div
+                key={key}
+                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out pointer-events-none ${
+                  isActive ? 'opacity-100 z-1' : 'opacity-0 z-0'
+                }`}
+              >
+                {/* Full-width gradient layer */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${t.bgSection}`} />
+
+                {/* Main Ambient Glow Orb (morphs with theme) */}
+                <div
+                  className={`absolute -top-24 -right-24 w-[680px] h-[680px] rounded-full blur-3xl opacity-75 bg-gradient-to-br ${t.glowGradient} animate-pulse-glow`}
+                />
+
+                {/* Secondary Ambient Accent Orb */}
+                <div
+                  className={`absolute top-1/3 right-1/4 w-[460px] h-[460px] rounded-full blur-2xl opacity-60 bg-gradient-to-tr ${t.secondaryGlow}`}
+                />
+              </div>
+            );
+          })}
+
           {/* Diffused ambient photo of active dish */}
           {activeDish.imageUrl && (
             <img
               key={`ambient-${activeDish.id}`}
               src={activeDish.imageUrl}
               alt=""
-              className="absolute right-0 top-1/3 -translate-y-1/2 w-[560px] h-[560px] object-cover rounded-full blur-[90px] opacity-35 pointer-events-none select-none transition-all duration-1000"
+              className="absolute right-0 top-1/3 -translate-y-1/2 w-[560px] h-[560px] object-cover rounded-full blur-[90px] opacity-35 pointer-events-none select-none transition-opacity duration-1000"
             />
           )}
+
           {/* Subtle Radial Dot Texture */}
-          <div className="absolute inset-0 bg-[radial-gradient(#a8a29e_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
+          <div className="absolute inset-0 bg-[radial-gradient(#a8a29e_1px,transparent_1px)] [background-size:24px_24px] opacity-25 z-2 pointer-events-none" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             {/* Left Content (Staggered Animation Entrance) */}
             <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
               <div className="animate-fade-up-1">
@@ -287,16 +341,37 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Headline */}
-              <h1 className="animate-fade-up-2 text-3xl sm:text-5xl lg:text-5xl font-extrabold text-stone-900 tracking-tight leading-[1.18]">
-                Tinh Hoa Yến Tiệc, <br />
-                <span className="text-amber-700 underline decoration-amber-300 decoration-wavy decoration-from-font">
-                  Minh Bạch Định Lượng
-                </span> Từng Bàn
+              {/* Headline with Structured 3-Tier Dynamic TextRotate (No overlap, crystal clear typography) */}
+              <h1 className="animate-fade-up-2 text-3xl sm:text-5xl lg:text-5xl font-extrabold text-stone-900 tracking-tight leading-[1.2]">
+                <span>Tinh Hoa Yến Tiệc,</span>
+                <span className="block mt-1 sm:mt-1.5 text-amber-700 min-h-[44px] sm:min-h-[58px] flex items-center">
+                  <TextRotate
+                    texts={[
+                      "Minh Bạch Định Lượng",
+                      "Đẳng Cấp 5 Sao",
+                      "Tinh Túy Mỹ Vị",
+                      "Chuẩn Vị Hoàng Gia",
+                      "Tối Ưu Chi Phí",
+                    ]}
+                    mainClassName="py-0.5 underline decoration-amber-300 decoration-wavy decoration-from-font inline-flex"
+                    splitBy="words"
+                    staggerDuration={0.03}
+                    staggerFrom="first"
+                    rotationInterval={3600}
+                    animatePresenceMode="popLayout"
+                    exit={{ y: "-80%", opacity: 0, transition: { duration: 0.2 } }}
+                    animate={{ y: 0, opacity: 1 }}
+                    initial={{ y: "80%", opacity: 0 }}
+                    transition={{ type: "spring", damping: 24, stiffness: 280 }}
+                  />
+                </span>
+                <span className="block text-2xl sm:text-4xl text-stone-800 font-bold mt-1 tracking-normal">
+                  Quy Chuẩn Từng Bàn Tiệc
+                </span>
               </h1>
 
               {/* Subtitle */}
-              <p className="animate-fade-up-3 text-sm sm:text-base text-stone-600 max-w-2xl leading-relaxed mx-auto lg:mx-0">
+              <p className="animate-fade-up-3 text-sm sm:text-base text-stone-600 max-w-xl leading-relaxed mx-auto lg:mx-0 pt-1">
                 Nền tảng đặt tiệc và quản lý nhà hàng thông minh kết nối trực tiếp công thức món ăn
                 với kho nguyên liệu trung tâm. Khách hàng chủ động chọn món, tính đúng chi phí theo quy chuẩn 1 bàn
                 và theo dõi định mức tiêu hao nguyên liệu thực tế.
@@ -321,203 +396,298 @@ export const HomePage: React.FC = () => {
                   <span>Mô Phỏng Chi Phí Bàn Tiệc</span>
                 </Link>
               </div>
+            </div>
 
-              {/* Key Hospitality Metrics */}
-              <div className="animate-fade-up-4 pt-6 border-t border-stone-200/80 grid grid-cols-3 gap-6 max-w-lg mx-auto lg:mx-0 text-left">
-                <div>
-                  <p className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">100%</p>
-                  <p className="text-xs font-medium text-stone-500 mt-0.5">Nguyên liệu chuẩn tươi</p>
+            {/* Right Hero: Luxury 3D Stacked Card Slideshow (Slide show thẻ bài xếp chồng đa tầng) */}
+            <div className="lg:col-span-6 relative w-full flex flex-col items-center justify-between select-none animate-hero-showcase">
+              {/* Top Framing Badges for Balance (Matches left badge py-1.5, height = 30px) */}
+              <div className="flex items-center justify-between w-full max-w-[490px] sm:max-w-[530px] mb-5 sm:mb-6 px-1 z-30">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/80 bg-white/95 backdrop-blur-md px-4 py-1.5 text-xs font-bold text-amber-950 shadow-xs">
+                  <Sparkles className="h-3.5 w-3.5 text-amber-600 animate-pulse" />
+                  <span>Bếp Trưởng 5★ Chuẩn Vị</span>
                 </div>
-                <div>
-                  <p className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">01 Bàn</p>
-                  <p className="text-xs font-medium text-stone-500 mt-0.5">Quy chuẩn 10 khách</p>
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/80 bg-white/95 backdrop-blur-md px-4 py-1.5 text-xs font-bold text-emerald-950 shadow-xs">
+                  <Utensils className="h-3.5 w-3.5 text-emerald-600" />
+                  <span>Quy Chuẩn 10 Khách / Bàn</span>
                 </div>
-                <div>
-                  <p className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">15 Phút</p>
-                  <p className="text-xs font-medium text-stone-500 mt-0.5">Giữ chỗ an toàn khi đặt</p>
+              </div>
+
+              {/* The 3D Stack Frame (Landscape Rectangle proportions with deliberate right margin for stack depth) */}
+              <div className="relative w-full max-w-[490px] sm:max-w-[530px] h-[300px] sm:h-[325px] mr-6 sm:mr-10">
+                {/* Card 2 (Bottom layer / 3rd in stack) */}
+                {(() => {
+                  const total = carouselItems.length;
+                  const card2Idx = (currentSlide + 2) % total;
+                  const card2 = carouselItems[card2Idx];
+                  if (!card2) return null;
+                  return (
+                    <motion.div
+                      key={`stack-2-${card2.id}`}
+                      onClick={() => setCurrentSlide(card2Idx)}
+                      className="absolute inset-0 z-10 cursor-pointer pointer-events-auto rounded-3xl border border-stone-200/80 bg-white/85 backdrop-blur-xs p-2.5 sm:p-3 shadow-lg transition-all"
+                      animate={{
+                        x: 62,
+                        y: -26,
+                        rotate: 6.8,
+                        scale: 0.88,
+                        opacity: 0.78,
+                      }}
+                      whileHover={{
+                        x: 70,
+                        y: -30,
+                        rotate: 8.5,
+                        scale: 0.91,
+                        opacity: 0.95,
+                      }}
+                      transition={{ type: "spring", stiffness: 260, damping: 25 }}
+                      title={`Món tiếp theo: ${card2.name} (Bấm để xem)`}
+                    >
+                      <div className="relative h-[255px] sm:h-[278px] rounded-2xl overflow-hidden bg-stone-100">
+                        <img
+                          src={card2.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'}
+                          alt={card2.name}
+                          className="h-full w-full object-cover filter brightness-90"
+                        />
+                        <div className="absolute inset-0 bg-stone-950/30" />
+                        <div className="absolute top-3 right-3 rounded-lg bg-stone-900/90 backdrop-blur-xs px-2.5 py-1 text-xs font-bold text-amber-300 font-mono shadow-xs">
+                          {formatVnd(card2.price)}
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })()}
+
+                {/* Card 1 (Middle layer / 2nd in stack) */}
+                {(() => {
+                  const total = carouselItems.length;
+                  const card1Idx = (currentSlide + 1) % total;
+                  const card1 = carouselItems[card1Idx];
+                  if (!card1) return null;
+                  return (
+                    <motion.div
+                      key={`stack-1-${card1.id}`}
+                      onClick={() => rotateNext()}
+                      className="absolute inset-0 z-20 cursor-pointer pointer-events-auto rounded-3xl border border-stone-200/90 bg-white/95 backdrop-blur-sm p-2.5 sm:p-3 shadow-xl transition-all"
+                      animate={{
+                        x: 32,
+                        y: -14,
+                        rotate: 3.4,
+                        scale: 0.94,
+                        opacity: 0.94,
+                      }}
+                      whileHover={{
+                        x: 38,
+                        y: -18,
+                        rotate: 4.8,
+                        scale: 0.97,
+                        opacity: 1,
+                      }}
+                      transition={{ type: "spring", stiffness: 260, damping: 25 }}
+                      title={`Món kế tiếp: ${card1.name} (Bấm để đưa lên trước)`}
+                    >
+                      <div className="relative h-[255px] sm:h-[278px] rounded-2xl overflow-hidden bg-stone-100">
+                        <img
+                          src={card1.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'}
+                          alt={card1.name}
+                          className="h-full w-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-stone-950/75 via-transparent to-transparent" />
+                        <span className="absolute top-3 left-3 rounded-lg bg-white/95 backdrop-blur-xs px-2.5 py-1 text-[11px] font-bold text-stone-900 shadow-sm border border-stone-200">
+                          {card1.categoryName || 'Món Tiệc'}
+                        </span>
+                        <span className="absolute top-3 right-3 rounded-lg bg-stone-900/85 backdrop-blur-xs px-2.5 py-1 text-xs font-bold text-amber-300 font-mono shadow-xs">
+                          {formatVnd(card1.price)}
+                        </span>
+                        <div className="absolute bottom-2.5 inset-x-3 px-3.5 py-2 rounded-xl bg-stone-900/85 backdrop-blur-xs text-white">
+                          <p className="text-xs font-bold truncate">{card1.name}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })()}
+
+                {/* Card 0 (Active Top Card / 1st in stack - Drag, Slide, Dynamic Theme) */}
+                <AnimatePresence mode="popLayout">
+                  <motion.div
+                    key={`stack-0-${activeDish.id}`}
+                    className="relative z-30 pointer-events-auto cursor-grab active:cursor-grabbing"
+                    initial={{
+                      x: slideDirection === 'down' ? 60 : -60,
+                      y: -12,
+                      rotate: slideDirection === 'down' ? 5 : -5,
+                      opacity: 0.3,
+                      scale: 0.93,
+                    }}
+                    animate={{
+                      x: 0,
+                      y: 0,
+                      rotate: 0,
+                      opacity: 1,
+                      scale: 1,
+                    }}
+                    exit={{
+                      x: slideDirection === 'down' ? -220 : 220,
+                      y: 22,
+                      rotate: slideDirection === 'down' ? -12 : 12,
+                      opacity: 0,
+                      scale: 0.88,
+                    }}
+                    transition={{ type: "spring", stiffness: 240, damping: 24, mass: 0.8 }}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.4}
+                    onDragEnd={(_, info) => {
+                      if (info.offset.x < -35 || info.velocity.x < -250) {
+                        rotateNext();
+                      } else if (info.offset.x > 35 || info.velocity.x > 250) {
+                        rotatePrev();
+                      }
+                    }}
+                  >
+                    <Link
+                      to={`/dishes/${activeDish.id}`}
+                      className={`block rounded-3xl border-2 bg-white/95 backdrop-blur-md p-2.5 sm:p-3 shadow-2xl transition-all duration-500 ${activeTheme.ringColor} ring-4 ring-offset-2 ring-offset-white/80 group hover:shadow-amber-950/25`}
+                    >
+                      <div className="relative h-[255px] sm:h-[278px] rounded-2xl overflow-hidden bg-stone-100">
+                        <img
+                          src={activeDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85'}
+                          alt={activeDish.name}
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/20 to-black/30" />
+
+                        {/* Top Badges */}
+                        <div className="animate-badge-left absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-lg bg-white/95 backdrop-blur-sm px-3 py-1 text-xs font-bold text-stone-900 shadow-sm border border-stone-200">
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                          </span>
+                          <span className="truncate max-w-[140px] sm:max-w-none">{activeDish.categoryName || 'Món Tiệc Đặc Sắc'}</span>
+                        </div>
+
+                        <div className="animate-badge-right absolute top-3 right-3 rounded-lg bg-amber-950/90 backdrop-blur-sm border border-amber-500/40 px-3 py-1 text-xs font-extrabold text-amber-300 shadow-sm font-mono">
+                          {formatVnd(activeDish.price)}
+                        </div>
+
+                        {/* Bottom Info inside Spotlight */}
+                        <div className="animate-info-box absolute bottom-2.5 inset-x-2.5 rounded-2xl border border-white/20 bg-stone-900/90 backdrop-blur-md px-4 py-2.5 sm:py-3 text-white space-y-1">
+                          <div className="flex items-center justify-between text-xs gap-2">
+                            <span className="font-bold text-sm sm:text-base text-white group-hover:text-amber-300 transition-colors line-clamp-1">
+                              {activeDish.name}
+                            </span>
+                            <span className="rounded-md bg-amber-500/20 px-2 py-0.5 text-[11px] font-bold text-amber-300 shrink-0">
+                              10 khách / bàn
+                            </span>
+                          </div>
+                          <p className="text-xs text-stone-300 line-clamp-1 leading-relaxed">
+                            {(activeDish as any).highlight || activeDish.description || 'Chế biến tươi mới theo từng bàn tiệc chuẩn 5 sao.'}
+                          </p>
+                          <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[11px] text-amber-200/90">
+                            <span className="flex items-center gap-1.5">
+                              <Scale className="h-3 w-3 text-amber-400" />
+                              <span>Minh bạch định lượng 1 bàn</span>
+                            </span>
+                            <span className="font-semibold text-stone-400 flex items-center gap-0.5 group-hover:text-amber-300 transition-colors">
+                              <span>Xem công thức</span>
+                              <ChevronRight className="h-3 w-3" />
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Navigation Controls & Rotary Indicators */}
+              <div className="flex items-center justify-between w-full max-w-[490px] sm:max-w-[530px] pt-6 px-1">
+                <button
+                  type="button"
+                  onClick={rotatePrev}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200/90 bg-white/90 hover:bg-white text-stone-700 hover:text-amber-800 px-4 py-2 text-xs font-semibold shadow-xs transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  title="Món trước"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span>Trước</span>
+                </button>
+
+                <div className="flex flex-col items-center">
+                  <span className="text-[11px] font-semibold text-stone-600 flex items-center gap-1">
+                    <GripVertical className="h-3.5 w-3.5 text-amber-700 animate-pulse" />
+                    <span>Vuốt hoặc bấm thẻ ({currentSlide + 1}/{carouselItems.length})</span>
+                  </span>
+                  {/* Rotary Dots */}
+                  <div className="flex items-center gap-1.5 pt-1">
+                    {carouselItems.map((_, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setCurrentSlide(idx)}
+                        className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                          currentSlide === idx ? 'w-5 bg-amber-700' : 'w-1.5 bg-stone-300 hover:bg-stone-400'
+                        }`}
+                        aria-label={`Chuyển đến món ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={rotateNext}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200/90 bg-white/90 hover:bg-white text-stone-700 hover:text-amber-800 px-4 py-2 text-xs font-semibold shadow-xs transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  title="Món kế tiếp"
+                >
+                  <span>Tiếp</span>
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Key Hospitality Trust Bar (Anchors both columns with 100% horizontal equilibrium) */}
+          <div className="animate-fade-up-4 mt-10 sm:mt-14 pt-8 border-t border-stone-200/70 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="flex items-center gap-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 p-3.5 sm:p-4 shadow-xs hover:shadow-md transition-all">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 font-bold">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-base sm:text-lg font-extrabold text-stone-900 tracking-tight leading-none">100%</p>
+                <p className="text-xs font-semibold text-stone-700 mt-1">Nguyên liệu chuẩn tươi</p>
+                <p className="text-[11px] text-stone-500 hidden sm:block">Nhập mới mỗi ngày</p>
               </div>
             </div>
 
-            {/* Right Hero: 2-Column Physical Separation (Left Spotlight + Right Stacked Cards, Zero Overlap) */}
-            <div
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleMouseUp}
-              onWheel={handleWheel}
-              className="lg:col-span-6 relative h-[530px] sm:h-[570px] w-full flex items-center justify-between gap-3 sm:gap-5 animate-hero-showcase select-none cursor-grab active:cursor-grabbing"
-              title="Giữ chuột và kéo lên/xuống để xoay đổi món tiệc"
-            >
-              {/* LEFT COLUMN: PRIMARY SPOTLIGHT CARD (Chiếm ~58% width, sắc nét, không bị che lấp) */}
-              <div className="w-[58%] sm:w-[60%] max-w-[360px] h-[360px] sm:h-[390px] flex items-center shrink-0">
-                <div
-                  key={`spotlight-${activeDish.id}`}
-                  className="w-full animate-card-cascade"
-                >
-                  <Link
-                    to={`/dishes/${activeDish.id}`}
-                    className={`block rounded-3xl border-2 bg-white/95 backdrop-blur-md p-3 sm:p-3.5 shadow-2xl transition-all duration-500 ${activeTheme.ringColor} ring-4 ring-offset-2 ring-offset-white/80 group hover:shadow-amber-950/25`}
-                  >
-                    <div className="relative h-64 sm:h-72 rounded-2xl overflow-hidden bg-stone-100">
-                      <img
-                        src={activeDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85'}
-                        alt={activeDish.name}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/25 to-black/30" />
-
-                      {/* Top Badges */}
-                      <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-xl bg-white/95 backdrop-blur-sm px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-bold text-stone-900 shadow-sm border border-stone-200">
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                        </span>
-                        <span className="truncate max-w-[130px] sm:max-w-none">{activeDish.categoryName || 'Món Tiệc Đặc Sắc'}</span>
-                      </div>
-
-                      <div className="absolute top-3 right-3 rounded-xl bg-amber-950/85 backdrop-blur-sm border border-amber-500/30 px-2.5 sm:px-3 py-1 text-xs font-extrabold text-amber-300 shadow-sm font-mono">
-                        {formatVnd(activeDish.price)}
-                      </div>
-
-                      {/* Bottom Info inside Spotlight */}
-                      <div className="absolute bottom-3 inset-x-3 rounded-xl border border-white/20 bg-stone-900/90 backdrop-blur-md p-3 sm:p-3.5 text-white space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-xs sm:text-sm text-white group-hover:text-amber-300 transition-colors line-clamp-1">
-                            {activeDish.name}
-                          </span>
-                          <span className="rounded-md bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 shrink-0 font-medium">
-                            10 khách / bàn
-                          </span>
-                        </div>
-                        <p className="text-[11px] sm:text-xs text-stone-300 line-clamp-2 leading-relaxed">
-                          {(activeDish as any).highlight || activeDish.description || 'Chế biến tươi mới theo từng bàn tiệc chuẩn 5 sao.'}
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                </div>
+            <div className="flex items-center gap-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 p-3.5 sm:p-4 shadow-xs hover:shadow-md transition-all">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800 font-bold">
+                <Utensils className="h-5 w-5" />
               </div>
+              <div>
+                <p className="text-base sm:text-lg font-extrabold text-stone-900 tracking-tight leading-none">01 Bàn</p>
+                <p className="text-xs font-semibold text-stone-700 mt-1">Quy chuẩn 10 khách</p>
+                <p className="text-[11px] text-stone-500 hidden sm:block">Định mức công thức chuẩn</p>
+              </div>
+            </div>
 
-              {/* RIGHT COLUMN: TWO STACKED CARDS (Top-Right & Bottom-Right với hiệu ứng xếp lớp theo bản vẽ) */}
-              {(() => {
-                const total = carouselItems.length;
-                const topIdx = (currentSlide - 1 + total) % total;
-                const bottomIdx = (currentSlide + 1) % total;
-                const topDish = carouselItems[topIdx] || carouselItems[0];
-                const bottomDish = carouselItems[bottomIdx] || carouselItems[0];
+            <div className="flex items-center gap-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 p-3.5 sm:p-4 shadow-xs hover:shadow-md transition-all">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-800 font-bold">
+                <Clock className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-base sm:text-lg font-extrabold text-stone-900 tracking-tight leading-none">15 Phút</p>
+                <p className="text-xs font-semibold text-stone-700 mt-1">Giữ chỗ an toàn</p>
+                <p className="text-[11px] text-stone-500 hidden sm:block">Bảo lưu thực đơn khi đặt</p>
+              </div>
+            </div>
 
-                return (
-                  <div className="w-[39%] sm:w-[37%] max-w-[215px] h-[360px] sm:h-[390px] flex flex-col justify-between py-1 shrink-0">
-                    {/* KHỐI TRÊN: Top-Right Stack (Món sắp tới theo dòng chảy từ trên xuống) */}
-                    <div
-                      key={`top-stack-${topDish.id}`}
-                      onClick={() => rotateDown()}
-                      className="relative h-[160px] sm:h-[175px] w-full flex items-center justify-center cursor-pointer group animate-card-cascade"
-                      title="Bấm để đưa món này vào tâm điểm (Món sắp tới)"
-                    >
-                      {/* Lớp thẻ nền sau cùng (Rotate 4deg tạo cảm giác xấp thẻ bài 3D) */}
-                      <div className="absolute inset-0 bg-white/40 border border-stone-200/60 rounded-2xl rotate-4 translate-x-2 -translate-y-1 shadow-xs pointer-events-none transition-transform duration-500 group-hover:rotate-6" />
-                      {/* Lớp thẻ nền ở giữa (Rotate -2deg) */}
-                      <div className="absolute inset-0 bg-white/70 border border-stone-200/80 rounded-2xl -rotate-2 -translate-x-1 translate-y-0.5 shadow-sm pointer-events-none transition-transform duration-500 group-hover:-rotate-3" />
-
-                      {/* Lớp thẻ tương tác chính diện */}
-                      <div className="relative w-full rounded-2xl border border-stone-200/90 bg-white/95 backdrop-blur-md p-2 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-[1.02]">
-                        <div className="relative h-20 sm:h-24 rounded-xl overflow-hidden bg-stone-100">
-                          <img
-                            src={topDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'}
-                            alt={topDish.name}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent" />
-                          <span className="absolute top-1.5 left-1.5 rounded-md bg-stone-900/85 backdrop-blur-xs px-1.5 py-0.5 text-[9px] font-bold text-amber-300">
-                            Món sắp tới
-                          </span>
-                          <span className="absolute bottom-1.5 right-1.5 text-[9px] sm:text-[10px] font-bold text-white bg-stone-900/75 px-1.5 py-0.5 rounded font-mono">
-                            {formatVnd(topDish.price)}
-                          </span>
-                        </div>
-                        <div className="pt-1.5 px-1">
-                          <p className="text-[11px] sm:text-xs font-bold text-stone-800 truncate group-hover:text-amber-700 transition-colors">
-                            {topDish.name}
-                          </p>
-                          <p className="text-[9px] sm:text-[10px] text-stone-500 truncate">{topDish.categoryName}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Flow Indicator Divider */}
-                    <div className="flex items-center justify-center py-0.5 opacity-60">
-                      <span className="text-[10px] text-stone-500 font-semibold flex items-center gap-1">
-                        <ChevronDown className="h-3 w-3 text-amber-700 animate-bounce" />
-                        <span>Dòng chảy ẩm thực</span>
-                      </span>
-                    </div>
-
-                    {/* KHỐI DƯỚI: Bottom-Right Stack (Món kế tiếp theo dòng chảy từ trên xuống) */}
-                    <div
-                      key={`bottom-stack-${bottomDish.id}`}
-                      onClick={() => rotateUp()}
-                      className="relative h-[160px] sm:h-[175px] w-full flex items-center justify-center cursor-pointer group animate-card-cascade"
-                      title="Bấm để đưa món này vào tâm điểm (Món kế tiếp)"
-                    >
-                      {/* Lớp thẻ nền sau cùng (Rotate -4deg tạo cảm giác xấp thẻ bài 3D) */}
-                      <div className="absolute inset-0 bg-white/40 border border-stone-200/60 rounded-2xl -rotate-4 translate-x-2 translate-y-1 shadow-xs pointer-events-none transition-transform duration-500 group-hover:-rotate-6" />
-                      {/* Lớp thẻ nền ở giữa (Rotate 2deg) */}
-                      <div className="absolute inset-0 bg-white/70 border border-stone-200/80 rounded-2xl rotate-2 -translate-x-1 -translate-y-0.5 shadow-sm pointer-events-none transition-transform duration-500 group-hover:rotate-3" />
-
-                      {/* Lớp thẻ tương tác chính diện */}
-                      <div className="relative w-full rounded-2xl border border-stone-200/90 bg-white/95 backdrop-blur-md p-2 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-[1.02]">
-                        <div className="relative h-20 sm:h-24 rounded-xl overflow-hidden bg-stone-100">
-                          <img
-                            src={bottomDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'}
-                            alt={bottomDish.name}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent" />
-                          <span className="absolute top-1.5 left-1.5 rounded-md bg-stone-900/85 backdrop-blur-xs px-1.5 py-0.5 text-[9px] font-bold text-amber-300">
-                            Món kế tiếp
-                          </span>
-                          <span className="absolute bottom-1.5 right-1.5 text-[9px] sm:text-[10px] font-bold text-white bg-stone-900/75 px-1.5 py-0.5 rounded font-mono">
-                            {formatVnd(bottomDish.price)}
-                          </span>
-                        </div>
-                        <div className="pt-1.5 px-1">
-                          <p className="text-[11px] sm:text-xs font-bold text-stone-800 truncate group-hover:text-amber-700 transition-colors">
-                            {bottomDish.name}
-                          </p>
-                          <p className="text-[9px] sm:text-[10px] text-stone-500 truncate">{bottomDish.categoryName}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Drag Indicator & Rotary Dots */}
-              <div className="absolute -bottom-6 sm:-bottom-8 inset-x-0 flex items-center justify-between px-3 text-xs">
-                <span className="text-[11px] font-medium text-stone-700 flex items-center gap-1">
-                  <GripVertical className="h-3.5 w-3.5 text-amber-700 animate-pulse" />
-                  <span>Kéo chuột để xoay ({currentSlide + 1}/{carouselItems.length})</span>
-                </span>
-                <div className="flex items-center gap-1.5">
-                  {carouselItems.map((_, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setCurrentSlide(idx)}
-                      className={`h-2 rounded-full transition-all cursor-pointer ${
-                        currentSlide === idx
-                          ? 'w-6 bg-amber-700'
-                          : 'w-2 bg-stone-300 hover:bg-stone-400'
-                      }`}
-                      aria-label={`Chuyển đến món ${idx + 1}`}
-                    />
-                  ))}
-                </div>
+            <div className="flex items-center gap-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 p-3.5 sm:p-4 shadow-xs hover:shadow-md transition-all">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-800 font-bold">
+                <Scale className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-base sm:text-lg font-extrabold text-stone-900 tracking-tight leading-none">Minh Bạch</p>
+                <p className="text-xs font-semibold text-stone-700 mt-1">Đúng giá niêm yết</p>
+                <p className="text-[11px] text-stone-500 hidden sm:block">Không phụ phí ẩn phát sinh</p>
               </div>
             </div>
           </div>

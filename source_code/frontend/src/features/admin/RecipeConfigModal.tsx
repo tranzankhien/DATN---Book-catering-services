@@ -117,29 +117,29 @@ export const RecipeConfigModal: React.FC<RecipeConfigModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 backdrop-blur-xs p-4">
-      <div className="w-full max-w-xl rounded-2xl border border-stone-200 bg-white shadow-xl overflow-hidden flex flex-col max-h-[88vh]">
+      <div className="w-full max-w-3xl lg:max-w-4xl rounded-2xl border border-stone-200 bg-white shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-stone-200 px-6 py-4 bg-stone-50">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-600 text-white font-bold shadow-xs">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-600 text-white font-bold shadow-xs">
               <Scale className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-stone-900">
+              <h2 className="text-base sm:text-lg font-bold text-stone-900">
                 Định Lượng Công Thức: {dish.name}
               </h2>
               <p className="text-xs text-stone-500">
                 Mã món: <span className="font-mono text-stone-700 font-semibold">{dish.code}</span> •
-                Tính chuẩn cho 01 phần phục vụ
+                Tính chuẩn cho 01 phần phục vụ (Tự động nhân cấp theo số bàn)
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-200 hover:text-stone-700 transition-colors cursor-pointer"
+            className="rounded-lg p-2 text-stone-400 hover:bg-stone-200 hover:text-stone-700 transition-colors cursor-pointer"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -153,89 +153,126 @@ export const RecipeConfigModal: React.FC<RecipeConfigModalProps> = ({
           )}
 
           <div className="flex items-center justify-between">
-            <p className="text-xs text-stone-600 font-medium">
-              Danh sách nguyên liệu và định mức tiêu hao (Quy tắc BR-02)
+            <p className="text-xs text-stone-700 font-bold flex items-center gap-1.5">
+              <span>Danh sách nguyên liệu và định mức tiêu hao (Quy tắc BR-02)</span>
             </p>
             <button
               type="button"
               onClick={handleAddRow}
-              className="inline-flex items-center gap-1 rounded-lg border border-stone-300 bg-stone-50 px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-900 hover:bg-amber-100 transition-colors cursor-pointer shadow-xs"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-3.5 w-3.5 text-amber-700" />
               <span>Thêm nguyên liệu</span>
             </button>
           </div>
 
-          <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+          {/* Table Header for Columns */}
+          <div className="hidden sm:grid sm:grid-cols-12 gap-3 px-3 py-2 rounded-lg bg-stone-100 text-[11px] font-bold text-stone-600 uppercase tracking-wider">
+            <div className="col-span-5">Nguyên Liệu Trong Kho</div>
+            <div className="col-span-3 text-center">Định Lượng / 01 Phần</div>
+            <div className="col-span-3">Ghi Chú Sơ Chế / Kỹ Thuật</div>
+            <div className="col-span-1 text-center">Xóa</div>
+          </div>
+
+          {/* Ingredient Rows Container */}
+          <div className="space-y-2.5 max-h-[460px] overflow-y-auto pr-1">
             {rows.map((row, idx) => {
               const currentIng = ingredients.find((i) => i.id === Number(row.ingredientId));
               return (
                 <div
                   key={idx}
-                  className="flex items-center gap-2 rounded-lg border border-stone-200 bg-stone-50 p-2"
+                  className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 items-center rounded-xl border border-stone-200 bg-stone-50/70 p-2.5 sm:p-3 hover:bg-stone-50 transition-colors"
                 >
-                  <select
-                    value={row.ingredientId}
-                    onChange={(e) => handleChangeRow(idx, 'ingredientId', Number(e.target.value))}
-                    className="flex-1 rounded-md border border-stone-300 bg-white px-2 py-1 text-xs font-medium text-stone-800 focus:outline-none focus:border-amber-600 cursor-pointer"
-                  >
-                    {ingredients.map((ing) => (
-                      <option key={ing.id} value={ing.id}>
-                        {ing.code} - {ing.name} ({ing.unit})
-                      </option>
-                    ))}
-                  </select>
-
-                  <div className="flex items-center gap-1 w-28 shrink-0">
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0.001"
-                      required
-                      value={row.quantity}
-                      onChange={(e) => handleChangeRow(idx, 'quantity', Number(e.target.value))}
-                      className="w-full rounded-md border border-stone-300 bg-white px-2 py-1 text-xs text-right font-bold text-amber-700 focus:outline-none focus:border-amber-600"
-                    />
-                    <span className="text-[11px] font-semibold text-stone-500 w-8">
-                      {currentIng?.unit || ''}
-                    </span>
+                  {/* Column 1: Ingredient Select (5 cols) */}
+                  <div className="sm:col-span-5">
+                    <label className="text-[10px] font-bold text-stone-500 sm:hidden block mb-1">
+                      Nguyên Liệu:
+                    </label>
+                    <select
+                      value={row.ingredientId}
+                      onChange={(e) => handleChangeRow(idx, 'ingredientId', Number(e.target.value))}
+                      className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs font-semibold text-stone-800 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 cursor-pointer shadow-xs truncate"
+                    >
+                      {ingredients.map((ing) => (
+                        <option key={ing.id} value={ing.id}>
+                          {ing.code} - {ing.name} ({ing.unit})
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
-                  <input
-                    type="text"
-                    value={row.note || ''}
-                    onChange={(e) => handleChangeRow(idx, 'note', e.target.value)}
-                    placeholder="Ghi chú chế biến..."
-                    className="w-32 rounded-md border border-stone-300 bg-white px-2 py-1 text-xs text-stone-700 focus:outline-none focus:border-amber-600 hidden sm:block"
-                  />
+                  {/* Column 2: Quantity + Unit (3 cols) */}
+                  <div className="sm:col-span-3">
+                    <label className="text-[10px] font-bold text-stone-500 sm:hidden block mb-1">
+                      Định Lượng / 1 Phần:
+                    </label>
+                    <div className="relative flex items-center">
+                      <input
+                        type="number"
+                        step="0.001"
+                        min="0.001"
+                        required
+                        value={row.quantity}
+                        onChange={(e) => handleChangeRow(idx, 'quantity', Number(e.target.value))}
+                        className="w-full rounded-lg border border-stone-300 bg-white pl-3 pr-14 py-2 text-xs text-right font-bold text-amber-700 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 shadow-xs"
+                        placeholder="0.00"
+                      />
+                      <span className="absolute right-2 px-1.5 py-0.5 rounded bg-stone-100 text-[11px] font-bold text-stone-600 pointer-events-none">
+                        {currentIng?.unit || ''}
+                      </span>
+                    </div>
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveRow(idx)}
-                    disabled={rows.length <= 1}
-                    className="p-1 text-stone-400 hover:text-rose-600 disabled:opacity-30 cursor-pointer"
-                    title="Xóa dòng"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  {/* Column 3: Processing Note (3 cols) */}
+                  <div className="sm:col-span-3">
+                    <label className="text-[10px] font-bold text-stone-500 sm:hidden block mb-1">
+                      Ghi Chú Kỹ Thuật:
+                    </label>
+                    <input
+                      type="text"
+                      value={row.note || ''}
+                      onChange={(e) => handleChangeRow(idx, 'note', e.target.value)}
+                      placeholder="Ghi chú chế biến, cắt tỉa..."
+                      className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs text-stone-700 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 shadow-xs"
+                    />
+                  </div>
+
+                  {/* Column 4: Remove Button (1 col) */}
+                  <div className="sm:col-span-1 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveRow(idx)}
+                      disabled={rows.length <= 1}
+                      className="rounded-lg p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-stone-400 transition-colors cursor-pointer"
+                      title="Xóa dòng nguyên liệu này"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               );
             })}
           </div>
 
+          {/* Form Summary Info */}
+          <div className="flex items-center justify-between text-xs text-stone-500 pt-1 px-1">
+            <span>Tổng cộng: <strong className="text-stone-800">{rows.length}</strong> nguyên liệu trong công thức</span>
+            <span className="italic text-[11px] text-stone-500">Định mức áp dụng tự động nhân cấp khi khách đặt tiệc</span>
+          </div>
+
           {/* Footer Controls */}
-          <div className="flex items-center justify-end gap-2.5 border-t border-stone-200 pt-3">
+          <div className="flex items-center justify-end gap-2.5 border-t border-stone-200 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
+              className="rounded-lg border border-stone-300 bg-white px-5 py-2.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
             >
               Hủy Bỏ
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 px-4 py-2 text-xs font-semibold text-white shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 px-6 py-2.5 text-xs font-semibold text-white shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
             >
               {saving ? (
                 <>
