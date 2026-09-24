@@ -139,3 +139,19 @@
 .btn-shimmer:hover {
   background-position: right center;
 }
+
+/* Keyframes for Hero Cascade Motion */
+@keyframes heroCardEnter {
+  0% {
+    opacity: 0.4;
+    transform: translateY(-14px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-card-cascade {
+  animation: heroCardEnter 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
