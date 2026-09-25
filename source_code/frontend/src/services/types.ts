@@ -55,6 +55,7 @@ export interface IngredientDto {
   avgUnitCost: number;
   lowStock: boolean;
   active: boolean;
+  usedInRecipe?: boolean;
 }
 
 export interface RecipeItemDto {

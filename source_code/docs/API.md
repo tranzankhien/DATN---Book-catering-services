@@ -81,15 +81,15 @@ Tất cả các endpoint dưới đây yêu cầu JWT của tài khoản có quy
 |-------------|----------|-------|-------|
 | `GET` | `/api/v1/admin/catalog/categories` | `ROLE_ADMIN` | Lấy toàn bộ danh mục món ăn |
 | `POST` | `/api/v1/admin/catalog/categories` | `ROLE_ADMIN` | Tạo danh mục món ăn mới |
-| `GET` | `/api/v1/admin/catalog/ingredients` | `ROLE_ADMIN` | Lấy danh sách nguyên liệu kèm tồn kho và ngưỡng cảnh báo |
+| `GET` | `/api/v1/admin/catalog/ingredients` | `ROLE_ADMIN` | Lấy danh sách nguyên liệu kèm tồn kho, ngưỡng cảnh báo và cờ `usedInRecipe` |
 | `POST` | `/api/v1/admin/catalog/ingredients` | `ROLE_ADMIN` | Thêm nguyên liệu gốc mới (`code`, `name`, `unit`, `minStockThreshold >= 0`) |
-| `PUT` | `/api/v1/admin/catalog/ingredients/{id}` | `ROLE_ADMIN` | Cập nhật thông tin nguyên liệu và ngưỡng tồn tối thiểu |
+| `PUT` | `/api/v1/admin/catalog/ingredients/{id}` | `ROLE_ADMIN` | Cập nhật thông tin nguyên liệu (khóa thay đổi `unit` nếu nguyên liệu đã dùng trong công thức món ăn – trả `400 Bad Request`) |
 | `GET` | `/api/v1/admin/catalog/dishes` | `ROLE_ADMIN` | Lấy toàn bộ món ăn (bao gồm cả `ACTIVE` và `HIDDEN`) kèm công thức |
 | `GET` | `/api/v1/admin/catalog/dishes/{id}` | `ROLE_ADMIN` | Xem chi tiết một món ăn bất kỳ |
-| `POST` | `/api/v1/admin/catalog/dishes` | `ROLE_ADMIN` | Tạo món ăn mới kèm danh sách công thức định lượng (`price > 0`, `quantity > 0`) |
-| `PUT` | `/api/v1/admin/catalog/dishes/{id}` | `ROLE_ADMIN` | Cập nhật thông tin món ăn và công thức nguyên liệu |
-| `PATCH` | `/api/v1/admin/catalog/dishes/{id}/status` | `ROLE_ADMIN` | Ẩn hoặc hiển thị lại món ăn (`{"status": "HIDDEN"}` / `{"status": "ACTIVE"}`) |
-| `PUT` | `/api/v1/admin/catalog/dishes/{id}/recipe` | `ROLE_ADMIN` | Cấu hình / cập nhật danh sách định lượng nguyên liệu cho 01 phần món (`quantity > 0`) |
+| `POST` | `/api/v1/admin/catalog/dishes` | `ROLE_ADMIN` | Tạo món ăn mới kèm ít nhất 01 nguyên liệu hợp lệ trong công thức (`price >= 1000` VND nguyên, `quantity > 0`, không chứa dòng `null`) |
+| `PUT` | `/api/v1/admin/catalog/dishes/{id}` | `ROLE_ADMIN` | Cập nhật thông tin món ăn và công thức nguyên liệu (`price >= 1000` VND, bắt buộc có ít nhất 01 nguyên liệu hợp lệ) |
+| `PATCH` | `/api/v1/admin/catalog/dishes/{id}/status` | `ROLE_ADMIN` | Ẩn hoặc hiển thị lại món ăn (`{"status": "HIDDEN"}` / `{"status": "ACTIVE"}` – chặn chuyển sang `ACTIVE` nếu món chưa có công thức hợp lệ) |
+| `PUT` | `/api/v1/admin/catalog/dishes/{id}/recipe` | `ROLE_ADMIN` | Cấu hình / cập nhật danh sách định lượng nguyên liệu cho 01 phần món (`quantity > 0`, không rỗng, không chứa dòng `null`) |
 
 ### Ví dụ `PUT /api/v1/admin/catalog/dishes/{id}/recipe`
 ```json

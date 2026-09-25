@@ -6,9 +6,16 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Set;
+
 public interface RecipeItemRepository extends JpaRepository<RecipeItem, Long> {
 
     @Modifying
     @Query("DELETE FROM RecipeItem r WHERE r.dish.id = :dishId")
     void deleteByDishId(@Param("dishId") Long dishId);
+
+    boolean existsByIngredientId(Long ingredientId);
+
+    @Query("SELECT DISTINCT r.ingredient.id FROM RecipeItem r")
+    Set<Long> findAllUsedIngredientIds();
 }

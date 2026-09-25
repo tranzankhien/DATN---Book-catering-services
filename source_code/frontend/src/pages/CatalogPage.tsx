@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   Search,
@@ -46,7 +46,10 @@ export const CatalogPage: React.FC = () => {
   const [draftLines, setDraftLines] = useState<DraftMenuLine[]>([]);
   const [tableCount, setTableCount] = useState<number>(6);
 
+  const latestRequestIdRef = useRef<number>(0);
+
   const fetchCatalog = useCallback(async () => {
+    const requestId = ++latestRequestIdRef.current;
     setLoading(true);
     setError(null);
     try {
@@ -57,17 +60,28 @@ export const CatalogPage: React.FC = () => {
           keyword: keyword.trim() || undefined,
         }),
       ]);
+      if (requestId !== latestRequestIdRef.current) {
+        return;
+      }
       setCategories(cats);
       setDishes(dishList);
     } catch (err) {
+      if (requestId !== latestRequestIdRef.current) {
+        return;
+      }
       setError(extractErrorMessage(err));
     } finally {
-      setLoading(false);
+      if (requestId === latestRequestIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [selectedCategoryId, keyword]);
 
   useEffect(() => {
     void fetchCatalog();
+    return () => {
+      latestRequestIdRef.current += 1;
+    };
   }, [fetchCatalog]);
 
   const handleSelectCategory = (catId?: number) => {

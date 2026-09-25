@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Plus,
   Search,
@@ -48,7 +48,10 @@ export const AdminCatalogPage: React.FC = () => {
   const [ingredientModalOpen, setIngredientModalOpen] = useState<boolean>(false);
   const [editingIngredient, setEditingIngredient] = useState<IngredientDto | null>(null);
 
+  const latestRequestIdRef = useRef<number>(0);
+
   const loadAdminData = useCallback(async () => {
+    const requestId = ++latestRequestIdRef.current;
     setLoading(true);
     setError(null);
     try {
@@ -61,18 +64,29 @@ export const AdminCatalogPage: React.FC = () => {
           keyword: keyword.trim() || undefined,
         }),
       ]);
+      if (requestId !== latestRequestIdRef.current) {
+        return;
+      }
       setCategories(catList);
       setIngredients(ingList);
       setDishes(dishList);
     } catch (err) {
+      if (requestId !== latestRequestIdRef.current) {
+        return;
+      }
       setError(extractErrorMessage(err));
     } finally {
-      setLoading(false);
+      if (requestId === latestRequestIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [selectedCategoryId, selectedStatus, keyword]);
 
   useEffect(() => {
     void loadAdminData();
+    return () => {
+      latestRequestIdRef.current += 1;
+    };
   }, [loadAdminData]);
 
   const handleToggleStatus = async (dish: DishDetailDto) => {

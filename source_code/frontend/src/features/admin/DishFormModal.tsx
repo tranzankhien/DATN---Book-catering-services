@@ -240,7 +240,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
               <input
                 type="number"
                 min={1000}
-                step={5000}
+                step={1}
                 required
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}

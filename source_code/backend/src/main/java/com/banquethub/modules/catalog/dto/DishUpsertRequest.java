@@ -35,7 +35,7 @@ public class DishUpsertRequest {
     private DishStatus status = DishStatus.ACTIVE;
 
     @Valid
-    private List<RecipeItemRequest> recipeItems;
+    private List<@NotNull(message = "Dòng nguyên liệu trong công thức không được để trống") RecipeItemRequest> recipeItems;
 
     public DishUpsertRequest() {
     }

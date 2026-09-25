@@ -288,6 +288,90 @@ class Phase1IntegrationTest {
                         .content(negativeQtyPayload))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
+
+        // Danh sách công thức chứa phần tử null -> bị từ chối 400 Bad Request (không phải 500)
+        String nullRowPayload = """
+                {
+                  "recipeItems": [ null ]
+                }
+                """;
+
+        mockMvc.perform(put("/api/v1/admin/catalog/dishes/{id}/recipe", dishId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(nullRowPayload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    @Order(8)
+    @Transactional
+    @DisplayName("8. Chặn tạo món chưa có công thức và khóa đổi đơn vị nguyên liệu đang dùng trong công thức")
+    void adminCannotCreateDishWithoutRecipeOrChangeUsedIngredientUnit() throws Exception {
+        String adminToken = obtainAdminToken();
+
+        MvcResult catRes = mockMvc.perform(get("/api/v1/admin/catalog/categories")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andReturn();
+        long categoryId = objectMapper.readTree(catRes.getResponse().getContentAsString())
+                .path("data").get(0).path("id").asLong();
+
+        // 1. Tạo món không có công thức (recipeItems rỗng) -> 400 Bad Request
+        String noRecipePayload = """
+                {
+                  "code": "DISH-NO-RECIPE",
+                  "name": "Món Không Có Công Thức",
+                  "price": 12500,
+                  "categoryId": %d,
+                  "status": "ACTIVE",
+                  "recipeItems": []
+                }
+                """.formatted(categoryId);
+
+        mockMvc.perform(post("/api/v1/admin/catalog/dishes")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(noRecipePayload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
+
+        // 2. Đổi đơn vị tính (unit) của nguyên liệu đã dùng trong công thức (từ kg sang g) -> 400 Bad Request
+        MvcResult ingRes = mockMvc.perform(get("/api/v1/admin/catalog/ingredients")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode ingredients = objectMapper.readTree(ingRes.getResponse().getContentAsString()).path("data");
+        JsonNode usedIngredient = null;
+        for (JsonNode node : ingredients) {
+            if (node.path("usedInRecipe").asBoolean()) {
+                usedIngredient = node;
+                break;
+            }
+        }
+        assertThat(usedIngredient).isNotNull();
+
+        long usedIngId = usedIngredient.path("id").asLong();
+        String usedIngCode = usedIngredient.path("code").asText();
+        String usedIngName = usedIngredient.path("name").asText();
+
+        String changeUnitPayload = """
+                {
+                  "code": "%s",
+                  "name": "%s",
+                  "unit": "g",
+                  "minStockThreshold": 5.0,
+                  "active": true
+                }
+                """.formatted(usedIngCode, usedIngName);
+
+        mockMvc.perform(put("/api/v1/admin/catalog/ingredients/{id}", usedIngId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(changeUnitPayload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
     }
 
     private String obtainAdminToken() throws Exception {

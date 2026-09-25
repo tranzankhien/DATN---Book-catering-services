@@ -15,11 +15,16 @@ public class IngredientResponse {
     private BigDecimal avgUnitCost;
     private boolean lowStock;
     private boolean active;
+    private boolean usedInRecipe;
 
     public IngredientResponse() {
     }
 
     public static IngredientResponse fromEntity(Ingredient entity) {
+        return fromEntity(entity, false);
+    }
+
+    public static IngredientResponse fromEntity(Ingredient entity, boolean usedInRecipe) {
         IngredientResponse dto = new IngredientResponse();
         dto.setId(entity.getId());
         dto.setCode(entity.getCode());
@@ -30,6 +35,7 @@ public class IngredientResponse {
         dto.setAvgUnitCost(entity.getAvgUnitCost());
         dto.setLowStock(entity.getCurrentStock().compareTo(entity.getMinStockThreshold()) <= 0);
         dto.setActive(entity.isActive());
+        dto.setUsedInRecipe(usedInRecipe);
         return dto;
     }
 
@@ -103,5 +109,13 @@ public class IngredientResponse {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isUsedInRecipe() {
+        return usedInRecipe;
+    }
+
+    public void setUsedInRecipe(boolean usedInRecipe) {
+        this.usedInRecipe = usedInRecipe;
     }
 }

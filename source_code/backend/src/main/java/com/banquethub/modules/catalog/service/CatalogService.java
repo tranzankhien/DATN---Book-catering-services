@@ -20,6 +20,7 @@ import com.banquethub.modules.catalog.entity.RecipeItem;
 import com.banquethub.modules.catalog.repository.DishCategoryRepository;
 import com.banquethub.modules.catalog.repository.DishRepository;
 import com.banquethub.modules.catalog.repository.IngredientRepository;
+import com.banquethub.modules.catalog.repository.RecipeItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -40,15 +41,18 @@ public class CatalogService {
     private final DishCategoryRepository categoryRepository;
     private final IngredientRepository ingredientRepository;
     private final DishRepository dishRepository;
+    private final RecipeItemRepository recipeItemRepository;
 
     public CatalogService(
             DishCategoryRepository categoryRepository,
             IngredientRepository ingredientRepository,
-            DishRepository dishRepository
+            DishRepository dishRepository,
+            RecipeItemRepository recipeItemRepository
     ) {
         this.categoryRepository = categoryRepository;
         this.ingredientRepository = ingredientRepository;
         this.dishRepository = dishRepository;
+        this.recipeItemRepository = recipeItemRepository;
     }
 
     // =====================================================================
@@ -110,9 +114,10 @@ public class CatalogService {
 
     @Transactional(readOnly = true)
     public List<IngredientResponse> getAdminIngredients() {
+        Set<Long> usedIngredientIds = recipeItemRepository.findAllUsedIngredientIds();
         return ingredientRepository.findAllByOrderByNameAsc()
                 .stream()
-                .map(IngredientResponse::fromEntity)
+                .map(ing -> IngredientResponse.fromEntity(ing, usedIngredientIds.contains(ing.getId())))
                 .toList();
     }
 
@@ -135,7 +140,7 @@ public class CatalogService {
         ingredient.setAvgUnitCost(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
         ingredient.setActive(request.getActive() == null || request.getActive());
 
-        return IngredientResponse.fromEntity(ingredientRepository.save(ingredient));
+        return IngredientResponse.fromEntity(ingredientRepository.save(ingredient), false);
     }
 
     @Transactional
@@ -154,15 +159,23 @@ public class CatalogService {
             throw new BusinessValidationException("Ngưỡng tồn tối thiểu phải lớn hơn hoặc bằng 0");
         }
 
+        String newUnit = request.getUnit().trim();
+        boolean usedInRecipe = recipeItemRepository.existsByIngredientId(id);
+        if (usedInRecipe && !ingredient.getUnit().trim().equals(newUnit)) {
+            throw new BusinessValidationException(
+                    "Không thể thay đổi đơn vị gốc của nguyên liệu đã được sử dụng trong công thức món ăn"
+            );
+        }
+
         ingredient.setCode(normalizedCode);
         ingredient.setName(request.getName().trim());
-        ingredient.setUnit(request.getUnit().trim());
+        ingredient.setUnit(newUnit);
         ingredient.setMinStockThreshold(request.getMinStockThreshold().setScale(3, RoundingMode.HALF_UP));
         if (request.getActive() != null) {
             ingredient.setActive(request.getActive());
         }
 
-        return IngredientResponse.fromEntity(ingredientRepository.save(ingredient));
+        return IngredientResponse.fromEntity(ingredientRepository.save(ingredient), usedInRecipe);
     }
 
     // =====================================================================
@@ -195,6 +208,10 @@ public class CatalogService {
         }
         validatePrice(request.getPrice());
 
+        if (request.getRecipeItems() == null || request.getRecipeItems().isEmpty()) {
+            throw new BusinessValidationException("Công thức món ăn phải có ít nhất 01 nguyên liệu hợp lệ");
+        }
+
         DishCategory category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục món với ID: " + request.getCategoryId()));
 
@@ -207,9 +224,8 @@ public class CatalogService {
         dish.setCategory(category);
         dish.setStatus(request.getStatus() != null ? request.getStatus() : DishStatus.ACTIVE);
 
-        if (request.getRecipeItems() != null && !request.getRecipeItems().isEmpty()) {
-            syncRecipeItems(dish, request.getRecipeItems());
-        }
+        syncRecipeItems(dish, request.getRecipeItems());
+        ensureDishHasValidRecipe(dish);
 
         Dish saved = dishRepository.save(dish);
         return DishDetailResponse.fromEntity(saved);
@@ -241,10 +257,12 @@ public class CatalogService {
 
         if (request.getRecipeItems() != null) {
             if (request.getRecipeItems().isEmpty()) {
-                throw new BusinessValidationException("Công thức món ăn phải có ít nhất 01 nguyên liệu");
+                throw new BusinessValidationException("Công thức món ăn phải có ít nhất 01 nguyên liệu hợp lệ");
             }
             syncRecipeItems(dish, request.getRecipeItems());
         }
+
+        ensureDishHasValidRecipe(dish);
 
         Dish saved = dishRepository.save(dish);
         return DishDetailResponse.fromEntity(saved);
@@ -254,6 +272,9 @@ public class CatalogService {
     public DishDetailResponse updateDishStatus(Long id, DishStatus status) {
         Dish dish = dishRepository.findWithDetailsById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy món ăn với ID: " + id));
+        if (status == DishStatus.ACTIVE) {
+            ensureDishHasValidRecipe(dish);
+        }
         dish.setStatus(status);
         Dish saved = dishRepository.save(dish);
         return DishDetailResponse.fromEntity(saved);
@@ -265,10 +286,11 @@ public class CatalogService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy món ăn với ID: " + id));
 
         if (request.getRecipeItems() == null || request.getRecipeItems().isEmpty()) {
-            throw new BusinessValidationException("Công thức món ăn phải có ít nhất 01 nguyên liệu");
+            throw new BusinessValidationException("Công thức món ăn phải có ít nhất 01 nguyên liệu hợp lệ");
         }
 
         syncRecipeItems(dish, request.getRecipeItems());
+        ensureDishHasValidRecipe(dish);
         Dish saved = dishRepository.save(dish);
         return DishDetailResponse.fromEntity(saved);
     }
@@ -278,8 +300,14 @@ public class CatalogService {
     // =====================================================================
 
     private void syncRecipeItems(Dish dish, List<RecipeItemRequest> itemRequests) {
+        if (itemRequests == null || itemRequests.isEmpty()) {
+            throw new BusinessValidationException("Công thức món ăn phải có ít nhất 01 nguyên liệu hợp lệ");
+        }
         Set<Long> seenIngredientIds = new HashSet<>();
         for (RecipeItemRequest itemReq : itemRequests) {
+            if (itemReq == null) {
+                throw new BusinessValidationException("Dòng nguyên liệu trong công thức không được để trống");
+            }
             if (itemReq.getIngredientId() == null) {
                 throw new BusinessValidationException("Mã nguyên liệu trong công thức không được để trống");
             }
@@ -296,7 +324,13 @@ public class CatalogService {
                 .collect(Collectors.toMap(Ingredient::getId, Function.identity()));
 
         if (ingredientMap.size() != seenIngredientIds.size()) {
-            throw new ResourceNotFoundException("Một hoặc nhiều nguyên liệu trong công thức không tồn tại trong hệ thống");
+            throw new BusinessValidationException("Một hoặc nhiều nguyên liệu trong công thức không tồn tại hoặc không hợp lệ");
+        }
+
+        for (Ingredient ing : ingredientMap.values()) {
+            if (!ing.isActive()) {
+                throw new BusinessValidationException("Nguyên liệu '" + ing.getName() + "' đang ngừng hoạt động, không thể đưa vào công thức");
+            }
         }
 
         Map<Long, RecipeItem> existingByIngredientId = dish.getRecipeItems().stream()
@@ -326,9 +360,21 @@ public class CatalogService {
         }
     }
 
+    private void ensureDishHasValidRecipe(Dish dish) {
+        if (dish.getRecipeItems() == null || dish.getRecipeItems().isEmpty()) {
+            throw new BusinessValidationException("Món ăn bắt buộc phải có ít nhất 01 nguyên liệu hợp lệ trong công thức");
+        }
+        for (RecipeItem item : dish.getRecipeItems()) {
+            if (item == null || item.getIngredient() == null || item.getQuantity() == null
+                    || item.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new BusinessValidationException("Công thức món ăn chứa nguyên liệu hoặc định lượng không hợp lệ");
+            }
+        }
+    }
+
     private void validatePrice(BigDecimal price) {
-        if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessValidationException("Giá bán món ăn phải lớn hơn 0 VND");
+        if (price == null || price.compareTo(BigDecimal.valueOf(1000)) < 0) {
+            throw new BusinessValidationException("Giá bán một phần món phải từ 1.000 VND trở lên");
         }
     }
 

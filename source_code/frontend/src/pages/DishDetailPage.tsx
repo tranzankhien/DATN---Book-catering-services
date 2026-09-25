@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -27,7 +27,10 @@ export const DishDetailPage: React.FC = () => {
   const [portionsPerTable, setPortionsPerTable] = useState<number>(1);
   const [tableCount, setTableCount] = useState<number>(6);
 
+  const latestRequestIdRef = useRef<number>(0);
+
   const loadDishDetail = useCallback(async () => {
+    const requestId = ++latestRequestIdRef.current;
     if (!id || Number.isNaN(Number(id))) {
       setError('Mã món ăn không hợp lệ');
       setLoading(false);
@@ -37,16 +40,27 @@ export const DishDetailPage: React.FC = () => {
     setError(null);
     try {
       const data = await catalogService.getPublicDishDetail(Number(id));
+      if (requestId !== latestRequestIdRef.current) {
+        return;
+      }
       setDish(data);
     } catch (err) {
+      if (requestId !== latestRequestIdRef.current) {
+        return;
+      }
       setError(extractErrorMessage(err));
     } finally {
-      setLoading(false);
+      if (requestId === latestRequestIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [id]);
 
   useEffect(() => {
     void loadDishDetail();
+    return () => {
+      latestRequestIdRef.current += 1;
+    };
   }, [loadDishDetail]);
 
   if (loading) {

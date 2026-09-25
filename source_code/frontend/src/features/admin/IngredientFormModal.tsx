@@ -147,11 +147,26 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
               <input
                 type="text"
                 required
+                disabled={isEdit && Boolean(initialIngredient?.usedInRecipe)}
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 placeholder="kg, lít, con, phần..."
-                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
+                title={
+                  isEdit && initialIngredient?.usedInRecipe
+                    ? 'Đơn vị gốc đã khóa vì nguyên liệu đang được dùng trong công thức món ăn'
+                    : undefined
+                }
+                className={`w-full rounded-lg border px-3 py-2 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600 ${
+                  isEdit && initialIngredient?.usedInRecipe
+                    ? 'border-stone-200 bg-stone-100 text-stone-500 cursor-not-allowed'
+                    : 'border-stone-300 bg-white text-stone-900'
+                }`}
               />
+              {isEdit && initialIngredient?.usedInRecipe && (
+                <p className="mt-1 text-[10px] text-amber-800 font-medium">
+                  Đã khóa đơn vị do đang dùng trong công thức món ăn.
+                </p>
+              )}
             </div>
 
             <div>
