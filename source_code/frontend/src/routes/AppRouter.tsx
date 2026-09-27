@@ -9,6 +9,13 @@ import { DishDetailPage } from '../pages/DishDetailPage';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { AdminCatalogPage } from '../pages/AdminCatalogPage';
+import { AdminInventoryOverviewPage } from '../pages/admin/AdminInventoryOverviewPage';
+import { AdminIngredientsInventoryPage } from '../pages/admin/AdminIngredientsInventoryPage';
+import { AdminSuppliersPage } from '../pages/admin/AdminSuppliersPage';
+import { AdminStockReceiptsPage } from '../pages/admin/AdminStockReceiptsPage';
+import { AdminStockReceiptCreatePage } from '../pages/admin/AdminStockReceiptCreatePage';
+import { AdminStockReceiptDetailPage } from '../pages/admin/AdminStockReceiptDetailPage';
+import { AdminStockMovementsPage } from '../pages/admin/AdminStockMovementsPage';
 
 export const AppRouter: React.FC = () => {
   return (
@@ -34,6 +41,13 @@ export const AppRouter: React.FC = () => {
         >
           <Route index element={<Navigate to="/admin/catalog" replace />} />
           <Route path="catalog" element={<AdminCatalogPage />} />
+          <Route path="inventory/overview" element={<AdminInventoryOverviewPage />} />
+          <Route path="inventory/ingredients" element={<AdminIngredientsInventoryPage />} />
+          <Route path="inventory/receipts" element={<AdminStockReceiptsPage />} />
+          <Route path="inventory/receipts/new" element={<AdminStockReceiptCreatePage />} />
+          <Route path="inventory/receipts/:id" element={<AdminStockReceiptDetailPage />} />
+          <Route path="inventory/movements" element={<AdminStockMovementsPage />} />
+          <Route path="suppliers" element={<AdminSuppliersPage />} />
         </Route>
 
         {/* Fallback */}

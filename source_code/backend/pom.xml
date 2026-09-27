@@ -89,6 +89,13 @@
             <version>${springdoc.version}</version>
         </dependency>
 
+        <!-- PDF Export (OpenPDF - LGPL/MPL licensed, Unicode & Vietnamese font support) -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

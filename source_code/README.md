@@ -168,15 +168,16 @@ Các tài khoản demo được cấu hình thông qua biến môi trường (`A
 
 ---
 
-### 7.2. Bảng kết quả kiểm tra thực tế hệ thống (Phase 1 Verification)
+### 7.2. Bảng kết quả kiểm tra thực tế hệ thống (Phase 1 & Phase 2 Verification)
 
 | Hạng mục kiểm tra | Lệnh thực thi đúng chuẩn trên PowerShell | Kết quả thực tế |
 |-------------------|------------------------------------------|-----------------|
 | **Khởi tạo PostgreSQL 17** | `docker compose -f infra/docker-compose.yml up -d` | Container `banquet-hub-postgres` đạt trạng thái `running / healthy` trên cổng `5432` |
-| **Chạy JUnit 5 Integration Tests** | `cd backend; .\mvnw.cmd test` | `Tests run: 7, Failures: 0, Errors: 0, Skipped: 0 — BUILD SUCCESS` ([Phase1IntegrationTest.java](backend/src/test/java/com/banquethub/Phase1IntegrationTest.java)) |
-| **Build TypeScript & Vite Frontend** | `cd frontend; npm run build` | `tsc -b && vite build` thành công (`✓ built in 2.18s`), 0 lỗi |
+| **Chạy JUnit 5 Integration Tests** | `cd backend; .\mvnw.cmd test` | `Tests run: 26, Failures: 0, Errors: 0, Skipped: 0 — BUILD SUCCESS` ([Phase1IntegrationTest.java](backend/src/test/java/com/banquethub/Phase1IntegrationTest.java) & [Phase2IntegrationTest.java](backend/src/test/java/com/banquethub/Phase2IntegrationTest.java)) |
+| **Build TypeScript & Vite Frontend** | `cd frontend; npm run build` | `tsc -b && vite build` thành công (`✓ built in ~3s`), 0 lỗi |
 | **Khởi động Live Services** | `.\run-dev.ps1`<br>*(hoặc mở 2 tab: `cd backend; .\mvnw.cmd spring-boot:run` và `cd frontend; npm run dev`)* | Backend Spring Boot sẵn sàng tại `:8080`, Frontend React Vite sẵn sàng tại `:5173` |
 | **Kiểm tra Live API & Health Endpoints** | `Invoke-RestMethod -Uri "http://localhost:8080/api/v1/health"; (Invoke-WebRequest -Uri "http://localhost:5173" -UseBasicParsing).StatusCode` | `/api/v1/health` trả `status: UP`, `database: PostgreSQL Connected`, `timezone: Asia/Ho_Chi_Minh`; Frontend trả mã `200 OK` |
+| **Xuất PDF Phiếu Nhập A4** | Gọi GET `/api/v1/admin/stock-receipts/{id}/pdf` | Trả về `application/pdf` binary chuẩn A4, hiển thị tiếng Việt có dấu với bộ font Unicode Noto Sans SIL OFL |
 
 ---
 

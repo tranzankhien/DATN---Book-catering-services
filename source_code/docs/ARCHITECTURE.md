@@ -6,7 +6,7 @@
 
 - **Đơn giản hóa vận hành**: Không sử dụng Microservices hay Kubernetes phức tạp không cần thiết cho phạm vi 01 cơ sở kinh doanh và 01 kho nguyên liệu của MVP.
 - **Ranh giới module rõ ràng**: Backend (`com.banquethub`) tách biệt phần lõi dùng chung (`common`) và các module nghiệp vụ độc lập (`modules.*`).
-- **Đảm bảo tính toàn vẹn giao dịch (ACID)**: Toàn bộ các nghiệp vụ nhạy cảm (cấu hình công thức món, giữ tồn tạm 15 phút, xác thực VNPAY và trừ kho một lần) sử dụng chung cơ chế `@Transactional` trên PostgreSQL 17.
+- **Đảm bảo tính toàn vẹn giao dịch (ACID)**: Toàn bộ các nghiệp vụ nhạy cảm (cấu hình công thức món, nhập kho, tính lại giá vốn di động, ghi sổ biến động kho, khóa tồn tạm) sử dụng cơ chế `@Transactional` trên PostgreSQL 17.
 
 ```mermaid
 flowchart LR
@@ -18,11 +18,13 @@ flowchart LR
     subgraph Backend["Spring Boot 3.5 API (:8080/api/v1)"]
         SecFilter["JWT Security Filter & RBAC"]
         AuthMod["Module: auth & users"]
-        CatMod["Module: catalog (Dish, Category, Ingredient, Recipe)"]
-        FutureMods["Modules Phase 2-7: inventory, suppliers, orders, payments, ai, employees, payroll, reports"]
+        CatMod["Module: catalog (Dish, Category, Recipe)"]
+        SuppMod["Module: suppliers (Supplier, NCC Code Seq)"]
+        InvMod["Module: inventory (StockReceipt, Movement, Adjustment, PDF)"]
+        FutureMods["Modules Phase 3-7: orders, payments, ai, employees, payroll, reports"]
     end
 
-    subgraph Infra["Infrastructure (Docker Compose :5432)"]
+    subgraph Infra["Infrastructure (PostgreSQL 17 :5432)"]
         PG[("PostgreSQL 17\nbanquet_hub")]
     end
 
@@ -30,9 +32,13 @@ flowchart LR
     AdminUI -->|Axios + Bearer JWT| SecFilter
     SecFilter --> AuthMod
     SecFilter --> CatMod
+    SecFilter --> SuppMod
+    SecFilter --> InvMod
     SecFilter -.-> FutureMods
     AuthMod --> PG
     CatMod --> PG
+    SuppMod --> PG
+    InvMod --> PG
 ```
 
 ---
@@ -40,37 +46,52 @@ flowchart LR
 ## 2. Cấu trúc Package Backend (`com.banquethub`)
 
 - **`com.banquethub.common`**:
-  - `config/`: `SecurityConfig` (Spring Security 6, Stateless JWT, CORS, JSON 401/403 handlers), `OpenApiConfig` (Swagger), `DemoDataInitializer` (khởi tạo tài khoản demo có kiểm soát), `SystemHealthController`.
+  - `config/`: `SecurityConfig` (Spring Security 6, Stateless JWT, CORS, JSON 401/403 handlers), `OpenApiConfig` (Swagger), `DemoDataInitializer`, `SystemHealthController`.
   - `security/`: `JwtTokenProvider` (HS256), `JwtAuthenticationFilter`, `CustomUserDetails`, `CustomUserDetailsService`.
   - `dto/`: `ApiResponse<T>`, `ApiErrorResponse`.
   - `exception/`: `GlobalExceptionHandler` (`@RestControllerAdvice`), `ResourceNotFoundException`, `BusinessValidationException`, `DuplicateResourceException`.
 - **`com.banquethub.modules`**:
-  - **Đã triển khai ở Phase 1**:
-    - `users`: Quản lý thực thể `User` và phân quyền `Role` (`ROLE_USER`, `ROLE_EMPLOYEE`, `ROLE_ADMIN`).
-    - `auth`: Đăng ký, đăng nhập (BCrypt + JWT) và truy vấn hồ sơ hiện tại (`/api/v1/auth/me`).
-    - `catalog`: Quản lý `DishCategory`, `Ingredient`, `Dish`, `RecipeItem` (định lượng nguyên liệu cho 01 phần món).
-  - **Dự kiến mở rộng ở Phase 2–7**:
-    - `inventory`, `suppliers`, `orders`, `payments`, `ai`, `notifications`, `employees`, `payroll`, `reports`.
+  - **`users` & `auth`**: Quản lý thực thể `User`, phân quyền RBAC (`ROLE_USER`, `ROLE_EMPLOYEE`, `ROLE_ADMIN`), đăng ký, đăng nhập (BCrypt + JWT), `/api/v1/auth/me`.
+  - **`catalog`**: Quản lý `DishCategory`, `Dish`, `RecipeItem` (định lượng cho 01 phần món), thực thể `Ingredient` (kho).
+  - **`suppliers` (Phase 2)**:
+    - `entity/Supplier`: Đối tác cung cấp nguyên liệu.
+    - `repository/SupplierRepository`: Tìm kiếm, đếm, tính tổng tiền đã nhập.
+    - `service/SupplierService`: Nghiệp vụ quản lý NCC, chặn trùng số điện thoại, kích hoạt/tạm dừng.
+    - `controller/AdminSupplierController`: `/api/v1/admin/suppliers/**`.
+  - **`inventory` (Phase 2)**:
+    - `entity/`: `StockReceipt`, `StockReceiptItem`, `StockMovement`, `StockAdjustment`.
+    - `repository/`: `StockReceiptRepository`, `StockReceiptItemRepository`, `StockMovementRepository`, `StockAdjustmentRepository`.
+    - `service/InventoryService`: Tra cứu tồn kho, cảnh báo tồn thấp, điều chỉnh kiểm kê, tra cứu sổ biến động, tổng quan dashboard kho.
+    - `service/StockReceiptService`: Lập phiếu nhập (Nháp/Xác nhận), kiểm tra tính hợp lệ, tăng tồn kho đúng 1 lần, cập nhật giá vốn bình quân di động, ghi sổ `StockMovement`, ghi nhận thanh toán.
+    - `service/PdfExportService`: Xuất phiếu nhập PDF A4 tiếng Việt có dấu chuẩn OpenPDF + Noto Sans Unicode SIL OFL.
+    - `controller/`: `AdminInventoryController`, `AdminStockReceiptController`.
+  - **Dự kiến mở rộng ở Phase 3–7**: `orders`, `payments`, `ai`, `notifications`, `employees`, `payroll`, `reports`.
 
 ---
 
-## 3. Cấu trúc Frontend (`frontend/src`)
+## 3. Kiến trúc Tính toán Giá Vốn Bình Quân Gia Quyền Di Động (Moving Weighted Average Cost)
 
-- `app/`: Khởi tạo `AuthProvider`, `ToastProvider` và `App`.
-- `routes/`: `AppRouter` và `ProtectedRoute` kiểm tra quyền truy cập theo `Role`.
-- `layouts/`: `PublicLayout` (khách vãng lai / khách hàng) và `AdminLayout` (giao diện quản trị có Sidebar).
-- `pages/`: Các màn hình chạy thực tế (`HomePage`, `CatalogPage`, `DishDetailPage`, `LoginPage`, `RegisterPage`, `AdminCatalogPage`).
-- `features/admin/`: Các modal nghiệp vụ chuyên biệt (`DishFormModal`, `RecipeConfigModal`, `IngredientFormModal`).
-- `services/`: Kết nối Axios (`apiClient.ts`) thông qua biến môi trường `VITE_API_BASE_URL`, tách biệt `authService` và `catalogService`.
-- `hooks/`: `useAuth`, `useToast`, `useFormatters` (chuẩn hóa tiền tệ `VND` và múi giờ `Asia/Ho_Chi_Minh`).
+Theo đặc tả `BR-07`, giá vốn bình quân di động được tính lại ngay tại thời điểm xác nhận nhập kho (`CONFIRMED`) theo công thức:
+
+$$
+\text{Cost}_{\text{mới}} = \frac{(\text{Stock}_{\text{cũ}} \times \text{Cost}_{\text{cũ}}) + (\text{Qty}_{\text{nhập}} \times \text{Price}_{\text{nhập}})}{\text{Stock}_{\text{cũ}} + \text{Qty}_{\text{nhập}}}
+$$
+
+- Tầng CSDL lưu `avg_unit_cost` kiểu `NUMERIC(18, 4)` để triệt tiêu hiện tượng sai số tích lũy (precision drift).
+- Tầng Business logic tính toán hoàn toàn bằng `BigDecimal` với `RoundingMode.HALF_UP`.
+- Ghi nhận `avg_cost_before` và `avg_cost_after` vào `stock_movements` cho từng lần nhập.
 
 ---
 
-## 4. Các quyết định kỹ thuật quan trọng (ADR)
+## 4. Kiến trúc Xuất File PDF Khổ A4 Tiếng Việt
 
-1. **Quản lý Schema bằng Flyway (`ddl-auto=validate`)**:
-   - Toàn bộ bảng, khóa ngoại và ràng buộc `CHECK` được quản lý qua các file SQL có phiên bản (`V1`, `V2`...). Hibernate chỉ kiểm tra sự tương thích (`validate`), tuyệt đối không tự động sửa cấu trúc bảng ngầm.
-2. **Kiểu dữ liệu số chính xác (`BigDecimal` / `NUMERIC`)**:
-   - Tuyệt đối không dùng `double` hoặc `float` cho giá tiền và định lượng nguyên liệu. Tiền tệ VND dùng `NUMERIC(15, 2)` và định lượng nguyên liệu dùng `NUMERIC(12, 3)`.
-3. **Bảo mật đa lớp (Defense in Depth)**:
-   - Route guard ở Frontend chỉ phục vụ trải nghiệm người dùng; mọi API `/api/v1/admin/**` đều được chặn độc lập ở tầng `SecurityFilterChain` và `@PreAuthorize("hasAuthority('ROLE_ADMIN')")` tại Backend.
+- **Thư viện**: `com.github.librepdf:openpdf:2.0.3` (Giấy phép mã nguồn mở LGPL / MPL phù hợp mục đích thương mại).
+- **Bộ font Unicode**: `NotoSans-Regular.ttf` và `NotoSans-Bold.ttf` đặt tại `backend/src/main/resources/fonts/` (Giấy phép SIL Open Font License 1.1).
+- **Cơ chế nạp font**: Nạp từ `ClassPathResource` sang `BaseFont` với encoding `BaseFont.IDENTITY_H` và cờ `BaseFont.EMBEDDED = true`.
+- **Bố cục chứng từ A4**:
+  - Header thương hiệu nhà hàng (Tiêu chuẩn A4, lề 36pt).
+  - Khối thông tin đối tác cung cấp, ngày nhập, mã phiếu tự sinh.
+  - Bảng nguyên liệu chi tiết: STT, Mã, Tên, Đơn vị, Số lượng, Đơn giá, Thành tiền, Ghi chú.
+  - Tổng tiền bằng số, số tiền đã trả, số tiền còn nợ.
+  - Khối chữ ký xác nhận của Người lập phiếu và Người giao hàng.
+- **Header truyền tải**: `Content-Type: application/pdf`, `Content-Disposition: attachment; filename="phieu-nhap-PN-xxxxxx.pdf"`.

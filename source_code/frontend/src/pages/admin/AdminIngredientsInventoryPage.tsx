@@ -1,0 +1,728 @@
+import React, { useEffect, useState } from 'react';
+import {
+  Boxes,
+  Search,
+  Filter,
+  Plus,
+  AlertTriangle,
+  CheckCircle2,
+  SlidersHorizontal,
+  Eye,
+  Trash2,
+  RefreshCw,
+  UtensilsCrossed,
+  History,
+  X,
+  ArrowRight,
+  TrendingUp,
+} from 'lucide-react';
+import { inventoryService } from '../../services/inventoryService';
+import { catalogService } from '../../services/catalogService';
+import type {
+  IngredientDto,
+  IngredientStockDetailDto,
+  IngredientUpsertPayload,
+  StockAdjustmentPayload,
+} from '../../services/types';
+import { useToast } from '../../hooks/useToast';
+
+export const AdminIngredientsInventoryPage: React.FC = () => {
+  const [ingredients, setIngredients] = useState<IngredientDto[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
+  const [activeFilter, setActiveFilter] = useState<string>('ALL');
+  const [lowStockOnly, setLowStockOnly] = useState<boolean>(false);
+
+  // Detail Modal
+  const [selectedIngredientId, setSelectedIngredientId] = useState<number | null>(null);
+  const [detailData, setDetailData] = useState<IngredientStockDetailDto | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState<boolean>(false);
+
+  // Adjust Stock Modal
+  const [adjustTarget, setAdjustTarget] = useState<IngredientDto | null>(null);
+  const [adjustQtyChange, setAdjustQtyChange] = useState<string>('');
+  const [adjustReason, setAdjustReason] = useState<string>('');
+  const [submittingAdjust, setSubmittingAdjust] = useState<boolean>(false);
+
+  // Create Ingredient Modal
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
+  const [createForm, setCreateForm] = useState<IngredientUpsertPayload>({
+    code: '',
+    name: '',
+    unit: 'kg',
+    minStockThreshold: 5,
+    active: true,
+  });
+  const [submittingCreate, setSubmittingCreate] = useState<boolean>(false);
+
+  const { showToast } = useToast();
+
+  const loadIngredients = async () => {
+    try {
+      setLoading(true);
+      const activeParam = activeFilter === 'ALL' ? undefined : activeFilter === 'ACTIVE';
+      const data = await inventoryService.getInventoryIngredients({
+        keyword: searchKeyword || undefined,
+        active: activeParam,
+        lowStockOnly,
+      });
+      setIngredients(data);
+    } catch {
+      showToast('Không thể tải danh sách nguyên liệu', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadIngredients();
+  }, [searchKeyword, activeFilter, lowStockOnly]);
+
+  const openDetail = async (id: number) => {
+    try {
+      setSelectedIngredientId(id);
+      setLoadingDetail(true);
+      const res = await inventoryService.getIngredientDetail(id);
+      setDetailData(res);
+    } catch {
+      showToast('Không thể tải chi tiết nguyên liệu', 'error');
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+
+  const handleAdjustSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adjustTarget) return;
+
+    const qty = parseFloat(adjustQtyChange);
+    if (isNaN(qty) || qty === 0) {
+      showToast('Số lượng điều chỉnh phải khác 0', 'error');
+      return;
+    }
+    if (!adjustReason.trim()) {
+      showToast('Lý do điều chỉnh là bắt buộc', 'error');
+      return;
+    }
+
+    try {
+      setSubmittingAdjust(true);
+      const payload: StockAdjustmentPayload = {
+        ingredientId: adjustTarget.id,
+        quantityChange: qty,
+        reason: adjustReason.trim(),
+      };
+      await inventoryService.adjustStock(payload);
+      showToast('Điều chỉnh tồn kho thành công!', 'success');
+      setAdjustTarget(null);
+      setAdjustQtyChange('');
+      setAdjustReason('');
+      loadIngredients();
+      if (selectedIngredientId === adjustTarget.id) {
+        openDetail(adjustTarget.id);
+      }
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Lỗi khi điều chỉnh tồn kho';
+      showToast(msg, 'error');
+    } finally {
+      setSubmittingAdjust(false);
+    }
+  };
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createForm.name.trim()) {
+      showToast('Vui lòng nhập tên nguyên liệu', 'error');
+      return;
+    }
+    try {
+      setSubmittingCreate(true);
+      await catalogService.createIngredient(createForm);
+      showToast('Thêm nguyên liệu thành công!', 'success');
+      setShowCreateModal(false);
+      setCreateForm({ code: '', name: '', unit: 'kg', minStockThreshold: 5, active: true });
+      loadIngredients();
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Lỗi khi thêm nguyên liệu';
+      showToast(msg, 'error');
+    } finally {
+      setSubmittingCreate(false);
+    }
+  };
+
+  const handleDeleteIngredient = async (item: IngredientDto) => {
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn nguyên liệu "${item.name}"?`)) {
+      return;
+    }
+    try {
+      await inventoryService.deleteIngredient(item.id);
+      showToast('Đã xóa nguyên liệu thành công', 'success');
+      if (selectedIngredientId === item.id) {
+        setSelectedIngredientId(null);
+        setDetailData(null);
+      }
+      loadIngredients();
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Không thể xóa nguyên liệu';
+      showToast(msg, 'error');
+    }
+  };
+
+  const formatVnd = (val: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0);
+  };
+
+  const formatDateTime = (isoStr: string) => {
+    if (!isoStr) return '—';
+    return new Date(isoStr).toLocaleString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  return (
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-700">
+            <Boxes className="h-4 w-4" />
+            <span>Kho Nguyên Liệu & Tồn Kho</span>
+          </div>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-stone-900 tracking-tight mt-1">
+            Quản Lý Nguyên Liệu & Tồn Kho Thực Tế
+          </h1>
+          <p className="text-sm text-stone-500 mt-0.5">
+            Theo dõi tồn kho, giá vốn bình quân di động, ngưỡng an toàn và kiểm kê điều chỉnh số dư.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowCreateModal(true)}
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold rounded-xl bg-amber-600 text-white hover:bg-amber-700 transition-colors shadow-sm shadow-amber-600/20 cursor-pointer self-start md:self-auto"
+        >
+          <Plus className="h-4 w-4" />
+          <span>Thêm Nguyên Liệu</span>
+        </button>
+      </div>
+
+      {/* Filter & Search Bar */}
+      <div className="bg-white p-4 rounded-2xl border border-stone-200/80 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+          <input
+            type="text"
+            placeholder="Tìm theo tên nguyên liệu hoặc mã (VD: Bò, Tôm, ING-001)..."
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Active status filter */}
+          <select
+            value={activeFilter}
+            onChange={(e) => setActiveFilter(e.target.value)}
+            className="px-3 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600"
+          >
+            <option value="ALL">Tất cả trạng thái</option>
+            <option value="ACTIVE">Đang sử dụng</option>
+            <option value="INACTIVE">Tạm ngừng / Ẩn</option>
+          </select>
+
+          {/* Low Stock toggle */}
+          <button
+            type="button"
+            onClick={() => setLowStockOnly(!lowStockOnly)}
+            className={`inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border transition-colors cursor-pointer ${
+              lowStockOnly
+                ? 'bg-rose-50 border-rose-300 text-rose-700 shadow-xs'
+                : 'bg-white border-stone-200 text-stone-700 hover:bg-stone-50'
+            }`}
+          >
+            <AlertTriangle className={`h-3.5 w-3.5 ${lowStockOnly ? 'text-rose-600' : 'text-stone-400'}`} />
+            <span>Chỉ xem tồn thấp</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={loadIngredients}
+            className="p-2 text-stone-500 hover:text-stone-900 rounded-xl hover:bg-stone-100 transition-colors"
+            title="Tải lại danh sách"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-amber-600' : ''}`} />
+          </button>
+        </div>
+      </div>
+
+      {/* Main Ingredients Table */}
+      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-stone-50/80 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
+                <th className="py-3 px-4">Mã</th>
+                <th className="py-3 px-4">Tên Nguyên Liệu</th>
+                <th className="py-3 px-4">Đơn Vị</th>
+                <th className="py-3 px-4 text-right">Tồn Kho Hiện Tại</th>
+                <th className="py-3 px-4 text-right">Ngưỡng Tối Thiểu</th>
+                <th className="py-3 px-4 text-right">Giá Vốn Bình Quân</th>
+                <th className="py-3 px-4 text-center">Trạng Thái</th>
+                <th className="py-3 px-4 text-center">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-stone-100">
+              {loading && ingredients.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-12 text-center text-stone-400">
+                    <RefreshCw className="h-6 w-6 animate-spin mx-auto text-amber-600 mb-2" />
+                    <span>Đang tải danh sách nguyên liệu...</span>
+                  </td>
+                </tr>
+              ) : ingredients.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-12 text-center text-stone-400">
+                    Không tìm thấy nguyên liệu nào phù hợp với bộ lọc
+                  </td>
+                </tr>
+              ) : (
+                ingredients.map((item) => {
+                  const isLow = item.currentStock <= item.minStockThreshold;
+                  return (
+                    <tr
+                      key={item.id}
+                      className={`hover:bg-amber-50/40 transition-colors ${
+                        isLow && item.active ? 'bg-rose-50/20' : ''
+                      }`}
+                    >
+                      <td className="py-3 px-4 font-mono font-bold text-stone-700">{item.code}</td>
+                      <td className="py-3 px-4 font-semibold text-stone-900">
+                        <div className="flex items-center gap-2">
+                          <span>{item.name}</span>
+                          {isLow && item.active && (
+                            <span
+                              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700"
+                              title="Tồn kho thấp hơn hoặc bằng ngưỡng cảnh báo"
+                            >
+                              <AlertTriangle className="h-2.5 w-2.5" />
+                              Tồn thấp
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 font-medium text-stone-600">{item.unit}</td>
+                      <td className="py-3 px-4 text-right font-mono font-bold">
+                        <span className={isLow && item.active ? 'text-rose-600 font-extrabold' : 'text-stone-900'}>
+                          {item.currentStock}
+                        </span>{' '}
+                        <span className="text-[11px] text-stone-400 font-normal">{item.unit}</span>
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono text-stone-600">
+                        {item.minStockThreshold} {item.unit}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono font-bold text-amber-800">
+                        {formatVnd(item.avgUnitCost)}
+                        <span className="text-[10px] text-stone-400 font-normal"> / {item.unit}</span>
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            item.active
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : 'bg-stone-100 text-stone-500 border border-stone-200'
+                          }`}
+                        >
+                          {item.active ? 'Đang dùng' : 'Tạm ẩn'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <div className="inline-flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => openDetail(item.id)}
+                            className="p-1.5 rounded-lg text-stone-500 hover:text-amber-700 hover:bg-stone-100 transition-colors"
+                            title="Xem chi tiết & món ăn sử dụng"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAdjustTarget(item);
+                              setAdjustQtyChange('');
+                              setAdjustReason('');
+                            }}
+                            className="p-1.5 rounded-lg text-stone-500 hover:text-blue-700 hover:bg-stone-100 transition-colors"
+                            title="Điều chỉnh tồn kho thủ công"
+                          >
+                            <SlidersHorizontal className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteIngredient(item)}
+                            className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-stone-100 transition-colors"
+                            title="Xóa nguyên liệu (nếu chưa dùng)"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Ingredient Detail & Recipe Usage Modal */}
+      {selectedIngredientId && (
+        <div className="fixed inset-0 z-50 bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-stone-200 space-y-5 animate-in fade-in duration-150 my-8">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Boxes className="h-5 w-5 text-amber-700" />
+                <h3 className="text-base font-bold text-stone-900">Chi Tiết Nguyên Liệu & Lịch Sử</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedIngredientId(null);
+                  setDetailData(null);
+                }}
+                className="p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {loadingDetail || !detailData ? (
+              <div className="py-12 text-center text-stone-400">
+                <RefreshCw className="h-6 w-6 animate-spin mx-auto text-amber-600 mb-2" />
+                <span>Đang tải chi tiết nguyên liệu...</span>
+              </div>
+            ) : (
+              <div className="space-y-5 text-xs">
+                {/* Basic Info Pill Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-stone-50 p-3.5 rounded-xl border border-stone-100">
+                  <div>
+                    <span className="text-[11px] text-stone-400 block">Mã nguyên liệu</span>
+                    <span className="font-mono font-bold text-stone-900">{detailData.ingredient.code}</span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-stone-400 block">Tên nguyên liệu</span>
+                    <span className="font-bold text-stone-900">{detailData.ingredient.name}</span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-stone-400 block">Tồn hiện tại</span>
+                    <span className="font-mono font-bold text-amber-700">
+                      {detailData.ingredient.currentStock} {detailData.ingredient.unit}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-stone-400 block">Giá vốn bình quân</span>
+                    <span className="font-mono font-bold text-stone-900">
+                      {formatVnd(detailData.ingredient.avgUnitCost)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Delete Protection Alert */}
+                {!detailData.canDelete && (
+                  <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-800 text-xs flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
+                    <div>
+                      <span className="font-bold block">Khóa xóa vĩnh viễn (Ràng buộc toàn vẹn)</span>
+                      <span>{detailData.deleteBlockReason}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Used in Dishes */}
+                <div>
+                  <h4 className="text-xs font-bold text-stone-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <UtensilsCrossed className="h-3.5 w-3.5 text-amber-600" />
+                    <span>Món ăn đang dùng nguyên liệu này ({detailData.usedInDishes.length})</span>
+                  </h4>
+                  {detailData.usedInDishes.length > 0 ? (
+                    <div className="border border-stone-200 rounded-xl overflow-hidden divide-y divide-stone-100">
+                      {detailData.usedInDishes.map((dish) => (
+                        <div key={dish.dishId} className="p-2.5 flex items-center justify-between hover:bg-stone-50">
+                          <div>
+                            <span className="font-mono text-stone-400 text-[11px] mr-2">{dish.dishCode}</span>
+                            <span className="font-semibold text-stone-900">{dish.dishName}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="font-mono font-bold text-amber-800">{dish.quantityFormatted}</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-stone-100 text-stone-600">
+                              {dish.dishStatus}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-stone-400 italic">Chưa có món ăn nào sử dụng nguyên liệu này</p>
+                  )}
+                </div>
+
+                {/* Recent Movements */}
+                <div>
+                  <h4 className="text-xs font-bold text-stone-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <History className="h-3.5 w-3.5 text-amber-600" />
+                    <span>Lịch sử biến động kho gần đây ({detailData.recentMovements.length})</span>
+                  </h4>
+                  {detailData.recentMovements.length > 0 ? (
+                    <div className="border border-stone-200 rounded-xl overflow-hidden divide-y divide-stone-100 max-h-48 overflow-y-auto">
+                      {detailData.recentMovements.map((mov) => (
+                        <div key={mov.id} className="p-2.5 flex items-center justify-between text-[11px]">
+                          <div>
+                            <span className="font-bold text-stone-800 mr-2">[{mov.movementType}]</span>
+                            <span className="font-mono text-stone-500 mr-2">{mov.referenceCode}</span>
+                            <span className="text-stone-400">{formatDateTime(mov.createdAt)}</span>
+                            {mov.note && <p className="text-stone-500 italic mt-0.5">{mov.note}</p>}
+                          </div>
+                          <div className="text-right">
+                            <span
+                              className={`font-mono font-bold ${
+                                mov.quantityChange > 0 ? 'text-emerald-600' : 'text-rose-600'
+                              }`}
+                            >
+                              {mov.quantityChange > 0 ? `+${mov.quantityChange}` : mov.quantityChange}{' '}
+                              {detailData.ingredient.unit}
+                            </span>
+                            <span className="block text-stone-400 text-[10px]">
+                              Tồn sau: {mov.stockAfter} {detailData.ingredient.unit}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-stone-400 italic">Chưa có lịch sử biến động</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Adjust Stock Modal */}
+      {adjustTarget && (
+        <div className="fixed inset-0 z-50 bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <form
+            onSubmit={handleAdjustSubmit}
+            className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4 animate-in fade-in duration-150"
+          >
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="h-5 w-5 text-blue-600" />
+                <h3 className="text-base font-bold text-stone-900">Điều Chỉnh Tồn Kho Thủ Công</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAdjustTarget(null)}
+                className="p-1 rounded-lg text-stone-400 hover:text-stone-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="bg-stone-50 p-3 rounded-xl border border-stone-100 text-xs space-y-1">
+              <div>
+                <span className="text-stone-400">Nguyên liệu: </span>
+                <span className="font-bold text-stone-900">{adjustTarget.name}</span>{' '}
+                <span className="font-mono text-stone-500">({adjustTarget.code})</span>
+              </div>
+              <div>
+                <span className="text-stone-400">Tồn hiện tại: </span>
+                <span className="font-bold text-amber-700 font-mono">
+                  {adjustTarget.currentStock} {adjustTarget.unit}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-stone-700 mb-1">
+                  Số lượng thay đổi (+ để tăng, - để giảm) <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.001"
+                    placeholder="VD: 5 hoặc -2.5"
+                    value={adjustQtyChange}
+                    onChange={(e) => setAdjustQtyChange(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 font-mono"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 font-medium">
+                    {adjustTarget.unit}
+                  </span>
+                </div>
+                {adjustQtyChange && !isNaN(parseFloat(adjustQtyChange)) && (
+                  <p className="text-[11px] text-stone-500 mt-1">
+                    Dự kiến tồn sau điều chỉnh:{' '}
+                    <span
+                      className={`font-mono font-bold ${
+                        adjustTarget.currentStock + parseFloat(adjustQtyChange) < 0
+                          ? 'text-rose-600'
+                          : 'text-emerald-600'
+                      }`}
+                    >
+                      {(adjustTarget.currentStock + parseFloat(adjustQtyChange)).toFixed(3)} {adjustTarget.unit}
+                    </span>
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block font-bold text-stone-700 mb-1">
+                  Lý do điều chỉnh kiểm kê <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="VD: Kiểm kê định kỳ phát hiện hao hụt, hư hỏng trong bảo quản, nhập bù thừa..."
+                  value={adjustReason}
+                  onChange={(e) => setAdjustReason(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-100">
+              <button
+                type="button"
+                onClick={() => setAdjustTarget(null)}
+                className="px-3 py-2 text-xs font-semibold rounded-xl text-stone-600 hover:bg-stone-100"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="submit"
+                disabled={submittingAdjust}
+                className="px-4 py-2 text-xs font-bold rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"
+              >
+                {submittingAdjust ? 'Đang lưu...' : 'Lưu Điều Chỉnh'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Create Ingredient Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <form
+            onSubmit={handleCreateSubmit}
+            className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4 animate-in fade-in duration-150"
+          >
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Boxes className="h-5 w-5 text-amber-700" />
+                <h3 className="text-base font-bold text-stone-900">Thêm Nguyên Liệu Mới</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="p-1 rounded-lg text-stone-400 hover:text-stone-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-stone-700 mb-1">
+                  Mã nguyên liệu (Để trống để hệ thống tự sinh mã)
+                </label>
+                <input
+                  type="text"
+                  placeholder="VD: ING-BO-UC (tùy chọn)"
+                  value={createForm.code}
+                  onChange={(e) => setCreateForm({ ...createForm, code: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-stone-700 mb-1">
+                  Tên nguyên liệu <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="VD: Bò Úc Thăn Ngoại Tươi"
+                  value={createForm.name}
+                  onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-stone-700 mb-1">
+                    Đơn vị tính <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    value={createForm.unit}
+                    onChange={(e) => setCreateForm({ ...createForm, unit: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 bg-white"
+                  >
+                    <option value="kg">kg (Kilogram)</option>
+                    <option value="g">g (Gram)</option>
+                    <option value="lít">lít (Litre)</option>
+                    <option value="ml">ml (Millilitre)</option>
+                    <option value="cái">cái / con</option>
+                    <option value="lon">lon / hộp</option>
+                    <option value="gói">gói / túi</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-stone-700 mb-1">Ngưỡng tồn tối thiểu</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    value={createForm.minStockThreshold}
+                    onChange={(e) =>
+                      setCreateForm({ ...createForm, minStockThreshold: parseFloat(e.target.value) || 0 })
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-100">
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="px-3 py-2 text-xs font-semibold rounded-xl text-stone-600 hover:bg-stone-100"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="submit"
+                disabled={submittingCreate}
+                className="px-4 py-2 text-xs font-bold rounded-xl bg-amber-600 text-white hover:bg-amber-700 transition-colors shadow-sm disabled:opacity-50"
+              >
+                {submittingCreate ? 'Đang tạo...' : 'Tạo Nguyên Liệu'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+};

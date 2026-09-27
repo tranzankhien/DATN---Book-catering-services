@@ -9,8 +9,8 @@ Tài liệu này theo dõi tiến độ triển khai dự án **BanquetHub (MVP)
 | Phase | Hạng mục chính | Trạng thái | Mã FR / BR trọng tâm |
 |-------|---------------|------------|----------------------|
 | **Phase 1** | Thiết lập nền tảng, PostgreSQL 17, Auth (JWT/RBAC), Danh mục món & Định lượng công thức | **Đã hoàn thành** | `FR-AUT-01`, `FR-AUT-03`, `FR-CAT-01`, `FR-CAT-02`, `FR-REC-01`, `FR-REC-02`, `FR-INV-01`, `BR-01`–`BR-03` |
-| **Phase 2** | Quản lý kho, nhà cung cấp, nhập hàng, giá vốn bình quân và xuất PDF phiếu nhập | Kế hoạch tiếp theo | `FR-SUP-01`–`FR-SUP-03`, `FR-INV-02`, `FR-INV-03`, `FR-INV-05`, `FR-INV-06`, `BR-06`, `BR-07`, `BR-11` |
-| **Phase 3** | Thực đơn mẫu, tạo thực đơn, đặt tiệc, giữ tồn 15 phút và quản lý đơn hàng | Chờ triển khai | `FR-CAT-03`, `FR-CAT-04`, `FR-REC-03`, `FR-ORD-01`–`FR-ORD-05`, `FR-PAY-04`, `BR-01`, `BR-02`, `BR-04` |
+| **Phase 2** | Quản lý kho, nhà cung cấp, nhập hàng, giá vốn bình quân di động và xuất PDF phiếu nhập | **Đã hoàn thành** | `FR-SUP-01`–`FR-SUP-03`, `FR-INV-02`, `FR-INV-03`, `FR-INV-05`, `FR-INV-06`, `BR-06`, `BR-07`, `BR-11` |
+| **Phase 3** | Thực đơn mẫu, tạo thực đơn, đặt tiệc, giữ tồn 15 phút và quản lý đơn hàng | Kế hoạch tiếp theo | `FR-CAT-03`, `FR-CAT-04`, `FR-REC-03`, `FR-ORD-01`–`FR-ORD-05`, `FR-PAY-04`, `BR-01`, `BR-02`, `BR-04` |
 | **Phase 4** | Tích hợp VNPAY Sandbox, trừ kho một lần khi thanh toán, gửi email xác nhận | Chờ triển khai | `FR-PAY-01`–`FR-PAY-03`, `FR-INV-04`, `FR-NOT-01`, `FR-NOT-02`, `BR-05`, `BR-08`, `BR-12` |
 | **Phase 5** | Tích hợp Gemini API gợi ý tối đa 03 phương án thực đơn từ catalog | Chờ triển khai | `FR-AI-01`–`FR-AI-04`, `NFR-07` |
 | **Phase 6** | Quản lý nhân viên, chấm công theo ngày, phụ cấp/khấu trừ và bảng lương tháng | Chờ triển khai | `FR-EMP-01`, `FR-HR-01`–`FR-HR-05`, `BR-10`, `BR-11` |
@@ -18,43 +18,29 @@ Tài liệu này theo dõi tiến độ triển khai dự án **BanquetHub (MVP)
 
 ---
 
-## Chi tiết các Phase tiếp theo
+## Chi tiết các Phase đã hoàn thành & Kế hoạch tiếp theo
 
-### Phase 2: Quản lý kho, nhà cung cấp, nhập hàng, giá vốn và xuất PDF
-- Quản lý danh bạ Nhà cung cấp (`Supplier`).
-- Tạo và xác nhận Phiếu nhập nguyên liệu (`StockReceipt`, `ReceiptLine`), tăng tồn đúng một lần và cập nhật đơn giá vốn bình quân gia quyền di động (`BR-07`).
-- Theo dõi trạng thái thanh toán NCC (`Chưa trả` / `Đã trả`) phục vụ tính dòng tiền (`FR-SUP-02`).
-- Phiếu điều chỉnh tồn kho có lý do (`StockMovement`, `FR-INV-05`) và cảnh báo tồn thấp (`FR-INV-06`).
-- Xuất file PDF phiếu nhập kho theo yêu cầu (`FR-SUP-03`).
+### Phase 1: Nền tảng, CSDL, Auth, Danh mục & Công thức (Hoàn thành)
+- Spring Boot 3.5.16, Java 21/24, PostgreSQL 17, Vite React TypeScript, Tailwind CSS.
+- JWT Authentication, BCrypt băm mật khẩu, phân quyền RBAC (`ROLE_USER`, `ROLE_EMPLOYEE`, `ROLE_ADMIN`).
+- Quản lý danh mục món ăn, công thức định lượng nguyên liệu chuẩn hóa cho 01 phần, khóa đơn vị kho (`BR-02`, `BR-03`).
+- 8/8 test cases integration vượt qua 100%.
 
-### Phase 3: Thực đơn mẫu, tạo thực đơn, đặt tiệc, giữ tồn 15 phút và quản lý đơn
+### Phase 2: Quản lý kho, nhà cung cấp, nhập hàng, giá vốn di động và xuất PDF (Hoàn thành)
+- **Module 1 – Quản lý nguyên liệu & Tồn kho**: Mở rộng bảng `ingredients` với `version` (optimistic lock), `avg_unit_cost` (NUMERIC(18,4)), xem chi tiết nguyên liệu, danh sách món dùng, lịch sử biến động, cảnh báo tồn thấp (`FR-INV-06`), chặn xóa vĩnh viễn khi đã có giao dịch kho hoặc công thức món.
+- **Module 2 – Quản lý nhà cung cấp**: Bảng `suppliers`, sinh mã `NCC-xxxxxx`, chặn trùng số điện thoại (`409 Conflict`), tìm kiếm theo tên/sđt, xem các phiếu nhập liên quan, tổng tiền đã nhập (`FR-SUP-01`, `FR-SUP-02`).
+- **Module 3 – Phiếu nhập nguyên liệu**: Bảng `stock_receipts` và `stock_receipt_items`, tự sinh mã `PN-xxxxxx`, tự tính thành tiền từng dòng và tổng tiền phiếu, lưu Nháp (`DRAFT`) hoặc Xác nhận (`CONFIRMED`). Xác nhận tăng tồn đúng 1 lần, chống xác nhận 2 lần bằng unique index idempotency, chặn sửa/xóa phiếu đã xác nhận (`BR-06`, `BR-07`).
+- **Module 4 – Xuất PDF phiếu nhập**: Thư viện OpenPDF 2.0.3 kết hợp bộ font Unicode Noto Sans (SIL Open Font License) hiển thị tiếng Việt có dấu chuẩn xác khổ A4, bố cục bảng biểu chuyên nghiệp, chữ ký và đầy đủ thông tin tài chính (`FR-SUP-03`).
+- **Module 5 – Tồn kho & Sổ biến động**: Bảng `stock_movements` (Audit log đầy đủ: tồn trước/sau, giá vốn trước/sau, chứng từ tham chiếu, tác nhân thực hiện) và `stock_adjustments` (biên bản điều chỉnh kiểm kê thủ công, chặn làm tồn âm `400 Bad Request`, `FR-INV-05`).
+- **Module 6 – Giá vốn bình quân di động liên hoàn**: Công thức chuẩn: `newCost = (oldStock * oldCost + importQty * importPrice) / (oldStock + importQty)`.
+- **Giao diện Admin UI**: 5 trang quản trị hoàn chỉnh tích hợp Sidebar thông minh (Pinned & Hover to expand).
+- **Kiểm thử**: 18/18 test cases integration Phase 2 vượt qua 100% (tổng cộng 26/26 tests hệ thống pass).
+
+---
+
+### Phase 3: Thực đơn mẫu, tạo thực đơn, đặt tiệc, giữ tồn 15 phút và quản lý đơn (Tiếp theo)
 - Quản trị Thực đơn mẫu (`Menu`, `MenuItem`) cho 01 bàn tiệc (`FR-CAT-04`).
 - Khách hàng tự xây dựng hoặc chỉnh sửa thực đơn cho 01 bàn và chọn số bàn (`FR-CAT-03`).
 - Kiểm tra khả năng phục vụ theo tồn khả dụng (`Tồn vật lý − Lượng đang giữ tạm hợp lệ`, `FR-REC-03`, `BR-04`).
 - Tạo đơn đặt tiệc (`Order`, `OrderLine`, `OrderStockSnapshot`), chốt bản sao giá bán và định lượng nguyên liệu tại thời điểm đặt, giữ tồn tạm trong 15 phút (`StockHold`, `FR-PAY-04`).
 - Luồng xử lý tiến độ đơn cho Nhân viên (`ROLE_EMPLOYEE`) và Admin: `Đã ghi nhận` → `Đang chuẩn bị` → `Hoàn thành` (`FR-ORD-03`–`FR-ORD-05`).
-
-### Phase 4: Tích hợp VNPAY Sandbox, trừ kho khi thanh toán, email xác nhận
-- Tạo URL thanh toán 100% giá trị đơn qua VNPAY Sandbox (`FR-PAY-01`).
-- Backend xác thực chữ ký HMAC-SHA512, số tiền, mã giao dịch (`PaymentTransaction`, `FR-PAY-02`).
-- Chống xử lý trùng callback (idempotency): cập nhật trạng thái đơn sang `Đã thanh toán`, trừ kho nguyên liệu đúng một lần theo snapshot định lượng và ghi nhận giá vốn xuất kho (`FR-PAY-03`, `FR-INV-04`, `BR-05`).
-- Xử lý trường hợp callback đến muộn sau 15 phút khi thiếu tồn: đánh dấu `Đã thanh toán – cần xử lý`, không trừ âm kho.
-- Gửi email xác nhận đơn hàng qua SMTP và lưu nhật ký `EmailLog` (`FR-NOT-01`, `BR-12`).
-
-### Phase 5: Gemini API gợi ý thực đơn
-- Khách hàng nhập mô tả bối cảnh tiệc, khẩu vị và ngân sách dự kiến cho 01 bàn (`FR-AI-01`).
-- Backend gọi Gemini API để đề xuất tối đa 03 phương án thực đơn chỉ sử dụng món `ACTIVE` trong hệ thống (`FR-AI-02`).
-- Lọc bỏ món không hợp lệ, tính lại giá thực tế từ CSDL (`FR-AI-03`) và cho phép khách hàng chỉnh sửa trước khi đặt tiệc (`FR-AI-04`).
-
-### Phase 6: Quản lý nhân viên, chấm công, bảng lương
-- Quản lý hồ sơ nhân viên và mức lương cố định tháng (`Employee`, `FR-EMP-01`).
-- Chấm công theo ngày (`0`, `0.5`, `1` công), chống trùng bản ghi cùng nhân viên/ngày (`Attendance`, `FR-HR-01`).
-- Quản lý khoản phụ cấp và khấu trừ theo tháng (`PayrollAdjustment`, `FR-HR-02`).
-- Tính bảng lương tháng (`Lương cố định × Tổng công / Công chuẩn + Phụ cấp − Khấu trừ`, mặc định công chuẩn 26, làm tròn VND) và ghi nhận thanh toán lương (`Payroll`, `SalaryPayment`, `FR-HR-03`, `FR-HR-04`, `BR-10`).
-
-### Phase 7: Dashboard, chi phí, báo cáo và nghiệm thu theo SRS
-- Quản lý khoản chi phí vận hành khác nhập thủ công (`OperatingExpense`, `FR-RPT-04`).
-- Dashboard tách biệt rõ hai chỉ số:
-  - **Lợi nhuận tạm tính** = Doanh thu đơn đã thanh toán − Giá vốn nguyên liệu xuất kho − Chi phí lương theo kỳ − Chi phí vận hành khác (`FR-RPT-05`, `BR-09`).
-  - **Dòng tiền thu/chi** = Tiền thu từ đơn đã trả − Tiền NCC đã chi − Lương đã trả − Chi phí vận hành đã chi (`FR-RPT-06`).
-- Kiểm thử nghiệm thu toàn diện 20 kịch bản `AT-01` đến `AT-20`.

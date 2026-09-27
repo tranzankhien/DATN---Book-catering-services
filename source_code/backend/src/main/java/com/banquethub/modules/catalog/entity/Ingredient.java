@@ -38,11 +38,15 @@ public class Ingredient {
     @Column(name = "current_stock", nullable = false, precision = 12, scale = 3)
     private BigDecimal currentStock = BigDecimal.ZERO;
 
-    @Column(name = "avg_unit_cost", nullable = false, precision = 15, scale = 2)
+    @Column(name = "avg_unit_cost", nullable = false, precision = 18, scale = 4)
     private BigDecimal avgUnitCost = BigDecimal.ZERO;
 
     @Column(name = "active", nullable = false)
     private boolean active = true;
+
+    @jakarta.persistence.Version
+    @Column(name = "version", nullable = false)
+    private Long version = 0L;
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
@@ -129,6 +133,14 @@ public class Ingredient {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public OffsetDateTime getCreatedAt() {

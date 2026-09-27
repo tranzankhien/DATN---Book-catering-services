@@ -1,4 +1,4 @@
-# Tài liệu REST API BanquetHub – Phase 1
+# Tài liệu REST API BanquetHub
 
 - **Base URL**: `http://localhost:8080/api/v1`
 - **Swagger UI**: `http://localhost:8080/swagger-ui.html`
@@ -53,14 +53,6 @@
 | `POST` | `/api/v1/auth/login` | Public | Đăng nhập bằng `email` và `password`, trả về `accessToken` và thông tin `user` |
 | `GET` | `/api/v1/auth/me` | Authenticated | Lấy thông tin tài khoản hiện tại từ JWT token |
 
-### Ví dụ `POST /api/v1/auth/login`
-```json
-{
-  "email": "admin@banquethub.vn",
-  "password": "Admin@123"
-}
-```
-
 ---
 
 ## 4. Danh mục & Món ăn Công khai (`catalog` – Public)
@@ -74,8 +66,6 @@
 ---
 
 ## 5. Quản trị Món ăn, Nguyên liệu & Công thức (`admin/catalog` – Admin Only)
-
-Tất cả các endpoint dưới đây yêu cầu JWT của tài khoản có quyền **`ROLE_ADMIN`** (`401 Unauthorized` nếu chưa đăng nhập, `403 Forbidden` nếu là `ROLE_USER` hoặc `ROLE_EMPLOYEE`).
 
 | Phương thức | Endpoint | Quyền | Mô tả |
 |-------------|----------|-------|-------|
@@ -91,19 +81,69 @@ Tất cả các endpoint dưới đây yêu cầu JWT của tài khoản có quy
 | `PATCH` | `/api/v1/admin/catalog/dishes/{id}/status` | `ROLE_ADMIN` | Ẩn hoặc hiển thị lại món ăn (`{"status": "HIDDEN"}` / `{"status": "ACTIVE"}` – chặn chuyển sang `ACTIVE` nếu món chưa có công thức hợp lệ) |
 | `PUT` | `/api/v1/admin/catalog/dishes/{id}/recipe` | `ROLE_ADMIN` | Cấu hình / cập nhật danh sách định lượng nguyên liệu cho 01 phần món (`quantity > 0`, không rỗng, không chứa dòng `null`) |
 
-### Ví dụ `PUT /api/v1/admin/catalog/dishes/{id}/recipe`
+---
+
+## 6. Quản trị Nhà Cung Cấp (`admin/suppliers` – Admin Only)
+
+| Phương thức | Endpoint | Quyền | Mô tả |
+|-------------|----------|-------|-------|
+| `GET` | `/api/v1/admin/suppliers?keyword=&active=` | `ROLE_ADMIN` | Danh sách nhà cung cấp (hỗ trợ tìm kiếm theo tên, sđt, mã; lọc theo trạng thái) |
+| `GET` | `/api/v1/admin/suppliers/{id}` | `ROLE_ADMIN` | Xem chi tiết một nhà cung cấp |
+| `GET` | `/api/v1/admin/suppliers/{id}/receipts` | `ROLE_ADMIN` | Lấy danh sách các phiếu nhập hàng từ nhà cung cấp kèm trạng thái |
+| `POST` | `/api/v1/admin/suppliers` | `ROLE_ADMIN` | Thêm nhà cung cấp mới (tự sinh mã `NCC-xxxxxx`, chặn trùng sđt `409 Conflict`) |
+| `PUT` | `/api/v1/admin/suppliers/{id}` | `ROLE_ADMIN` | Cập nhật thông tin nhà cung cấp (chặn đổi sang sđt trùng của NCC khác `409 Conflict`) |
+| `PATCH` | `/api/v1/admin/suppliers/{id}/toggle-active` | `ROLE_ADMIN` | Bật / tắt trạng thái hợp tác của nhà cung cấp |
+
+---
+
+## 7. Quản trị Kho Nguyên Liệu & Sổ Biến Động (`admin/inventory` – Admin Only)
+
+| Phương thức | Endpoint | Quyền | Mô tả |
+|-------------|----------|-------|-------|
+| `GET` | `/api/v1/admin/inventory/overview` | `ROLE_ADMIN` | Tổng quan kho: giá trị tồn kho ước tính theo giá vốn bình quân di động, tổng nhập trong tháng, cảnh báo tồn thấp, 5 phiếu nhập gần nhất, 10 biến động gần nhất |
+| `GET` | `/api/v1/admin/inventory/ingredients?keyword=&active=&lowStockOnly=` | `ROLE_ADMIN` | Danh sách nguyên liệu tồn kho kèm bộ lọc tìm kiếm và cờ chỉ xem tồn thấp |
+| `GET` | `/api/v1/admin/inventory/ingredients/{id}` | `ROLE_ADMIN` | Chi tiết nguyên liệu: danh sách món ăn đang dùng, 10 biến động kho gần nhất, kiểm tra ràng buộc toàn vẹn có được xóa vĩnh viễn không |
+| `DELETE` | `/api/v1/admin/inventory/ingredients/{id}` | `ROLE_ADMIN` | Xóa vĩnh viễn nguyên liệu (chặn `400 Bad Request` nếu đã có giao dịch kho hoặc đang dùng trong công thức món ăn) |
+| `GET` | `/api/v1/admin/inventory/low-stock` | `ROLE_ADMIN` | Danh sách các nguyên liệu có tồn kho dưới hoặc bằng ngưỡng tối thiểu (`currentStock <= minStockThreshold`) |
+| `POST` | `/api/v1/admin/inventory/adjustments` | `ROLE_ADMIN` | Điều chỉnh tồn kho kiểm kê thủ công (`quantityChange != 0`, bắt buộc `reason`, chặn điều chỉnh làm tồn kho âm `400 Bad Request`, ghi sổ `StockMovement` loại `ADJUSTMENT`) |
+| `GET` | `/api/v1/admin/inventory/movements?ingredientId=&movementType=&fromTime=&toTime=&limit=` | `ROLE_ADMIN` | Tra cứu sổ biến động kho nguyên liệu (lọc theo nguyên liệu, loại `IMPORT`/`EXPORT`/`ADJUSTMENT`, thời gian, giới hạn số dòng) |
+
+---
+
+## 8. Quản trị Phiếu Nhập Nguyên Liệu & Xuất PDF (`admin/stock-receipts` – Admin Only)
+
+| Phương thức | Endpoint | Quyền | Mô tả |
+|-------------|----------|-------|-------|
+| `GET` | `/api/v1/admin/stock-receipts?supplierId=&status=&paymentStatus=&fromDate=&toDate=&keyword=` | `ROLE_ADMIN` | Danh sách phiếu nhập hàng kèm bộ lọc đa tiêu chí |
+| `GET` | `/api/v1/admin/stock-receipts/{id}` | `ROLE_ADMIN` | Xem chi tiết phiếu nhập kèm toàn bộ các dòng nguyên liệu (`items`) |
+| `POST` | `/api/v1/admin/stock-receipts` | `ROLE_ADMIN` | Tạo phiếu nhập nguyên liệu mới (tự sinh mã `PN-xxxxxx`, tự tính tổng tiền, tùy chọn lưu `DRAFT` hoặc `CONFIRMED` ngay) |
+| `PUT` | `/api/v1/admin/stock-receipts/{id}` | `ROLE_ADMIN` | Chỉnh sửa phiếu nhập Nháp (chặn sửa phiếu đã xác nhận `400 Bad Request`) |
+| `DELETE` | `/api/v1/admin/stock-receipts/{id}` | `ROLE_ADMIN` | Xóa phiếu nhập Nháp (chặn xóa phiếu đã xác nhận `400 Bad Request`) |
+| `POST` | `/api/v1/admin/stock-receipts/{id}/confirm` | `ROLE_ADMIN` | Xác nhận nhập kho: tăng tồn kho nguyên liệu, tính lại giá vốn bình quân di động, ghi sổ `StockMovement`, chặn xác nhận lần 2 (`400 Bad Request`) |
+| `POST` | `/api/v1/admin/stock-receipts/{id}/payments` | `ROLE_ADMIN` | Ghi nhận thanh toán thêm cho nhà cung cấp (chặn trả quá tổng tiền phiếu `400 Bad Request`, cập nhật trạng thái `PARTIALLY_PAID` hoặc `PAID`) |
+| `GET` | `/api/v1/admin/stock-receipts/{id}/pdf` | `ROLE_ADMIN` | Xuất file PDF khổ A4 tiêu chuẩn in ấn (font Unicode Noto Sans tiếng Việt có dấu đầy đủ, trả về `Content-Type: application/pdf`, `Content-Disposition: attachment; filename="phieu-nhap-PN-xxxxxx.pdf"`) |
+
+### Ví dụ Payload `POST /api/v1/admin/stock-receipts`
 ```json
 {
-  "recipeItems": [
+  "supplierId": 1,
+  "receiptDate": "2026-11-10",
+  "note": "Nhập hàng hải sản phục vụ tiệc cưới cuối tuần",
+  "amountPaid": 2000000,
+  "paymentNote": "Chuyển khoản Vietcombank 2.000.000đ",
+  "confirmImmediately": true,
+  "items": [
     {
       "ingredientId": 1,
-      "quantity": 0.450,
-      "note": "Tôm sú tươi bóc vỏ"
+      "quantity": 10.0,
+      "unitPrice": 180000,
+      "note": "Tôm sú tươi sống loại 1"
     },
     {
-      "ingredientId": 8,
-      "quantity": 0.300,
-      "note": "Ngó sen bào giòn"
+      "ingredientId": 2,
+      "quantity": 5.0,
+      "unitPrice": 120000,
+      "note": "Mực ống tươi"
     }
   ]
 }

@@ -14,6 +14,10 @@ import {
   PanelLeftOpen,
   Pin,
   PinOff,
+  Boxes,
+  Receipt,
+  History,
+  Truck,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
@@ -65,7 +69,6 @@ export const AdminLayout: React.FC = () => {
   };
 
   const upcomingModules = [
-    { label: 'Kho & Nhập Nhà Cung Cấp', phase: 'Phase 2', icon: Warehouse },
     { label: 'Đơn Tiệc & Khóa Tồn 15p', phase: 'Phase 3–4', icon: ClipboardList },
     { label: 'Nhân Sự & Bảng Lương', phase: 'Phase 6', icon: Users },
     { label: 'Dashboard Lợi Nhuận', phase: 'Phase 7', icon: BarChart3 },
@@ -168,6 +171,30 @@ export const AdminLayout: React.FC = () => {
                 )}
                 <nav className="space-y-1">
                   <NavLink
+                    to="/admin/inventory/overview"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Tổng Quan Kho & Giá Vốn' : undefined}
+                  >
+                    <Warehouse className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Tổng Quan Kho & Giá Vốn</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Tổng Quan Kho & Giá Vốn
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
                     to="/admin/catalog"
                     className={({ isActive }) =>
                       `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
@@ -178,17 +205,111 @@ export const AdminLayout: React.FC = () => {
                           : 'text-stone-300 hover:bg-stone-800 hover:text-white'
                       }`
                     }
-                    title={!isOpen ? 'Danh Mục Món Ăn & Công Thức' : undefined}
+                    title={!isOpen ? 'Thực Đơn Món & Công Thức' : undefined}
                   >
                     <ChefHat className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
                     {isOpen && (
-                      <span className="whitespace-nowrap truncate">Danh Mục Món & Công Thức</span>
+                      <span className="whitespace-nowrap truncate">Thực Đơn & Công Thức</span>
                     )}
-
-                    {/* Flyout Tooltip when Rail is collapsed */}
                     {!isOpen && (
                       <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
-                        Danh Mục Món & Công Thức
+                        Thực Đơn & Công Thức
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/inventory/ingredients"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Nguyên Liệu & Tồn Kho' : undefined}
+                  >
+                    <Boxes className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Nguyên Liệu & Tồn Kho</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Nguyên Liệu & Tồn Kho
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/inventory/receipts"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Nhập Hàng (Phiếu Nhập)' : undefined}
+                  >
+                    <Receipt className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Nhập Hàng (Phiếu Nhập)</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Nhập Hàng (Phiếu Nhập)
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/inventory/movements"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Sổ Biến Động Kho' : undefined}
+                  >
+                    <History className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Sổ Biến Động Kho</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Sổ Biến Động Kho
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/suppliers"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Nhà Cung Cấp' : undefined}
+                  >
+                    <Truck className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Nhà Cung Cấp</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Nhà Cung Cấp
                       </div>
                     )}
                   </NavLink>
