@@ -52,10 +52,34 @@ export const inventoryService = {
     movementType?: string;
     fromTime?: string;
     toTime?: string;
+    page?: number;
+    size?: number;
     limit?: number;
   }): Promise<StockMovementDto[]> {
     const res = await apiClient.get<ApiResponse<StockMovementDto[]>>('/admin/inventory/movements', { params });
     return res.data.data;
+  },
+
+  async getStockMovementsPaged(params?: {
+    ingredientId?: number;
+    movementType?: string;
+    fromTime?: string;
+    toTime?: string;
+    page?: number;
+    size?: number;
+  }): Promise<{ items: StockMovementDto[]; totalCount: number; totalPages: number; currentPage: number; pageSize: number }> {
+    const res = await apiClient.get<ApiResponse<StockMovementDto[]>>('/admin/inventory/movements', { params });
+    const totalCount = parseInt(res.headers['x-total-count'] || '0', 10);
+    const totalPages = parseInt(res.headers['x-total-pages'] || '1', 10);
+    const currentPage = parseInt(res.headers['x-current-page'] || '0', 10);
+    const pageSize = parseInt(res.headers['x-page-size'] || '20', 10);
+    return {
+      items: res.data.data,
+      totalCount: Number.isNaN(totalCount) ? res.data.data.length : totalCount,
+      totalPages: Number.isNaN(totalPages) ? 1 : totalPages,
+      currentPage: Number.isNaN(currentPage) ? 0 : currentPage,
+      pageSize: Number.isNaN(pageSize) ? 20 : pageSize,
+    };
   },
 
   // --- Stock Receipts (Phiếu nhập nguyên liệu) ---
@@ -115,3 +139,4 @@ export const inventoryService = {
     window.URL.revokeObjectURL(url);
   },
 };
+

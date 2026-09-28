@@ -15,3 +15,4 @@ public interface StockAdjustmentRepository extends JpaRepository<StockAdjustment
 
     boolean existsByIngredientId(Long ingredientId);
 }
+

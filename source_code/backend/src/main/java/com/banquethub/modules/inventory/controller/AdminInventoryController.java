@@ -89,16 +89,26 @@ public class AdminInventoryController {
     }
 
     @GetMapping("/movements")
-    @Operation(summary = "Tra cứu sổ biến động kho nguyên liệu (lọc theo nguyên liệu, loại biến động, thời gian)")
+    @Operation(summary = "Tra cứu sổ biến động kho nguyên liệu (lọc theo nguyên liệu, loại biến động, khoảng thời gian và phân trang)")
     public ResponseEntity<ApiResponse<List<StockMovementResponse>>> getMovements(
             @RequestParam(required = false) Long ingredientId,
             @RequestParam(required = false) MovementType movementType,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fromTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime toTime,
-            @RequestParam(defaultValue = "50") int limit
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) Integer limit
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(
-                inventoryService.searchMovements(ingredientId, movementType, fromTime, toTime, limit)
-        ));
+        int effectiveSize = limit != null ? limit : size;
+        org.springframework.data.domain.Page<StockMovementResponse> pagedResult =
+                inventoryService.searchMovementsPaged(ingredientId, movementType, fromTime, toTime, page, effectiveSize);
+
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(pagedResult.getTotalElements()))
+                .header("X-Total-Pages", String.valueOf(pagedResult.getTotalPages()))
+                .header("X-Current-Page", String.valueOf(pagedResult.getNumber()))
+                .header("X-Page-Size", String.valueOf(pagedResult.getSize()))
+                .body(ApiResponse.ok(pagedResult.getContent()));
     }
 }
+

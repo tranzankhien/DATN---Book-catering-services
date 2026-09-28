@@ -51,3 +51,4 @@ public class StockReceiptItemRequest {
         this.unitPrice = unitPrice;
     }
 }
+

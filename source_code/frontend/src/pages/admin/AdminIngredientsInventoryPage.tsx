@@ -726,3 +726,4 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
     </div>
   );
 };
+

@@ -5,3 +5,4 @@ public enum PaymentStatus {
     PARTIALLY_PAID,
     PAID
 }
+

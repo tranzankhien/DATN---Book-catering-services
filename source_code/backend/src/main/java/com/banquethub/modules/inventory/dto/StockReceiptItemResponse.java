@@ -107,3 +107,4 @@ public class StockReceiptItemResponse {
         this.lineTotal = lineTotal;
     }
 }
+

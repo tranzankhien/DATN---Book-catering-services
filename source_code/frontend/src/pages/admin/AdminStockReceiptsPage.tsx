@@ -378,3 +378,4 @@ export const AdminStockReceiptsPage: React.FC = () => {
     </div>
   );
 };
+

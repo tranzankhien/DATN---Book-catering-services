@@ -146,3 +146,4 @@ public class Supplier {
         this.updatedAt = updatedAt;
     }
 }
+

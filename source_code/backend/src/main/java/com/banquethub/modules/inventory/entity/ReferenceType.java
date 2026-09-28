@@ -6,3 +6,4 @@ public enum ReferenceType {
     STOCK_ADJUSTMENT,
     ORDER
 }
+

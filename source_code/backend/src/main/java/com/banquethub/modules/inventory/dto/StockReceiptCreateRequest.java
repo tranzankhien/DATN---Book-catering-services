@@ -91,3 +91,4 @@ public class StockReceiptCreateRequest {
         this.items = items;
     }
 }
+

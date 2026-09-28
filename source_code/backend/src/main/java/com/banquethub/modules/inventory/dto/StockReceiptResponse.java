@@ -254,3 +254,4 @@ public class StockReceiptResponse {
         this.items = items;
     }
 }
+

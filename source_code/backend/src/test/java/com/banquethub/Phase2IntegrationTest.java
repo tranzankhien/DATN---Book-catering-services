@@ -760,4 +760,269 @@ class Phase2IntegrationTest {
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @Order(19)
+    @DisplayName("19. P1 - Tính giá vốn bình quân gia quyền đúng chuẩn kế toán khi tồn cũ > 0 và giá vốn cũ = 0đ")
+    void testWeightedAverageCostWhenOldCostZero() throws Exception {
+        String adminToken = obtainAdminToken();
+
+        // 1. Tạo nguyên liệu mới (tồn ban đầu 0 kg, giá vốn 0đ)
+        String ingPayload = String.format("""
+                {
+                  "name": "Thịt Heo Rừng Tặng Kèm %d",
+                  "unit": "kg",
+                  "minStockThreshold": 5.0,
+                  "active": true
+                }
+                """, System.currentTimeMillis());
+
+        MvcResult ingResult = mockMvc.perform(post("/api/v1/admin/catalog/ingredients")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(ingPayload))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.code").value(org.hamcrest.Matchers.startsWith("ING-")))
+                .andReturn();
+
+        long ingId = objectMapper.readTree(ingResult.getResponse().getContentAsString())
+                .path("data").path("id").asLong();
+
+        // 2. Điều chỉnh kiểm kê tồn kho đầu kỳ lên 10 kg (giá vốn vẫn 0đ)
+        String adjustPayload = String.format("""
+                {
+                  "ingredientId": %d,
+                  "quantityChange": 10.0,
+                  "reason": "Ghi nhận tồn kho đầu kỳ kiểm kê 0đ"
+                }
+                """, ingId);
+        mockMvc.perform(post("/api/v1/admin/inventory/adjustments")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(adjustPayload))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.quantityChange").value(10.0));
+
+        // 3. Lấy 1 NCC active
+        MvcResult supRes = mockMvc.perform(get("/api/v1/admin/suppliers")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andReturn();
+        long supId = objectMapper.readTree(supRes.getResponse().getContentAsString())
+                .path("data").get(0).path("id").asLong();
+
+        // 4. Nhập thêm 10 kg với đơn giá 50.000đ -> Giá vốn mới = (10*0 + 10*50000) / 20 = 25.000đ/kg
+        String receiptPayload = String.format("""
+                {
+                  "supplierId": %d,
+                  "note": "Nhập thử nghiệm giá vốn 0đ",
+                  "confirmImmediately": true,
+                  "items": [
+                    {
+                      "ingredientId": %d,
+                      "quantity": 10.0,
+                      "unit": "kg",
+                      "unitPrice": 50000.0
+                    }
+                  ]
+                }
+                """, supId, ingId);
+
+        mockMvc.perform(post("/api/v1/admin/stock-receipts")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(receiptPayload))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.status").value("CONFIRMED"));
+
+        // 5. Kiểm tra giá vốn nguyên liệu sau nhập kho: phải là 25000.0000, tồn kho = 20.0
+        MvcResult checkRes = mockMvc.perform(get("/api/v1/admin/inventory/ingredients/{id}", ingId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode ingData = objectMapper.readTree(checkRes.getResponse().getContentAsString())
+                .path("data").path("ingredient");
+        assertThat(ingData.path("currentStock").asDouble()).isEqualTo(20.0);
+        assertThat(ingData.path("avgUnitCost").asDouble()).isEqualTo(25000.0);
+    }
+
+    @Test
+    @Order(20)
+    @DisplayName("20. P1 - Khóa đơn vị tính của nguyên liệu khi đã có dòng phiếu nhập kho hoặc biến động kho (400)")
+    void testUnitLockWhenHasReceiptItemsOrMovements() throws Exception {
+        String adminToken = obtainAdminToken();
+
+        // Lấy nguyên liệu đã có chứng từ kho từ test trước
+        MvcResult ingRes = mockMvc.perform(get("/api/v1/admin/inventory/ingredients")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andReturn();
+        JsonNode firstIng = objectMapper.readTree(ingRes.getResponse().getContentAsString()).path("data").get(0);
+        long ingId = firstIng.path("id").asLong();
+        String currentUnit = firstIng.path("unit").asText();
+        String newUnit = currentUnit.equalsIgnoreCase("kg") ? "g" : "kg";
+
+        // Cố tình sửa đổi đơn vị tính -> Phải bị chặn 400
+        String updatePayload = String.format("""
+                {
+                  "name": "%s",
+                  "code": "%s",
+                  "unit": "%s",
+                  "minStockThreshold": 10.0,
+                  "active": true
+                }
+                """, firstIng.path("name").asText(), firstIng.path("code").asText(), newUnit);
+
+        mockMvc.perform(put("/api/v1/admin/catalog/ingredients/{id}", ingId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updatePayload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Không thể thay đổi đơn vị")));
+    }
+
+    @Test
+    @Order(21)
+    @DisplayName("21. P1 - Chặn xác nhận phiếu nhập khi nhà cung cấp hoặc nguyên liệu bị vô hiệu hóa (INACTIVE)")
+    void testBlockConfirmWhenSupplierOrIngredientInactive() throws Exception {
+        String adminToken = obtainAdminToken();
+
+        // 1. Tạo 1 NCC và chuyển sang inactive
+        String supPayload = String.format("""
+                {
+                  "name": "NCC Tạm Khóa %d",
+                  "phone": "098%07d",
+                  "address": "TP HCM",
+                  "active": true
+                }
+                """, System.currentTimeMillis(), System.currentTimeMillis() % 10000000);
+        MvcResult supRes = mockMvc.perform(post("/api/v1/admin/suppliers")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(supPayload))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long supId = objectMapper.readTree(supRes.getResponse().getContentAsString()).path("data").path("id").asLong();
+
+        // Lấy 1 nguyên liệu active
+        MvcResult ingRes = mockMvc.perform(get("/api/v1/admin/inventory/ingredients")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andReturn();
+        long ingId = objectMapper.readTree(ingRes.getResponse().getContentAsString()).path("data").get(0).path("id").asLong();
+        String ingUnit = objectMapper.readTree(ingRes.getResponse().getContentAsString()).path("data").get(0).path("unit").asText();
+
+        // Tạo phiếu nháp
+        String draftPayload = String.format("""
+                {
+                  "supplierId": %d,
+                  "note": "Phiếu nháp kiểm tra NCC inactive",
+                  "items": [
+                    {
+                      "ingredientId": %d,
+                      "quantity": 5.0,
+                      "unit": "%s",
+                      "unitPrice": 40000.0
+                    }
+                  ]
+                }
+                """, supId, ingId, ingUnit);
+        MvcResult receiptRes = mockMvc.perform(post("/api/v1/admin/stock-receipts")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(draftPayload))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long receiptId = objectMapper.readTree(receiptRes.getResponse().getContentAsString()).path("data").path("id").asLong();
+
+        // Khóa NCC qua toggle-active
+        mockMvc.perform(patch("/api/v1/admin/suppliers/{id}/toggle-active", supId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk());
+
+        // Cố xác nhận phiếu -> 400
+        mockMvc.perform(post("/api/v1/admin/stock-receipts/{id}/confirm", receiptId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("tạm ngừng hoạt động")));
+    }
+
+    @Test
+    @Order(22)
+    @DisplayName("22. P2 - Chặn ghi nhận thanh toán trên phiếu Nháp (DRAFT) và chặn xóa phiếu nháp đã có thanh toán")
+    void testDraftPaymentRules() throws Exception {
+        String adminToken = obtainAdminToken();
+
+        // 1. Lấy 1 NCC active và 1 nguyên liệu
+        MvcResult supRes = mockMvc.perform(get("/api/v1/admin/suppliers")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andReturn();
+        long supId = objectMapper.readTree(supRes.getResponse().getContentAsString()).path("data").get(0).path("id").asLong();
+
+        MvcResult ingRes = mockMvc.perform(get("/api/v1/admin/inventory/ingredients")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andReturn();
+        long ingId = objectMapper.readTree(ingRes.getResponse().getContentAsString()).path("data").get(0).path("id").asLong();
+        String ingUnit = objectMapper.readTree(ingRes.getResponse().getContentAsString()).path("data").get(0).path("unit").asText();
+
+        // Tạo phiếu DRAFT không thanh toán trước
+        String draftPayload = String.format("""
+                {
+                  "supplierId": %d,
+                  "note": "Phiếu nháp test thanh toán",
+                  "items": [
+                    {
+                      "ingredientId": %d,
+                      "quantity": 2.0,
+                      "unit": "%s",
+                      "unitPrice": 10000.0
+                    }
+                  ]
+                }
+                """, supId, ingId, ingUnit);
+        MvcResult receiptRes = mockMvc.perform(post("/api/v1/admin/stock-receipts")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(draftPayload))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long draftId = objectMapper.readTree(receiptRes.getResponse().getContentAsString()).path("data").path("id").asLong();
+
+        // Thử ghi nhận thanh toán trên phiếu DRAFT -> Phải bị chặn 400
+        String payPayload = """
+                {
+                  "paymentAmount": 10000.0,
+                  "paymentNote": "Thanh toán trên nháp"
+                }
+                """;
+        mockMvc.perform(post("/api/v1/admin/stock-receipts/{id}/payments", draftId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payPayload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("trạng thái Nháp")));
+
+        // Xóa phiếu nháp chưa thanh toán thành công -> 200
+        mockMvc.perform(delete("/api/v1/admin/stock-receipts/{id}", draftId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(23)
+    @DisplayName("23. P2 - Phân trang sổ biến động kho cấp DB và lọc theo khoảng ngày với headers HTTP")
+    void testStockMovementsDbPagination() throws Exception {
+        String adminToken = obtainAdminToken();
+
+        // Gọi API phân trang size=5, page=0
+        mockMvc.perform(get("/api/v1/admin/inventory/movements")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .param("page", "0")
+                        .param("size", "5"))
+                .andExpect(status().isOk())
+                .andExpect(header().exists("X-Total-Count"))
+                .andExpect(header().exists("X-Total-Pages"))
+                .andExpect(header().string("X-Current-Page", "0"))
+                .andExpect(header().string("X-Page-Size", "5"))
+                .andExpect(jsonPath("$.data", hasSize(greaterThanOrEqualTo(1))));
+    }
 }

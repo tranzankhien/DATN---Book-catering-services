@@ -231,6 +231,46 @@ public class InventoryService {
     }
 
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<StockMovementResponse> searchMovementsPaged(
+            Long ingredientId,
+            MovementType movementType,
+            OffsetDateTime fromTime,
+            OffsetDateTime toTime,
+            int page,
+            int size
+    ) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                safePage,
+                safeSize,
+                org.springframework.data.domain.Sort.by(
+                        org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id"
+                )
+        );
+
+        org.springframework.data.jpa.domain.Specification<StockMovement> spec = (root, query, cb) -> {
+            java.util.List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
+            if (ingredientId != null) {
+                predicates.add(cb.equal(root.get("ingredient").get("id"), ingredientId));
+            }
+            if (movementType != null) {
+                predicates.add(cb.equal(root.get("movementType"), movementType));
+            }
+            if (fromTime != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), fromTime));
+            }
+            if (toTime != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), toTime));
+            }
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        org.springframework.data.domain.Page<StockMovement> pageResult = stockMovementRepository.findAll(spec, pageable);
+        return pageResult.map(StockMovementResponse::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
     public List<StockMovementResponse> searchMovements(
             Long ingredientId,
             MovementType movementType,
@@ -239,29 +279,7 @@ public class InventoryService {
             int limit
     ) {
         int safeLimit = Math.min(Math.max(limit, 1), 200);
-        List<StockMovement> list;
-        if (ingredientId != null) {
-            list = stockMovementRepository.findByIngredientIdOrderByCreatedAtDesc(ingredientId);
-        } else {
-            list = stockMovementRepository.findAll(
-                    org.springframework.data.domain.Sort.by(
-                            org.springframework.data.domain.Sort.Direction.DESC, "createdAt", "id"
-                    )
-            );
-        }
-        if (movementType != null) {
-            list = list.stream().filter(m -> m.getMovementType() == movementType).toList();
-        }
-        if (fromTime != null) {
-            list = list.stream().filter(m -> !m.getCreatedAt().isBefore(fromTime)).toList();
-        }
-        if (toTime != null) {
-            list = list.stream().filter(m -> !m.getCreatedAt().isAfter(toTime)).toList();
-        }
-        if (list.size() > safeLimit) {
-            list = list.subList(0, safeLimit);
-        }
-        return list.stream().map(StockMovementResponse::fromEntity).toList();
+        return searchMovementsPaged(ingredientId, movementType, fromTime, toTime, 0, safeLimit).getContent();
     }
 
     @Transactional(readOnly = true)

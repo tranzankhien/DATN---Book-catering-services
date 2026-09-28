@@ -51,3 +51,4 @@ public class StockAdjustmentRequest {
         this.reason = reason;
     }
 }
+

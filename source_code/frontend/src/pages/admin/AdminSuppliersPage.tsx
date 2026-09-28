@@ -572,3 +572,4 @@ export const AdminSuppliersPage: React.FC = () => {
     </div>
   );
 };
+

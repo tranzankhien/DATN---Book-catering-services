@@ -159,3 +159,4 @@ public class StockReceiptItem {
         this.updatedAt = updatedAt;
     }
 }
+

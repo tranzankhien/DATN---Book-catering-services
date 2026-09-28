@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 
 public class IngredientRequest {
 
-    @NotBlank(message = "Mã nguyên liệu không được để trống")
     @Size(max = 50, message = "Mã nguyên liệu không vượt quá 50 ký tự")
     private String code;
 

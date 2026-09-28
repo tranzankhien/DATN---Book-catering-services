@@ -297,3 +297,4 @@ public class StockReceipt {
         this.items = items;
     }
 }
+

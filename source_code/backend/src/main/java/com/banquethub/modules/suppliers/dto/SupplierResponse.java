@@ -140,3 +140,4 @@ public class SupplierResponse {
         this.updatedAt = updatedAt;
     }
 }
+

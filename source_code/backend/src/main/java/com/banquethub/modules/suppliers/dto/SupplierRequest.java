@@ -89,3 +89,4 @@ public class SupplierRequest {
         this.active = active;
     }
 }
+

@@ -32,3 +32,4 @@ export const supplierService = {
     return res.data.data;
   },
 };
+

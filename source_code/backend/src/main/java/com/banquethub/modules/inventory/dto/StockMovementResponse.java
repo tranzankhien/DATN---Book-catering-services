@@ -202,3 +202,4 @@ public class StockMovementResponse {
         this.createdAt = createdAt;
     }
 }
+

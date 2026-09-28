@@ -124,3 +124,4 @@ public class StockAdjustment {
         this.createdAt = createdAt;
     }
 }
+

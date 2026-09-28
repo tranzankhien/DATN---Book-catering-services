@@ -209,6 +209,13 @@ public class StockReceiptService {
             throw new BusinessValidationException("Chỉ được phép xóa phiếu nhập ở trạng thái Nháp. Phiếu đã xác nhận nhập kho không thể xóa để bảo toàn lịch sử sổ kho.");
         }
 
+        if (receipt.getAmountPaid() != null && receipt.getAmountPaid().compareTo(BigDecimal.ZERO) > 0) {
+            throw new BusinessValidationException(String.format(
+                    "Không thể xóa phiếu nhập đã ghi nhận thanh toán (%s VND). Vui lòng hoàn lại hoặc điều chỉnh tiền thanh toán về 0 trước khi xóa.",
+                    receipt.getAmountPaid().stripTrailingZeros().toPlainString()
+            ));
+        }
+
         stockReceiptRepository.delete(receipt);
     }
 
@@ -228,6 +235,10 @@ public class StockReceiptService {
     public StockReceiptResponse recordPayment(Long id, StockReceiptPaymentRequest paymentRequest) {
         StockReceipt receipt = stockReceiptRepository.findWithItemsById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu nhập với ID: " + id));
+
+        if (receipt.getStatus() == StockReceiptStatus.DRAFT) {
+            throw new BusinessValidationException("Phiếu nhập đang ở trạng thái Nháp. Vui lòng xác nhận nhập kho trước khi ghi nhận thanh toán.");
+        }
 
         BigDecimal addAmount = paymentRequest.getPaymentAmount().setScale(2, RoundingMode.HALF_UP);
         if (addAmount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -262,10 +273,28 @@ public class StockReceiptService {
             throw new BusinessValidationException("Phiếu nhập không có dòng nguyên liệu nào, không thể xác nhận");
         }
 
+        if (receipt.getSupplier() == null || !receipt.getSupplier().isActive()) {
+            String supplierName = receipt.getSupplier() != null ? receipt.getSupplier().getName() : "Không xác định";
+            throw new BusinessValidationException("Nhà cung cấp '" + supplierName + "' đang tạm ngừng hoạt động hoặc đã bị vô hiệu hóa. Không thể xác nhận nhập kho.");
+        }
+
         OffsetDateTime now = OffsetDateTime.now(VN_ZONE);
 
         for (StockReceiptItem item : receipt.getItems()) {
             Ingredient ingredient = item.getIngredient();
+
+            if (!ingredient.isActive()) {
+                throw new BusinessValidationException("Nguyên liệu '" + ingredient.getName() + "' (Mã: " + ingredient.getCode() + ") đang tạm ẩn hoặc ngừng sử dụng. Vui lòng kích hoạt lại nguyên liệu trước khi nhập kho.");
+            }
+
+            if (!ingredient.getUnit().trim().equalsIgnoreCase(item.getUnit().trim())) {
+                throw new BusinessValidationException(String.format(
+                        "Đơn vị tính của nguyên liệu '%s' trên phiếu (%s) không khớp với đơn vị gốc của kho (%s). Vui lòng kiểm tra lại trước khi xác nhận.",
+                        ingredient.getName(),
+                        item.getUnit().trim(),
+                        ingredient.getUnit().trim()
+                ));
+            }
 
             BigDecimal oldStock = ingredient.getCurrentStock();
             BigDecimal oldCost = ingredient.getAvgUnitCost();
@@ -276,9 +305,11 @@ public class StockReceiptService {
 
             // Tính giá vốn bình quân gia quyền liên hoàn:
             // Giá vốn mới = (Tồn cũ * Giá cũ + Nhập mới * Giá nhập) / (Tồn cũ + Nhập mới)
-            // Nếu tồn cũ <= 0 hoặc giá cũ == 0 -> giá vốn mới = giá nhập
+            // Chỉ khi tồn cũ <= 0 thì mới lấy thẳng đơn giá nhập mới làm giá vốn.
+            // Nếu tồn cũ > 0 và giá cũ == 0 (ví dụ hàng tồn ban đầu hoặc hàng tặng), vẫn tính bình quân gia quyền đúng chuẩn kế toán:
+            // (Tồn cũ * 0 + Nhập mới * Giá nhập) / (Tồn cũ + Nhập mới)
             BigDecimal newCost;
-            if (oldStock.compareTo(BigDecimal.ZERO) <= 0 || oldCost.compareTo(BigDecimal.ZERO) <= 0) {
+            if (oldStock.compareTo(BigDecimal.ZERO) <= 0) {
                 newCost = importPrice.setScale(4, RoundingMode.HALF_UP);
             } else {
                 BigDecimal oldValue = oldStock.multiply(oldCost);

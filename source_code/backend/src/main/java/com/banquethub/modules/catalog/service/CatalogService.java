@@ -21,12 +21,15 @@ import com.banquethub.modules.catalog.repository.DishCategoryRepository;
 import com.banquethub.modules.catalog.repository.DishRepository;
 import com.banquethub.modules.catalog.repository.IngredientRepository;
 import com.banquethub.modules.catalog.repository.RecipeItemRepository;
+import com.banquethub.modules.inventory.repository.StockMovementRepository;
+import com.banquethub.modules.inventory.repository.StockReceiptItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -42,17 +45,23 @@ public class CatalogService {
     private final IngredientRepository ingredientRepository;
     private final DishRepository dishRepository;
     private final RecipeItemRepository recipeItemRepository;
+    private final StockReceiptItemRepository stockReceiptItemRepository;
+    private final StockMovementRepository stockMovementRepository;
 
     public CatalogService(
             DishCategoryRepository categoryRepository,
             IngredientRepository ingredientRepository,
             DishRepository dishRepository,
-            RecipeItemRepository recipeItemRepository
+            RecipeItemRepository recipeItemRepository,
+            StockReceiptItemRepository stockReceiptItemRepository,
+            StockMovementRepository stockMovementRepository
     ) {
         this.categoryRepository = categoryRepository;
         this.ingredientRepository = ingredientRepository;
         this.dishRepository = dishRepository;
         this.recipeItemRepository = recipeItemRepository;
+        this.stockReceiptItemRepository = stockReceiptItemRepository;
+        this.stockMovementRepository = stockMovementRepository;
     }
 
     // =====================================================================
@@ -123,10 +132,16 @@ public class CatalogService {
 
     @Transactional
     public IngredientResponse createIngredient(IngredientRequest request) {
-        String normalizedCode = request.getCode().trim().toUpperCase(Locale.ROOT);
-        if (ingredientRepository.existsByCodeIgnoreCase(normalizedCode)) {
-            throw new DuplicateResourceException("Mã nguyên liệu '" + normalizedCode + "' đã tồn tại");
+        String normalizedCode;
+        if (StringUtils.hasText(request.getCode())) {
+            normalizedCode = request.getCode().trim().toUpperCase(Locale.ROOT);
+            if (ingredientRepository.existsByCodeIgnoreCase(normalizedCode)) {
+                throw new DuplicateResourceException("Mã nguyên liệu '" + normalizedCode + "' đã tồn tại");
+            }
+        } else {
+            normalizedCode = String.format("ING-%06d", ingredientRepository.getNextIngredientCodeSeq());
         }
+
         if (request.getMinStockThreshold() == null || request.getMinStockThreshold().compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessValidationException("Ngưỡng tồn tối thiểu phải lớn hơn hoặc bằng 0");
         }
@@ -148,12 +163,17 @@ public class CatalogService {
         Ingredient ingredient = ingredientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nguyên liệu với ID: " + id));
 
-        String normalizedCode = request.getCode().trim().toUpperCase(Locale.ROOT);
-        ingredientRepository.findByCodeIgnoreCase(normalizedCode)
-                .filter(existing -> !existing.getId().equals(id))
-                .ifPresent(existing -> {
-                    throw new DuplicateResourceException("Mã nguyên liệu '" + normalizedCode + "' đã tồn tại");
-                });
+        String normalizedCode;
+        if (StringUtils.hasText(request.getCode())) {
+            normalizedCode = request.getCode().trim().toUpperCase(Locale.ROOT);
+            ingredientRepository.findByCodeIgnoreCase(normalizedCode)
+                    .filter(existing -> !existing.getId().equals(id))
+                    .ifPresent(existing -> {
+                        throw new DuplicateResourceException("Mã nguyên liệu '" + normalizedCode + "' đã tồn tại");
+                    });
+        } else {
+            normalizedCode = ingredient.getCode();
+        }
 
         if (request.getMinStockThreshold() == null || request.getMinStockThreshold().compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessValidationException("Ngưỡng tồn tối thiểu phải lớn hơn hoặc bằng 0");
@@ -161,10 +181,19 @@ public class CatalogService {
 
         String newUnit = request.getUnit().trim();
         boolean usedInRecipe = recipeItemRepository.existsByIngredientId(id);
-        if (usedInRecipe && !ingredient.getUnit().trim().equals(newUnit)) {
-            throw new BusinessValidationException(
-                    "Không thể thay đổi đơn vị gốc của nguyên liệu đã được sử dụng trong công thức món ăn"
-            );
+        boolean hasReceiptItems = stockReceiptItemRepository.existsByIngredientId(id);
+        boolean hasMovements = stockMovementRepository.existsByIngredientId(id);
+
+        if (!ingredient.getUnit().trim().equalsIgnoreCase(newUnit)) {
+            if (usedInRecipe || hasReceiptItems || hasMovements) {
+                List<String> reasons = new ArrayList<>();
+                if (usedInRecipe) reasons.add("đã được sử dụng trong công thức món ăn");
+                if (hasReceiptItems) reasons.add("đã phát sinh trong chứng từ phiếu nhập kho");
+                if (hasMovements) reasons.add("đã có lịch sử biến động kho");
+                throw new BusinessValidationException(
+                        "Không thể thay đổi đơn vị gốc của nguyên liệu do " + String.join(" và ", reasons)
+                );
+            }
         }
 
         ingredient.setCode(normalizedCode);

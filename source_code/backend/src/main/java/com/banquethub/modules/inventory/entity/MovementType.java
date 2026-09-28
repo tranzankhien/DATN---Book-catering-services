@@ -5,3 +5,4 @@ public enum MovementType {
     EXPORT,
     ADJUSTMENT
 }
+

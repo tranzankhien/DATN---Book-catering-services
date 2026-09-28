@@ -11,3 +11,4 @@ public interface StockReceiptItemRepository extends JpaRepository<StockReceiptIt
 
     boolean existsByIngredientId(Long ingredientId);
 }
+

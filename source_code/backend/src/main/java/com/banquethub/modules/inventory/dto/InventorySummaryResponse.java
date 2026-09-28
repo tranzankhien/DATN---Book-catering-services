@@ -102,3 +102,4 @@ public class InventorySummaryResponse {
         this.recentMovements = recentMovements;
     }
 }
+

@@ -406,3 +406,4 @@ export const AdminInventoryOverviewPage: React.FC = () => {
     </div>
   );
 };
+

@@ -39,3 +39,4 @@ public class StockReceiptPaymentRequest {
         this.paymentNote = paymentNote;
     }
 }
+

@@ -497,3 +497,4 @@ export const AdminStockReceiptCreatePage: React.FC = () => {
     </div>
   );
 };
+
