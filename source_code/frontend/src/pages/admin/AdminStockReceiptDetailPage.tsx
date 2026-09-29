@@ -108,27 +108,18 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
   const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!receipt) return;
-    const amount = parseFloat(paymentAmount);
-    if (isNaN(amount) || amount <= 0) {
-      showToast('Số tiền thanh toán phải lớn hơn 0 VND', 'error');
-      return;
-    }
-    if (amount > receipt.remainingAmount) {
-      showToast('Số tiền thanh toán vượt quá số tiền còn nợ', 'error');
-      return;
-    }
 
     try {
       setSubmittingPayment(true);
+      // Quy tắc SRS BR-11: Thanh toán toàn bộ giá trị phiếu nhập
       const payload: StockReceiptPaymentPayload = {
-        paymentAmount: amount,
+        paymentAmount: receipt.totalAmount,
         paymentNote: paymentNote.trim() || undefined,
       };
       const res = await inventoryService.recordPayment(receipt.id, payload);
-      showToast('Ghi nhận thanh toán thành công!', 'success');
+      showToast('Ghi nhận thanh toán toàn bộ thành công!', 'success');
       setReceipt(res);
       setShowPaymentModal(false);
-      setPaymentAmount('');
       setPaymentNote('');
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Không thể ghi nhận thanh toán';
@@ -408,44 +399,35 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="bg-stone-50 p-3 rounded-xl border border-stone-100 text-xs space-y-1">
+            <div className="bg-stone-50 p-3 rounded-xl border border-stone-100 text-xs space-y-1.5">
               <div className="flex justify-between">
                 <span className="text-stone-500">Mã phiếu:</span>
                 <span className="font-mono font-bold text-stone-900">{receipt.code}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-stone-500">Số tiền còn nợ:</span>
-                <span className="font-mono font-extrabold text-rose-600">
-                  {formatVnd(receipt.remainingAmount)}
+                <span className="text-stone-500">Tổng tiền phiếu:</span>
+                <span className="font-mono font-bold text-stone-900">{formatVnd(receipt.totalAmount)}</span>
+              </div>
+              <div className="flex justify-between items-center pt-1 border-t border-stone-200">
+                <span className="font-bold text-stone-700">Số tiền thanh toán:</span>
+                <span className="font-mono font-extrabold text-base text-emerald-700">
+                  {formatVnd(receipt.totalAmount)}
                 </span>
               </div>
+              <p className="text-[11px] text-stone-400 italic pt-0.5">
+                * Quy tắc SRS BR-11: Hệ thống ghi nhận thanh toán toàn bộ cho phiếu nhập đã xác nhận kho.
+              </p>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block font-bold text-stone-700 mb-1">
-                  Số tiền thanh toán thêm (₫) <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  step="1"
-                  min="1"
-                  max={receipt.remainingAmount}
-                  value={paymentAmount}
-                  onChange={(e) => setPaymentAmount(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 font-mono text-stone-900 focus:outline-none focus:border-amber-600 font-bold"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-stone-700 mb-1">Ghi chú thanh toán</label>
+                <label className="block font-bold text-stone-700 mb-1">Ghi chú thanh toán (tùy chọn)</label>
                 <input
                   type="text"
-                  placeholder="VD: Ủy nhiệm chi số UNC-8899..."
+                  placeholder="VD: Ủy nhiệm chi số UNC-8899, chuyển khoản qua Vietcombank..."
                   value={paymentNote}
                   onChange={(e) => setPaymentNote(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600"
+                  className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 text-xs"
                 />
               </div>
             </div>
@@ -454,16 +436,16 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowPaymentModal(false)}
-                className="px-3 py-2 text-xs font-semibold rounded-xl text-stone-600 hover:bg-stone-100"
+                className="px-3 py-2 text-xs font-semibold rounded-xl text-stone-600 hover:bg-stone-100 cursor-pointer"
               >
                 Hủy bỏ
               </button>
               <button
                 type="submit"
                 disabled={submittingPayment}
-                className="px-4 py-2 text-xs font-bold rounded-xl bg-purple-600 text-white hover:bg-purple-700 transition-colors shadow-sm disabled:opacity-50"
+                className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
               >
-                {submittingPayment ? 'Đang lưu...' : 'Lưu Thanh Toán'}
+                {submittingPayment ? 'Đang lưu...' : 'Xác Nhận Thanh Toán Toàn Bộ'}
               </button>
             </div>
           </form>

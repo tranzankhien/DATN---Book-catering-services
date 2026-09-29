@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 public class StockReceiptPaymentRequest {
 
-    @NotNull(message = "Số tiền thanh toán bổ sung không được để trống")
+    // Số tiền thanh toán (tùy chọn theo BR-11, nếu truyền thì phải khớp với toàn bộ tổng tiền phiếu nhập)
     @DecimalMin(value = "1.0", inclusive = true, message = "Số tiền thanh toán phải lớn hơn 0 VND")
     private BigDecimal paymentAmount;
 

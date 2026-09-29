@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   History,
@@ -34,6 +34,9 @@ export const AdminStockMovementsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalCount, setTotalCount] = useState<number>(0);
 
+  // Chống race-condition khi đổi bộ lọc nhanh: chỉ chấp nhận phản hồi của request mới nhất
+  const latestRequestIdRef = useRef<number>(0);
+
   const { showToast } = useToast();
 
   const loadIngredients = async () => {
@@ -46,10 +49,21 @@ export const AdminStockMovementsPage: React.FC = () => {
   };
 
   const loadMovements = async () => {
+    const requestId = ++latestRequestIdRef.current;
     try {
       setLoading(true);
       const fromTimeIso = fromDate ? `${fromDate}T00:00:00+07:00` : undefined;
-      const toTimeIso = toDate ? `${toDate}T23:59:59+07:00` : undefined;
+
+      // Tính mốc 00:00:00 của ngày kế tiếp (exclusive boundary) để không bao giờ bỏ sót microsecond cuối ngày
+      let toTimeIso: string | undefined = undefined;
+      if (toDate) {
+        const d = new Date(`${toDate}T00:00:00`);
+        d.setDate(d.getDate() + 1);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        toTimeIso = `${yyyy}-${mm}-${dd}T00:00:00+07:00`;
+      }
 
       const paged = await inventoryService.getStockMovementsPaged({
         ingredientId: selectedIngredientId !== 'ALL' ? Number(selectedIngredientId) : undefined,
@@ -60,13 +74,22 @@ export const AdminStockMovementsPage: React.FC = () => {
         size: pageSize,
       });
 
+      if (requestId !== latestRequestIdRef.current) {
+        // Phản hồi cũ đã lỗi thời, bỏ qua để tránh ghi đè
+        return;
+      }
+
       setMovements(paged.items);
       setTotalPages(paged.totalPages);
       setTotalCount(paged.totalCount);
     } catch {
-      showToast('Không thể tải sổ biến động kho', 'error');
+      if (requestId === latestRequestIdRef.current) {
+        showToast('Không thể tải sổ biến động kho', 'error');
+      }
     } finally {
-      setLoading(false);
+      if (requestId === latestRequestIdRef.current) {
+        setLoading(false);
+      }
     }
   };
 

@@ -144,11 +144,6 @@ export const AdminStockReceiptCreatePage: React.FC = () => {
       return;
     }
 
-    if (amountPaid > totalAmount) {
-      showToast('Số tiền thanh toán không được vượt quá tổng giá trị phiếu nhập', 'error');
-      return;
-    }
-
     try {
       setSubmitting(true);
       const payload: StockReceiptCreatePayload = {
@@ -156,7 +151,7 @@ export const AdminStockReceiptCreatePage: React.FC = () => {
         receiptDate,
         note: note.trim() || undefined,
         paymentNote: paymentNote.trim() || undefined,
-        amountPaid: Number(amountPaid) || 0,
+        amountPaid: 0,
         confirmImmediately,
         items: items.map((i) => ({
           ingredientId: i.ingredientId,
@@ -409,28 +404,12 @@ export const AdminStockReceiptCreatePage: React.FC = () => {
                 <span className="font-mono font-bold text-sm text-stone-900">{formatVnd(totalAmount)}</span>
               </div>
 
-              {/* Amount paid */}
-              <div className="space-y-1 pt-2 border-t border-stone-100">
-                <label className="block font-bold text-stone-700">
-                  Số tiền thanh toán ngay (₫):
-                </label>
-                <input
-                  type="number"
-                  step="1"
-                  min="0"
-                  max={totalAmount}
-                  value={amountPaid}
-                  onChange={(e) => setAmountPaid(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 font-mono text-emerald-800 font-bold focus:outline-none focus:border-amber-600 text-xs"
-                />
-              </div>
-
-              {/* Remaining debt */}
-              <div className="flex items-center justify-between pt-2 border-t border-stone-100">
-                <span className="font-bold text-stone-700">Còn nợ NCC:</span>
-                <span className="font-mono font-extrabold text-sm text-rose-600">
-                  {formatVnd(remainingDebt)}
-                </span>
+              {/* Quy tắc thanh toán BR-11 */}
+              <div className="pt-2 border-t border-stone-100 text-[11px] text-stone-500 bg-stone-50 p-2.5 rounded-xl border border-stone-200/60">
+                <p className="font-semibold text-stone-700">Quy chuẩn thanh toán (SRS BR-11):</p>
+                <p className="mt-0.5 text-stone-500">
+                  Phiếu nhập tạo mới mặc định ở trạng thái <strong>Chưa thanh toán (UNPAID)</strong>. Quản trị viên sẽ ghi nhận thanh toán toàn bộ cho NCC sau khi xác nhận nhập kho.
+                </p>
               </div>
             </div>
 

@@ -180,16 +180,15 @@ export const AdminStockReceiptsPage: React.FC = () => {
               <option value="CONFIRMED">Đã nhập kho (Xác nhận)</option>
             </select>
 
-            {/* Payment Status Filter */}
+            {/* Payment Status Filter (SRS BR-11) */}
             <select
               value={paymentFilter}
               onChange={(e) => setPaymentFilter(e.target.value)}
               className="px-3 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600"
             >
               <option value="ALL">Tất cả thanh toán</option>
-              <option value="PAID">Đã thanh toán đủ</option>
-              <option value="PARTIALLY_PAID">Còn nợ (Thanh toán 1 phần)</option>
-              <option value="UNPAID">Chưa thanh toán</option>
+              <option value="UNPAID">Chưa thanh toán (UNPAID)</option>
+              <option value="PAID">Đã thanh toán (PAID)</option>
             </select>
 
             <button

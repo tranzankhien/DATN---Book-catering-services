@@ -125,19 +125,11 @@ public class StockReceiptService {
         BigDecimal total = calculateTotalAmount(receipt.getItems());
         receipt.setTotalAmount(total);
 
-        BigDecimal paid = request.getAmountPaid() != null ? request.getAmountPaid().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
-        if (paid.compareTo(total) > 0) {
-            throw new BusinessValidationException(String.format(
-                    "Số tiền thanh toán (%s VND) không được vượt quá tổng giá trị phiếu nhập (%s VND)",
-                    paid.stripTrailingZeros().toPlainString(),
-                    total.stripTrailingZeros().toPlainString()
-            ));
-        }
-        receipt.setAmountPaid(paid);
-        receipt.setPaymentStatus(determinePaymentStatus(total, paid));
-        if (paid.compareTo(BigDecimal.ZERO) > 0) {
-            receipt.setLastPaidAt(OffsetDateTime.now(VN_ZONE));
-        }
+        // Theo quy tắc nghiệp vụ SRS BR-11: Phiếu nháp luôn khởi tạo chưa thanh toán (amountPaid = 0, UNPAID).
+        // Chỉ ghi nhận thanh toán toàn bộ sau khi phiếu đã được xác nhận nhập kho.
+        receipt.setAmountPaid(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
+        receipt.setPaymentStatus(PaymentStatus.UNPAID);
+        receipt.setLastPaidAt(null);
 
         StockReceipt saved = stockReceiptRepository.save(receipt);
 
@@ -180,16 +172,10 @@ public class StockReceiptService {
         BigDecimal total = calculateTotalAmount(receipt.getItems());
         receipt.setTotalAmount(total);
 
-        BigDecimal paid = request.getAmountPaid() != null ? request.getAmountPaid().setScale(2, RoundingMode.HALF_UP) : receipt.getAmountPaid();
-        if (paid.compareTo(total) > 0) {
-            throw new BusinessValidationException(String.format(
-                    "Số tiền thanh toán (%s VND) không được vượt quá tổng giá trị phiếu nhập (%s VND)",
-                    paid.stripTrailingZeros().toPlainString(),
-                    total.stripTrailingZeros().toPlainString()
-            ));
-        }
-        receipt.setAmountPaid(paid);
-        receipt.setPaymentStatus(determinePaymentStatus(total, paid));
+        // Theo quy tắc nghiệp vụ SRS BR-11: Phiếu nháp không ghi nhận thanh toán
+        receipt.setAmountPaid(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
+        receipt.setPaymentStatus(PaymentStatus.UNPAID);
+        receipt.setLastPaidAt(null);
 
         StockReceipt saved = stockReceiptRepository.save(receipt);
 
@@ -240,25 +226,25 @@ public class StockReceiptService {
             throw new BusinessValidationException("Phiếu nhập đang ở trạng thái Nháp. Vui lòng xác nhận nhập kho trước khi ghi nhận thanh toán.");
         }
 
-        BigDecimal addAmount = paymentRequest.getPaymentAmount().setScale(2, RoundingMode.HALF_UP);
-        if (addAmount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessValidationException("Số tiền thanh toán phải lớn hơn 0 VND");
-        }
-
-        BigDecimal currentPaid = receipt.getAmountPaid() != null ? receipt.getAmountPaid() : BigDecimal.ZERO;
-        BigDecimal newPaid = currentPaid.add(addAmount);
-
-        if (newPaid.compareTo(receipt.getTotalAmount()) > 0) {
-            BigDecimal remaining = receipt.getRemainingAmount();
+        if (receipt.getPaymentStatus() == PaymentStatus.PAID) {
             throw new BusinessValidationException(String.format(
-                    "Số tiền thanh toán thêm (%s VND) vượt quá số tiền còn phải trả của phiếu (%s VND)",
-                    addAmount.stripTrailingZeros().toPlainString(),
-                    remaining.stripTrailingZeros().toPlainString()
+                    "Phiếu nhập '%s' đã được ghi nhận thanh toán toàn bộ trước đó (%s VND).",
+                    receipt.getCode(),
+                    receipt.getTotalAmount().stripTrailingZeros().toPlainString()
             ));
         }
 
-        receipt.setAmountPaid(newPaid);
-        receipt.setPaymentStatus(determinePaymentStatus(receipt.getTotalAmount(), newPaid));
+        // Quy tắc SRS BR-11: Chỉ hỗ trợ ghi nhận thanh toán toàn bộ (PAID), không hỗ trợ trả một phần.
+        if (paymentRequest.getPaymentAmount() != null && paymentRequest.getPaymentAmount().compareTo(receipt.getTotalAmount()) != 0) {
+            throw new BusinessValidationException(String.format(
+                    "Theo quy tắc nghiệp vụ SRS BR-11, hệ thống chỉ hỗ trợ ghi nhận thanh toán toàn bộ giá trị phiếu nhập (%s VND), không hỗ trợ thanh toán từng phần (%s VND).",
+                    receipt.getTotalAmount().stripTrailingZeros().toPlainString(),
+                    paymentRequest.getPaymentAmount().stripTrailingZeros().toPlainString()
+            ));
+        }
+
+        receipt.setAmountPaid(receipt.getTotalAmount());
+        receipt.setPaymentStatus(PaymentStatus.PAID);
         receipt.setLastPaidAt(OffsetDateTime.now(VN_ZONE));
         if (StringUtils.hasText(paymentRequest.getPaymentNote())) {
             receipt.setPaymentNote(paymentRequest.getPaymentNote().trim());
@@ -422,12 +408,9 @@ public class StockReceiptService {
     }
 
     private PaymentStatus determinePaymentStatus(BigDecimal total, BigDecimal paid) {
-        if (paid == null || paid.compareTo(BigDecimal.ZERO) <= 0) {
-            return PaymentStatus.UNPAID;
-        }
-        if (paid.compareTo(total) >= 0) {
+        if (paid != null && paid.compareTo(total) >= 0 && total.compareTo(BigDecimal.ZERO) > 0) {
             return PaymentStatus.PAID;
         }
-        return PaymentStatus.PARTIALLY_PAID;
+        return PaymentStatus.UNPAID;
     }
 }

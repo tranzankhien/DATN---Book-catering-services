@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -215,14 +216,12 @@ class Phase2IntegrationTest {
         long ing1Id = ings.get(0).path("id").asLong();
         long ing2Id = ings.get(1).path("id").asLong();
 
-        // 10 * 50.000 = 500.000; 5 * 120.000 = 600.000; Tổng = 1.100.000; Đã trả = 400.000
+        // 10 * 50.000 = 500.000; 5 * 120.000 = 600.000; Tổng = 1.100.000; Phiếu nháp theo BR-11 chưa thanh toán (UNPAID)
         String payload = String.format("""
                 {
                   "supplierId": %d,
                   "receiptDate": "2026-11-10",
                   "note": "Phiếu nhập thử nghiệm Nháp",
-                  "amountPaid": 400000,
-                  "paymentNote": "Tạm ứng tiền mặt 400.000đ",
                   "confirmImmediately": false,
                   "items": [
                     { "ingredientId": %d, "quantity": 10.0, "unitPrice": 50000, "note": "Hàng loại 1" },
@@ -239,10 +238,10 @@ class Phase2IntegrationTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.code").isNotEmpty())
                 .andExpect(jsonPath("$.data.status").value("DRAFT"))
-                .andExpect(jsonPath("$.data.paymentStatus").value("PARTIALLY_PAID"))
+                .andExpect(jsonPath("$.data.paymentStatus").value("UNPAID"))
                 .andExpect(jsonPath("$.data.totalAmount").value(1100000.0))
-                .andExpect(jsonPath("$.data.amountPaid").value(400000.0))
-                .andExpect(jsonPath("$.data.remainingAmount").value(700000.0))
+                .andExpect(jsonPath("$.data.amountPaid").value(0.0))
+                .andExpect(jsonPath("$.data.remainingAmount").value(1100000.0))
                 .andExpect(jsonPath("$.data.items", hasSize(2)))
                 .andReturn();
 
@@ -307,14 +306,12 @@ class Phase2IntegrationTest {
         long supId = detail.path("supplierId").asLong();
         long ing1Id = detail.path("items").get(0).path("ingredientId").asLong();
 
-        // Sửa còn 1 dòng: 20 * 50.000 = 1.000.000đ, amountPaid = 500.000đ
+        // Sửa còn 1 dòng: 20 * 50.000 = 1.000.000đ; Phiếu nháp theo BR-11 chưa ghi nhận thanh toán
         String updatePayload = String.format("""
                 {
                   "supplierId": %d,
                   "receiptDate": "2026-11-10",
                   "note": "Phiếu nháp đã được chỉnh sửa số lượng",
-                  "amountPaid": 500000,
-                  "paymentNote": "Chuyển khoản 500.000đ",
                   "confirmImmediately": false,
                   "items": [
                     { "ingredientId": %d, "quantity": 20.0, "unitPrice": 50000, "note": "Tăng số lượng lên 20" }
@@ -328,8 +325,9 @@ class Phase2IntegrationTest {
                         .content(updatePayload))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.totalAmount").value(1000000.0))
-                .andExpect(jsonPath("$.data.amountPaid").value(500000.0))
-                .andExpect(jsonPath("$.data.remainingAmount").value(500000.0))
+                .andExpect(jsonPath("$.data.paymentStatus").value("UNPAID"))
+                .andExpect(jsonPath("$.data.amountPaid").value(0.0))
+                .andExpect(jsonPath("$.data.remainingAmount").value(1000000.0))
                 .andExpect(jsonPath("$.data.items", hasSize(1)));
     }
 
@@ -479,7 +477,6 @@ class Phase2IntegrationTest {
                   "supplierId": %d,
                   "receiptDate": "2026-11-10",
                   "note": "Test tính giá vốn bình quân",
-                  "amountPaid": 800000,
                   "confirmImmediately": true,
                   "items": [
                     { "ingredientId": %d, "quantity": 10.0, "unitPrice": 80000 }
@@ -568,42 +565,61 @@ class Phase2IntegrationTest {
 
     @Test
     @Order(13)
-    @DisplayName("13. Ghi nhận thanh toán cho NCC: cập nhật amountPaid, paymentStatus và chặn trả quá số tiền")
+    @DisplayName("13. Ghi nhận thanh toán cho NCC: tuân thủ BR-11 thanh toán toàn bộ, chặn trả từng phần")
     void testRecordPaymentForStockReceipt() throws Exception {
         String adminToken = obtainAdminToken();
 
-        // Tìm phiếu còn nợ (PARTIALLY_PAID hoặc UNPAID)
+        // 1. Kiểm tra chặn thanh toán trên phiếu DRAFT
+        MvcResult draftRes = mockMvc.perform(get("/api/v1/admin/stock-receipts")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .param("status", "DRAFT"))
+                .andReturn();
+        JsonNode draftReceipts = objectMapper.readTree(draftRes.getResponse().getContentAsString()).path("data");
+        if (draftReceipts.size() > 0) {
+            long draftId = draftReceipts.get(0).path("id").asLong();
+            mockMvc.perform(post("/api/v1/admin/stock-receipts/{id}/payments", draftId)
+                            .header("Authorization", "Bearer " + adminToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"paymentNote\": \"Cố tình trả phiếu nháp\"}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message", containsString("xác nhận")));
+        }
+
+        // 2. Tìm phiếu đã CONFIRMED và UNPAID
         MvcResult receiptsRes = mockMvc.perform(get("/api/v1/admin/stock-receipts")
                         .header("Authorization", "Bearer " + adminToken)
-                        .param("paymentStatus", "PARTIALLY_PAID"))
+                        .param("status", "CONFIRMED")
+                        .param("paymentStatus", "UNPAID"))
                 .andReturn();
         JsonNode receipts = objectMapper.readTree(receiptsRes.getResponse().getContentAsString()).path("data");
         assertThat(receipts.size()).isGreaterThanOrEqualTo(1);
 
         long receiptId = receipts.get(0).path("id").asLong();
-        double remaining = receipts.get(0).path("remainingAmount").asDouble();
+        double total = receipts.get(0).path("totalAmount").asDouble();
 
-        // Thanh toán thêm vượt số tiền còn lại -> bị từ chối 400
-        String overPaymentPayload = String.format("""
+        // 3. Thử thanh toán từng phần (ví dụ 1/2 số tiền) -> vi phạm SRS BR-11, bị từ chối 400
+        String partialPaymentPayload = String.format("""
                 {
                   "paymentAmount": %f,
-                  "paymentNote": "Thanh toán lố tiền"
+                  "paymentNote": "Cố tình trả một phần"
                 }
-                """, remaining + 100000.0);
+                """, total / 2.0);
         mockMvc.perform(post("/api/v1/admin/stock-receipts/{id}/payments", receiptId)
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(overPaymentPayload))
+                        .content(partialPaymentPayload))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false));
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message", containsString("BR-11")));
 
-        // Thanh toán vừa đủ số tiền còn lại -> thành PAID
+        // 4. Thanh toán toàn bộ đúng quy chuẩn BR-11 (truyền đúng totalAmount hoặc để trống paymentAmount)
         String exactPaymentPayload = String.format("""
                 {
                   "paymentAmount": %f,
-                  "paymentNote": "Thanh toán dứt điểm phiếu nhập"
+                  "paymentNote": "Thanh toán dứt điểm toàn bộ phiếu nhập theo BR-11"
                 }
-                """, remaining);
+                """, total);
         mockMvc.perform(post("/api/v1/admin/stock-receipts/{id}/payments", receiptId)
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -611,7 +627,16 @@ class Phase2IntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.paymentStatus").value("PAID"))
-                .andExpect(jsonPath("$.data.remainingAmount").value(0.0));
+                .andExpect(jsonPath("$.data.remainingAmount").value(0.0))
+                .andExpect(jsonPath("$.data.amountPaid").value(total));
+
+        // 5. Thử thanh toán lại phiếu đã PAID -> bị từ chối 400
+        mockMvc.perform(post("/api/v1/admin/stock-receipts/{id}/payments", receiptId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(exactPaymentPayload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
     }
 
     @Test

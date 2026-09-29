@@ -261,7 +261,8 @@ public class InventoryService {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), fromTime));
             }
             if (toTime != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), toTime));
+                // Dùng mốc loại trừ strictly lessThan (< 00:00:00 của ngày kế tiếp) để không bỏ sót các bản ghi có phần lẻ microsecond cuối ngày
+                predicates.add(cb.lessThan(root.get("createdAt"), toTime));
             }
             return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
         };
