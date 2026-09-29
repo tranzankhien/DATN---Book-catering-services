@@ -183,8 +183,16 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
     });
   };
 
+  const activeIngredientsCount = ingredients.filter((i) => i.active).length;
+  const lowStockCount = ingredients.filter((i) => i.active && i.currentStock <= i.minStockThreshold).length;
+  const safeStockCount = Math.max(0, activeIngredientsCount - lowStockCount);
+  const totalStockValue = ingredients.reduce(
+    (sum, i) => sum + (i.currentStock || 0) * (i.avgUnitCost || 0),
+    0
+  );
+
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="w-full max-w-[1720px] mx-auto space-y-6">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -203,56 +211,129 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold rounded-xl bg-amber-600 text-white hover:bg-amber-700 transition-colors shadow-sm shadow-amber-600/20 cursor-pointer self-start md:self-auto"
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl bg-amber-700 hover:bg-amber-800 text-white transition-all shadow-md shadow-amber-900/10 cursor-pointer self-start md:self-auto hover:shadow-lg"
         >
           <Plus className="h-4 w-4" />
-          <span>Thêm Nguyên Liệu</span>
+          <span>Thêm Nguyên Liệu Mới</span>
         </button>
       </div>
 
+      {/* 4 Executive KPI Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+              Tổng Mặt Hàng Kho
+            </span>
+            <p className="text-2xl font-black text-stone-900">{ingredients.length}</p>
+            <span className="text-xs text-stone-400">Nguyên liệu trong danh mục</span>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
+            <Boxes className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+              Tồn Kho An Toàn
+            </span>
+            <p className="text-2xl font-black text-emerald-700">{safeStockCount}</p>
+            <span className="text-xs text-stone-400">Trên ngưỡng cảnh báo</span>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
+            <CheckCircle2 className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className={`rounded-2xl p-4.5 border shadow-xs flex items-center justify-between ${
+          lowStockCount > 0 ? 'bg-rose-50/40 border-rose-200' : 'bg-white border-stone-200/80'
+        }`}>
+          <div className="space-y-1">
+            <span className={`text-[11px] font-bold uppercase tracking-wider ${
+              lowStockCount > 0 ? 'text-rose-700' : 'text-stone-500'
+            }`}>
+              Cảnh Báo Tồn Thấp
+            </span>
+            <p className={`text-2xl font-black ${lowStockCount > 0 ? 'text-rose-700' : 'text-stone-600'}`}>
+              {lowStockCount}
+            </p>
+            <span className="text-xs text-stone-400">Cần lập phiếu nhập bổ sung</span>
+          </div>
+          <div className={`h-11 w-11 rounded-xl flex items-center justify-center border ${
+            lowStockCount > 0 ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-stone-100 text-stone-500 border-stone-200'
+          }`}>
+            <AlertTriangle className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
+              Tổng Giá Trị Kho
+            </span>
+            <p className="text-xl font-black font-mono text-amber-800">{formatVnd(totalStockValue)}</p>
+            <span className="text-xs text-stone-400">Theo giá vốn bình quân di động</span>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
+            <TrendingUp className="h-5 w-5" />
+          </div>
+        </div>
+      </div>
+
       {/* Filter & Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-stone-200/80 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      <div className="bg-white p-3.5 rounded-2xl border border-stone-200/80 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
           <input
             type="text"
-            placeholder="Tìm theo tên nguyên liệu hoặc mã (VD: Bò, Tôm, ING-001)..."
+            placeholder="Tìm theo tên nguyên liệu hoặc mã (VD: Bò, Tôm, ING-BUN-TUOI)..."
             value={searchKeyword}
             onChange={(e) => setSearchKeyword(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600"
+            className="w-full pl-10 pr-9 py-2.5 text-xs rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 transition-colors"
           />
+          {searchKeyword && (
+            <button
+              type="button"
+              onClick={() => setSearchKeyword('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+              title="Xóa tìm kiếm"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           {/* Active status filter */}
           <select
             value={activeFilter}
             onChange={(e) => setActiveFilter(e.target.value)}
-            className="px-3 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600"
+            className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
           >
-            <option value="ALL">Tất cả trạng thái</option>
-            <option value="ACTIVE">Đang sử dụng</option>
-            <option value="INACTIVE">Tạm ngừng / Ẩn</option>
+            <option value="ALL">Tất cả trạng thái ({ingredients.length})</option>
+            <option value="ACTIVE">Đang sử dụng ({activeIngredientsCount})</option>
+            <option value="INACTIVE">Tạm ngừng / Ẩn ({ingredients.length - activeIngredientsCount})</option>
           </select>
 
           {/* Low Stock toggle */}
           <button
             type="button"
             onClick={() => setLowStockOnly(!lowStockOnly)}
-            className={`inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
               lowStockOnly
-                ? 'bg-rose-50 border-rose-300 text-rose-700 shadow-xs'
+                ? 'bg-rose-100 border-rose-300 text-rose-800 shadow-xs'
                 : 'bg-white border-stone-200 text-stone-700 hover:bg-stone-50'
             }`}
           >
-            <AlertTriangle className={`h-3.5 w-3.5 ${lowStockOnly ? 'text-rose-600' : 'text-stone-400'}`} />
-            <span>Chỉ xem tồn thấp</span>
+            <AlertTriangle className={`h-3.5 w-3.5 ${lowStockOnly ? 'text-rose-700' : 'text-stone-400'}`} />
+            <span>Chỉ xem tồn thấp {lowStockCount > 0 && `(${lowStockCount})`}</span>
           </button>
 
           <button
             type="button"
             onClick={loadIngredients}
-            className="p-2 text-stone-500 hover:text-stone-900 rounded-xl hover:bg-stone-100 transition-colors"
+            className="p-2.5 text-stone-500 hover:text-stone-900 rounded-xl hover:bg-stone-100 transition-colors border border-stone-200 shadow-xs"
             title="Tải lại danh sách"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-amber-600' : ''}`} />
@@ -260,34 +341,36 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Ingredients Table */}
-      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+      {/* Main Ingredients Table with Optimized Proportional Column Widths */}
+      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-stone-50/80 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3 px-4">Mã</th>
-                <th className="py-3 px-4">Tên Nguyên Liệu</th>
-                <th className="py-3 px-4">Đơn Vị</th>
-                <th className="py-3 px-4 text-right">Tồn Kho Hiện Tại</th>
-                <th className="py-3 px-4 text-right">Ngưỡng Tối Thiểu</th>
-                <th className="py-3 px-4 text-right">Giá Vốn Bình Quân</th>
-                <th className="py-3 px-4 text-center">Trạng Thái</th>
-                <th className="py-3 px-4 text-center">Thao Tác</th>
+              <tr className="bg-stone-50/90 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
+                <th className="py-3.5 px-4 w-28 whitespace-nowrap">Mã</th>
+                <th className="py-3.5 px-4 min-w-[280px]">Tên Nguyên Liệu</th>
+                <th className="py-3.5 px-4 w-24 text-center whitespace-nowrap">Đơn Vị</th>
+                <th className="py-3.5 px-4 text-right w-40 whitespace-nowrap">Tồn Kho Hiện Tại</th>
+                <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Ngưỡng Tối Thiểu</th>
+                <th className="py-3.5 px-4 text-right w-44 whitespace-nowrap">Giá Vốn Bình Quân</th>
+                <th className="py-3.5 px-4 text-center w-32 whitespace-nowrap">Trạng Thái</th>
+                <th className="py-3.5 px-4 text-center w-36 whitespace-nowrap">Thao Tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
               {loading && ingredients.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-stone-400">
+                  <td colSpan={8} className="py-16 text-center text-stone-400">
                     <RefreshCw className="h-6 w-6 animate-spin mx-auto text-amber-600 mb-2" />
-                    <span>Đang tải danh sách nguyên liệu...</span>
+                    <span className="font-medium">Đang tải danh sách nguyên liệu...</span>
                   </td>
                 </tr>
               ) : ingredients.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-stone-400">
-                    Không tìm thấy nguyên liệu nào phù hợp với bộ lọc
+                  <td colSpan={8} className="py-16 text-center text-stone-400">
+                    <Boxes className="h-8 w-8 mx-auto text-stone-300 mb-2" />
+                    <p className="font-semibold text-stone-600 text-sm">Không tìm thấy nguyên liệu nào phù hợp</p>
+                    <p className="text-xs text-stone-400 mt-1">Thử thay đổi từ khóa hoặc bộ lọc trạng thái</p>
                   </td>
                 </tr>
               ) : (
@@ -296,56 +379,70 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                   return (
                     <tr
                       key={item.id}
-                      className={`hover:bg-amber-50/40 transition-colors ${
-                        isLow && item.active ? 'bg-rose-50/20' : ''
+                      className={`hover:bg-amber-50/40 transition-colors group ${
+                        isLow && item.active ? 'bg-rose-50/30' : ''
                       }`}
                     >
-                      <td className="py-3 px-4 font-mono font-bold text-stone-700">{item.code}</td>
-                      <td className="py-3 px-4 font-semibold text-stone-900">
+                      <td className="py-3.5 px-4 font-mono font-bold text-stone-800 whitespace-nowrap bg-stone-50/40">
+                        {item.code}
+                      </td>
+                      <td className="py-3.5 px-4 font-semibold text-stone-900">
                         <div className="flex items-center gap-2">
-                          <span>{item.name}</span>
+                          <span className="text-sm font-bold group-hover:text-amber-800 transition-colors">
+                            {item.name}
+                          </span>
                           {isLow && item.active && (
                             <span
-                              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200 shrink-0"
                               title="Tồn kho thấp hơn hoặc bằng ngưỡng cảnh báo"
                             >
-                              <AlertTriangle className="h-2.5 w-2.5" />
+                              <AlertTriangle className="h-3 w-3" />
                               Tồn thấp
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="py-3 px-4 font-medium text-stone-600">{item.unit}</td>
-                      <td className="py-3 px-4 text-right font-mono font-bold">
-                        <span className={isLow && item.active ? 'text-rose-600 font-extrabold' : 'text-stone-900'}>
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <span className="inline-block px-2.5 py-0.5 rounded-md bg-stone-100 font-medium text-stone-700 border border-stone-200/80">
+                          {item.unit}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-mono font-bold whitespace-nowrap">
+                        <span
+                          className={`text-sm ${
+                            isLow && item.active ? 'text-rose-600 font-extrabold' : 'text-stone-900'
+                          }`}
+                        >
                           {item.currentStock}
                         </span>{' '}
                         <span className="text-[11px] text-stone-400 font-normal">{item.unit}</span>
                       </td>
-                      <td className="py-3 px-4 text-right font-mono text-stone-600">
-                        {item.minStockThreshold} {item.unit}
+                      <td className="py-3.5 px-4 text-right font-mono text-stone-600 whitespace-nowrap">
+                        <span>{item.minStockThreshold}</span>{' '}
+                        <span className="text-[11px] text-stone-400">{item.unit}</span>
                       </td>
-                      <td className="py-3 px-4 text-right font-mono font-bold text-amber-800">
+                      <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 whitespace-nowrap text-sm">
                         {formatVnd(item.avgUnitCost)}
-                        <span className="text-[10px] text-stone-400 font-normal"> / {item.unit}</span>
+                        <span className="text-[11px] text-stone-400 font-normal"> / {item.unit}</span>
                       </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         <span
-                          className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${
                             item.active
                               ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                               : 'bg-stone-100 text-stone-500 border border-stone-200'
                           }`}
                         >
+                          <span className={`h-1.5 w-1.5 rounded-full ${item.active ? 'bg-emerald-500' : 'bg-stone-400'}`} />
                           {item.active ? 'Đang dùng' : 'Tạm ẩn'}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center">
-                        <div className="inline-flex items-center gap-1">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <div className="inline-flex items-center justify-center gap-1">
                           <button
                             type="button"
                             onClick={() => openDetail(item.id)}
-                            className="p-1.5 rounded-lg text-stone-500 hover:text-amber-700 hover:bg-stone-100 transition-colors"
+                            className="p-1.5 rounded-lg text-stone-500 hover:text-amber-700 hover:bg-amber-50 transition-colors"
                             title="Xem chi tiết & món ăn sử dụng"
                           >
                             <Eye className="h-4 w-4" />
@@ -357,7 +454,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                               setAdjustQtyChange('');
                               setAdjustReason('');
                             }}
-                            className="p-1.5 rounded-lg text-stone-500 hover:text-blue-700 hover:bg-stone-100 transition-colors"
+                            className="p-1.5 rounded-lg text-stone-500 hover:text-blue-700 hover:bg-blue-50 transition-colors"
                             title="Điều chỉnh tồn kho thủ công"
                           >
                             <SlidersHorizontal className="h-4 w-4" />
@@ -365,7 +462,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleDeleteIngredient(item)}
-                            className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-stone-100 transition-colors"
+                            className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                             title="Xóa nguyên liệu (nếu chưa dùng)"
                           >
                             <Trash2 className="h-4 w-4" />

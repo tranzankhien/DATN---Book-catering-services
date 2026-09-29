@@ -130,7 +130,7 @@ export const AdminStockMovementsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="w-full max-w-[1720px] mx-auto space-y-6">
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -149,25 +149,25 @@ export const AdminStockMovementsPage: React.FC = () => {
         <button
           type="button"
           onClick={loadMovements}
-          className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 transition-colors shadow-sm cursor-pointer self-start md:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 transition-colors shadow-xs cursor-pointer self-start md:self-auto"
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-amber-600' : ''}`} />
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-amber-600' : ''}`} />
           <span>Làm mới sổ</span>
         </button>
       </div>
 
-      {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-stone-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex flex-wrap items-center gap-3 flex-1">
+      {/* Filter Bar with Horizontal Layout */}
+      <div className="bg-white p-3.5 rounded-2xl border border-stone-200/80 shadow-xs space-y-3 text-xs">
+        <div className="flex flex-wrap items-center gap-3">
           {/* Ingredient select */}
-          <div className="flex items-center gap-2 min-w-[200px]">
-            <span className="font-semibold text-stone-500 shrink-0">Nguyên liệu:</span>
+          <div className="flex items-center gap-2 min-w-[240px] flex-1">
+            <span className="font-bold text-stone-600 shrink-0">Nguyên liệu:</span>
             <select
               value={selectedIngredientId}
               onChange={(e) => handleFilterChange(() => setSelectedIngredientId(e.target.value))}
-              className="flex-1 px-3 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs"
+              className="flex-1 px-3 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs shadow-xs"
             >
-              <option value="ALL">Tất cả nguyên liệu</option>
+              <option value="ALL">Tất cả nguyên liệu ({ingredients.length})</option>
               {ingredients.map((ing) => (
                 <option key={ing.id} value={ing.id}>
                   {ing.code} - {ing.name}
@@ -177,12 +177,12 @@ export const AdminStockMovementsPage: React.FC = () => {
           </div>
 
           {/* Movement Type select */}
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-stone-500 shrink-0">Loại:</span>
+          <div className="flex items-center gap-2 min-w-[200px]">
+            <span className="font-bold text-stone-600 shrink-0">Loại:</span>
             <select
               value={movementTypeFilter}
               onChange={(e) => handleFilterChange(() => setMovementTypeFilter(e.target.value))}
-              className="px-3 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs"
+              className="px-3 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs shadow-xs"
             >
               <option value="ALL">Tất cả loại biến động</option>
               <option value="IMPORT">Nhập kho (IMPORT)</option>
@@ -193,100 +193,104 @@ export const AdminStockMovementsPage: React.FC = () => {
 
           {/* Date range filters */}
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-stone-500 shrink-0">Từ ngày:</span>
+            <span className="font-bold text-stone-600 shrink-0">Từ ngày:</span>
             <input
               type="date"
               value={fromDate}
               onChange={(e) => handleFilterChange(() => setFromDate(e.target.value))}
-              className="px-2.5 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-800 text-xs focus:outline-none focus:border-amber-600"
+              className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-800 text-xs focus:outline-none focus:border-amber-600 font-mono shadow-xs"
             />
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-stone-500 shrink-0">Đến ngày:</span>
+            <span className="font-bold text-stone-600 shrink-0">Đến ngày:</span>
             <input
               type="date"
               value={toDate}
               onChange={(e) => handleFilterChange(() => setToDate(e.target.value))}
-              className="px-2.5 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-800 text-xs focus:outline-none focus:border-amber-600"
+              className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-800 text-xs focus:outline-none focus:border-amber-600 font-mono shadow-xs"
             />
           </div>
 
           {/* Page size */}
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-stone-500 shrink-0">Hiển thị:</span>
+            <span className="font-bold text-stone-600 shrink-0">Hiển thị:</span>
             <select
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value));
                 setPage(0);
               }}
-              className="px-3 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs font-mono"
+              className="px-3 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs font-mono shadow-xs"
             >
               <option value={20}>20 dòng</option>
               <option value={50}>50 dòng</option>
               <option value={100}>100 dòng</option>
             </select>
           </div>
-        </div>
 
-        {(selectedIngredientId !== 'ALL' || movementTypeFilter !== 'ALL' || fromDate !== '' || toDate !== '') && (
-          <button
-            type="button"
-            onClick={clearAllFilters}
-            className="text-[11px] font-bold text-amber-700 hover:underline cursor-pointer ml-auto"
-          >
-            Xóa bộ lọc
-          </button>
-        )}
+          {(selectedIngredientId !== 'ALL' || movementTypeFilter !== 'ALL' || fromDate !== '' || toDate !== '') && (
+            <button
+              type="button"
+              onClick={clearAllFilters}
+              className="text-[11px] font-bold text-amber-700 hover:underline cursor-pointer ml-auto"
+            >
+              Xóa bộ lọc
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Movements Table */}
-      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+      {/* Movements Table with Optimized Proportional Column Widths */}
+      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-stone-50/80 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3 px-4">Thời Gian</th>
-                <th className="py-3 px-4">Nguyên Liệu</th>
-                <th className="py-3 px-4 text-center">Loại Biến Động</th>
-                <th className="py-3 px-4 text-right">Lượng Thay Đổi</th>
-                <th className="py-3 px-4 text-right">Tồn Trước → Sau</th>
-                <th className="py-3 px-4 text-right">Giá Vốn Sau</th>
-                <th className="py-3 px-4">Chứng Từ Tham Chiếu</th>
-                <th className="py-3 px-4">Người Thực Hiện</th>
-                <th className="py-3 px-4">Ghi Chú</th>
+              <tr className="bg-stone-50/90 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
+                <th className="py-3.5 px-4 w-36 whitespace-nowrap">Thời Gian</th>
+                <th className="py-3.5 px-4 min-w-[260px]">Nguyên Liệu</th>
+                <th className="py-3.5 px-4 text-center w-32 whitespace-nowrap">Loại Biến Động</th>
+                <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Lượng Thay Đổi</th>
+                <th className="py-3.5 px-4 text-right w-40 whitespace-nowrap">Tồn Trước → Sau</th>
+                <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Giá Vốn Sau</th>
+                <th className="py-3.5 px-4 w-36 whitespace-nowrap">Chứng Từ Tham Chiếu</th>
+                <th className="py-3.5 px-4 w-32 whitespace-nowrap">Người Thực Hiện</th>
+                <th className="py-3.5 px-4 min-w-[200px]">Ghi Chú</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
               {loading && movements.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-stone-400">
+                  <td colSpan={9} className="py-16 text-center text-stone-400">
                     <RefreshCw className="h-6 w-6 animate-spin mx-auto text-amber-600 mb-2" />
-                    <span>Đang tải sổ biến động kho...</span>
+                    <span className="font-medium">Đang tải sổ biến động kho...</span>
                   </td>
                 </tr>
               ) : movements.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-stone-400">
-                    Không tìm thấy bản ghi biến động kho nào phù hợp
+                  <td colSpan={9} className="py-16 text-center text-stone-400">
+                    <History className="h-8 w-8 mx-auto text-stone-300 mb-2" />
+                    <p className="font-semibold text-stone-600 text-sm">Không tìm thấy bản ghi biến động kho nào</p>
+                    <p className="text-xs text-stone-400 mt-1">Thử thay đổi nguyên liệu hoặc khoảng thời gian tra cứu</p>
                   </td>
                 </tr>
               ) : (
                 movements.map((m) => {
                   const isPositive = m.quantityChange > 0;
                   return (
-                    <tr key={m.id} className="hover:bg-amber-50/20 transition-colors">
-                      <td className="py-3 px-4 font-mono text-stone-500 whitespace-nowrap">
+                    <tr key={m.id} className="hover:bg-amber-50/30 transition-colors group">
+                      <td className="py-3.5 px-4 font-mono text-stone-600 whitespace-nowrap bg-stone-50/40">
                         {formatDateTime(m.createdAt)}
                       </td>
-                      <td className="py-3 px-4">
-                        <span className="font-bold text-stone-900 block">{m.ingredientName}</span>
-                        <span className="font-mono text-[11px] text-stone-400">{m.ingredientCode}</span>
+                      <td className="py-3.5 px-4">
+                        <span className="font-bold text-stone-900 block text-sm group-hover:text-amber-800 transition-colors">
+                          {m.ingredientName}
+                        </span>
+                        <span className="font-mono text-[11px] text-stone-400 font-semibold">{m.ingredientCode}</span>
                       </td>
-                      <td className="py-3 px-4 text-center whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold ${
                             m.movementType === 'IMPORT'
                               ? 'bg-blue-50 text-blue-700 border border-blue-200'
                               : m.movementType === 'ADJUSTMENT'
@@ -301,22 +305,22 @@ export const AdminStockMovementsPage: React.FC = () => {
                             : 'Xuất kho'}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right font-mono font-bold whitespace-nowrap">
-                        <span className={isPositive ? 'text-emerald-600 font-extrabold' : 'text-rose-600'}>
+                      <td className="py-3.5 px-4 text-right font-mono font-bold whitespace-nowrap">
+                        <span className={`text-sm ${isPositive ? 'text-emerald-600 font-extrabold' : 'text-rose-600'}`}>
                           {isPositive ? `+${m.quantityChange}` : m.quantityChange}
                         </span>{' '}
                         <span className="text-[11px] text-stone-400 font-normal">{m.unit}</span>
                       </td>
-                      <td className="py-3 px-4 text-right font-mono text-[11px] text-stone-600 whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-right font-mono text-[11px] text-stone-600 whitespace-nowrap">
                         <span>{m.stockBefore}</span>
                         <span className="text-stone-300 mx-1">→</span>
                         <span className="font-bold text-stone-900">{m.stockAfter}</span>{' '}
                         <span className="text-stone-400">{m.unit}</span>
                       </td>
-                      <td className="py-3 px-4 text-right font-mono font-semibold text-amber-800 whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 whitespace-nowrap">
                         {formatVnd(m.avgCostAfter)}
                       </td>
-                      <td className="py-3 px-4 whitespace-nowrap">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         {m.referenceType === 'STOCK_RECEIPT' && m.referenceId ? (
                           <Link
                             to={`/admin/inventory/receipts/${m.referenceId}`}
@@ -331,11 +335,15 @@ export const AdminStockMovementsPage: React.FC = () => {
                           {m.referenceType}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-stone-600 whitespace-nowrap">
+                      <td className="py-3.5 px-4 whitespace-nowrap font-medium text-stone-700">
                         {m.performedByName || 'Hệ thống'}
                       </td>
-                      <td className="py-3 px-4 text-stone-500 italic max-w-xs truncate text-[11px]">
-                        {m.note || '—'}
+                      <td className="py-3.5 px-4 text-stone-500 text-xs">
+                        {m.note ? (
+                          <span className="line-clamp-2" title={m.note}>{m.note}</span>
+                        ) : (
+                          <span className="text-stone-300 italic">—</span>
+                        )}
                       </td>
                     </tr>
                   );

@@ -182,7 +182,7 @@ export const AdminStockReceiptCreatePage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-5xl mx-auto">
+    <div className="w-full max-w-[1600px] mx-auto space-y-6">
       {/* Top Header */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">

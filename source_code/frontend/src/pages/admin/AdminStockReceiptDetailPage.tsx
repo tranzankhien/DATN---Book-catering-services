@@ -165,7 +165,7 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
   const isConfirmed = receipt.status === 'CONFIRMED';
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-5xl mx-auto">
+    <div className="w-full max-w-[1600px] mx-auto space-y-6">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -336,30 +336,44 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-stone-50/80 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3 px-4 w-12 text-center">STT</th>
-                <th className="py-3 px-4">Mã</th>
-                <th className="py-3 px-4">Tên Nguyên Liệu</th>
-                <th className="py-3 px-4">Đơn Vị</th>
-                <th className="py-3 px-4 text-right">Số Lượng</th>
-                <th className="py-3 px-4 text-right">Đơn Giá (₫)</th>
-                <th className="py-3 px-4 text-right">Thành Tiền (₫)</th>
-                <th className="py-3 px-4">Ghi Chú</th>
+              <tr className="bg-stone-50/90 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
+                <th className="py-3.5 px-4 w-14 text-center whitespace-nowrap">STT</th>
+                <th className="py-3.5 px-4 w-32 whitespace-nowrap">Mã</th>
+                <th className="py-3.5 px-4 min-w-[260px]">Tên Nguyên Liệu</th>
+                <th className="py-3.5 px-4 w-24 text-center whitespace-nowrap">Đơn Vị</th>
+                <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Số Lượng</th>
+                <th className="py-3.5 px-4 text-right w-40 whitespace-nowrap">Đơn Giá</th>
+                <th className="py-3.5 px-4 text-right w-44 whitespace-nowrap">Thành Tiền</th>
+                <th className="py-3.5 px-4 min-w-[180px]">Ghi Chú</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
               {receipt.items?.map((item) => (
-                <tr key={item.id} className="hover:bg-amber-50/20">
-                  <td className="py-3 px-4 text-center font-mono text-stone-400">{item.lineNo}</td>
-                  <td className="py-3 px-4 font-mono font-bold text-stone-700">{item.ingredientCode}</td>
-                  <td className="py-3 px-4 font-semibold text-stone-900">{item.ingredientName}</td>
-                  <td className="py-3 px-4 text-stone-600">{item.unit}</td>
-                  <td className="py-3 px-4 text-right font-mono font-bold text-stone-900">{item.quantity}</td>
-                  <td className="py-3 px-4 text-right font-mono text-stone-700">{formatVnd(item.unitPrice)}</td>
-                  <td className="py-3 px-4 text-right font-mono font-extrabold text-amber-900">
+                <tr key={item.id} className="hover:bg-amber-50/20 group">
+                  <td className="py-3.5 px-4 text-center font-mono text-stone-400 whitespace-nowrap">{item.lineNo}</td>
+                  <td className="py-3.5 px-4 font-mono font-bold text-stone-800 whitespace-nowrap bg-stone-50/40">
+                    {item.ingredientCode}
+                  </td>
+                  <td className="py-3.5 px-4 font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
+                    {item.ingredientName}
+                  </td>
+                  <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                    <span className="inline-block px-2.5 py-0.5 rounded-md bg-stone-100 font-medium text-stone-700 border border-stone-200/80">
+                      {item.unit}
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-4 text-right font-mono font-bold text-stone-900 whitespace-nowrap">
+                    {item.quantity} <span className="text-[11px] text-stone-400 font-normal">{item.unit}</span>
+                  </td>
+                  <td className="py-3.5 px-4 text-right font-mono text-stone-700 whitespace-nowrap">
+                    {formatVnd(item.unitPrice)}
+                  </td>
+                  <td className="py-3.5 px-4 text-right font-mono font-black text-amber-900 whitespace-nowrap text-sm">
                     {formatVnd(item.lineTotal)}
                   </td>
-                  <td className="py-3 px-4 text-stone-400 italic text-[11px]">{item.note || '—'}</td>
+                  <td className="py-3.5 px-4 text-stone-500 italic text-[11px]">
+                    {item.note || '—'}
+                  </td>
                 </tr>
               ))}
             </tbody>

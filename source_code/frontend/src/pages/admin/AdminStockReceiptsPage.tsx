@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
+  Warehouse,
+  X,
 } from 'lucide-react';
 import { inventoryService } from '../../services/inventoryService';
 import { supplierService } from '../../services/supplierService';
@@ -114,8 +116,12 @@ export const AdminStockReceiptsPage: React.FC = () => {
     });
   };
 
+  const totalReceiptsAmount = receipts.reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+  const confirmedCount = receipts.filter((r) => r.status === 'CONFIRMED').length;
+  const draftCount = receipts.filter((r) => r.status === 'DRAFT').length;
+
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="w-full max-w-[1720px] mx-auto space-y-6">
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -133,35 +139,100 @@ export const AdminStockReceiptsPage: React.FC = () => {
 
         <Link
           to="/admin/inventory/receipts/new"
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold rounded-xl bg-amber-600 text-white hover:bg-amber-700 transition-colors shadow-sm shadow-amber-600/20 cursor-pointer self-start md:self-auto"
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl bg-amber-700 hover:bg-amber-800 text-white transition-all shadow-md shadow-amber-900/10 cursor-pointer self-start md:self-auto hover:shadow-lg"
         >
           <Plus className="h-4 w-4" />
           <span>Tạo Phiếu Nhập Mới</span>
         </Link>
       </div>
 
+      {/* 4 Executive KPI Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+              Tổng Số Phiếu Nhập
+            </span>
+            <p className="text-2xl font-black text-stone-900">{receipts.length}</p>
+            <span className="text-xs text-stone-400">Chứng từ đã lập</span>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
+            <Receipt className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+              Đã Nhập Kho (Xác Nhận)
+            </span>
+            <p className="text-2xl font-black text-emerald-700">{confirmedCount}</p>
+            <span className="text-xs text-stone-400">Đã cộng tồn & tính giá vốn</span>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
+            <CheckCircle2 className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
+              Bản Nháp Chờ Duyệt
+            </span>
+            <p className="text-2xl font-black text-amber-700">{draftCount}</p>
+            <span className="text-xs text-stone-400">Chưa làm thay đổi tồn kho</span>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
+            <Clock className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-700">
+              Tổng Giá Trị Phiếu
+            </span>
+            <p className="text-xl font-black font-mono text-amber-800">{formatVnd(totalReceiptsAmount)}</p>
+            <span className="text-xs text-stone-400">Theo bộ lọc hiển thị</span>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
+            <Warehouse className="h-5 w-5" />
+          </div>
+        </div>
+      </div>
+
       {/* Filter Toolbar */}
-      <div className="bg-white p-4 rounded-2xl border border-stone-200/80 shadow-xs space-y-3">
+      <div className="bg-white p-3.5 rounded-2xl border border-stone-200/80 shadow-xs space-y-3">
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
             <input
               type="text"
-              placeholder="Tìm theo mã phiếu (PN-000001) hoặc tên NCC..."
+              placeholder="Tìm theo mã phiếu (PN-000001) hoặc tên nhà cung cấp..."
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600"
+              className="w-full pl-10 pr-9 py-2.5 text-xs rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 transition-colors"
             />
+            {keyword && (
+              <button
+                type="button"
+                onClick={() => setKeyword('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                title="Xóa tìm kiếm"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             {/* Supplier Filter */}
             <select
               value={selectedSupplierId}
               onChange={(e) => setSelectedSupplierId(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 max-w-[200px] truncate"
+              className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 max-w-[220px] truncate shadow-xs"
             >
-              <option value="ALL">Tất cả nhà cung cấp</option>
+              <option value="ALL">Tất cả nhà cung cấp ({suppliers.length})</option>
               {suppliers.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -173,29 +244,29 @@ export const AdminStockReceiptsPage: React.FC = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600"
+              className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
             >
-              <option value="ALL">Tất cả trạng thái phiếu</option>
-              <option value="DRAFT">Bản nháp</option>
-              <option value="CONFIRMED">Đã nhập kho (Xác nhận)</option>
+              <option value="ALL">Tất cả trạng thái kho</option>
+              <option value="DRAFT">Bản nháp ({draftCount})</option>
+              <option value="CONFIRMED">Đã nhập kho ({confirmedCount})</option>
             </select>
 
             {/* Payment Status Filter (SRS BR-11) */}
             <select
               value={paymentFilter}
               onChange={(e) => setPaymentFilter(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600"
+              className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
             >
               <option value="ALL">Tất cả thanh toán</option>
-              <option value="UNPAID">Chưa thanh toán (UNPAID)</option>
-              <option value="PAID">Đã thanh toán (PAID)</option>
+              <option value="UNPAID">Chưa thanh toán</option>
+              <option value="PAID">Đã thanh toán đủ</option>
             </select>
 
             <button
               type="button"
               onClick={loadReceipts}
-              className="p-2 text-stone-500 hover:text-stone-900 rounded-xl hover:bg-stone-100 transition-colors"
-              title="Làm mới"
+              className="p-2.5 text-stone-500 hover:text-stone-900 rounded-xl hover:bg-stone-100 transition-colors border border-stone-200 shadow-xs"
+              title="Làm mới danh sách"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-amber-600' : ''}`} />
             </button>
@@ -203,14 +274,14 @@ export const AdminStockReceiptsPage: React.FC = () => {
         </div>
 
         {/* Date Filters */}
-        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-stone-100 text-xs text-stone-600">
+        <div className="flex flex-wrap items-center gap-3 pt-2.5 border-t border-stone-100 text-xs text-stone-600">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-stone-500">Từ ngày:</span>
             <input
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="px-2.5 py-1 rounded-lg border border-stone-200 text-xs focus:outline-none focus:border-amber-600 font-mono"
+              className="px-3 py-1.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-amber-600 font-mono shadow-xs"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -219,7 +290,7 @@ export const AdminStockReceiptsPage: React.FC = () => {
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="px-2.5 py-1 rounded-lg border border-stone-200 text-xs focus:outline-none focus:border-amber-600 font-mono"
+              className="px-3 py-1.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-amber-600 font-mono shadow-xs"
             />
           </div>
           {(fromDate || toDate || keyword || statusFilter !== 'ALL' || paymentFilter !== 'ALL' || selectedSupplierId !== 'ALL') && (
@@ -241,35 +312,35 @@ export const AdminStockReceiptsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Receipts Table */}
-      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+      {/* Receipts Table with Optimized Proportional Column Widths */}
+      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-stone-50/80 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3 px-4">Mã Phiếu</th>
-                <th className="py-3 px-4">Ngày Nhập</th>
-                <th className="py-3 px-4">Nhà Cung Cấp</th>
-                <th className="py-3 px-4 text-right">Tổng Tiền</th>
-                <th className="py-3 px-4 text-right">Đã Trả</th>
-                <th className="py-3 px-4 text-right">Còn Nợ</th>
-                <th className="py-3 px-4 text-center">Trạng Thái Kho</th>
-                <th className="py-3 px-4 text-center">Thanh Toán</th>
-                <th className="py-3 px-4 text-center">Thao Tác</th>
+              <tr className="bg-stone-50/90 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
+                <th className="py-3.5 px-4 w-36 whitespace-nowrap">Mã Phiếu</th>
+                <th className="py-3.5 px-4 w-32 whitespace-nowrap">Ngày Nhập</th>
+                <th className="py-3.5 px-4 min-w-[280px]">Nhà Cung Cấp</th>
+                <th className="py-3.5 px-4 text-right w-44 whitespace-nowrap">Tổng Tiền</th>
+                <th className="py-3.5 px-4 text-center w-36 whitespace-nowrap">Trạng Thái Kho</th>
+                <th className="py-3.5 px-4 text-center w-36 whitespace-nowrap">Thanh Toán</th>
+                <th className="py-3.5 px-4 text-center w-40 whitespace-nowrap">Thao Tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
               {loading && receipts.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-stone-400">
+                  <td colSpan={7} className="py-16 text-center text-stone-400">
                     <RefreshCw className="h-6 w-6 animate-spin mx-auto text-amber-600 mb-2" />
-                    <span>Đang tải danh sách phiếu nhập...</span>
+                    <span className="font-medium">Đang tải danh sách phiếu nhập...</span>
                   </td>
                 </tr>
               ) : receipts.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-stone-400">
-                    Không tìm thấy phiếu nhập nào phù hợp với bộ lọc
+                  <td colSpan={7} className="py-16 text-center text-stone-400">
+                    <Receipt className="h-8 w-8 mx-auto text-stone-300 mb-2" />
+                    <p className="font-semibold text-stone-600 text-sm">Không tìm thấy phiếu nhập nào</p>
+                    <p className="text-xs text-stone-400 mt-1">Thử thay đổi từ khóa tìm kiếm hoặc mốc thời gian</p>
                   </td>
                 </tr>
               ) : (
@@ -278,27 +349,31 @@ export const AdminStockReceiptsPage: React.FC = () => {
                   return (
                     <tr
                       key={r.id}
-                      className="hover:bg-amber-50/30 transition-colors cursor-pointer"
+                      className="hover:bg-amber-50/30 transition-colors cursor-pointer group"
                       onClick={() => (window.location.href = `/admin/inventory/receipts/${r.id}`)}
                     >
-                      <td className="py-3 px-4 font-mono font-bold text-stone-900">{r.code}</td>
-                      <td className="py-3 px-4 font-mono text-stone-600">{formatDate(r.receiptDate)}</td>
-                      <td className="py-3 px-4 font-semibold text-stone-900 max-w-xs truncate">
-                        <div>{r.supplierName}</div>
-                        <span className="text-[11px] font-mono text-stone-400 font-normal">{r.supplierPhone}</span>
+                      <td className="py-3.5 px-4 font-mono font-bold text-stone-900 whitespace-nowrap bg-stone-50/40">
+                        {r.code}
                       </td>
-                      <td className="py-3 px-4 text-right font-mono font-bold text-stone-900">
+                      <td className="py-3.5 px-4 font-mono text-stone-600 whitespace-nowrap">
+                        {formatDate(r.receiptDate)}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
+                          {r.supplierName}
+                        </div>
+                        {r.supplierPhone && (
+                          <span className="text-[11px] font-mono text-stone-400 font-normal">
+                            {r.supplierPhone}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 whitespace-nowrap text-sm">
                         {formatVnd(r.totalAmount)}
                       </td>
-                      <td className="py-3 px-4 text-right font-mono text-emerald-700 font-semibold">
-                        {formatVnd(r.amountPaid)}
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono font-bold text-rose-700">
-                        {formatVnd(r.remainingAmount)}
-                      </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${
                             isConfirmed
                               ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                               : 'bg-amber-50 text-amber-700 border border-amber-200'
@@ -306,39 +381,38 @@ export const AdminStockReceiptsPage: React.FC = () => {
                         >
                           {isConfirmed ? (
                             <>
-                              <CheckCircle2 className="h-3 w-3" />
+                              <CheckCircle2 className="h-3.5 w-3.5" />
                               Đã nhập kho
                             </>
                           ) : (
                             <>
-                              <Clock className="h-3 w-3" />
+                              <Clock className="h-3.5 w-3.5" />
                               Bản nháp
                             </>
                           )}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         <span
-                          className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${
                             r.paymentStatus === 'PAID'
-                              ? 'bg-emerald-50 text-emerald-700'
-                              : r.paymentStatus === 'PARTIALLY_PAID'
-                              ? 'bg-amber-50 text-amber-800'
-                              : 'bg-stone-100 text-stone-500'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : 'bg-stone-100 text-stone-600 border border-stone-200'
                           }`}
                         >
-                          {r.paymentStatus === 'PAID'
-                            ? 'Đã trả đủ'
-                            : r.paymentStatus === 'PARTIALLY_PAID'
-                            ? 'Trả 1 phần'
-                            : 'Chưa trả'}
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              r.paymentStatus === 'PAID' ? 'bg-emerald-500' : 'bg-stone-400'
+                            }`}
+                          />
+                          {r.paymentStatus === 'PAID' ? 'Đã trả đủ' : 'Chưa thanh toán'}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center" onClick={(e) => e.stopPropagation()}>
-                        <div className="inline-flex items-center gap-1">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <div className="inline-flex items-center justify-center gap-1">
                           <Link
                             to={`/admin/inventory/receipts/${r.id}`}
-                            className="p-1.5 rounded-lg text-stone-500 hover:text-amber-700 hover:bg-stone-100 transition-colors"
+                            className="p-1.5 rounded-lg text-stone-500 hover:text-amber-700 hover:bg-amber-50 transition-colors"
                             title="Xem chi tiết phiếu nhập"
                           >
                             <Eye className="h-4 w-4" />
@@ -347,8 +421,8 @@ export const AdminStockReceiptsPage: React.FC = () => {
                             type="button"
                             onClick={(e) => handleDownloadPdf(e, r)}
                             disabled={downloadingPdfId === r.id}
-                            className="p-1.5 rounded-lg text-stone-500 hover:text-blue-700 hover:bg-stone-100 transition-colors disabled:opacity-50"
-                            title="Xuất file PDF A4"
+                            className="p-1.5 rounded-lg text-stone-500 hover:text-blue-700 hover:bg-blue-50 transition-colors disabled:opacity-50"
+                            title="Xuất file PDF A4 chuẩn in ấn"
                           >
                             <FileDown
                               className={`h-4 w-4 ${downloadingPdfId === r.id ? 'animate-bounce text-blue-600' : ''}`}
@@ -358,7 +432,7 @@ export const AdminStockReceiptsPage: React.FC = () => {
                             <button
                               type="button"
                               onClick={(e) => handleDeleteDraft(e, r)}
-                              className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-stone-100 transition-colors"
+                              className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                               title="Xóa phiếu nháp"
                             >
                               <Trash2 className="h-4 w-4" />

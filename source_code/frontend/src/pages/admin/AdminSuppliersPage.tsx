@@ -159,8 +159,12 @@ export const AdminSuppliersPage: React.FC = () => {
     });
   };
 
+  const totalPurchasedSum = suppliers.reduce((sum, s) => sum + (s.totalPurchasedAmount || 0), 0);
+  const activeCount = suppliers.filter((s) => s.active).length;
+  const inactiveCount = suppliers.filter((s) => !s.active).length;
+
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="w-full max-w-[1720px] mx-auto space-y-6">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -179,166 +183,249 @@ export const AdminSuppliersPage: React.FC = () => {
         <button
           type="button"
           onClick={openCreateModal}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold rounded-xl bg-amber-600 text-white hover:bg-amber-700 transition-colors shadow-sm shadow-amber-600/20 cursor-pointer self-start md:self-auto"
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl bg-amber-700 hover:bg-amber-800 text-white transition-all shadow-md shadow-amber-900/10 cursor-pointer self-start md:self-auto hover:shadow-lg"
         >
           <Plus className="h-4 w-4" />
-          <span>Thêm Nhà Cung Cấp</span>
+          <span>Thêm Nhà Cung Cấp Mới</span>
         </button>
       </div>
 
-      {/* Filter & Search */}
-      <div className="bg-white p-4 rounded-2xl border border-stone-200/80 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      {/* 4 Executive KPI Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+              Tổng Nhà Cung Cấp
+            </span>
+            <p className="text-2xl font-black text-stone-900">{suppliers.length}</p>
+            <span className="text-xs text-stone-400">Đối tác trong danh bạ</span>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
+            <Truck className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+              Đang Hợp Tác
+            </span>
+            <p className="text-2xl font-black text-emerald-700">{activeCount}</p>
+            <span className="text-xs text-stone-400">Sẵn sàng nhận đơn</span>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
+            <CheckCircle2 className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+              Tạm Dừng Hợp Tác
+            </span>
+            <p className="text-2xl font-black text-stone-600">{inactiveCount}</p>
+            <span className="text-xs text-stone-400">Khóa tạo phiếu nhập</span>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-stone-100 text-stone-500 flex items-center justify-center border border-stone-200">
+            <Ban className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
+              Tổng Giá Trị Đã Nhập
+            </span>
+            <p className="text-xl font-black font-mono text-amber-800">{formatVnd(totalPurchasedSum)}</p>
+            <span className="text-xs text-stone-400">Lũy kế toàn bộ phiếu</span>
+          </div>
+          <div className="h-11 w-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
+            <Receipt className="h-5 w-5" />
+          </div>
+        </div>
+      </div>
+
+      {/* Filter & Search Toolbar */}
+      <div className="bg-white p-3.5 rounded-2xl border border-stone-200/80 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
           <input
             type="text"
-            placeholder="Tìm theo tên NCC, số điện thoại hoặc mã..."
+            placeholder="Tìm theo tên nhà cung cấp, số điện thoại hoặc mã NCC..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600"
+            className="w-full pl-10 pr-9 py-2.5 text-xs rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 transition-colors"
           />
+          {keyword && (
+            <button
+              type="button"
+              onClick={() => setKeyword('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+              title="Xóa tìm kiếm"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <select
             value={activeFilter}
             onChange={(e) => setActiveFilter(e.target.value)}
-            className="px-3 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600"
+            className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
           >
-            <option value="ALL">Tất cả trạng thái</option>
-            <option value="ACTIVE">Đang hợp tác</option>
-            <option value="INACTIVE">Tạm dừng</option>
+            <option value="ALL">Tất cả trạng thái ({suppliers.length})</option>
+            <option value="ACTIVE">Đang hợp tác ({activeCount})</option>
+            <option value="INACTIVE">Tạm dừng ({inactiveCount})</option>
           </select>
 
           <button
             type="button"
             onClick={loadSuppliers}
-            className="p-2 text-stone-500 hover:text-stone-900 rounded-xl hover:bg-stone-100 transition-colors"
-            title="Tải lại"
+            className="p-2.5 text-stone-500 hover:text-stone-900 rounded-xl hover:bg-stone-100 transition-colors border border-stone-200 shadow-xs"
+            title="Tải lại danh sách"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-amber-600' : ''}`} />
           </button>
         </div>
       </div>
 
-      {/* Suppliers Table */}
-      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+      {/* Suppliers Table with Optimized Proportional Column Widths */}
+      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-stone-50/80 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3 px-4">Mã NCC</th>
-                <th className="py-3 px-4">Nhà Cung Cấp</th>
-                <th className="py-3 px-4">Liên Hệ</th>
-                <th className="py-3 px-4">Địa Chỉ</th>
-                <th className="py-3 px-4 text-right">Tổng Tiền Đã Nhập</th>
-                <th className="py-3 px-4 text-center">Số Phiếu</th>
-                <th className="py-3 px-4 text-center">Trạng Thái</th>
-                <th className="py-3 px-4 text-center">Thao Tác</th>
+              <tr className="bg-stone-50/90 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
+                <th className="py-3.5 px-4 w-28 whitespace-nowrap">Mã NCC</th>
+                <th className="py-3.5 px-4 min-w-[280px]">Nhà Cung Cấp</th>
+                <th className="py-3.5 px-4 min-w-[220px] whitespace-nowrap">Liên Hệ</th>
+                <th className="py-3.5 px-4 min-w-[260px]">Địa Chỉ</th>
+                <th className="py-3.5 px-4 text-right w-44 whitespace-nowrap">Tổng Tiền Đã Nhập</th>
+                <th className="py-3.5 px-4 text-center w-32 whitespace-nowrap">Số Phiếu</th>
+                <th className="py-3.5 px-4 text-center w-32 whitespace-nowrap">Trạng Thái</th>
+                <th className="py-3.5 px-4 text-center w-36 whitespace-nowrap">Thao Tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
               {loading && suppliers.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-stone-400">
+                  <td colSpan={8} className="py-16 text-center text-stone-400">
                     <RefreshCw className="h-6 w-6 animate-spin mx-auto text-amber-600 mb-2" />
-                    <span>Đang tải danh bạ nhà cung cấp...</span>
+                    <span className="font-medium">Đang tải danh bạ nhà cung cấp...</span>
                   </td>
                 </tr>
               ) : suppliers.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-stone-400">
-                    Không tìm thấy nhà cung cấp nào
+                  <td colSpan={8} className="py-16 text-center text-stone-400">
+                    <Truck className="h-8 w-8 mx-auto text-stone-300 mb-2" />
+                    <p className="font-semibold text-stone-600 text-sm">Không tìm thấy nhà cung cấp nào</p>
+                    <p className="text-xs text-stone-400 mt-1">Thử thay đổi từ khóa hoặc bộ lọc trạng thái</p>
                   </td>
                 </tr>
               ) : (
-                suppliers.map((sup) => (
-                  <tr key={sup.id} className="hover:bg-amber-50/30 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-stone-700">{sup.code}</td>
-                    <td className="py-3 px-4">
-                      <div className="font-bold text-stone-900">{sup.name}</div>
-                      {sup.note && <div className="text-[11px] text-stone-400 truncate max-w-xs">{sup.note}</div>}
-                    </td>
-                    <td className="py-3 px-4 space-y-0.5">
-                      <div className="flex items-center gap-1 font-mono text-stone-800 font-semibold">
-                        <Phone className="h-3 w-3 text-stone-400" />
-                        <span>{sup.phone}</span>
-                      </div>
-                      {sup.email && (
-                        <div className="flex items-center gap-1 text-[11px] text-stone-500">
-                          <Mail className="h-3 w-3 text-stone-400" />
-                          <span>{sup.email}</span>
+                suppliers.map((sup) => {
+                  const receiptsCount = sup.totalReceiptsCount ?? sup.stockReceiptsCount ?? 0;
+                  return (
+                    <tr key={sup.id} className="hover:bg-amber-50/30 transition-colors group">
+                      <td className="py-3.5 px-4 font-mono font-bold text-stone-800 whitespace-nowrap bg-stone-50/40">
+                        {sup.code}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-stone-900 text-sm group-hover:text-amber-800 transition-colors">
+                          {sup.name}
                         </div>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-stone-600 max-w-xs truncate" title={sup.address || ''}>
-                      {sup.address ? (
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3 text-stone-400 shrink-0" />
-                          <span className="truncate">{sup.address}</span>
+                        {sup.note && (
+                          <div className="text-[11px] text-stone-400 mt-0.5 max-w-md line-clamp-1" title={sup.note}>
+                            {sup.note}
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 space-y-1 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5 font-mono text-stone-900 font-semibold text-xs">
+                          <Phone className="h-3.5 w-3.5 text-stone-400 shrink-0" />
+                          <span>{sup.phone}</span>
                         </div>
-                      ) : (
-                        <span className="text-stone-300 italic">—</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono font-bold text-amber-800">
-                      {formatVnd(sup.totalPurchasedAmount)}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <button
-                        type="button"
-                        onClick={() => openReceiptsModal(sup)}
-                        className="font-mono font-bold text-xs px-2 py-0.5 rounded-full bg-stone-100 text-stone-700 hover:bg-amber-100 hover:text-amber-800 transition-colors"
-                        title="Bấm để xem lịch sử phiếu nhập của NCC này"
-                      >
-                        {sup.stockReceiptsCount} phiếu
-                      </button>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span
-                        className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          sup.active
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : 'bg-stone-100 text-stone-500 border border-stone-200'
-                        }`}
-                      >
-                        {sup.active ? 'Hợp tác' : 'Tạm dừng'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <div className="inline-flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(sup)}
-                          className="p-1.5 rounded-lg text-stone-500 hover:text-amber-700 hover:bg-stone-100 transition-colors"
-                          title="Chỉnh sửa thông tin NCC"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleToggleActive(sup)}
-                          className={`p-1.5 rounded-lg transition-colors ${
-                            sup.active
-                              ? 'text-stone-400 hover:text-rose-600 hover:bg-stone-100'
-                              : 'text-stone-400 hover:text-emerald-600 hover:bg-stone-100'
-                          }`}
-                          title={sup.active ? 'Tạm ngừng hợp tác' : 'Kích hoạt lại'}
-                        >
-                          {sup.active ? <Ban className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-                        </button>
+                        {sup.email ? (
+                          <div className="flex items-center gap-1.5 text-[11px] text-stone-500">
+                            <Mail className="h-3.5 w-3.5 text-stone-400 shrink-0" />
+                            <span>{sup.email}</span>
+                          </div>
+                        ) : (
+                          <span className="text-[11px] text-stone-300 italic">Chưa có email</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-stone-600" title={sup.address || ''}>
+                        {sup.address ? (
+                          <div className="flex items-start gap-1.5 max-w-sm">
+                            <MapPin className="h-3.5 w-3.5 text-stone-400 shrink-0 mt-0.5" />
+                            <span className="line-clamp-2 leading-relaxed text-xs">{sup.address}</span>
+                          </div>
+                        ) : (
+                          <span className="text-stone-300 italic">—</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 whitespace-nowrap text-sm">
+                        {formatVnd(sup.totalPurchasedAmount)}
+                      </td>
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         <button
                           type="button"
                           onClick={() => openReceiptsModal(sup)}
-                          className="p-1.5 rounded-lg text-stone-500 hover:text-blue-700 hover:bg-stone-100 transition-colors"
-                          title="Xem phiếu nhập"
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 hover:bg-amber-100 text-stone-700 hover:text-amber-900 font-semibold transition-colors cursor-pointer border border-stone-200/80 hover:border-amber-300"
+                          title="Bấm để xem lịch sử phiếu nhập của NCC này"
                         >
-                          <Receipt className="h-4 w-4" />
+                          <Receipt className="h-3 w-3 text-stone-400" />
+                          <span className="font-mono font-bold">{receiptsCount}</span>
+                          <span className="text-[11px] text-stone-500">phiếu</span>
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                            sup.active
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : 'bg-stone-100 text-stone-500 border border-stone-200'
+                          }`}
+                        >
+                          <span className={`h-1.5 w-1.5 rounded-full ${sup.active ? 'bg-emerald-500' : 'bg-stone-400'}`} />
+                          {sup.active ? 'Đang hợp tác' : 'Tạm dừng'}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <div className="inline-flex items-center justify-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(sup)}
+                            className="p-1.5 rounded-lg text-stone-500 hover:text-amber-700 hover:bg-amber-50 transition-colors"
+                            title="Chỉnh sửa thông tin NCC"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleActive(sup)}
+                            className={`p-1.5 rounded-lg transition-colors ${
+                              sup.active
+                                ? 'text-stone-400 hover:text-rose-600 hover:bg-rose-50'
+                                : 'text-stone-400 hover:text-emerald-600 hover:bg-emerald-50'
+                            }`}
+                            title={sup.active ? 'Tạm ngừng hợp tác' : 'Kích hoạt lại'}
+                          >
+                            {sup.active ? <Ban className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openReceiptsModal(sup)}
+                            className="p-1.5 rounded-lg text-stone-500 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                            title="Xem danh sách phiếu nhập"
+                          >
+                            <Receipt className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

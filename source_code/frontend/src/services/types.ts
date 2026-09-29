@@ -143,6 +143,7 @@ export interface SupplierDto {
   active: boolean;
   totalPurchasedAmount: number;
   stockReceiptsCount: number;
+  totalReceiptsCount?: number;
   createdAt: string;
   updatedAt: string;
 }

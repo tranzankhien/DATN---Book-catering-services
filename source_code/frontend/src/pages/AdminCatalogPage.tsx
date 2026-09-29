@@ -305,13 +305,13 @@ export const AdminCatalogPage: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-stone-200 bg-stone-50 text-[11px] font-semibold uppercase tracking-wider text-stone-600">
-                      <th className="py-3 px-4">Món Ăn</th>
-                      <th className="py-3 px-4">Danh Mục</th>
-                      <th className="py-3 px-4 text-right">Đơn Giá / 01 Phần</th>
-                      <th className="py-3 px-4">Công Thức Định Lượng (01 Phần)</th>
-                      <th className="py-3 px-4">Trạng Thái</th>
-                      <th className="py-3 px-4 text-right">Thao Tác Quản Trị</th>
+                    <tr className="border-b border-stone-200 bg-stone-50/90 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">
+                      <th className="py-3.5 px-4 min-w-[280px]">Món Ăn</th>
+                      <th className="py-3.5 px-4 w-36 whitespace-nowrap">Danh Mục</th>
+                      <th className="py-3.5 px-4 text-right w-44 whitespace-nowrap">Đơn Giá / 01 Phần</th>
+                      <th className="py-3.5 px-4 min-w-[320px]">Công Thức Định Lượng (01 Phần)</th>
+                      <th className="py-3.5 px-4 w-32 text-center whitespace-nowrap">Trạng Thái</th>
+                      <th className="py-3.5 px-4 text-right w-40 whitespace-nowrap">Thao Tác Quản Trị</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100 text-xs">
@@ -441,35 +441,37 @@ export const AdminCatalogPage: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-stone-200 bg-stone-50 text-[11px] font-semibold uppercase tracking-wider text-stone-600">
-                  <th className="py-3 px-4">Mã Nguyên Liệu</th>
-                  <th className="py-3 px-4">Tên Nguyên Liệu</th>
-                  <th className="py-3 px-4">Đơn Vị</th>
-                  <th className="py-3 px-4 text-right">Ngưỡng Tồn Tối Thiểu</th>
-                  <th className="py-3 px-4 text-right">Tồn Vật Lý Hiện Tại</th>
-                  <th className="py-3 px-4 text-right">Đơn Giá Vốn Bình Quân</th>
-                  <th className="py-3 px-4 text-right">Thao Tác</th>
+                <tr className="border-b border-stone-200 bg-stone-50/90 text-[11px] font-bold uppercase tracking-wider text-stone-600">
+                  <th className="py-3.5 px-4 w-32 whitespace-nowrap">Mã Nguyên Liệu</th>
+                  <th className="py-3.5 px-4 min-w-[280px]">Tên Nguyên Liệu</th>
+                  <th className="py-3.5 px-4 w-24 text-center whitespace-nowrap">Đơn Vị</th>
+                  <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Ngưỡng Tối Thiểu</th>
+                  <th className="py-3.5 px-4 text-right w-40 whitespace-nowrap">Tồn Vật Lý Hiện Tại</th>
+                  <th className="py-3.5 px-4 text-right w-44 whitespace-nowrap">Giá Vốn Bình Quân</th>
+                  <th className="py-3.5 px-4 text-right w-32 whitespace-nowrap">Thao Tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100 text-xs">
                 {ingredients.map((ing) => (
-                  <tr key={ing.id} className="hover:bg-stone-50/70 transition-colors">
-                    <td className="py-3 px-4 font-mono font-semibold text-stone-700">
+                  <tr key={ing.id} className="hover:bg-amber-50/20 transition-colors group">
+                    <td className="py-3.5 px-4 font-mono font-bold text-stone-800 whitespace-nowrap bg-stone-50/40">
                       {ing.code}
                     </td>
-                    <td className="py-3 px-4 font-semibold text-stone-900">{ing.name}</td>
-                    <td className="py-3 px-4">
-                      <span className="rounded bg-stone-100 px-2 py-0.5 font-medium text-stone-700">
+                    <td className="py-3.5 px-4 font-bold text-stone-900 group-hover:text-amber-800 transition-colors text-sm">
+                      {ing.name}
+                    </td>
+                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                      <span className="inline-block rounded-md bg-stone-100 px-2.5 py-0.5 font-medium text-stone-700 border border-stone-200/80">
                         {ing.unit}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right font-medium text-stone-600">
-                      {formatQuantity(ing.minStockThreshold)} {ing.unit}
+                    <td className="py-3.5 px-4 text-right font-medium text-stone-600 font-mono whitespace-nowrap">
+                      {formatQuantity(ing.minStockThreshold)} <span className="text-[11px] text-stone-400 font-normal">{ing.unit}</span>
                     </td>
-                    <td className="py-3 px-4 text-right font-bold text-emerald-700 font-mono">
-                      {formatQuantity(ing.currentStock)} {ing.unit}
+                    <td className="py-3.5 px-4 text-right font-mono font-bold text-emerald-700 whitespace-nowrap text-sm">
+                      {formatQuantity(ing.currentStock)} <span className="text-[11px] text-stone-400 font-normal">{ing.unit}</span>
                     </td>
-                    <td className="py-3 px-4 text-right font-semibold text-stone-800">
+                    <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 whitespace-nowrap text-sm">
                       {formatVnd(ing.avgUnitCost)}
                     </td>
                     <td className="py-3 px-4 text-right">

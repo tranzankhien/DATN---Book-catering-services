@@ -74,7 +74,7 @@ export const AdminInventoryOverviewPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="w-full max-w-[1720px] mx-auto space-y-8">
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>

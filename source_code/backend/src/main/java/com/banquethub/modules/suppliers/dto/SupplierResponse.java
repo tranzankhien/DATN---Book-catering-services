@@ -120,6 +120,10 @@ public class SupplierResponse {
         return totalReceiptsCount;
     }
 
+    public long getStockReceiptsCount() {
+        return totalReceiptsCount;
+    }
+
     public void setTotalReceiptsCount(long totalReceiptsCount) {
         this.totalReceiptsCount = totalReceiptsCount;
     }
