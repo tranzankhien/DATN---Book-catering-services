@@ -42,6 +42,7 @@ class Phase2IntegrationTest {
     private ObjectMapper objectMapper;
 
     private static final String TEST_PHONE = "093" + (System.currentTimeMillis() % 10000000);
+    private static Long sharedDraftReceiptId;
 
     private String obtainAdminToken() throws Exception {
         String loginPayload = """
@@ -73,6 +74,19 @@ class Phase2IntegrationTest {
                 .andReturn();
         return objectMapper.readTree(res.getResponse().getContentAsString())
                 .path("data").path("accessToken").asText();
+    }
+
+    private long getFirstActiveSupplierId(String token) throws Exception {
+        MvcResult supRes = mockMvc.perform(get("/api/v1/admin/suppliers")
+                        .header("Authorization", "Bearer " + token))
+                .andReturn();
+        JsonNode list = objectMapper.readTree(supRes.getResponse().getContentAsString()).path("data");
+        for (JsonNode s : list) {
+            if (s.path("active").asBoolean(true)) {
+                return s.path("id").asLong();
+            }
+        }
+        return list.get(0).path("id").asLong();
     }
 
     @Test
@@ -246,6 +260,7 @@ class Phase2IntegrationTest {
                 .andReturn();
 
         JsonNode data = objectMapper.readTree(res.getResponse().getContentAsString()).path("data");
+        sharedDraftReceiptId = data.path("id").asLong();
         assertThat(data.path("items").get(0).path("lineTotal").asDouble()).isEqualTo(500000.0);
         assertThat(data.path("items").get(1).path("lineTotal").asDouble()).isEqualTo(600000.0);
     }
@@ -262,7 +277,7 @@ class Phase2IntegrationTest {
                         .param("status", "DRAFT"))
                 .andReturn();
         JsonNode receipts = objectMapper.readTree(receiptsRes.getResponse().getContentAsString()).path("data");
-        long receiptId = receipts.get(0).path("id").asLong();
+        long receiptId = sharedDraftReceiptId != null ? sharedDraftReceiptId : receipts.get(0).path("id").asLong();
 
         // Lấy chi tiết phiếu để biết ingredientId và tồn hiện tại
         MvcResult detailRes = mockMvc.perform(get("/api/v1/admin/stock-receipts/{id}", receiptId)
@@ -292,12 +307,15 @@ class Phase2IntegrationTest {
     void testUpdateDraftReceipt() throws Exception {
         String adminToken = obtainAdminToken();
 
-        MvcResult receiptsRes = mockMvc.perform(get("/api/v1/admin/stock-receipts")
-                        .header("Authorization", "Bearer " + adminToken)
-                        .param("status", "DRAFT"))
-                .andReturn();
-        long receiptId = objectMapper.readTree(receiptsRes.getResponse().getContentAsString())
-                .path("data").get(0).path("id").asLong();
+        long receiptId = sharedDraftReceiptId != null ? sharedDraftReceiptId : 0L;
+        if (receiptId == 0L) {
+            MvcResult receiptsRes = mockMvc.perform(get("/api/v1/admin/stock-receipts")
+                            .header("Authorization", "Bearer " + adminToken)
+                            .param("status", "DRAFT"))
+                    .andReturn();
+            receiptId = objectMapper.readTree(receiptsRes.getResponse().getContentAsString())
+                    .path("data").get(0).path("id").asLong();
+        }
 
         MvcResult detailRes = mockMvc.perform(get("/api/v1/admin/stock-receipts/{id}", receiptId)
                         .header("Authorization", "Bearer " + adminToken))
@@ -338,11 +356,7 @@ class Phase2IntegrationTest {
         String adminToken = obtainAdminToken();
 
         // Tạo 1 phiếu nháp riêng để test xóa
-        MvcResult supRes = mockMvc.perform(get("/api/v1/admin/suppliers")
-                        .header("Authorization", "Bearer " + adminToken))
-                .andReturn();
-        long supId = objectMapper.readTree(supRes.getResponse().getContentAsString())
-                .path("data").get(0).path("id").asLong();
+        long supId = getFirstActiveSupplierId(adminToken);
 
         MvcResult ingRes = mockMvc.perform(get("/api/v1/admin/inventory/ingredients")
                         .header("Authorization", "Bearer " + adminToken))
@@ -391,12 +405,15 @@ class Phase2IntegrationTest {
         String adminToken = obtainAdminToken();
 
         // Lấy phiếu nháp còn lại
-        MvcResult receiptsRes = mockMvc.perform(get("/api/v1/admin/stock-receipts")
-                        .header("Authorization", "Bearer " + adminToken)
-                        .param("status", "DRAFT"))
-                .andReturn();
-        long receiptId = objectMapper.readTree(receiptsRes.getResponse().getContentAsString())
-                .path("data").get(0).path("id").asLong();
+        long receiptId = sharedDraftReceiptId != null ? sharedDraftReceiptId : 0L;
+        if (receiptId == 0L) {
+            MvcResult receiptsRes = mockMvc.perform(get("/api/v1/admin/stock-receipts")
+                            .header("Authorization", "Bearer " + adminToken)
+                            .param("status", "DRAFT"))
+                    .andReturn();
+            receiptId = objectMapper.readTree(receiptsRes.getResponse().getContentAsString())
+                    .path("data").get(0).path("id").asLong();
+        }
 
         MvcResult detailRes = mockMvc.perform(get("/api/v1/admin/stock-receipts/{id}", receiptId)
                         .header("Authorization", "Bearer " + adminToken))
@@ -457,11 +474,7 @@ class Phase2IntegrationTest {
         BigDecimal oldCost = BigDecimal.valueOf(testIng.path("avgUnitCost").asDouble());
 
         // Lấy supplier ID
-        MvcResult supRes = mockMvc.perform(get("/api/v1/admin/suppliers")
-                        .header("Authorization", "Bearer " + adminToken))
-                .andReturn();
-        long supId = objectMapper.readTree(supRes.getResponse().getContentAsString())
-                .path("data").get(0).path("id").asLong();
+        long supId = getFirstActiveSupplierId(adminToken);
 
         BigDecimal importQty = BigDecimal.valueOf(10.0);
         BigDecimal importPrice = BigDecimal.valueOf(80000.0);
@@ -829,11 +842,7 @@ class Phase2IntegrationTest {
                 .andExpect(jsonPath("$.data.quantityChange").value(10.0));
 
         // 3. Lấy 1 NCC active
-        MvcResult supRes = mockMvc.perform(get("/api/v1/admin/suppliers")
-                        .header("Authorization", "Bearer " + adminToken))
-                .andReturn();
-        long supId = objectMapper.readTree(supRes.getResponse().getContentAsString())
-                .path("data").get(0).path("id").asLong();
+        long supId = getFirstActiveSupplierId(adminToken);
 
         // 4. Nhập thêm 10 kg với đơn giá 50.000đ -> Giá vốn mới = (10*0 + 10*50000) / 20 = 25.000đ/kg
         String receiptPayload = String.format("""
@@ -969,6 +978,11 @@ class Phase2IntegrationTest {
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("tạm ngừng hoạt động")));
+
+        // Khôi phục lại trạng thái active của NCC để không ảnh hưởng dữ liệu các lần chạy test khác
+        mockMvc.perform(patch("/api/v1/admin/suppliers/{id}/toggle-active", supId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -978,10 +992,7 @@ class Phase2IntegrationTest {
         String adminToken = obtainAdminToken();
 
         // 1. Lấy 1 NCC active và 1 nguyên liệu
-        MvcResult supRes = mockMvc.perform(get("/api/v1/admin/suppliers")
-                        .header("Authorization", "Bearer " + adminToken))
-                .andReturn();
-        long supId = objectMapper.readTree(supRes.getResponse().getContentAsString()).path("data").get(0).path("id").asLong();
+        long supId = getFirstActiveSupplierId(adminToken);
 
         MvcResult ingRes = mockMvc.perform(get("/api/v1/admin/inventory/ingredients")
                         .header("Authorization", "Bearer " + adminToken))

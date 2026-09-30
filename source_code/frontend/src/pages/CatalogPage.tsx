@@ -152,15 +152,15 @@ export const CatalogPage: React.FC = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header Banner */}
-      <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8 shadow-sm">
+      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
               <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-              <span>Thực Đơn Công Khai & Định Mức Chuẩn Hóa</span>
+              <span>Thực đơn công khai & định mức chuẩn hóa</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
-              Danh Mục Món Tiệc Chuẩn Vị
+            <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+              Danh mục món tiệc chuẩn vị
             </h1>
             <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
               Mỗi món ăn có đơn giá tính cho 01 phần trên mỗi bàn tiệc (chuẩn 10 khách). Bấm{' '}

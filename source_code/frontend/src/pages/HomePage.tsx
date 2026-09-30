@@ -247,9 +247,9 @@ export const HomePage: React.FC = () => {
   const activeTheme = activeDish ? getDishTheme(activeDish) : THEME_PRESETS.emerald;
 
   return (
-    <div className="space-y-16 sm:space-y-24 pb-16">
+    <div className="space-y-24 sm:space-y-32 pb-20">
       {/* Luxury Hero Section with Rotary Orbit Showcase & Dynamic Atmospheric Background */}
-      <section className="relative overflow-hidden pt-8 pb-14 sm:pt-14 sm:pb-22">
+      <section className="relative overflow-hidden pt-8 pb-16 sm:pt-14 sm:pb-24">
         {/* Dynamic Atmospheric Background with Layered Cross-fade and Deliberate Stagger Delay */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {(Object.keys(THEME_PRESETS) as ThemeKey[]).map((key) => {
@@ -297,23 +297,23 @@ export const HomePage: React.FC = () => {
             {/* Left Content (Staggered Animation Entrance) */}
             <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
               <div className="animate-fade-up-1">
-                <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/90 bg-white/80 backdrop-blur-sm px-4 py-1.5 text-xs font-semibold text-amber-900 shadow-xs">
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/90 bg-white/85 backdrop-blur-sm px-4 py-1.5 text-xs font-medium text-amber-900 shadow-xs">
                   <Sparkles className="h-3.5 w-3.5 text-amber-700 animate-spin" style={{ animationDuration: '8s' }} />
-                  <span>Nghệ Thuật Ẩm Thực Yến Tiệc & Hội Nghị Cao Cấp</span>
+                  <span>Nghệ thuật ẩm thực yến tiệc & hội nghị cao cấp</span>
                 </div>
               </div>
 
               {/* Headline with Structured 3-Tier Dynamic TextRotate (No overlap, crystal clear typography) */}
               <h1 className="animate-fade-up-2 text-3xl sm:text-5xl lg:text-5xl font-extrabold text-stone-900 tracking-tight leading-[1.2]">
-                <span>Tinh Hoa Yến Tiệc,</span>
+                <span>Tinh hoa yến tiệc,</span>
                 <span className="block mt-1 sm:mt-1.5 text-amber-700 min-h-[44px] sm:min-h-[58px] flex items-center">
                   <TextRotate
                     texts={[
-                      "Minh Bạch Định Lượng",
-                      "Đẳng Cấp 5 Sao",
-                      "Tinh Túy Mỹ Vị",
-                      "Chuẩn Vị Hoàng Gia",
-                      "Tối Ưu Chi Phí",
+                      "minh bạch định lượng",
+                      "đẳng cấp 5 sao",
+                      "tinh túy mỹ vị",
+                      "chuẩn vị truyền thống",
+                      "tối ưu chi phí",
                     ]}
                     mainClassName="py-0.5 underline decoration-amber-300 decoration-wavy decoration-from-font inline-flex"
                     splitBy="words"
@@ -328,13 +328,13 @@ export const HomePage: React.FC = () => {
                   />
                 </span>
                 <span className="block text-2xl sm:text-4xl text-stone-800 font-bold mt-1 tracking-normal">
-                  Quy Chuẩn Từng Bàn Tiệc
+                  quy chuẩn từng bàn tiệc
                 </span>
               </h1>
 
               {/* Subtitle */}
               <p className="animate-fade-up-3 text-sm sm:text-base text-stone-600 max-w-xl leading-relaxed mx-auto lg:mx-0 pt-1">
-                Nền tảng đặt tiệc và quản lý nhà hàng thông minh kết nối trực tiếp công thức món ăn
+                Nền tảng đặt tiệc và quản lý ẩm thực thông minh kết nối trực tiếp công thức món ăn
                 với kho nguyên liệu trung tâm. Khách hàng chủ động chọn món, tính đúng chi phí theo quy chuẩn 1 bàn
                 và theo dõi định mức tiêu hao nguyên liệu thực tế.
               </p>
@@ -343,19 +343,19 @@ export const HomePage: React.FC = () => {
               <div className="animate-fade-up-4 flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
                 <Link
                   to="/dishes"
-                  className="btn-shimmer inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-700 via-amber-800 to-amber-700 hover:from-amber-800 hover:to-amber-900 text-white px-6 py-3.5 text-sm font-bold shadow-md shadow-amber-900/10 hover:shadow-lg transition-all"
+                  className="btn-shimmer inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-700 via-amber-800 to-amber-700 hover:from-amber-800 hover:to-amber-900 text-white px-6 py-3.5 text-sm font-semibold shadow-md shadow-amber-900/10 hover:shadow-lg transition-all"
                 >
                   <Compass className="h-4 w-4" />
-                  <span>Khám Phá Món & Bảng Tính Giá</span>
+                  <span>Khám phá món & bảng tính giá</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
 
                 <Link
                   to="/dishes"
-                  className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white/90 backdrop-blur-sm px-5 py-3.5 text-sm font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-400 transition-colors shadow-xs"
+                  className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white/95 backdrop-blur-sm px-5 py-3.5 text-sm font-medium text-stone-700 hover:bg-stone-50 hover:border-stone-400 transition-colors shadow-xs"
                 >
                   <Calculator className="h-4 w-4 text-amber-700" />
-                  <span>Mô Phỏng Chi Phí Bàn Tiệc</span>
+                  <span>Mô phỏng chi phí bàn tiệc</span>
                 </Link>
               </div>
             </div>
@@ -671,45 +671,45 @@ export const HomePage: React.FC = () => {
 
           {/* Key Hospitality Trust Bar (Anchors both columns with 100% horizontal equilibrium) */}
           <div className="animate-fade-up-4 mt-10 sm:mt-14 pt-8 border-t border-stone-200/70 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <div className="flex items-center gap-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 p-3.5 sm:p-4 shadow-xs hover:shadow-md transition-all">
+            <div className="flex items-center gap-3.5 rounded-2xl bg-white/80 backdrop-blur-md border border-stone-200/60 p-4 shadow-xs hover:shadow-md transition-all">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 font-bold">
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-base sm:text-lg font-extrabold text-stone-900 tracking-tight leading-none">100%</p>
-                <p className="text-xs font-semibold text-stone-700 mt-1">Nguyên liệu chuẩn tươi</p>
-                <p className="text-[11px] text-stone-500 hidden sm:block">Nhập mới mỗi ngày</p>
+                <p className="text-base sm:text-lg font-bold text-stone-900 tracking-tight leading-none">100%</p>
+                <p className="text-xs font-semibold text-stone-700 mt-1">Nguyên liệu tươi sạch</p>
+                <p className="text-[11px] text-stone-500 hidden sm:block">Nhập mới theo ngày</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 p-3.5 sm:p-4 shadow-xs hover:shadow-md transition-all">
+            <div className="flex items-center gap-3.5 rounded-2xl bg-white/80 backdrop-blur-md border border-stone-200/60 p-4 shadow-xs hover:shadow-md transition-all">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800 font-bold">
                 <Utensils className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-base sm:text-lg font-extrabold text-stone-900 tracking-tight leading-none">01 Bàn</p>
+                <p className="text-base sm:text-lg font-bold text-stone-900 tracking-tight leading-none">01 bàn</p>
                 <p className="text-xs font-semibold text-stone-700 mt-1">Quy chuẩn 10 khách</p>
-                <p className="text-[11px] text-stone-500 hidden sm:block">Định mức công thức chuẩn</p>
+                <p className="text-[11px] text-stone-500 hidden sm:block">Định mức chuẩn từng món</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 p-3.5 sm:p-4 shadow-xs hover:shadow-md transition-all">
+            <div className="flex items-center gap-3.5 rounded-2xl bg-white/80 backdrop-blur-md border border-stone-200/60 p-4 shadow-xs hover:shadow-md transition-all">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-800 font-bold">
                 <Clock className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-base sm:text-lg font-extrabold text-stone-900 tracking-tight leading-none">15 Phút</p>
+                <p className="text-base sm:text-lg font-bold text-stone-900 tracking-tight leading-none">15 phút</p>
                 <p className="text-xs font-semibold text-stone-700 mt-1">Giữ chỗ an toàn</p>
                 <p className="text-[11px] text-stone-500 hidden sm:block">Bảo lưu thực đơn khi đặt</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 p-3.5 sm:p-4 shadow-xs hover:shadow-md transition-all">
+            <div className="flex items-center gap-3.5 rounded-2xl bg-white/80 backdrop-blur-md border border-stone-200/60 p-4 shadow-xs hover:shadow-md transition-all">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-800 font-bold">
                 <Scale className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-base sm:text-lg font-extrabold text-stone-900 tracking-tight leading-none">Minh Bạch</p>
+                <p className="text-base sm:text-lg font-bold text-stone-900 tracking-tight leading-none">Minh bạch</p>
                 <p className="text-xs font-semibold text-stone-700 mt-1">Đúng giá niêm yết</p>
                 <p className="text-[11px] text-stone-500 hidden sm:block">Không phụ phí ẩn phát sinh</p>
               </div>
@@ -718,96 +718,96 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 4 Core Pillars of BanquetHub */}
+      {/* 4 Core Pillars of BanquetHub - PITO Clean Enterprise Style */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12 space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
-            Tiêu Chuẩn Vận Hành Độc Bản
+        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-14 space-y-2.5">
+          <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
+            Tiêu chuẩn vận hành độc bản
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
-            Vì Sao Chọn Nền Tảng BanquetHub?
+            Vì sao chọn nền tảng BanquetHub?
           </h2>
           <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
             Quy chuẩn yến tiệc chuyên nghiệp, đảm bảo định lượng minh bạch và trải nghiệm dịch vụ đẳng cấp nhất.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Pillar 1 */}
-          <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-xs hover:border-amber-400 hover:shadow-md transition-all flex flex-col justify-between group">
-            <div className="space-y-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100 transition-colors">
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs hover:border-amber-400/80 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+            <div className="space-y-3.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100/80 transition-colors">
                 <Scale className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-bold text-stone-900">
-                Minh Bạch Định Lượng Từng Món
+              <h3 className="text-base font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
+                Minh bạch định lượng từng món
               </h3>
               <p className="text-xs text-stone-600 leading-relaxed">
                 Mỗi món ăn đi kèm công thức tiêu hao chuẩn cho 01 phần. Tự động nhân cấp theo số phần
                 trên bàn và số lượng bàn tiệc.
               </p>
             </div>
-            <div className="mt-4 pt-3 border-t border-stone-100 flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+            <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center gap-1.5 text-xs font-medium text-emerald-700">
               <CheckCircle2 className="h-3.5 w-3.5" />
               <span>Chống thất thoát nguyên liệu</span>
             </div>
           </div>
 
           {/* Pillar 2 */}
-          <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-xs hover:border-amber-400 hover:shadow-md transition-all flex flex-col justify-between group">
-            <div className="space-y-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100 transition-colors">
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs hover:border-amber-400/80 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+            <div className="space-y-3.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100/80 transition-colors">
                 <Clock className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-bold text-stone-900">
-                Giữ Chỗ Tạm 15 Phút Khi Đặt Tiệc
+              <h3 className="text-base font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
+                Giữ chỗ tạm 15 phút khi đặt tiệc
               </h3>
               <p className="text-xs text-stone-600 leading-relaxed">
                 Tồn khả dụng được tính toán theo thời gian thực (Tồn vật lý − Đang giữ). Tự giải phóng
                 kho nếu đơn tiệc quá hạn chưa hoàn tất.
               </p>
             </div>
-            <div className="mt-4 pt-3 border-t border-stone-100 flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+            <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center gap-1.5 text-xs font-medium text-emerald-700">
               <CheckCircle2 className="h-3.5 w-3.5" />
               <span>Không sợ trùng lặp đơn tiệc</span>
             </div>
           </div>
 
           {/* Pillar 3 */}
-          <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-xs hover:border-amber-400 hover:shadow-md transition-all flex flex-col justify-between group">
-            <div className="space-y-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100 transition-colors">
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs hover:border-amber-400/80 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+            <div className="space-y-3.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100/80 transition-colors">
                 <Sparkles className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-bold text-stone-900">
-                Trợ Lý Gợi Ý Thực Đơn Thông Minh
+              <h3 className="text-base font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
+                Trợ lý gợi ý thực đơn thông minh
               </h3>
               <p className="text-xs text-stone-600 leading-relaxed">
                 Hệ thống phân tích bối cảnh tiệc (cưới hỏi, thôi nôi, liên hoan) để gợi ý
                 các phương án thực đơn tối ưu chi phí và hương vị.
               </p>
             </div>
-            <div className="mt-4 pt-3 border-t border-stone-100 flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+            <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center gap-1.5 text-xs font-medium text-emerald-700">
               <CheckCircle2 className="h-3.5 w-3.5" />
               <span>Chỉ dùng món có trong kho</span>
             </div>
           </div>
 
           {/* Pillar 4 */}
-          <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-xs hover:border-amber-400 hover:shadow-md transition-all flex flex-col justify-between group">
-            <div className="space-y-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100 transition-colors">
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs hover:border-amber-400/80 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+            <div className="space-y-3.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100/80 transition-colors">
                 <Layers className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-bold text-stone-900">
-                Bảo Đảm Giá Cố Định Theo Hợp Đồng
+              <h3 className="text-base font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
+                Bảo đảm giá cố định theo hợp đồng
               </h3>
               <p className="text-xs text-stone-600 leading-relaxed">
                 Chốt bản sao giá và định lượng tại thời điểm tạo đơn. Thay đổi giá thị trường sau này
                 không bao giờ làm ảnh hưởng đến đơn đã đặt.
               </p>
             </div>
-            <div className="mt-4 pt-3 border-t border-stone-100 flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+            <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center gap-1.5 text-xs font-medium text-emerald-700">
               <CheckCircle2 className="h-3.5 w-3.5" />
               <span>Toàn vẹn số liệu minh bạch</span>
             </div>
@@ -815,20 +815,20 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Culinary Categories Section (NO TECHNICAL CODES!) */}
+      {/* Culinary Categories Section */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
-              Tuyển Tập Ẩm Thực
+            <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
+              Tuyển tập ẩm thực
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight mt-1">
-              Phân Loại Danh Mục Món Tiệc
+              Phân loại danh mục món tiệc
             </h2>
           </div>
           <Link
             to="/dishes"
-            className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 hover:text-amber-800 transition-colors"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 hover:text-amber-800 transition-colors"
           >
             <span>Xem toàn bộ thực đơn</span>
             <ChevronRight className="h-4 w-4" />
@@ -845,10 +845,10 @@ export const HomePage: React.FC = () => {
               <Link
                 key={cat.id}
                 to={`/dishes?categoryId=${cat.id}`}
-                className="group rounded-xl border border-stone-200 bg-white p-4 shadow-xs hover:border-amber-400 hover:shadow-md transition-all"
+                className="group rounded-2xl border border-stone-200/90 bg-white p-4.5 shadow-xs hover:border-amber-400 hover:shadow-md transition-all"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 border border-amber-200 flex items-center gap-1">
+                  <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-900 border border-amber-200/80 flex items-center gap-1">
                     <Sparkles className="h-3 w-3 text-amber-600" />
                     <span>Thực đơn tiệc</span>
                   </span>
@@ -860,7 +860,7 @@ export const HomePage: React.FC = () => {
                 <p className="mt-1 text-xs text-stone-500 line-clamp-2 leading-relaxed">
                   {cat.description || 'Các món ăn tiêu chuẩn tiệc cưới & hội nghị.'}
                 </p>
-                <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-amber-700 group-hover:text-amber-800">
+                <div className="mt-3.5 flex items-center gap-1 text-xs font-semibold text-amber-700 group-hover:text-amber-800">
                   <span>Khám phá món</span>
                   <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -870,15 +870,15 @@ export const HomePage: React.FC = () => {
         )}
       </section>
 
-      {/* Featured Signature Dishes Showcase (NO TECHNICAL CODES!) */}
+      {/* Featured Signature Dishes Showcase */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
-              Món Ăn Nổi Bật
+            <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
+              Món ăn nổi bật
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight mt-1">
-              Thực Đơn Tiệc Đặc Sắc
+              Thực đơn tiệc đặc sắc
             </h2>
             <p className="mt-1 text-xs text-stone-500">
               Giá niêm yết tính cho 01 phần phục vụ bàn tiệc tiêu chuẩn 10 khách
@@ -886,7 +886,7 @@ export const HomePage: React.FC = () => {
           </div>
           <Link
             to="/dishes"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-400 transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-400 transition-all shadow-xs"
           >
             <span>Tất cả món ăn</span>
             <ArrowRight className="h-3.5 w-3.5" />
@@ -894,14 +894,14 @@ export const HomePage: React.FC = () => {
         </div>
 
         {!loading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
             {featuredDishes.map((dish) => (
               <article
                 key={dish.id}
-                className="group flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-white hover:border-amber-300 hover:shadow-md transition-all shadow-xs"
+                className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white hover:border-amber-300 hover:shadow-lg transition-all duration-300 shadow-xs"
               >
                 {/* Image Area */}
-                <div className="relative h-48 bg-stone-100 overflow-hidden">
+                <div className="relative h-52 bg-stone-100 overflow-hidden">
                   {dish.imageUrl ? (
                     <img
                       src={dish.imageUrl}
@@ -915,13 +915,13 @@ export const HomePage: React.FC = () => {
                     </div>
                   )}
 
-                  <span className="absolute top-2.5 left-2.5 rounded-lg bg-white/95 backdrop-blur-sm px-2.5 py-1 text-xs font-semibold text-stone-800 shadow-xs border border-stone-200">
+                  <span className="absolute top-3 left-3 rounded-lg bg-white/95 backdrop-blur-sm px-2.5 py-1 text-xs font-semibold text-stone-800 shadow-xs border border-stone-200">
                     {dish.categoryName}
                   </span>
                 </div>
 
                 {/* Content */}
-                <div className="flex flex-1 flex-col p-4 sm:p-5 space-y-3">
+                <div className="flex flex-1 flex-col p-5 space-y-3.5">
                   <div className="flex-1">
                     <Link
                       to={`/dishes/${dish.id}`}
@@ -929,24 +929,24 @@ export const HomePage: React.FC = () => {
                     >
                       {dish.name}
                     </Link>
-                    <p className="mt-1 text-xs text-stone-500 line-clamp-2 leading-relaxed">
+                    <p className="mt-1.5 text-xs text-stone-500 line-clamp-2 leading-relaxed">
                       {dish.description || 'Món ăn tiệc truyền thống phục vụ theo quy chuẩn 10 khách.'}
                     </p>
                   </div>
 
-                  <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
+                  <div className="pt-3.5 border-t border-stone-100 flex items-center justify-between">
                     <div>
                       <span className="block text-[10px] font-semibold text-stone-400 uppercase">
                         Giá / 01 phần
                       </span>
-                      <span className="text-base sm:text-lg font-bold text-amber-700">
+                      <span className="text-base sm:text-lg font-bold text-amber-700 font-mono">
                         {formatVnd(dish.price)}
                       </span>
                     </div>
 
                     <Link
                       to={`/dishes/${dish.id}`}
-                      className="inline-flex items-center gap-1 rounded-lg bg-stone-100 hover:bg-amber-50 hover:text-amber-800 px-3 py-2 text-xs font-semibold text-stone-700 transition-colors"
+                      className="inline-flex items-center gap-1 rounded-xl bg-stone-100 hover:bg-amber-50 hover:text-amber-800 px-3.5 py-2 text-xs font-semibold text-stone-700 transition-colors"
                     >
                       <span>Xem chi tiết</span>
                       <ArrowRight className="h-3 w-3" />
@@ -961,14 +961,14 @@ export const HomePage: React.FC = () => {
 
       {/* Banquet Consultation CTA Banner */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-stone-200 bg-gradient-to-r from-amber-50 via-white to-amber-50/50 p-6 sm:p-10 shadow-xs">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            <div className="lg:col-span-8 space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
-                Sẵn Sàng Cho Bàn Tiệc Hoàn Hảo?
+        <div className="rounded-3xl border border-stone-200/90 bg-gradient-to-r from-amber-50 via-white to-amber-50/60 p-8 sm:p-12 shadow-sm">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-8 space-y-2.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
+                Sẵn sàng cho bàn tiệc hoàn hảo?
               </span>
               <h2 className="text-xl sm:text-3xl font-bold text-stone-900 tracking-tight">
-                Tự Thiết Kế Thực Đơn Bàn Tiệc & Nhận Báo Giá Ngay
+                Tự thiết kế thực đơn bàn tiệc & nhận báo giá ngay
               </h2>
               <p className="text-xs sm:text-sm text-stone-600 leading-relaxed max-w-2xl">
                 Thử nghiệm bảng tính giá bàn tiệc theo thời gian thực, xem định lượng nguyên
@@ -978,17 +978,17 @@ export const HomePage: React.FC = () => {
             <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
               <Link
                 to="/dishes"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-5 py-3 text-xs font-semibold shadow-xs transition-colors"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-5 py-3.5 text-xs font-semibold shadow-xs transition-colors"
               >
                 <Utensils className="h-4 w-4" />
-                <span>Mở Bảng Tính Thực Đơn</span>
+                <span>Mở bảng tính thực đơn</span>
               </Link>
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white px-5 py-3 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors shadow-xs"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white px-5 py-3.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors shadow-xs"
               >
                 <CalendarCheck className="h-4 w-4 text-amber-700" />
-                <span>Đăng Ký Thành Viên</span>
+                <span>Đăng ký thành viên</span>
               </Link>
             </div>
           </div>
