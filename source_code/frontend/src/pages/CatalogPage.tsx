@@ -307,12 +307,12 @@ export const CatalogPage: React.FC = () => {
                     key={dish.id}
                     className="group flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-white hover:border-amber-300 hover:shadow-md transition-all shadow-sm"
                   >
-                    <div className="relative h-44 bg-stone-100 overflow-hidden">
+                    <div className="relative h-48 bg-stone-100 overflow-hidden">
                       {dish.imageUrl ? (
                         <img
                           src={dish.imageUrl}
                           alt={dish.name}
-                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="h-full w-full object-cover group-hover:scale-103 transition-transform duration-500"
                           loading="lazy"
                         />
                       ) : (
@@ -320,17 +320,16 @@ export const CatalogPage: React.FC = () => {
                           <Utensils className="h-10 w-10" />
                         </div>
                       )}
-
-                      <span className="absolute top-2.5 left-2.5 rounded-lg bg-white/95 backdrop-blur-sm px-2.5 py-1 text-xs font-semibold text-stone-800 shadow-sm border border-stone-200">
-                        {dish.categoryName}
-                      </span>
                     </div>
 
-                    <div className="flex flex-1 flex-col p-4 sm:p-5 space-y-3">
+                    <div className="flex flex-1 flex-col p-5 space-y-2.5">
                       <div className="flex-1">
+                        <span className="text-[11px] font-medium text-amber-800 uppercase tracking-wider">
+                          {dish.categoryName}
+                        </span>
                         <Link
                           to={`/dishes/${dish.id}`}
-                          className="text-base font-bold text-stone-900 hover:text-amber-700 transition-colors line-clamp-1"
+                          className="block mt-1 text-base font-bold text-stone-900 hover:text-amber-800 transition-colors line-clamp-1"
                         >
                           {dish.name}
                         </Link>
@@ -339,12 +338,12 @@ export const CatalogPage: React.FC = () => {
                         </p>
                       </div>
 
-                      <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-3">
+                      <div className="pt-3.5 border-t border-stone-100 flex items-center justify-between gap-3">
                         <div>
-                          <span className="block text-[10px] uppercase font-semibold text-stone-400">
-                            Giá / 01 phần
+                          <span className="block text-[10px] text-stone-400">
+                            Giá / 01 bàn
                           </span>
-                          <span className="text-base font-bold text-amber-700">
+                          <span className="text-base font-bold text-stone-900">
                             {formatVnd(dish.price)}
                           </span>
                         </div>

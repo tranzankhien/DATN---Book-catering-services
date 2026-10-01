@@ -3,121 +3,18 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   Scale,
-  Sparkles,
   Utensils,
-  Layers,
-  Flame,
-  ChevronRight,
-  ChevronLeft,
-  CheckCircle2,
   Clock,
-  Compass,
-  CalendarCheck,
-  Calculator,
-  ChefHat,
-  Award,
-  RotateCcw,
-  GripVertical,
-  ChevronDown,
+  Sparkles,
+  Layers,
+  ChevronRight,
+  ShieldCheck,
 } from 'lucide-react';
 import { catalogService } from '../services/catalogService';
 import { extractErrorMessage } from '../services/apiClient';
 import type { CategoryDto, DishSummaryDto } from '../services/types';
 import { formatVnd } from '../hooks/useFormatters';
-import { ErrorState, LoadingState } from '../components/StatusStates';
-import { TextRotate } from '@/components/ui/text-rotate';
 import { motion, AnimatePresence } from 'motion/react';
-
-// Cấu hình theme màu và ánh sáng background rực rỡ, ấn tượng linh hoạt theo từng món ăn
-export type ThemeKey = 'emerald' | 'rose' | 'amber' | 'sky' | 'champagne';
-
-interface DishTheme {
-  key: ThemeKey;
-  categoryLabel: string;
-  badgeStyle: string;
-  bgSection: string;
-  glowGradient: string;
-  secondaryGlow: string;
-  ringColor: string;
-  accentText: string;
-}
-
-const THEME_PRESETS: Record<ThemeKey, DishTheme> = {
-  emerald: {
-    key: 'emerald',
-    categoryLabel: 'Khai Vị Hoàng Gia',
-    badgeStyle: 'bg-emerald-100 text-emerald-950 border-emerald-300',
-    bgSection: 'from-emerald-300/90 via-teal-200/80 to-amber-100/90',
-    glowGradient: 'from-emerald-500/70 via-teal-400/60 to-lime-300/50',
-    secondaryGlow: 'from-emerald-400/60 to-teal-200/50',
-    ringColor: 'ring-emerald-500 border-emerald-300',
-    accentText: 'text-emerald-950',
-  },
-  rose: {
-    key: 'rose',
-    categoryLabel: 'Lẩu Thảo Mộc & Tiềm',
-    badgeStyle: 'bg-rose-100 text-rose-950 border-rose-300',
-    bgSection: 'from-rose-300/90 via-orange-200/80 to-amber-100/90',
-    glowGradient: 'from-rose-500/70 via-orange-500/60 to-amber-400/50',
-    secondaryGlow: 'from-red-400/60 to-orange-300/50',
-    ringColor: 'ring-rose-500 border-rose-300',
-    accentText: 'text-rose-950',
-  },
-  amber: {
-    key: 'amber',
-    categoryLabel: 'Món Thịt & Bò Thượng Hạng',
-    badgeStyle: 'bg-amber-200 text-amber-950 border-amber-400',
-    bgSection: 'from-amber-300/90 via-orange-200/85 to-stone-200/85',
-    glowGradient: 'from-amber-600/70 via-orange-500/60 to-yellow-500/50',
-    secondaryGlow: 'from-amber-500/60 to-orange-400/50',
-    ringColor: 'ring-amber-600 border-amber-300',
-    accentText: 'text-amber-950',
-  },
-  sky: {
-    key: 'sky',
-    categoryLabel: 'Hải Sản Tươi Sống',
-    badgeStyle: 'bg-sky-200 text-sky-950 border-sky-400',
-    bgSection: 'from-sky-300/90 via-cyan-200/80 to-amber-100/85',
-    glowGradient: 'from-sky-500/70 via-cyan-400/60 to-blue-300/50',
-    secondaryGlow: 'from-cyan-400/60 to-teal-300/50',
-    ringColor: 'ring-sky-500 border-sky-300',
-    accentText: 'text-sky-950',
-  },
-  champagne: {
-    key: 'champagne',
-    categoryLabel: 'Mỹ Vị Yến Tiệc',
-    badgeStyle: 'bg-amber-200 text-amber-950 border-amber-400',
-    bgSection: 'from-amber-300/90 via-yellow-200/85 to-amber-100/90',
-    glowGradient: 'from-amber-500/70 via-yellow-400/60 to-orange-400/50',
-    secondaryGlow: 'from-yellow-400/60 to-amber-300/50',
-    ringColor: 'ring-amber-500 border-amber-300',
-    accentText: 'text-amber-900',
-  },
-};
-
-const getDishTheme = (dish: { name?: string; categoryName?: string }): DishTheme => {
-  const cat = (dish.categoryName || '').toLowerCase();
-  const name = (dish.name || '').toLowerCase();
-
-  // Khai Vị & Gỏi: Ngọc Lục Bảo & Vàng Chanh Hoàng Gia tươi sáng
-  if (cat.includes('khai vị') || cat.includes('gỏi') || name.includes('gỏi')) {
-    return THEME_PRESETS.emerald;
-  }
-  // Lẩu & Canh: Đỏ San Hô Ruby & Ánh Lửa Yến Tiệc Nồng Ấm
-  if (cat.includes('lẩu') || cat.includes('canh') || name.includes('lẩu')) {
-    return THEME_PRESETS.rose;
-  }
-  // Bò & Món Nướng: Nâu Hổ Phách Nướng & Vàng Gold Thượng Hạng
-  if (name.includes('bò') || cat.includes('thịt')) {
-    return THEME_PRESETS.amber;
-  }
-  // Hải Sản Tươi Sống: Xanh Biển Ngọc & Bích Ngọc Biển Đông
-  if (cat.includes('hải sản') || name.includes('tôm') || name.includes('mực') || name.includes('cá')) {
-    return THEME_PRESETS.sky;
-  }
-  // Gà Ta Xôi Sen & Món Đặc Biệt: Hoàng Kim & Lụa Champagne
-  return THEME_PRESETS.champagne;
-};
 
 export const HomePage: React.FC = () => {
   const [categories, setCategories] = useState<CategoryDto[]>([]);
@@ -125,10 +22,9 @@ export const HomePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Carousel State cho Hero Section (Luôn xoay tự động liên tục không ngừng)
+  // Carousel State: Xoay món nhẹ nhàng, êm ái
   const [currentSlide, setCurrentSlide] = useState<number>(0);
   const [slideDirection, setSlideDirection] = useState<'down' | 'up'>('down');
-  const [bgThemeKey, setBgThemeKey] = useState<ThemeKey>('emerald');
 
   const loadHomeData = async () => {
     setLoading(true);
@@ -151,48 +47,30 @@ export const HomePage: React.FC = () => {
     void loadHomeData();
   }, []);
 
-  // Danh sách các món chạy trong Carousel: Dùng 100% dữ liệu thật từ API, không bao giờ dùng ID giả gây lỗi 404
   const carouselItems = featuredDishes;
 
-  // Cập nhật màu nền theo độ trễ có chủ đích (Deliberate latency):
-  useEffect(() => {
-    if (carouselItems.length === 0) return;
-    const dish = carouselItems[currentSlide] || carouselItems[0];
-    if (!dish) return;
-    const theme = getDishTheme(dish);
-    const timer = setTimeout(() => {
-      setBgThemeKey(theme.key);
-    }, 220);
-    return () => clearTimeout(timer);
-  }, [currentSlide, carouselItems]);
-
-  // Xoay tiến: Món kế tiếp bước lên
   const rotateNext = () => {
     if (carouselItems.length <= 1) return;
     setSlideDirection('down');
     setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
   };
 
-  // Xoay lùi: Món trước đó quay lại
   const rotatePrev = () => {
     if (carouselItems.length <= 1) return;
     setSlideDirection('up');
     setCurrentSlide((prev) => (prev - 1 + carouselItems.length) % carouselItems.length);
   };
 
-  const rotateDown = rotateNext;
-  const rotateUp = rotatePrev;
-
-  // Hiệu ứng mặc định: Tự động xoay sau 4.5s khi có từ 2 món trở lên
+  // Tự động xoay sau 5s nhịp nhàng, thư thái
   useEffect(() => {
     if (carouselItems.length <= 1) return;
     const timer = setInterval(() => {
       rotateNext();
-    }, 4500);
+    }, 5000);
     return () => clearInterval(timer);
   }, [carouselItems.length]);
 
-  // Xử lý giữ chuột & kéo để xoay tự nhiên (Mouse Drag / Touch Drag)
+  // Kéo chuột nhẹ nhàng để chuyển món
   const dragStartY = useRef<number | null>(null);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -202,11 +80,11 @@ export const HomePage: React.FC = () => {
   const handleMouseMove = (e: React.MouseEvent) => {
     if (dragStartY.current === null) return;
     const deltaY = e.clientY - dragStartY.current;
-    if (deltaY > 35) {
-      rotateDown();
+    if (deltaY > 40) {
+      rotateNext();
       dragStartY.current = e.clientY;
-    } else if (deltaY < -35) {
-      rotateUp();
+    } else if (deltaY < -40) {
+      rotatePrev();
       dragStartY.current = e.clientY;
     }
   };
@@ -224,143 +102,60 @@ export const HomePage: React.FC = () => {
   const handleTouchMove = (e: React.TouchEvent) => {
     if (dragStartY.current === null || e.touches.length === 0) return;
     const deltaY = e.touches[0].clientY - dragStartY.current;
-    if (deltaY > 35) {
-      rotateDown();
+    if (deltaY > 40) {
+      rotateNext();
       dragStartY.current = e.touches[0].clientY;
-    } else if (deltaY < -35) {
-      rotateUp();
+    } else if (deltaY < -40) {
+      rotatePrev();
       dragStartY.current = e.touches[0].clientY;
-    }
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    if (Math.abs(e.deltaY) > 30) {
-      if (e.deltaY > 0) {
-        rotateDown();
-      } else {
-        rotateUp();
-      }
     }
   };
 
   const activeDish = carouselItems[currentSlide] || carouselItems[0] || null;
-  const activeTheme = activeDish ? getDishTheme(activeDish) : THEME_PRESETS.emerald;
 
   return (
-    <div className="space-y-24 sm:space-y-32 pb-20">
-      {/* Luxury Hero Section with Rotary Orbit Showcase & Dynamic Atmospheric Background */}
-      <section className="relative overflow-hidden pt-8 pb-16 sm:pt-14 sm:pb-24">
-        {/* Dynamic Atmospheric Background with Layered Cross-fade and Deliberate Stagger Delay */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {(Object.keys(THEME_PRESETS) as ThemeKey[]).map((key) => {
-            const t = THEME_PRESETS[key];
-            const isActive = bgThemeKey === key;
-            return (
-              <div
-                key={key}
-                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out pointer-events-none ${
-                  isActive ? 'opacity-100 z-1' : 'opacity-0 z-0'
-                }`}
-              >
-                {/* Full-width gradient layer */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${t.bgSection}`} />
-
-                {/* Main Ambient Glow Orb (morphs with theme) */}
-                <div
-                  className={`absolute -top-24 -right-24 w-[680px] h-[680px] rounded-full blur-3xl opacity-75 bg-gradient-to-br ${t.glowGradient} animate-pulse-glow`}
-                />
-
-                {/* Secondary Ambient Accent Orb */}
-                <div
-                  className={`absolute top-1/3 right-1/4 w-[460px] h-[460px] rounded-full blur-2xl opacity-60 bg-gradient-to-tr ${t.secondaryGlow}`}
-                />
-              </div>
-            );
-          })}
-
-          {/* Diffused ambient photo of active dish */}
-          {activeDish?.imageUrl && (
-            <img
-              key={`ambient-${activeDish.id}`}
-              src={activeDish.imageUrl}
-              alt=""
-              className="absolute right-0 top-1/3 -translate-y-1/2 w-[560px] h-[560px] object-cover rounded-full blur-[90px] opacity-35 pointer-events-none select-none transition-opacity duration-1000"
-            />
-          )}
-
-          {/* Subtle Radial Dot Texture */}
-          <div className="absolute inset-0 bg-[radial-gradient(#a8a29e_1px,transparent_1px)] [background-size:24px_24px] opacity-25 z-2 pointer-events-none" />
-        </div>
-
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            {/* Left Content (Staggered Animation Entrance) */}
+    <div className="space-y-28 sm:space-y-36 pb-24">
+      {/* =========================================================================
+          HERO SECTION - THIẾT KẾ ĐẬM CHẤT CON NGƯỜI: CHỮ TO NỔI BẬT, THOÁNG ĐÃNG
+         ========================================================================= */}
+      <section className="relative pt-10 pb-12 sm:pt-16 sm:pb-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            {/* Cột trái: Headline to, sắc sảo, tự tin, không rối mắt */}
             <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
-              <div className="animate-fade-up-1">
-                <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/90 bg-white/85 backdrop-blur-sm px-4 py-1.5 text-xs font-medium text-amber-900 shadow-xs">
-                  <Sparkles className="h-3.5 w-3.5 text-amber-700 animate-spin" style={{ animationDuration: '8s' }} />
-                  <span>Nghệ thuật ẩm thực yến tiệc & hội nghị cao cấp</span>
-                </div>
-              </div>
+              <span className="inline-block text-xs font-semibold tracking-wider uppercase text-amber-800">
+                Nền tảng ẩm thực yến tiệc & hội nghị
+              </span>
 
-              {/* Headline with Structured 3-Tier Dynamic TextRotate (No overlap, crystal clear typography) */}
-              <h1 className="animate-fade-up-2 text-3xl sm:text-5xl lg:text-5xl font-extrabold text-stone-900 tracking-tight leading-[1.2]">
-                <span>Tinh hoa yến tiệc,</span>
-                <span className="block mt-1 sm:mt-1.5 text-amber-700 min-h-[44px] sm:min-h-[58px] flex items-center">
-                  <TextRotate
-                    texts={[
-                      "minh bạch định lượng",
-                      "đẳng cấp 5 sao",
-                      "tinh túy mỹ vị",
-                      "chuẩn vị truyền thống",
-                      "tối ưu chi phí",
-                    ]}
-                    mainClassName="py-0.5 underline decoration-amber-300 decoration-wavy decoration-from-font inline-flex"
-                    splitBy="words"
-                    staggerDuration={0.03}
-                    staggerFrom="first"
-                    rotationInterval={3600}
-                    animatePresenceMode="popLayout"
-                    exit={{ y: "-80%", opacity: 0, transition: { duration: 0.2 } }}
-                    animate={{ y: 0, opacity: 1 }}
-                    initial={{ y: "80%", opacity: 0 }}
-                    transition={{ type: "spring", damping: 24, stiffness: 280 }}
-                  />
-                </span>
-                <span className="block text-2xl sm:text-4xl text-stone-800 font-bold mt-1 tracking-normal">
-                  quy chuẩn từng bàn tiệc
-                </span>
+              <h1 className="text-4xl sm:text-6xl lg:text-6xl xl:text-7xl font-extrabold text-stone-900 tracking-tight leading-[1.08]">
+                Tinh hoa yến tiệc,<br />
+                <span className="text-amber-800">minh bạch định lượng.</span>
               </h1>
 
-              {/* Subtitle */}
-              <p className="animate-fade-up-3 text-sm sm:text-base text-stone-600 max-w-xl leading-relaxed mx-auto lg:mx-0 pt-1">
-                Nền tảng đặt tiệc và quản lý ẩm thực thông minh kết nối trực tiếp công thức món ăn
-                với kho nguyên liệu trung tâm. Khách hàng chủ động chọn món, tính đúng chi phí theo quy chuẩn 1 bàn
-                và theo dõi định mức tiêu hao nguyên liệu thực tế.
+              <p className="text-base sm:text-lg text-stone-600 max-w-xl leading-relaxed mx-auto lg:mx-0 font-normal">
+                Chuẩn hóa công thức và định mức nguyên liệu cho từng bàn 10 khách. Chủ động tính đúng chi phí, kiểm soát chất lượng tươi ngon và giữ chỗ an toàn.
               </p>
 
-              {/* Action Buttons (Strictly Guest-Focused) */}
-              <div className="animate-fade-up-4 flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
+              {/* Nút bấm tinh gọn, kích thước hào phóng, không màu mè */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
                 <Link
                   to="/dishes"
-                  className="btn-shimmer inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-700 via-amber-800 to-amber-700 hover:from-amber-800 hover:to-amber-900 text-white px-6 py-3.5 text-sm font-semibold shadow-md shadow-amber-900/10 hover:shadow-lg transition-all"
+                  className="inline-flex items-center gap-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white px-7 py-4 text-sm font-semibold shadow-sm hover:shadow-md transition-all duration-200"
                 >
-                  <Compass className="h-4 w-4" />
-                  <span>Khám phá món & bảng tính giá</span>
+                  <span>Khám phá thực đơn</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
 
                 <Link
                   to="/dishes"
-                  className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white/95 backdrop-blur-sm px-5 py-3.5 text-sm font-medium text-stone-700 hover:bg-stone-50 hover:border-stone-400 transition-colors shadow-xs"
+                  className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-800 px-6 py-4 text-sm font-semibold transition-all duration-200"
                 >
-                  <Calculator className="h-4 w-4 text-amber-700" />
-                  <span>Mô phỏng chi phí bàn tiệc</span>
+                  <span>Bảng tính giá bàn tiệc</span>
                 </Link>
               </div>
             </div>
 
-            {/* Right Hero: Luxury 3D Dual-Column Showcase (Thẻ chính to bên trái + 2 Thẻ phụ xếp dọc bên phải - Dữ liệu thật 100%) */}
+            {/* Cột phải: Thẻ Showcase sạch sẽ, không có bất kỳ note nhỏ nào ở 4 góc */}
             <div
               className="lg:col-span-6 relative w-full flex flex-col items-center justify-center select-none"
               onMouseDown={handleMouseDown}
@@ -368,626 +163,419 @@ export const HomePage: React.FC = () => {
               onMouseUp={handleMouseUp}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
-              onWheel={handleWheel}
             >
               {loading ? (
-                /* Skeleton Loader */
-                <div className="relative w-full max-w-[620px] flex flex-row items-center gap-3.5 sm:gap-4.5">
-                  <div className="flex-1 w-[60%] sm:w-[62%] h-[340px] sm:h-[375px] rounded-3xl bg-white/70 backdrop-blur-md border border-stone-200/80 p-4 animate-pulse flex flex-col justify-between shadow-lg">
-                    <div className="flex justify-between">
-                      <div className="h-6 w-24 bg-stone-200/80 rounded-lg" />
-                      <div className="h-6 w-20 bg-stone-200/80 rounded-lg" />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-5 w-3/4 bg-stone-200/80 rounded-md" />
-                      <div className="h-3.5 w-1/2 bg-stone-200/80 rounded-md" />
-                    </div>
-                  </div>
-                  <div className="w-[40%] sm:w-[38%] h-[340px] sm:h-[375px] flex flex-col justify-between gap-3 sm:gap-3.5">
-                    <div className="h-[48%] rounded-2xl bg-white/60 border border-stone-200/60 animate-pulse" />
-                    <div className="h-[48%] rounded-2xl bg-white/60 border border-stone-200/60 animate-pulse" />
+                <div className="relative w-full max-w-[580px] flex flex-row items-center gap-4">
+                  <div className="flex-1 w-[62%] h-[360px] rounded-2xl bg-stone-100 animate-pulse" />
+                  <div className="w-[38%] h-[360px] flex flex-col justify-between gap-3.5">
+                    <div className="h-[48%] rounded-2xl bg-stone-100 animate-pulse" />
+                    <div className="h-[48%] rounded-2xl bg-stone-100 animate-pulse" />
                   </div>
                 </div>
-              ) : error ? (
-                /* Error State */
-                <div className="w-full max-w-[500px] p-8 rounded-3xl border border-rose-200 bg-white/95 backdrop-blur-md shadow-xl text-center space-y-3">
-                  <div className="h-12 w-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
-                    <Sparkles className="h-6 w-6" />
-                  </div>
-                  <h3 className="font-bold text-stone-900 text-sm">Không thể tải thực đơn món tiệc</h3>
-                  <p className="text-xs text-stone-500">{error}</p>
-                  <button
-                    type="button"
-                    onClick={() => void loadHomeData()}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold shadow-xs cursor-pointer transition-colors"
-                  >
-                    <span>Thử tải lại</span>
-                  </button>
-                </div>
-              ) : carouselItems.length === 0 ? (
-                /* Empty State */
-                <div className="w-full max-w-[500px] p-8 rounded-3xl border border-stone-200 bg-white/90 backdrop-blur-md shadow-lg text-center space-y-3">
-                  <div className="h-12 w-12 rounded-full bg-amber-50 text-amber-700 flex items-center justify-center mx-auto">
-                    <Utensils className="h-6 w-6" />
-                  </div>
-                  <h3 className="font-bold text-stone-900 text-base">Thực đơn yến tiệc đang cập nhật</h3>
-                  <p className="text-xs text-stone-500">Mời quý khách xem danh mục ẩm thực hoặc quay lại sau.</p>
-                  <Link
-                    to="/dishes"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold shadow-xs transition-colors"
-                  >
-                    <span>Xem toàn bộ thực đơn</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                </div>
-              ) : (
-                /* Dữ liệu thật: Showcase 2 cột */
+              ) : carouselItems.length > 0 && activeDish ? (
                 <>
-                  <div className="relative w-full max-w-[620px] flex flex-row items-center gap-3.5 sm:gap-4.5">
-                    {/* CỘT TRÁI: Main Active Card */}
-                    {activeDish && (
-                      <div className="flex-1 w-[60%] sm:w-[62%] h-[340px] sm:h-[375px] relative">
-                        <AnimatePresence mode="popLayout" custom={slideDirection}>
-                          <motion.div
-                            key={`main-${activeDish.id}`}
-                            custom={slideDirection}
-                            variants={{
-                              enter: (dir: 'down' | 'up') => ({
-                                y: dir === 'down' ? -42 : 42,
-                                opacity: 0,
-                                scale: 0.96,
-                              }),
-                              center: {
-                                y: 0,
-                                opacity: 1,
-                                scale: 1,
-                              },
-                              exit: (dir: 'down' | 'up') => ({
-                                y: dir === 'down' ? 42 : -42,
-                                opacity: 0,
-                                scale: 0.95,
-                              }),
-                            }}
-                            initial="enter"
-                            animate="center"
-                            exit="exit"
-                            transition={{
-                              duration: 0.55,
-                              ease: [0.22, 1, 0.36, 1],
-                            }}
-                            drag="y"
-                            dragConstraints={{ top: 0, bottom: 0 }}
-                            dragElastic={0.3}
-                            onDragEnd={(_, info) => {
-                              if (info.offset.y < -30 || info.velocity.y < -200) {
-                                rotateDown();
-                              } else if (info.offset.y > 30 || info.velocity.y > 200) {
-                                rotateUp();
-                              }
-                            }}
-                            className="h-full w-full cursor-grab active:cursor-grabbing"
+                  <div className="relative w-full max-w-[580px] flex flex-row items-center gap-4">
+                    {/* Thẻ chính: Ảnh lớn trọn vẹn, không dán note con con ở các góc */}
+                    <div className="flex-1 w-[62%] h-[360px] sm:h-[390px] relative">
+                      <AnimatePresence mode="popLayout" custom={slideDirection}>
+                        <motion.div
+                          key={`main-${activeDish.id}`}
+                          custom={slideDirection}
+                          variants={{
+                            enter: (dir: 'down' | 'up') => ({
+                              y: dir === 'down' ? -28 : 28,
+                              opacity: 0,
+                            }),
+                            center: {
+                              y: 0,
+                              opacity: 1,
+                            },
+                            exit: (dir: 'down' | 'up') => ({
+                              y: dir === 'down' ? 28 : -28,
+                              opacity: 0,
+                            }),
+                          }}
+                          initial="enter"
+                          animate="center"
+                          exit="exit"
+                          transition={{
+                            duration: 0.45,
+                            ease: [0.16, 1, 0.3, 1],
+                          }}
+                          className="h-full w-full cursor-grab active:cursor-grabbing"
+                        >
+                          <Link
+                            to={`/dishes/${activeDish.id}`}
+                            className="block h-full w-full rounded-2xl overflow-hidden bg-stone-100 shadow-xl border border-stone-200/80 group transition-all duration-300"
                           >
-                            <Link
-                              to={`/dishes/${activeDish.id}`}
-                              className={`block h-full w-full rounded-3xl border-2 bg-white/95 backdrop-blur-md p-2.5 sm:p-3 shadow-2xl transition-all duration-500 ${activeTheme.ringColor} ring-4 ring-offset-2 ring-offset-white/80 group hover:shadow-amber-950/25`}
-                              title={`Bấm để xem chi tiết: ${activeDish.name}`}
-                            >
-                              <div className="relative h-full w-full rounded-2xl overflow-hidden bg-stone-100">
-                                <img
-                                  src={activeDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85'}
-                                  alt={activeDish.name}
-                                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/25 to-black/30 pointer-events-none" />
+                            <div className="relative h-full w-full">
+                              <img
+                                src={activeDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85'}
+                                alt={activeDish.name}
+                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-103"
+                              />
+                              {/* Lớp phủ gradient nhẹ tự nhiên ở đáy để hiện chữ êm mắt */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/20 to-transparent pointer-events-none" />
 
-                                {/* Top Badges */}
-                                <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-lg bg-white/95 backdrop-blur-sm px-3 py-1 text-xs font-bold text-stone-900 shadow-sm border border-stone-200">
-                                  <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                                  </span>
-                                  <span className="truncate max-w-[130px] sm:max-w-none">{activeDish.categoryName || 'Món Tiệc Đặc Sắc'}</span>
-                                </div>
-
-                                <div className="absolute top-3 right-3 rounded-lg bg-amber-950/90 backdrop-blur-sm border border-amber-500/40 px-3 py-1 text-xs sm:text-sm font-extrabold text-amber-300 shadow-sm font-mono">
-                                  {formatVnd(activeDish.price)}
-                                </div>
-
-                                {/* Bottom Info inside Card */}
-                                <div className="absolute bottom-2.5 inset-x-2.5 rounded-2xl border border-white/20 bg-stone-900/90 backdrop-blur-md px-3.5 py-2.5 sm:py-3 text-white space-y-1">
-                                  <div className="flex items-center justify-between text-xs gap-2">
-                                    <span className="font-bold text-sm sm:text-base text-white group-hover:text-amber-300 transition-colors line-clamp-1">
-                                      {activeDish.name}
-                                    </span>
-                                    <span className="rounded-md bg-amber-500/20 px-2 py-0.5 text-[11px] font-bold text-amber-300 shrink-0">
-                                      10 khách / bàn
-                                    </span>
-                                  </div>
-                                  <p className="text-xs text-stone-300 line-clamp-1 leading-relaxed">
-                                    {(activeDish as any).highlight || activeDish.description || 'Chế biến tươi mới theo từng bàn tiệc chuẩn 5 sao.'}
-                                  </p>
-                                </div>
+                              <div className="absolute bottom-0 inset-x-0 p-5 sm:p-6 text-white space-y-1">
+                                <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white group-hover:text-amber-300 transition-colors line-clamp-1">
+                                  {activeDish.name}
+                                </h3>
+                                <p className="text-sm font-medium text-stone-200">
+                                  {formatVnd(activeDish.price)} <span className="text-stone-300 text-xs font-normal">/ bàn 10 khách</span>
+                                </p>
                               </div>
-                            </Link>
-                          </motion.div>
-                        </AnimatePresence>
-                      </div>
-                    )}
-
-                    {/* CỘT PHẢI: 2 Thẻ phụ (hoặc thẻ cam kết chất lượng nếu có 1 món) */}
-                    <div className="w-[40%] sm:w-[38%] h-[340px] sm:h-[375px] flex flex-col justify-between gap-3 sm:gap-3.5">
-                      {carouselItems.length === 1 ? (
-                        <>
-                          <div className="relative h-[48%] w-full rounded-2xl border border-white/80 bg-white/90 backdrop-blur-xs p-3 shadow-md flex flex-col justify-between">
-                            <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs">
-                              <Sparkles className="h-4 w-4 text-amber-600" />
-                              <span>Chuẩn Vị 5 Sao</span>
                             </div>
-                            <p className="text-[11px] text-stone-600 leading-snug">
-                              Nguyên liệu chọn lọc tươi mới mỗi ngày, chế biến theo quy chuẩn ẩm thực cung đình.
-                            </p>
-                            <span className="text-[10px] text-amber-700 font-semibold">Quy chuẩn 1 bàn</span>
-                          </div>
+                          </Link>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
 
-                          <div className="relative h-[48%] w-full rounded-2xl border border-white/80 bg-white/90 backdrop-blur-xs p-3 shadow-md flex flex-col justify-between">
-                            <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs">
-                              <Scale className="h-4 w-4 text-emerald-600" />
-                              <span>Minh Bạch Định Lượng</span>
+                    {/* 2 Thẻ phụ bên phải: Xếp gọn gàng, sạch sẽ */}
+                    <div className="w-[38%] h-[360px] sm:h-[390px] flex flex-col justify-between gap-3.5">
+                      {(() => {
+                        const topIdx = (currentSlide + 1) % carouselItems.length;
+                        const topDish = carouselItems[topIdx];
+                        if (!topDish) return null;
+                        return (
+                          <div
+                            onClick={() => {
+                              setSlideDirection('down');
+                              setCurrentSlide(topIdx);
+                            }}
+                            className="relative h-[48%] w-full cursor-pointer rounded-2xl overflow-hidden bg-stone-100 shadow-md border border-stone-200/70 opacity-80 hover:opacity-100 transition-all duration-300 group"
+                          >
+                            <img
+                              src={topDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80'}
+                              alt={topDish.name}
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent pointer-events-none" />
+                            <div className="absolute bottom-0 inset-x-0 p-3 text-white">
+                              <p className="text-xs font-bold truncate group-hover:text-amber-300 transition-colors">
+                                {topDish.name}
+                              </p>
+                              <p className="text-[11px] text-stone-300">
+                                {formatVnd(topDish.price)}
+                              </p>
                             </div>
-                            <p className="text-[11px] text-stone-600 leading-snug">
-                              Quy chuẩn khẩu phần rõ ràng cho từng bàn 10 khách, kiểm soát định mức hao hụt.
-                            </p>
-                            <span className="text-[10px] text-emerald-700 font-semibold">Chuẩn 10 khách</span>
                           </div>
-                        </>
-                      ) : (
-                        <>
-                          {/* Card Phụ Trên */}
-                          {(() => {
-                            const topIdx = (currentSlide + 1) % carouselItems.length;
-                            const topDish = carouselItems[topIdx];
-                            if (!topDish) return null;
-                            return (
-                              <motion.div
-                                key={`sub-top-${topDish.id}`}
-                                onClick={() => {
-                                  setSlideDirection('down');
-                                  setCurrentSlide(topIdx);
-                                }}
-                                whileHover={{ scale: 1.03, opacity: 1 }}
-                                whileTap={{ scale: 0.97 }}
-                                className="relative h-[48%] w-full cursor-pointer rounded-2xl border border-white/80 bg-white/90 backdrop-blur-xs p-1.5 sm:p-2 shadow-md transition-all opacity-80 hover:opacity-100 hover:shadow-xl group"
-                                title={`Bấm để đưa lên món chính: ${topDish.name}`}
-                              >
-                                <div className="relative h-full w-full rounded-xl overflow-hidden bg-stone-100">
-                                  <img
-                                    src={topDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80'}
-                                    alt={topDish.name}
-                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                  />
-                                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/20 to-black/30" />
-                                  <div className="absolute top-1.5 left-1.5 rounded-md bg-stone-900/80 backdrop-blur-xs px-2 py-0.5 text-[10px] font-semibold text-amber-200">
-                                    Món kế tiếp
-                                  </div>
-                                  <div className="absolute top-1.5 right-1.5 rounded-md bg-amber-950/90 px-2 py-0.5 text-[10px] font-bold text-amber-300 font-mono">
-                                    {formatVnd(topDish.price)}
-                                  </div>
-                                  <div className="absolute bottom-1.5 inset-x-1.5 px-2 py-1 rounded-lg bg-stone-900/80 backdrop-blur-xs text-white">
-                                    <p className="text-[11px] sm:text-xs font-bold truncate group-hover:text-amber-300 transition-colors">
-                                      {topDish.name}
-                                    </p>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            );
-                          })()}
+                        );
+                      })()}
 
-                          {/* Card Phụ Dưới */}
-                          {(() => {
-                            if (carouselItems.length === 2) {
-                              return (
-                                <div className="relative h-[48%] w-full rounded-2xl border border-white/80 bg-white/90 backdrop-blur-xs p-3 shadow-md flex flex-col justify-between">
-                                  <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs">
-                                    <Scale className="h-4 w-4 text-emerald-600" />
-                                    <span>Minh Bạch Định Lượng</span>
-                                  </div>
-                                  <p className="text-[11px] text-stone-600 leading-snug">
-                                    Quy chuẩn khẩu phần rõ ràng cho từng bàn 10 khách.
-                                  </p>
-                                  <span className="text-[10px] text-emerald-700 font-semibold">Chuẩn 10 khách/bàn</span>
-                                </div>
-                              );
-                            }
-                            const btmIdx = (currentSlide + 2) % carouselItems.length;
-                            const btmDish = carouselItems[btmIdx];
-                            if (!btmDish) return null;
-                            return (
-                              <motion.div
-                                key={`sub-btm-${btmDish.id}`}
-                                onClick={() => {
-                                  setSlideDirection('down');
-                                  setCurrentSlide(btmIdx);
-                                }}
-                                whileHover={{ scale: 1.03, opacity: 1 }}
-                                whileTap={{ scale: 0.97 }}
-                                className="relative h-[48%] w-full cursor-pointer rounded-2xl border border-white/80 bg-white/90 backdrop-blur-xs p-1.5 sm:p-2 shadow-md transition-all opacity-80 hover:opacity-100 hover:shadow-xl group"
-                                title={`Bấm để đưa lên món chính: ${btmDish.name}`}
-                              >
-                                <div className="relative h-full w-full rounded-xl overflow-hidden bg-stone-100">
-                                  <img
-                                    src={btmDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80'}
-                                    alt={btmDish.name}
-                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                  />
-                                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/20 to-black/30" />
-                                  <div className="absolute top-1.5 left-1.5 rounded-md bg-stone-900/80 backdrop-blur-xs px-2 py-0.5 text-[10px] font-semibold text-stone-200">
-                                    {btmDish.categoryName || 'Món tiệc'}
-                                  </div>
-                                  <div className="absolute top-1.5 right-1.5 rounded-md bg-amber-950/90 px-2 py-0.5 text-[10px] font-bold text-amber-300 font-mono">
-                                    {formatVnd(btmDish.price)}
-                                  </div>
-                                  <div className="absolute bottom-1.5 inset-x-1.5 px-2 py-1 rounded-lg bg-stone-900/80 backdrop-blur-xs text-white">
-                                    <p className="text-[11px] sm:text-xs font-bold truncate group-hover:text-amber-300 transition-colors">
-                                      {btmDish.name}
-                                    </p>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            );
-                          })()}
-                        </>
-                      )}
+                      {(() => {
+                        const btmIdx = (currentSlide + 2) % carouselItems.length;
+                        const btmDish = carouselItems[btmIdx];
+                        if (!btmDish) return null;
+                        return (
+                          <div
+                            onClick={() => {
+                              setSlideDirection('down');
+                              setCurrentSlide(btmIdx);
+                            }}
+                            className="relative h-[48%] w-full cursor-pointer rounded-2xl overflow-hidden bg-stone-100 shadow-md border border-stone-200/70 opacity-80 hover:opacity-100 transition-all duration-300 group"
+                          >
+                            <img
+                              src={btmDish.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80'}
+                              alt={btmDish.name}
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent pointer-events-none" />
+                            <div className="absolute bottom-0 inset-x-0 p-3 text-white">
+                              <p className="text-xs font-bold truncate group-hover:text-amber-300 transition-colors">
+                                {btmDish.name}
+                              </p>
+                              <p className="text-[11px] text-stone-300">
+                                {formatVnd(btmDish.price)}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
 
-                  {/* Rotary Indicators: chỉ hiện khi có từ 2 món trở lên */}
+                  {/* Rotary Dot Indicators nhỏ nhắn, thanh lịch */}
                   {carouselItems.length > 1 && (
-                    <div className="flex flex-col items-center justify-center pt-4 w-full max-w-[620px]">
-                      <div className="flex items-center gap-1.5">
-                        {carouselItems.map((_, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => {
-                              setSlideDirection(idx > currentSlide ? 'down' : 'up');
-                              setCurrentSlide(idx);
-                            }}
-                            className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                              currentSlide === idx ? 'w-6 bg-amber-700' : 'w-1.5 bg-stone-300 hover:bg-stone-400'
-                            }`}
-                            aria-label={`Chuyển đến món ${idx + 1}`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-[11px] font-medium text-stone-500 mt-1.5">
-                        Kéo vuốt hoặc bấm thẻ phụ ({currentSlide + 1}/{carouselItems.length})
-                      </span>
+                    <div className="flex items-center gap-2 pt-4">
+                      {carouselItems.map((_, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setSlideDirection(idx > currentSlide ? 'down' : 'up');
+                            setCurrentSlide(idx);
+                          }}
+                          className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                            currentSlide === idx ? 'w-6 bg-amber-800' : 'w-1.5 bg-stone-300 hover:bg-stone-400'
+                          }`}
+                          aria-label={`Chuyển món ${idx + 1}`}
+                        />
+                      ))}
                     </div>
                   )}
                 </>
-              )}
+              ) : null}
             </div>
           </div>
 
-          {/* Key Hospitality Trust Bar (Anchors both columns with 100% horizontal equilibrium) */}
-          <div className="animate-fade-up-4 mt-10 sm:mt-14 pt-8 border-t border-stone-200/70 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <div className="flex items-center gap-3.5 rounded-2xl bg-white/80 backdrop-blur-md border border-stone-200/60 p-4 shadow-xs hover:shadow-md transition-all">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 font-bold">
-                <Sparkles className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-base sm:text-lg font-bold text-stone-900 tracking-tight leading-none">100%</p>
-                <p className="text-xs font-semibold text-stone-700 mt-1">Nguyên liệu tươi sạch</p>
-                <p className="text-[11px] text-stone-500 hidden sm:block">Nhập mới theo ngày</p>
-              </div>
+          {/* =========================================================================
+              MINIMALIST STAT BAR - KHÔNG ĐÓNG KHUNG MÀU MÈ, SỐ TO SẮC NÉT KIỂU PITO
+             ========================================================================= */}
+          <div className="mt-16 sm:mt-20 pt-10 border-t border-stone-200/70 grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div>
+              <p className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight">100%</p>
+              <p className="text-sm font-semibold text-stone-800 mt-1">Nguyên liệu tươi sạch</p>
+              <p className="text-xs text-stone-500 mt-0.5">Nhập mới theo từng sự kiện</p>
             </div>
 
-            <div className="flex items-center gap-3.5 rounded-2xl bg-white/80 backdrop-blur-md border border-stone-200/60 p-4 shadow-xs hover:shadow-md transition-all">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800 font-bold">
-                <Utensils className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-base sm:text-lg font-bold text-stone-900 tracking-tight leading-none">01 bàn</p>
-                <p className="text-xs font-semibold text-stone-700 mt-1">Quy chuẩn 10 khách</p>
-                <p className="text-[11px] text-stone-500 hidden sm:block">Định mức chuẩn từng món</p>
-              </div>
+            <div>
+              <p className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight">10 khách</p>
+              <p className="text-sm font-semibold text-stone-800 mt-1">Chuẩn mực 01 bàn tiệc</p>
+              <p className="text-xs text-stone-500 mt-0.5">Định mức công thức chính xác</p>
             </div>
 
-            <div className="flex items-center gap-3.5 rounded-2xl bg-white/80 backdrop-blur-md border border-stone-200/60 p-4 shadow-xs hover:shadow-md transition-all">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-800 font-bold">
-                <Clock className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-base sm:text-lg font-bold text-stone-900 tracking-tight leading-none">15 phút</p>
-                <p className="text-xs font-semibold text-stone-700 mt-1">Giữ chỗ an toàn</p>
-                <p className="text-[11px] text-stone-500 hidden sm:block">Bảo lưu thực đơn khi đặt</p>
-              </div>
+            <div>
+              <p className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight">15 phút</p>
+              <p className="text-sm font-semibold text-stone-800 mt-1">Giữ chỗ tự động</p>
+              <p className="text-xs text-stone-500 mt-0.5">Bảo lưu tồn kho khi đặt tiệc</p>
             </div>
 
-            <div className="flex items-center gap-3.5 rounded-2xl bg-white/80 backdrop-blur-md border border-stone-200/60 p-4 shadow-xs hover:shadow-md transition-all">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-800 font-bold">
-                <Scale className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-base sm:text-lg font-bold text-stone-900 tracking-tight leading-none">Minh bạch</p>
-                <p className="text-xs font-semibold text-stone-700 mt-1">Đúng giá niêm yết</p>
-                <p className="text-[11px] text-stone-500 hidden sm:block">Không phụ phí ẩn phát sinh</p>
-              </div>
+            <div>
+              <p className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight">0đ</p>
+              <p className="text-sm font-semibold text-stone-800 mt-1">Không phụ phí phát sinh</p>
+              <p className="text-xs text-stone-500 mt-0.5">Cam kết theo hợp đồng</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4 Core Pillars of BanquetHub - PITO Clean Enterprise Style */}
+      {/* =========================================================================
+          VÌ SAO CHỌN BANQUETHUB - BỎ HẾT CÁC NOTE THỪA THÃI, THOÁNG ĐÃNG
+         ========================================================================= */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-14 space-y-2.5">
+        <div className="max-w-2xl mb-12 sm:mb-16 space-y-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
-            Tiêu chuẩn vận hành độc bản
+            Tiêu chuẩn vận hành
           </span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
-            Vì sao chọn nền tảng BanquetHub?
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight">
+            Vì sao khách hàng tin chọn BanquetHub?
           </h2>
-          <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-            Quy chuẩn yến tiệc chuyên nghiệp, đảm bảo định lượng minh bạch và trải nghiệm dịch vụ đẳng cấp nhất.
+          <p className="text-sm sm:text-base text-stone-600 leading-relaxed font-normal">
+            Kết hợp nghệ thuật ẩm thực truyền thống với giải pháp quản trị kho định lượng minh bạch.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Pillar 1 */}
-          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs hover:border-amber-400/80 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
-            <div className="space-y-3.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100/80 transition-colors">
-                <Scale className="h-5 w-5" />
-              </div>
-              <h3 className="text-base font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
-                Minh bạch định lượng từng món
-              </h3>
-              <p className="text-xs text-stone-600 leading-relaxed">
-                Mỗi món ăn đi kèm công thức tiêu hao chuẩn cho 01 phần. Tự động nhân cấp theo số phần
-                trên bàn và số lượng bàn tiệc.
-              </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-7 shadow-xs hover:border-amber-400 hover:shadow-md transition-all duration-300">
+            <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center mb-5">
+              <Scale className="h-5 w-5" />
             </div>
-            <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <span>Chống thất thoát nguyên liệu</span>
-            </div>
+            <h3 className="text-base font-bold text-stone-900 mb-2">
+              Định lượng minh bạch
+            </h3>
+            <p className="text-xs text-stone-600 leading-relaxed">
+              Mỗi món ăn đi kèm công thức tiêu hao chuẩn xác cho 10 khách, tính đúng chi phí thực tế và chống thất thoát.
+            </p>
           </div>
 
-          {/* Pillar 2 */}
-          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs hover:border-amber-400/80 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
-            <div className="space-y-3.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100/80 transition-colors">
-                <Clock className="h-5 w-5" />
-              </div>
-              <h3 className="text-base font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
-                Giữ chỗ tạm 15 phút khi đặt tiệc
-              </h3>
-              <p className="text-xs text-stone-600 leading-relaxed">
-                Tồn khả dụng được tính toán theo thời gian thực (Tồn vật lý − Đang giữ). Tự giải phóng
-                kho nếu đơn tiệc quá hạn chưa hoàn tất.
-              </p>
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-7 shadow-xs hover:border-amber-400 hover:shadow-md transition-all duration-300">
+            <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center mb-5">
+              <Clock className="h-5 w-5" />
             </div>
-            <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <span>Không sợ trùng lặp đơn tiệc</span>
-            </div>
+            <h3 className="text-base font-bold text-stone-900 mb-2">
+              Giữ chỗ 15 phút
+            </h3>
+            <p className="text-xs text-stone-600 leading-relaxed">
+              Tự động giữ tồn kho khả dụng theo thời gian thực khi khách chọn món, không lo trùng lặp đơn tiệc.
+            </p>
           </div>
 
-          {/* Pillar 3 */}
-          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs hover:border-amber-400/80 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
-            <div className="space-y-3.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100/80 transition-colors">
-                <Sparkles className="h-5 w-5" />
-              </div>
-              <h3 className="text-base font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
-                Trợ lý gợi ý thực đơn thông minh
-              </h3>
-              <p className="text-xs text-stone-600 leading-relaxed">
-                Hệ thống phân tích bối cảnh tiệc (cưới hỏi, thôi nôi, liên hoan) để gợi ý
-                các phương án thực đơn tối ưu chi phí và hương vị.
-              </p>
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-7 shadow-xs hover:border-amber-400 hover:shadow-md transition-all duration-300">
+            <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center mb-5">
+              <Sparkles className="h-5 w-5" />
             </div>
-            <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <span>Chỉ dùng món có trong kho</span>
-            </div>
+            <h3 className="text-base font-bold text-stone-900 mb-2">
+              Tối ưu thực đơn
+            </h3>
+            <p className="text-xs text-stone-600 leading-relaxed">
+              Gợi ý phương án thực đơn hài hòa hương vị theo ngân sách và tính chất của tiệc cưới hay hội nghị.
+            </p>
           </div>
 
-          {/* Pillar 4 */}
-          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs hover:border-amber-400/80 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
-            <div className="space-y-3.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100/80 transition-colors">
-                <Layers className="h-5 w-5" />
-              </div>
-              <h3 className="text-base font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
-                Bảo đảm giá cố định theo hợp đồng
-              </h3>
-              <p className="text-xs text-stone-600 leading-relaxed">
-                Chốt bản sao giá và định lượng tại thời điểm tạo đơn. Thay đổi giá thị trường sau này
-                không bao giờ làm ảnh hưởng đến đơn đã đặt.
-              </p>
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-7 shadow-xs hover:border-amber-400 hover:shadow-md transition-all duration-300">
+            <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center mb-5">
+              <ShieldCheck className="h-5 w-5" />
             </div>
-            <div className="mt-5 pt-3.5 border-t border-stone-100 flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <span>Toàn vẹn số liệu minh bạch</span>
-            </div>
+            <h3 className="text-base font-bold text-stone-900 mb-2">
+              Giá niêm yết cố định
+            </h3>
+            <p className="text-xs text-stone-600 leading-relaxed">
+              Chốt bản sao giá và định lượng tại thời điểm tạo đơn, đảm bảo an tâm trọn vẹn cho khách hàng.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Culinary Categories Section */}
+      {/* =========================================================================
+          DANH MỤC MÓN TIỆC - GỌN GÀNG, KHÔNG DÁN BADGE CON CON
+         ========================================================================= */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
             <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
               Tuyển tập ẩm thực
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight mt-1">
-              Phân loại danh mục món tiệc
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight mt-1">
+              Danh mục món tiệc
             </h2>
           </div>
           <Link
             to="/dishes"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 hover:text-amber-800 transition-colors"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-amber-800 hover:text-amber-900 transition-colors"
           >
             <span>Xem toàn bộ thực đơn</span>
             <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
 
-        {loading ? (
-          <LoadingState label="Đang tải dữ liệu ẩm thực..." />
-        ) : error ? (
-          <ErrorState message={error} onRetry={loadHomeData} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                to={`/dishes?categoryId=${cat.id}`}
-                className="group rounded-2xl border border-stone-200/90 bg-white p-4.5 shadow-xs hover:border-amber-400 hover:shadow-md transition-all"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-900 border border-amber-200/80 flex items-center gap-1">
-                    <Sparkles className="h-3 w-3 text-amber-600" />
-                    <span>Thực đơn tiệc</span>
-                  </span>
-                  <ChefHat className="h-4 w-4 text-stone-400 group-hover:text-amber-700 transition-colors" />
-                </div>
-                <h3 className="text-sm font-bold text-stone-900 group-hover:text-amber-700 transition-colors">
-                  {cat.name}
-                </h3>
-                <p className="mt-1 text-xs text-stone-500 line-clamp-2 leading-relaxed">
-                  {cat.description || 'Các món ăn tiêu chuẩn tiệc cưới & hội nghị.'}
-                </p>
-                <div className="mt-3.5 flex items-center gap-1 text-xs font-semibold text-amber-700 group-hover:text-amber-800">
-                  <span>Khám phá món</span>
-                  <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+          {categories.map((cat) => (
+            <Link
+              key={cat.id}
+              to={`/dishes?categoryId=${cat.id}`}
+              className="group rounded-2xl border border-stone-200/90 bg-white p-5 shadow-xs hover:border-amber-400 hover:shadow-md transition-all duration-300"
+            >
+              <h3 className="text-sm font-bold text-stone-900 group-hover:text-amber-800 transition-colors mb-1">
+                {cat.name}
+              </h3>
+              <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed font-normal">
+                {cat.description || 'Các món ăn tiêu chuẩn tiệc cưới & hội nghị.'}
+              </p>
+              <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-amber-800 group-hover:text-amber-900">
+                <span>Xem danh sách món</span>
+                <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+          ))}
+        </div>
       </section>
 
-      {/* Featured Signature Dishes Showcase */}
+      {/* =========================================================================
+          THỰC ĐƠN TIỆC ĐẶC SẮC - CARD MÓN ĂN SẠCH BÓNG, KHÔNG CÓ NOTE GÓC
+         ========================================================================= */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
             <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
               Món ăn nổi bật
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight mt-1">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight mt-1">
               Thực đơn tiệc đặc sắc
             </h2>
-            <p className="mt-1 text-xs text-stone-500">
-              Giá niêm yết tính cho 01 phần phục vụ bàn tiệc tiêu chuẩn 10 khách
+            <p className="mt-1 text-xs sm:text-sm text-stone-500">
+              Quy chuẩn phục vụ cho 01 bàn tiệc tiêu chuẩn 10 khách
             </p>
           </div>
           <Link
             to="/dishes"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-400 transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-all shadow-xs"
           >
             <span>Tất cả món ăn</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
-        {!loading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
-            {featuredDishes.map((dish) => (
-              <article
-                key={dish.id}
-                className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white hover:border-amber-300 hover:shadow-lg transition-all duration-300 shadow-xs"
-              >
-                {/* Image Area */}
-                <div className="relative h-52 bg-stone-100 overflow-hidden">
-                  {dish.imageUrl ? (
-                    <img
-                      src={dish.imageUrl}
-                      alt={dish.name}
-                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-stone-400">
-                      <Utensils className="h-10 w-10" />
-                    </div>
-                  )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {featuredDishes.map((dish) => (
+            <article
+              key={dish.id}
+              className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white hover:border-amber-300 hover:shadow-lg transition-all duration-300 shadow-xs"
+            >
+              {/* Ảnh món ăn sạch sẽ, không dán bất kỳ badge hay status dot nào */}
+              <div className="relative h-56 bg-stone-100 overflow-hidden">
+                {dish.imageUrl ? (
+                  <img
+                    src={dish.imageUrl}
+                    alt={dish.name}
+                    className="h-full w-full object-cover group-hover:scale-103 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-stone-400">
+                    <Utensils className="h-10 w-10" />
+                  </div>
+                )}
+              </div>
 
-                  <span className="absolute top-3 left-3 rounded-lg bg-white/95 backdrop-blur-sm px-2.5 py-1 text-xs font-semibold text-stone-800 shadow-xs border border-stone-200">
+              {/* Thông tin cốt lõi: Tên món, mô tả, giá */}
+              <div className="flex flex-1 flex-col p-6 space-y-3">
+                <div className="flex-1">
+                  <span className="text-[11px] font-medium text-amber-800 uppercase tracking-wider">
                     {dish.categoryName}
                   </span>
+                  <Link
+                    to={`/dishes/${dish.id}`}
+                    className="block mt-1 text-base sm:text-lg font-bold text-stone-900 hover:text-amber-800 transition-colors line-clamp-1"
+                  >
+                    {dish.name}
+                  </Link>
+                  <p className="mt-1.5 text-xs text-stone-500 line-clamp-2 leading-relaxed">
+                    {dish.description || 'Món ăn tiệc truyền thống phục vụ theo quy chuẩn 10 khách.'}
+                  </p>
                 </div>
 
-                {/* Content */}
-                <div className="flex flex-1 flex-col p-5 space-y-3.5">
-                  <div className="flex-1">
-                    <Link
-                      to={`/dishes/${dish.id}`}
-                      className="text-base font-bold text-stone-900 hover:text-amber-700 transition-colors line-clamp-1"
-                    >
-                      {dish.name}
-                    </Link>
-                    <p className="mt-1.5 text-xs text-stone-500 line-clamp-2 leading-relaxed">
-                      {dish.description || 'Món ăn tiệc truyền thống phục vụ theo quy chuẩn 10 khách.'}
-                    </p>
+                <div className="pt-4 border-t border-stone-100 flex items-center justify-between">
+                  <div>
+                    <span className="block text-[11px] text-stone-400">Giá / 01 bàn (10 khách)</span>
+                    <span className="text-lg font-bold text-stone-900">
+                      {formatVnd(dish.price)}
+                    </span>
                   </div>
 
-                  <div className="pt-3.5 border-t border-stone-100 flex items-center justify-between">
-                    <div>
-                      <span className="block text-[10px] font-semibold text-stone-400 uppercase">
-                        Giá / 01 phần
-                      </span>
-                      <span className="text-base sm:text-lg font-bold text-amber-700 font-mono">
-                        {formatVnd(dish.price)}
-                      </span>
-                    </div>
-
-                    <Link
-                      to={`/dishes/${dish.id}`}
-                      className="inline-flex items-center gap-1 rounded-xl bg-stone-100 hover:bg-amber-50 hover:text-amber-800 px-3.5 py-2 text-xs font-semibold text-stone-700 transition-colors"
-                    >
-                      <span>Xem chi tiết</span>
-                      <ArrowRight className="h-3 w-3" />
-                    </Link>
-                  </div>
+                  <Link
+                    to={`/dishes/${dish.id}`}
+                    className="inline-flex items-center gap-1 rounded-xl bg-stone-100 hover:bg-stone-200 px-3.5 py-2 text-xs font-semibold text-stone-800 transition-colors"
+                  >
+                    <span>Xem chi tiết</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
                 </div>
-              </article>
-            ))}
-          </div>
-        )}
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
 
-      {/* Banquet Consultation CTA Banner */}
+      {/* =========================================================================
+          BANNER TƯ VẤN CUỐI TRANG - ĐƠN GIẢN, BỀ THẾ, ẤN TƯỢNG
+         ========================================================================= */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl border border-stone-200/90 bg-gradient-to-r from-amber-50 via-white to-amber-50/60 p-8 sm:p-12 shadow-sm">
+        <div className="rounded-3xl bg-stone-900 text-white p-8 sm:p-14 shadow-lg">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-8 space-y-2.5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
-                Sẵn sàng cho bàn tiệc hoàn hảo?
+            <div className="lg:col-span-8 space-y-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-amber-400">
+                Tổ chức tiệc hoàn hảo
               </span>
-              <h2 className="text-xl sm:text-3xl font-bold text-stone-900 tracking-tight">
-                Tự thiết kế thực đơn bàn tiệc & nhận báo giá ngay
+              <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
+                Tự thiết kế thực đơn & nhận báo giá ngay
               </h2>
-              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed max-w-2xl">
-                Thử nghiệm bảng tính giá bàn tiệc theo thời gian thực, xem định lượng nguyên
-                liệu xuất kho chi tiết và trải nghiệm quy trình đặt tiệc trực tuyến tiện lợi.
+              <p className="text-sm text-stone-300 leading-relaxed max-w-2xl font-normal">
+                Thử nghiệm bảng tính giá bàn tiệc theo thời gian thực, xem định lượng nguyên liệu xuất kho chi tiết và trải nghiệm quy trình đặt tiệc trực tuyến tiện lợi.
               </p>
             </div>
             <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
               <Link
                 to="/dishes"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-5 py-3.5 text-xs font-semibold shadow-xs transition-colors"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-600 text-white px-6 py-4 text-xs sm:text-sm font-semibold shadow-sm transition-all"
               >
-                <Utensils className="h-4 w-4" />
                 <span>Mở bảng tính thực đơn</span>
+                <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white px-5 py-3.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors shadow-xs"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-700 bg-stone-800 hover:bg-stone-700 text-white px-6 py-4 text-xs sm:text-sm font-semibold transition-all"
               >
-                <CalendarCheck className="h-4 w-4 text-amber-700" />
                 <span>Đăng ký thành viên</span>
               </Link>
             </div>
