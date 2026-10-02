@@ -11,12 +11,12 @@ import {
   Eye,
   EyeOff,
   Sparkles,
-  UtensilsCrossed,
   CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { extractErrorMessage } from '../services/apiClient';
+import { Logo } from '../components/ui/Logo';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -70,31 +70,12 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:py-16">
-      <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm grid grid-cols-1 lg:grid-cols-12">
+      <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xs grid grid-cols-1 lg:grid-cols-12">
         {/* Left Side: Warm Light Brand Story Panel (BRIGHT & ELEGANT) */}
-        <div className="lg:col-span-5 relative hidden lg:flex flex-col justify-between p-8 bg-gradient-to-br from-amber-50 via-stone-50 to-amber-100/50 border-r border-stone-200">
-          <img
-            src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=85"
-            alt="Luxury Banquet Hospitality"
-            className="absolute inset-0 h-full w-full object-cover opacity-20"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-amber-50/50" />
-
+        <div className="lg:col-span-5 relative hidden lg:flex flex-col justify-between p-8 bg-gradient-to-br from-amber-50/70 via-stone-50 to-amber-100/40 border-r border-stone-200">
           <div className="relative z-10 space-y-3">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-700 text-white font-bold shadow-xs">
-                <UtensilsCrossed className="h-5 w-5" />
-              </div>
-              <div>
-                <span className="text-xl font-extrabold tracking-tight text-stone-900">
-                  Banquet<span className="text-amber-700">Hub</span>
-                </span>
-                <span className="block text-[10px] font-bold uppercase tracking-wider text-amber-800 -mt-0.5">
-                  Dịch Vụ Yến Tiệc 5 Sao
-                </span>
-              </div>
-            </div>
-            <p className="text-xs text-stone-600 leading-relaxed font-medium">
+            <Logo size="md" />
+            <p className="text-xs text-stone-600 leading-relaxed font-medium pt-1">
               Không gian ẩm thực đẳng cấp và giải pháp đặt tiệc trọn gói hàng đầu.
             </p>
           </div>
@@ -117,7 +98,7 @@ export const LoginPage: React.FC = () => {
 
             <div className="pt-3 border-t border-stone-200/80">
               <p className="text-[11px] text-stone-500 italic">
-                "Định lượng chuẩn xác - Hương vị tinh hoa - Dịch vụ chu đáo."
+                "Định lượng chuẩn xác • Hương vị tinh hoa • Dịch vụ chu đáo."
               </p>
             </div>
           </div>
@@ -128,13 +109,13 @@ export const LoginPage: React.FC = () => {
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-0.5 text-xs font-semibold text-amber-900">
               <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-              <span>Cổng Đăng Nhập Thành Viên</span>
+              <span>Cổng đăng nhập thành viên</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
-              Đăng Nhập Hệ Thống
+              Đăng nhập hệ thống
             </h1>
             <p className="text-xs text-stone-500">
-              Truy cập tài khoản để tự xây dựng thực đơn hoặc theo dõi tiến độ tiệc
+              Truy cập tài khoản để tự xây dựng thực đơn hoặc quản trị vận hành
             </p>
           </div>
 
@@ -148,7 +129,7 @@ export const LoginPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="loginEmail" className="block text-xs font-semibold text-stone-700 mb-1">
-                Địa Chỉ Email
+                Địa chỉ email
               </label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
@@ -170,7 +151,7 @@ export const LoginPage: React.FC = () => {
                 htmlFor="loginPassword"
                 className="block text-xs font-semibold text-stone-700 mb-1"
               >
-                Mật Khẩu
+                Mật khẩu
               </label>
               <div className="relative">
                 <KeyRound className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
@@ -208,7 +189,7 @@ export const LoginPage: React.FC = () => {
               ) : (
                 <>
                   <LogIn className="h-4 w-4" />
-                  <span>Đăng Nhập Ngay</span>
+                  <span>Đăng nhập</span>
                 </>
               )}
             </button>
@@ -216,7 +197,7 @@ export const LoginPage: React.FC = () => {
 
           {/* Quick Demo Fill Buttons */}
           <div className="rounded-xl border border-stone-200 bg-stone-50 p-3.5 space-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500">
               Tài khoản trải nghiệm mẫu:
             </p>
             <div className="grid grid-cols-2 gap-2">
@@ -226,7 +207,7 @@ export const LoginPage: React.FC = () => {
                 className="flex items-center justify-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-amber-500 transition-colors cursor-pointer shadow-xs"
               >
                 <ShieldCheck className="h-3.5 w-3.5 text-amber-700" />
-                <span>Tài khoản Quản lý</span>
+                <span>Tài khoản quản lý</span>
               </button>
               <button
                 type="button"
@@ -234,7 +215,7 @@ export const LoginPage: React.FC = () => {
                 className="flex items-center justify-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-emerald-500 transition-colors cursor-pointer shadow-xs"
               >
                 <User className="h-3.5 w-3.5 text-emerald-600" />
-                <span>Tài khoản Khách hàng</span>
+                <span>Tài khoản khách hàng</span>
               </button>
             </div>
           </div>
@@ -250,3 +231,4 @@ export const LoginPage: React.FC = () => {
     </div>
   );
 };
+

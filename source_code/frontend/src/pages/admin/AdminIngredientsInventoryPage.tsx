@@ -196,14 +196,14 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-700">
+          <div className="flex items-center gap-2 text-xs font-semibold text-amber-700">
             <Boxes className="h-4 w-4" />
-            <span>Kho Nguyên Liệu & Tồn Kho</span>
+            <span>Kho nguyên liệu & tồn kho</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-stone-900 tracking-tight mt-1">
-            Quản Lý Nguyên Liệu & Tồn Kho Thực Tế
+          <h1 className="text-2xl md:text-3xl font-bold text-stone-900 tracking-tight mt-1">
+            Quản lý nguyên liệu & tồn kho thực tế
           </h1>
-          <p className="text-sm text-stone-500 mt-0.5">
+          <p className="text-sm text-stone-500 mt-1">
             Theo dõi tồn kho, giá vốn bình quân di động, ngưỡng an toàn và kiểm kê điều chỉnh số dư.
           </p>
         </div>
@@ -211,10 +211,10 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl bg-amber-700 hover:bg-amber-800 text-white transition-all shadow-md shadow-amber-900/10 cursor-pointer self-start md:self-auto hover:shadow-lg"
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-amber-700 hover:bg-amber-800 text-white transition-all shadow-xs cursor-pointer self-start md:self-auto"
         >
           <Plus className="h-4 w-4" />
-          <span>Thêm Nguyên Liệu Mới</span>
+          <span>Thêm nguyên liệu mới</span>
         </button>
       </div>
 
@@ -222,26 +222,26 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
-              Tổng Mặt Hàng Kho
+            <span className="text-xs font-medium text-stone-500">
+              Tổng mặt hàng kho
             </span>
-            <p className="text-2xl font-black text-stone-900">{ingredients.length}</p>
-            <span className="text-xs text-stone-400">Nguyên liệu trong danh mục</span>
+            <p className="text-2xl font-bold text-stone-900">{ingredients.length}</p>
+            <span className="text-[11px] text-stone-400">Nguyên liệu trong danh mục</span>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
+          <div className="h-10 w-10 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
             <Boxes className="h-5 w-5" />
           </div>
         </div>
 
         <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
-              Tồn Kho An Toàn
+            <span className="text-xs font-medium text-emerald-700">
+              Tồn kho an toàn
             </span>
-            <p className="text-2xl font-black text-emerald-700">{safeStockCount}</p>
-            <span className="text-xs text-stone-400">Trên ngưỡng cảnh báo</span>
+            <p className="text-2xl font-bold text-emerald-700">{safeStockCount}</p>
+            <span className="text-[11px] text-stone-400">Trên ngưỡng cảnh báo</span>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
+          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
             <CheckCircle2 className="h-5 w-5" />
           </div>
         </div>
@@ -250,17 +250,17 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
           lowStockCount > 0 ? 'bg-rose-50/40 border-rose-200' : 'bg-white border-stone-200/80'
         }`}>
           <div className="space-y-1">
-            <span className={`text-[11px] font-bold uppercase tracking-wider ${
+            <span className={`text-xs font-medium ${
               lowStockCount > 0 ? 'text-rose-700' : 'text-stone-500'
             }`}>
-              Cảnh Báo Tồn Thấp
+              Cảnh báo tồn thấp
             </span>
-            <p className={`text-2xl font-black ${lowStockCount > 0 ? 'text-rose-700' : 'text-stone-600'}`}>
+            <p className={`text-2xl font-bold ${lowStockCount > 0 ? 'text-rose-700' : 'text-stone-600'}`}>
               {lowStockCount}
             </p>
-            <span className="text-xs text-stone-400">Cần lập phiếu nhập bổ sung</span>
+            <span className="text-[11px] text-stone-400">Cần lập phiếu nhập bổ sung</span>
           </div>
-          <div className={`h-11 w-11 rounded-xl flex items-center justify-center border ${
+          <div className={`h-10 w-10 rounded-xl flex items-center justify-center border ${
             lowStockCount > 0 ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-stone-100 text-stone-500 border-stone-200'
           }`}>
             <AlertTriangle className="h-5 w-5" />
@@ -269,13 +269,13 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
 
         <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
-              Tổng Giá Trị Kho
+            <span className="text-xs font-medium text-amber-800">
+              Tổng giá trị kho
             </span>
-            <p className="text-xl font-black font-mono text-amber-800">{formatVnd(totalStockValue)}</p>
-            <span className="text-xs text-stone-400">Theo giá vốn bình quân di động</span>
+            <p className="text-xl font-bold font-mono text-amber-800">{formatVnd(totalStockValue)}</p>
+            <span className="text-[11px] text-stone-400">Theo giá vốn bình quân di động</span>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
+          <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
             <TrendingUp className="h-5 w-5" />
           </div>
         </div>
@@ -346,15 +346,15 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-stone-50/90 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3.5 px-4 w-28 whitespace-nowrap">Mã</th>
-                <th className="py-3.5 px-4 min-w-[280px]">Tên Nguyên Liệu</th>
-                <th className="py-3.5 px-4 w-24 text-center whitespace-nowrap">Đơn Vị</th>
-                <th className="py-3.5 px-4 text-right w-40 whitespace-nowrap">Tồn Kho Hiện Tại</th>
-                <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Ngưỡng Tối Thiểu</th>
-                <th className="py-3.5 px-4 text-right w-44 whitespace-nowrap">Giá Vốn Bình Quân</th>
-                <th className="py-3.5 px-4 text-center w-32 whitespace-nowrap">Trạng Thái</th>
-                <th className="py-3.5 px-4 text-center w-36 whitespace-nowrap">Thao Tác</th>
+              <tr className="bg-stone-50/80 border-b border-stone-200 text-stone-600 font-semibold text-xs">
+                <th className="py-3 px-4 w-28 whitespace-nowrap">Mã nguyên liệu</th>
+                <th className="py-3 px-4 min-w-[280px]">Tên nguyên liệu</th>
+                <th className="py-3 px-4 w-24 text-center whitespace-nowrap">Đơn vị</th>
+                <th className="py-3 px-4 text-right w-40 whitespace-nowrap">Tồn kho hiện tại</th>
+                <th className="py-3 px-4 text-right w-36 whitespace-nowrap">Ngưỡng tối thiểu</th>
+                <th className="py-3 px-4 text-right w-44 whitespace-nowrap">Giá vốn bình quân</th>
+                <th className="py-3 px-4 text-center w-32 whitespace-nowrap">Trạng thái</th>
+                <th className="py-3 px-4 text-center w-36 whitespace-nowrap">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">

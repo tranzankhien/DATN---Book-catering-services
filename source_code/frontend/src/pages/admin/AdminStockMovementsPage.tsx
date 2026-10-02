@@ -134,15 +134,15 @@ export const AdminStockMovementsPage: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-700">
+          <div className="flex items-center gap-2 text-xs font-semibold text-amber-700">
             <History className="h-4 w-4" />
-            <span>Sổ Kho & Kiểm Toán</span>
+            <span>Sổ kho & kiểm toán</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-stone-900 tracking-tight mt-1">
-            Sổ Biến Động Kho Nguyên Liệu
+          <h1 className="text-2xl md:text-3xl font-bold text-stone-900 tracking-tight mt-1">
+            Sổ biến động kho nguyên liệu
           </h1>
-          <p className="text-sm text-stone-500 mt-0.5">
-            Nhật ký lưu vết toàn bộ hoạt động Nhập kho (IMPORT), Xuất kho (EXPORT) và Điều chỉnh kiểm kê (ADJUSTMENT).
+          <p className="text-sm text-stone-500 mt-1">
+            Nhật ký lưu vết toàn bộ hoạt động nhập kho, xuất kho và điều chỉnh kiểm kê theo thời gian thực.
           </p>
         </div>
 
@@ -246,16 +246,16 @@ export const AdminStockMovementsPage: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-stone-50/90 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3.5 px-4 w-36 whitespace-nowrap">Thời Gian</th>
-                <th className="py-3.5 px-4 min-w-[260px]">Nguyên Liệu</th>
-                <th className="py-3.5 px-4 text-center w-32 whitespace-nowrap">Loại Biến Động</th>
-                <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Lượng Thay Đổi</th>
-                <th className="py-3.5 px-4 text-right w-40 whitespace-nowrap">Tồn Trước → Sau</th>
-                <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Giá Vốn Sau</th>
-                <th className="py-3.5 px-4 w-36 whitespace-nowrap">Chứng Từ Tham Chiếu</th>
-                <th className="py-3.5 px-4 w-32 whitespace-nowrap">Người Thực Hiện</th>
-                <th className="py-3.5 px-4 min-w-[200px]">Ghi Chú</th>
+              <tr className="bg-stone-50/80 border-b border-stone-200 text-stone-600 font-semibold text-xs">
+                <th className="py-3 px-4 w-36 whitespace-nowrap">Thời gian</th>
+                <th className="py-3 px-4 min-w-[260px]">Nguyên liệu</th>
+                <th className="py-3 px-4 text-center w-32 whitespace-nowrap">Loại biến động</th>
+                <th className="py-3 px-4 text-right w-36 whitespace-nowrap">Lượng thay đổi</th>
+                <th className="py-3 px-4 text-right w-40 whitespace-nowrap">Tồn trước → sau</th>
+                <th className="py-3 px-4 text-right w-36 whitespace-nowrap">Giá vốn sau</th>
+                <th className="py-3 px-4 w-36 whitespace-nowrap">Chứng từ tham chiếu</th>
+                <th className="py-3 px-4 w-32 whitespace-nowrap">Người thực hiện</th>
+                <th className="py-3 px-4 min-w-[200px]">Ghi chú</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">

@@ -163,7 +163,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-stone-900">
-                {isEdit ? `Chỉnh sửa món ăn: ${initialDish?.name}` : 'Thêm Món Ăn Mới'}
+                {isEdit ? `Chỉnh sửa món ăn: ${initialDish?.name}` : 'Thêm món ăn mới'}
               </h2>
               <p className="text-xs text-stone-500">
                 Khai báo thông tin món, đơn giá 01 phần (VND) và công thức nguyên liệu chuẩn
@@ -190,7 +190,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
             <div className="sm:col-span-4">
               <label className="block font-semibold text-stone-700 mb-1">
-                Mã Món Ăn <span className="text-amber-700">*</span>
+                Mã món ăn <span className="text-amber-700">*</span>
               </label>
               <input
                 type="text"
@@ -204,7 +204,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
 
             <div className="sm:col-span-8">
               <label className="block font-semibold text-stone-700 mb-1">
-                Tên Món Ăn <span className="text-amber-700">*</span>
+                Tên món ăn <span className="text-amber-700">*</span>
               </label>
               <input
                 type="text"
@@ -218,7 +218,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
 
             <div className="sm:col-span-4">
               <label className="block font-semibold text-stone-700 mb-1">
-                Danh Mục <span className="text-amber-700">*</span>
+                Danh mục <span className="text-amber-700">*</span>
               </label>
               <select
                 value={categoryId}
@@ -235,7 +235,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
 
             <div className="sm:col-span-4">
               <label className="block font-semibold text-stone-700 mb-1">
-                Đơn Giá / 01 Phần (VND) <span className="text-amber-700">*</span>
+                Đơn giá / 01 phần (VND) <span className="text-amber-700">*</span>
               </label>
               <input
                 type="number"
@@ -250,7 +250,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
 
             <div className="sm:col-span-4">
               <label className="block font-semibold text-stone-700 mb-1">
-                Trạng Thái Phục Vụ
+                Trạng thái phục vụ
               </label>
               <select
                 value={status}
@@ -264,7 +264,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
 
             <div className="sm:col-span-12">
               <label className="block font-semibold text-stone-700 mb-1">
-                Đường Dẫn Hình Ảnh (URL)
+                Đường dẫn hình ảnh (URL)
               </label>
               <input
                 type="url"
@@ -277,7 +277,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
 
             <div className="sm:col-span-12">
               <label className="block font-semibold text-stone-700 mb-1">
-                Mô Tả Hương Vị & Thành Phần
+                Mô tả hương vị & thành phần
               </label>
               <textarea
                 rows={2}
@@ -294,7 +294,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-stone-900">
-                  Công Thức Định Lượng Nguyên Liệu (01 Phần)
+                  Công thức định lượng nguyên liệu (01 phần)
                 </h3>
                 <p className="text-[11px] text-stone-500">
                   Quy tắc BR-02: Định lượng bắt buộc &gt; 0, dùng đơn vị gốc của kho

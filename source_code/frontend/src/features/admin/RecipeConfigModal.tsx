@@ -126,7 +126,7 @@ export const RecipeConfigModal: React.FC<RecipeConfigModalProps> = ({
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-bold text-stone-900">
-                Định Lượng Công Thức: {dish.name}
+                Định lượng công thức: {dish.name}
               </h2>
               <p className="text-xs text-stone-500">
                 Mã món: <span className="font-mono text-stone-700 font-semibold">{dish.code}</span> •

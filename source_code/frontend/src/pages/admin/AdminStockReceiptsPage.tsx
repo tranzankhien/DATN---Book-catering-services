@@ -125,24 +125,24 @@ export const AdminStockReceiptsPage: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-700">
+          <div className="flex items-center gap-2 text-xs font-semibold text-amber-700">
             <Receipt className="h-4 w-4" />
-            <span>Chứng Từ Kho & Nhập Hàng</span>
+            <span>Chứng từ kho & nhập hàng</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-stone-900 tracking-tight mt-1">
-            Quản Lý Phiếu Nhập Nguyên Liệu
+          <h1 className="text-2xl md:text-3xl font-bold text-stone-900 tracking-tight mt-1">
+            Quản lý phiếu nhập nguyên liệu
           </h1>
-          <p className="text-sm text-stone-500 mt-0.5">
+          <p className="text-sm text-stone-500 mt-1">
             Lập phiếu nhập, lưu nháp hoặc xác nhận tăng tồn kho, tự động tính giá vốn bình quân di động và xuất PDF A4.
           </p>
         </div>
 
         <Link
           to="/admin/inventory/receipts/new"
-          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl bg-amber-700 hover:bg-amber-800 text-white transition-all shadow-md shadow-amber-900/10 cursor-pointer self-start md:self-auto hover:shadow-lg"
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-amber-700 hover:bg-amber-800 text-white transition-all shadow-xs cursor-pointer self-start md:self-auto"
         >
           <Plus className="h-4 w-4" />
-          <span>Tạo Phiếu Nhập Mới</span>
+          <span>Tạo phiếu nhập mới</span>
         </Link>
       </div>
 
@@ -150,52 +150,52 @@ export const AdminStockReceiptsPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
-              Tổng Số Phiếu Nhập
+            <span className="text-xs font-medium text-stone-500">
+              Tổng số phiếu nhập
             </span>
-            <p className="text-2xl font-black text-stone-900">{receipts.length}</p>
-            <span className="text-xs text-stone-400">Chứng từ đã lập</span>
+            <p className="text-2xl font-bold text-stone-900">{receipts.length}</p>
+            <span className="text-[11px] text-stone-400">Chứng từ đã lập</span>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
+          <div className="h-10 w-10 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
             <Receipt className="h-5 w-5" />
           </div>
         </div>
 
         <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
-              Đã Nhập Kho (Xác Nhận)
+            <span className="text-xs font-medium text-emerald-700">
+              Đã nhập kho
             </span>
-            <p className="text-2xl font-black text-emerald-700">{confirmedCount}</p>
-            <span className="text-xs text-stone-400">Đã cộng tồn & tính giá vốn</span>
+            <p className="text-2xl font-bold text-emerald-700">{confirmedCount}</p>
+            <span className="text-[11px] text-stone-400">Đã cộng tồn & tính giá vốn</span>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
+          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
             <CheckCircle2 className="h-5 w-5" />
           </div>
         </div>
 
         <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
-              Bản Nháp Chờ Duyệt
+            <span className="text-xs font-medium text-amber-800">
+              Bản nháp chờ duyệt
             </span>
-            <p className="text-2xl font-black text-amber-700">{draftCount}</p>
-            <span className="text-xs text-stone-400">Chưa làm thay đổi tồn kho</span>
+            <p className="text-2xl font-bold text-amber-700">{draftCount}</p>
+            <span className="text-[11px] text-stone-400">Chưa làm thay đổi tồn kho</span>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
+          <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
             <Clock className="h-5 w-5" />
           </div>
         </div>
 
         <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-700">
-              Tổng Giá Trị Phiếu
+            <span className="text-xs font-medium text-stone-700">
+              Tổng giá trị phiếu
             </span>
-            <p className="text-xl font-black font-mono text-amber-800">{formatVnd(totalReceiptsAmount)}</p>
-            <span className="text-xs text-stone-400">Theo bộ lọc hiển thị</span>
+            <p className="text-xl font-bold font-mono text-amber-800">{formatVnd(totalReceiptsAmount)}</p>
+            <span className="text-[11px] text-stone-400">Theo bộ lọc hiển thị</span>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
+          <div className="h-10 w-10 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
             <Warehouse className="h-5 w-5" />
           </div>
         </div>
@@ -317,14 +317,14 @@ export const AdminStockReceiptsPage: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-stone-50/90 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3.5 px-4 w-36 whitespace-nowrap">Mã Phiếu</th>
-                <th className="py-3.5 px-4 w-32 whitespace-nowrap">Ngày Nhập</th>
-                <th className="py-3.5 px-4 min-w-[280px]">Nhà Cung Cấp</th>
-                <th className="py-3.5 px-4 text-right w-44 whitespace-nowrap">Tổng Tiền</th>
-                <th className="py-3.5 px-4 text-center w-36 whitespace-nowrap">Trạng Thái Kho</th>
-                <th className="py-3.5 px-4 text-center w-36 whitespace-nowrap">Thanh Toán</th>
-                <th className="py-3.5 px-4 text-center w-40 whitespace-nowrap">Thao Tác</th>
+              <tr className="bg-stone-50/80 border-b border-stone-200 text-stone-600 font-semibold text-xs">
+                <th className="py-3 px-4 w-36 whitespace-nowrap">Mã phiếu</th>
+                <th className="py-3 px-4 w-32 whitespace-nowrap">Ngày nhập</th>
+                <th className="py-3 px-4 min-w-[280px]">Nhà cung cấp</th>
+                <th className="py-3 px-4 text-right w-44 whitespace-nowrap">Tổng tiền</th>
+                <th className="py-3 px-4 text-center w-36 whitespace-nowrap">Trạng thái kho</th>
+                <th className="py-3 px-4 text-center w-36 whitespace-nowrap">Thanh toán</th>
+                <th className="py-3 px-4 text-center w-40 whitespace-nowrap">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">

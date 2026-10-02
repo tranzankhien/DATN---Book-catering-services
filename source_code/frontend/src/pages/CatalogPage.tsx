@@ -201,8 +201,8 @@ export const CatalogPage: React.FC = () => {
                 className="bg-transparent font-semibold text-stone-800 focus:outline-none cursor-pointer"
               >
                 <option value="default">Mặc định danh mục</option>
-                <option value="price-asc">Giá: Thấp đến Cao</option>
-                <option value="price-desc">Giá: Cao đến Thấp</option>
+                <option value="price-asc">Giá: thấp đến cao</option>
+                <option value="price-desc">Giá: cao đến thấp</option>
                 <option value="name">Tên món: A → Z</option>
               </select>
             </div>
@@ -461,10 +461,10 @@ export const CatalogPage: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-stone-900">
-                    Bảng Tính Bàn Tiệc
+                    Bảng tính bàn tiệc
                   </h2>
                   <p className="text-[10px] text-stone-500 font-medium">
-                    Giá 01 bàn × Số lượng bàn tiệc
+                    Giá 01 bàn × số lượng bàn tiệc
                   </p>
                 </div>
               </div>

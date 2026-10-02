@@ -70,9 +70,9 @@ export const AdminLayout: React.FC = () => {
   };
 
   const upcomingModules = [
-    { label: 'Đơn Tiệc & Khóa Tồn 15p', phase: 'Phase 3–4', icon: ClipboardList },
-    { label: 'Nhân Sự & Bảng Lương', phase: 'Phase 6', icon: Users },
-    { label: 'Dashboard Lợi Nhuận', phase: 'Phase 7', icon: BarChart3 },
+    { label: 'Đơn tiệc & khóa tồn 15 phút', phase: 'Phase 3–4', icon: ClipboardList },
+    { label: 'Nhân sự & phục vụ tiệc', phase: 'Phase 6', icon: Users },
+    { label: 'Báo cáo doanh thu & lãi gộp', phase: 'Phase 7', icon: BarChart3 },
   ];
 
   return (
@@ -98,21 +98,12 @@ export const AdminLayout: React.FC = () => {
                 <Logo size="sm" variant="light" />
               ) : (
                 <Link to="/" title="Về trang chủ BanquetHub">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-700 via-amber-800 to-amber-950 text-white shadow-sm ring-1 ring-amber-900/20">
-                    <svg
-                      viewBox="0 0 32 32"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5.5 w-5.5"
-                    >
-                      <circle cx="16" cy="8" r="2" fill="#FDE68A" />
-                      <path
-                        d="M7 21C7 13.5 11 11 16 11C21 11 25 13.5 25 21H7Z"
-                        fill="currentColor"
-                        fillOpacity="0.95"
-                      />
-                      <rect x="5" y="22.5" width="22" height="2" rx="1" fill="#FDE68A" />
-                    </svg>
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-amber-900/20 bg-stone-800 shadow-sm">
+                    <img
+                      src="/logo-icon.jpg"
+                      alt="BanquetHub"
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                 </Link>
               )}
@@ -189,11 +180,11 @@ export const AdminLayout: React.FC = () => {
                   >
                     <Warehouse className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
                     {isOpen && (
-                      <span className="whitespace-nowrap truncate">Tổng Quan Kho & Giá Vốn</span>
+                      <span className="whitespace-nowrap truncate">Tổng quan kho & giá vốn</span>
                     )}
                     {!isOpen && (
                       <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
-                        Tổng Quan Kho & Giá Vốn
+                        Tổng quan kho & giá vốn
                       </div>
                     )}
                   </NavLink>
@@ -209,15 +200,15 @@ export const AdminLayout: React.FC = () => {
                           : 'text-stone-300 hover:bg-stone-800 hover:text-white'
                       }`
                     }
-                    title={!isOpen ? 'Thực Đơn Món & Công Thức' : undefined}
+                    title={!isOpen ? 'Thực đơn & công thức' : undefined}
                   >
                     <ChefHat className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
                     {isOpen && (
-                      <span className="whitespace-nowrap truncate">Thực Đơn & Công Thức</span>
+                      <span className="whitespace-nowrap truncate">Thực đơn & công thức</span>
                     )}
                     {!isOpen && (
                       <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
-                        Thực Đơn & Công Thức
+                        Thực đơn & công thức
                       </div>
                     )}
                   </NavLink>
@@ -233,15 +224,15 @@ export const AdminLayout: React.FC = () => {
                           : 'text-stone-300 hover:bg-stone-800 hover:text-white'
                       }`
                     }
-                    title={!isOpen ? 'Nguyên Liệu & Tồn Kho' : undefined}
+                    title={!isOpen ? 'Nguyên liệu & tồn kho' : undefined}
                   >
                     <Boxes className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
                     {isOpen && (
-                      <span className="whitespace-nowrap truncate">Nguyên Liệu & Tồn Kho</span>
+                      <span className="whitespace-nowrap truncate">Nguyên liệu & tồn kho</span>
                     )}
                     {!isOpen && (
                       <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
-                        Nguyên Liệu & Tồn Kho
+                        Nguyên liệu & tồn kho
                       </div>
                     )}
                   </NavLink>
@@ -257,15 +248,15 @@ export const AdminLayout: React.FC = () => {
                           : 'text-stone-300 hover:bg-stone-800 hover:text-white'
                       }`
                     }
-                    title={!isOpen ? 'Nhập Hàng (Phiếu Nhập)' : undefined}
+                    title={!isOpen ? 'Nhập hàng (phiếu nhập)' : undefined}
                   >
                     <Receipt className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
                     {isOpen && (
-                      <span className="whitespace-nowrap truncate">Nhập Hàng (Phiếu Nhập)</span>
+                      <span className="whitespace-nowrap truncate">Nhập hàng (phiếu nhập)</span>
                     )}
                     {!isOpen && (
                       <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
-                        Nhập Hàng (Phiếu Nhập)
+                        Nhập hàng (phiếu nhập)
                       </div>
                     )}
                   </NavLink>
@@ -281,15 +272,15 @@ export const AdminLayout: React.FC = () => {
                           : 'text-stone-300 hover:bg-stone-800 hover:text-white'
                       }`
                     }
-                    title={!isOpen ? 'Sổ Biến Động Kho' : undefined}
+                    title={!isOpen ? 'Sổ biến động kho' : undefined}
                   >
                     <History className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
                     {isOpen && (
-                      <span className="whitespace-nowrap truncate">Sổ Biến Động Kho</span>
+                      <span className="whitespace-nowrap truncate">Sổ biến động kho</span>
                     )}
                     {!isOpen && (
                       <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
-                        Sổ Biến Động Kho
+                        Sổ biến động kho
                       </div>
                     )}
                   </NavLink>
@@ -305,15 +296,15 @@ export const AdminLayout: React.FC = () => {
                           : 'text-stone-300 hover:bg-stone-800 hover:text-white'
                       }`
                     }
-                    title={!isOpen ? 'Nhà Cung Cấp' : undefined}
+                    title={!isOpen ? 'Nhà cung cấp' : undefined}
                   >
                     <Truck className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
                     {isOpen && (
-                      <span className="whitespace-nowrap truncate">Nhà Cung Cấp</span>
+                      <span className="whitespace-nowrap truncate">Nhà cung cấp</span>
                     )}
                     {!isOpen && (
                       <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
-                        Nhà Cung Cấp
+                        Nhà cung cấp
                       </div>
                     )}
                   </NavLink>
@@ -451,12 +442,12 @@ export const AdminLayout: React.FC = () => {
 
             <div className="space-y-0.5">
               <div className="flex items-center gap-2 text-xs text-stone-500">
-                <span>Quản Trị Nhà Hàng</span>
+                <span>Quản trị tiệc</span>
                 <span>/</span>
-                <span className="font-semibold text-stone-900">Danh Mục Món Ăn, Nguyên Liệu & Công Thức</span>
+                <span className="font-semibold text-stone-900">Vận hành thực đơn & kho</span>
               </div>
               <p className="text-[11px] text-stone-500 hidden md:block">
-                01 Cơ sở tiệc độc bản • 01 Kho nguyên liệu • Tiền tệ VND • Giờ Việt Nam (UTC+7)
+                Cơ sở tiệc & kho trung tâm • Tiền tệ VND (UTC+7)
               </p>
             </div>
           </div>

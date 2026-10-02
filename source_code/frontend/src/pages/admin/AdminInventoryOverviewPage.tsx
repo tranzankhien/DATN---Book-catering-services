@@ -78,15 +78,15 @@ export const AdminInventoryOverviewPage: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-700">
+          <div className="flex items-center gap-2 text-xs font-semibold text-amber-700">
             <Warehouse className="h-4 w-4" />
-            <span>Phân hệ Kho & Quản lý Nhập Hàng</span>
+            <span>Phân hệ kho & quản lý nhập hàng</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-stone-900 tracking-tight mt-1">
-            Tổng Quan Kho Nguyên Liệu & Giá Vốn
+          <h1 className="text-2xl md:text-3xl font-bold text-stone-900 tracking-tight mt-1">
+            Tổng quan kho nguyên liệu & giá vốn
           </h1>
-          <p className="text-sm text-stone-500 mt-0.5">
-            Theo dõi giá trị tồn kho thực tế, giá vốn bình quân di động, ngưỡng cảnh báo và công nợ nhà cung cấp.
+          <p className="text-sm text-stone-500 mt-1">
+            Theo dõi giá trị tồn kho thực tế, giá vốn bình quân di động, ngưỡng cảnh báo và công nợ đối tác.
           </p>
         </div>
 
@@ -95,7 +95,7 @@ export const AdminInventoryOverviewPage: React.FC = () => {
             type="button"
             onClick={loadData}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 transition-colors shadow-sm cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 transition-colors shadow-xs cursor-pointer"
             title="Làm mới số liệu"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-amber-600' : ''}`} />
@@ -103,17 +103,17 @@ export const AdminInventoryOverviewPage: React.FC = () => {
           </button>
           <Link
             to="/admin/suppliers"
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 transition-colors shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 transition-colors shadow-xs"
           >
             <Truck className="h-3.5 w-3.5 text-stone-500" />
-            <span>Nhà Cung Cấp</span>
+            <span>Nhà cung cấp</span>
           </Link>
           <Link
             to="/admin/inventory/receipts/new"
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-amber-600 text-white hover:bg-amber-700 transition-colors shadow-sm shadow-amber-600/20"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-amber-700 text-white hover:bg-amber-800 transition-colors shadow-xs"
           >
             <Plus className="h-4 w-4" />
-            <span>Tạo Phiếu Nhập</span>
+            <span>Tạo phiếu nhập</span>
           </Link>
         </div>
       </div>
@@ -121,15 +121,15 @@ export const AdminInventoryOverviewPage: React.FC = () => {
       {/* 4 Key Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Tổng nguyên liệu & Cảnh báo tồn */}
-        <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm relative overflow-hidden">
+        <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">Nguyên Liệu Trong Kho</span>
+            <span className="text-xs font-medium text-stone-500">Nguyên liệu trong kho</span>
             <div className="h-8 w-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-700">
               <Warehouse className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-stone-900">{summary?.totalIngredients || 0}</span>
+            <span className="text-3xl font-bold text-stone-900">{summary?.totalIngredients || 0}</span>
             <span className="text-xs font-medium text-stone-500">mặt hàng</span>
           </div>
           <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between">
@@ -149,15 +149,15 @@ export const AdminInventoryOverviewPage: React.FC = () => {
         </div>
 
         {/* Card 2: Giá trị tồn kho ước tính */}
-        <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm relative overflow-hidden">
+        <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">Giá Trị Tồn Kho Ước Tính</span>
+            <span className="text-xs font-medium text-stone-500">Giá trị tồn kho ước tính</span>
             <div className="h-8 w-8 rounded-xl bg-amber-50 flex items-center justify-center text-amber-700">
               <Coins className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-black text-amber-800 tracking-tight">
+            <div className="text-2xl font-bold text-amber-800 tracking-tight">
               {formatVnd(summary?.estimatedStockValue || 0)}
             </div>
           </div>
@@ -168,15 +168,15 @@ export const AdminInventoryOverviewPage: React.FC = () => {
         </div>
 
         {/* Card 3: Tiền nhập trong tháng */}
-        <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm relative overflow-hidden">
+        <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">Nhập Hàng Tháng Này</span>
+            <span className="text-xs font-medium text-stone-500">Nhập hàng tháng này</span>
             <div className="h-8 w-8 rounded-xl bg-blue-50 flex items-center justify-center text-blue-700">
               <Calendar className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-black text-stone-900 tracking-tight">
+            <div className="text-2xl font-bold text-stone-900 tracking-tight">
               {formatVnd(summary?.monthlyPurchasedAmount || 0)}
             </div>
           </div>
@@ -187,15 +187,15 @@ export const AdminInventoryOverviewPage: React.FC = () => {
         </div>
 
         {/* Card 4: Công nợ nhà cung cấp */}
-        <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm relative overflow-hidden">
+        <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">Công Nợ Phải Trả NCC</span>
+            <span className="text-xs font-medium text-stone-500">Công nợ phải trả NCC</span>
             <div className="h-8 w-8 rounded-xl bg-purple-50 flex items-center justify-center text-purple-700">
               <Receipt className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-black text-purple-900 tracking-tight">
+            <div className="text-2xl font-bold text-purple-900 tracking-tight">
               {formatVnd(summary?.totalRemainingToSuppliers || 0)}
             </div>
           </div>
@@ -270,11 +270,11 @@ export const AdminInventoryOverviewPage: React.FC = () => {
       {/* Two Columns: Recent Receipts & Recent Movements */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Stock Receipts */}
-        <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden flex flex-col">
+        <div className="bg-white rounded-2xl border border-stone-200/80 shadow-xs overflow-hidden flex flex-col">
           <div className="p-5 border-b border-stone-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Receipt className="h-4 w-4 text-amber-700" />
-              <h2 className="text-sm font-bold text-stone-900">Phiếu Nhập Gần Đây</h2>
+              <h2 className="text-sm font-bold text-stone-900">Phiếu nhập gần đây</h2>
             </div>
             <Link
               to="/admin/inventory/receipts"
@@ -340,7 +340,7 @@ export const AdminInventoryOverviewPage: React.FC = () => {
           <div className="p-5 border-b border-stone-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <History className="h-4 w-4 text-amber-700" />
-              <h2 className="text-sm font-bold text-stone-900">Biến Động Kho Gần Đây</h2>
+              <h2 className="text-sm font-bold text-stone-900">Biến động kho gần đây</h2>
             </div>
             <Link
               to="/admin/inventory/movements"

@@ -212,11 +212,11 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
             type="button"
             onClick={handleDownloadPdf}
             disabled={downloadingPdf}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 transition-colors shadow-sm cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
             title="Xuất file PDF khổ A4 chuẩn in ấn"
           >
-            <FileDown className={`h-4 w-4 text-blue-600 ${downloadingPdf ? 'animate-bounce' : ''}`} />
-            <span>{downloadingPdf ? 'Đang tạo PDF...' : 'Xuất Phiếu Nhập PDF'}</span>
+            <FileDown className={`h-4 w-4 text-amber-700 ${downloadingPdf ? 'animate-bounce' : ''}`} />
+            <span>{downloadingPdf ? 'Đang tạo PDF...' : 'Xuất phiếu nhập PDF'}</span>
           </button>
 
           {!isConfirmed && (
@@ -225,16 +225,16 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
                 type="button"
                 onClick={handleConfirm}
                 disabled={confirming}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-amber-600 text-white hover:bg-amber-700 transition-colors shadow-sm shadow-amber-600/20 cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-amber-700 text-white hover:bg-amber-800 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
                 title="Cộng kho và tính giá vốn"
               >
                 <CheckCircle2 className="h-4 w-4" />
-                <span>{confirming ? 'Đang xác nhận...' : 'Xác Nhận Nhập Kho'}</span>
+                <span>{confirming ? 'Đang xác nhận...' : 'Xác nhận nhập kho'}</span>
               </button>
               <button
                 type="button"
                 onClick={handleDeleteDraft}
-                className="p-2 text-stone-400 hover:text-rose-600 rounded-xl hover:bg-stone-100 transition-colors"
+                className="p-2 text-stone-400 hover:text-rose-600 rounded-xl hover:bg-stone-100 transition-colors cursor-pointer"
                 title="Xóa phiếu nháp"
               >
                 <Trash2 className="h-4 w-4" />
@@ -249,10 +249,10 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
                 setPaymentAmount(receipt.remainingAmount.toString());
                 setShowPaymentModal(true);
               }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-purple-600 text-white hover:bg-purple-700 transition-colors shadow-sm shadow-purple-600/20 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-amber-700 text-white hover:bg-amber-800 transition-colors shadow-xs cursor-pointer"
             >
               <CreditCard className="h-4 w-4" />
-              <span>Ghi Nhận Thanh Toán</span>
+              <span>Ghi nhận thanh toán</span>
             </button>
           )}
         </div>

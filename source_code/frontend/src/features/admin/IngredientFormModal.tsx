@@ -86,7 +86,7 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-stone-900">
-                {isEdit ? 'Cập Nhật Nguyên Liệu' : 'Thêm Nguyên Liệu Mới'}
+                {isEdit ? 'Cập nhật nguyên liệu' : 'Thêm nguyên liệu mới'}
               </h2>
               <p className="text-xs text-stone-500">
                 Khai báo đơn vị gốc chuẩn (BR-03) dùng chung cho kho và công thức
@@ -113,7 +113,7 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
 
           <div>
             <label className="block font-semibold text-stone-700 mb-1">
-              Mã Nguyên Liệu <span className="text-amber-700">*</span>
+              Mã nguyên liệu <span className="text-amber-700">*</span>
             </label>
             <input
               type="text"
@@ -127,7 +127,7 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
 
           <div>
             <label className="block font-semibold text-stone-700 mb-1">
-              Tên Nguyên Liệu <span className="text-amber-700">*</span>
+              Tên nguyên liệu <span className="text-amber-700">*</span>
             </label>
             <input
               type="text"
@@ -142,7 +142,7 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-stone-700 mb-1">
-                Đơn Vị Gốc <span className="text-amber-700">*</span>
+                Đơn vị gốc <span className="text-amber-700">*</span>
               </label>
               <input
                 type="text"
@@ -171,7 +171,7 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
 
             <div>
               <label className="block font-semibold text-stone-700 mb-1">
-                Ngưỡng Tồn Tối Thiểu
+                Ngưỡng tồn tối thiểu
               </label>
               <input
                 type="number"
@@ -206,7 +206,7 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
               onClick={onClose}
               className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
             >
-              Hủy Bỏ
+              Hủy bỏ
             </button>
             <button
               type="submit"

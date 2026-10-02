@@ -168,25 +168,25 @@ export const AdminSuppliersPage: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-700">
+          <div className="flex items-center gap-2 text-xs font-semibold text-amber-700">
             <Truck className="h-4 w-4" />
-            <span>Đối Tác & Cung Ứng</span>
+            <span>Đối tác & cung ứng</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-stone-900 tracking-tight mt-1">
-            Quản Lý Nhà Cung Cấp Nguyên Liệu
+          <h1 className="text-2xl md:text-3xl font-bold text-stone-900 tracking-tight mt-1">
+            Quản lý nhà cung cấp nguyên liệu
           </h1>
-          <p className="text-sm text-stone-500 mt-0.5">
-            Danh bạ đối tác cung ứng nông sản, hải sản, gia vị; theo dõi công nợ và lịch sử phiếu nhập hàng.
+          <p className="text-sm text-stone-500 mt-1">
+            Danh bạ đối tác cung ứng nông sản, thực phẩm tươi sống; theo dõi công nợ và lịch sử nhập kho.
           </p>
         </div>
 
         <button
           type="button"
           onClick={openCreateModal}
-          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl bg-amber-700 hover:bg-amber-800 text-white transition-all shadow-md shadow-amber-900/10 cursor-pointer self-start md:self-auto hover:shadow-lg"
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-amber-700 hover:bg-amber-800 text-white transition-all shadow-xs cursor-pointer self-start md:self-auto"
         >
           <Plus className="h-4 w-4" />
-          <span>Thêm Nhà Cung Cấp Mới</span>
+          <span>Thêm nhà cung cấp mới</span>
         </button>
       </div>
 
@@ -194,52 +194,52 @@ export const AdminSuppliersPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
-              Tổng Nhà Cung Cấp
+            <span className="text-xs font-medium text-stone-500">
+              Tổng nhà cung cấp
             </span>
-            <p className="text-2xl font-black text-stone-900">{suppliers.length}</p>
-            <span className="text-xs text-stone-400">Đối tác trong danh bạ</span>
+            <p className="text-2xl font-bold text-stone-900">{suppliers.length}</p>
+            <span className="text-[11px] text-stone-400">Đối tác trong danh bạ</span>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
+          <div className="h-10 w-10 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
             <Truck className="h-5 w-5" />
           </div>
         </div>
 
         <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
-              Đang Hợp Tác
+            <span className="text-xs font-medium text-emerald-700">
+              Đang hợp tác
             </span>
-            <p className="text-2xl font-black text-emerald-700">{activeCount}</p>
-            <span className="text-xs text-stone-400">Sẵn sàng nhận đơn</span>
+            <p className="text-2xl font-bold text-emerald-700">{activeCount}</p>
+            <span className="text-[11px] text-stone-400">Sẵn sàng nhận đơn</span>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
+          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
             <CheckCircle2 className="h-5 w-5" />
           </div>
         </div>
 
         <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
-              Tạm Dừng Hợp Tác
+            <span className="text-xs font-medium text-stone-500">
+              Tạm dừng hợp tác
             </span>
-            <p className="text-2xl font-black text-stone-600">{inactiveCount}</p>
-            <span className="text-xs text-stone-400">Khóa tạo phiếu nhập</span>
+            <p className="text-2xl font-bold text-stone-600">{inactiveCount}</p>
+            <span className="text-[11px] text-stone-400">Khóa tạo phiếu nhập</span>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-stone-100 text-stone-500 flex items-center justify-center border border-stone-200">
+          <div className="h-10 w-10 rounded-xl bg-stone-100 text-stone-500 flex items-center justify-center border border-stone-200">
             <Ban className="h-5 w-5" />
           </div>
         </div>
 
         <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
-              Tổng Giá Trị Đã Nhập
+            <span className="text-xs font-medium text-amber-800">
+              Tổng tiền đã nhập
             </span>
-            <p className="text-xl font-black font-mono text-amber-800">{formatVnd(totalPurchasedSum)}</p>
-            <span className="text-xs text-stone-400">Lũy kế toàn bộ phiếu</span>
+            <p className="text-xl font-bold font-mono text-amber-800">{formatVnd(totalPurchasedSum)}</p>
+            <span className="text-[11px] text-stone-400">Lũy kế toàn bộ phiếu</span>
           </div>
-          <div className="h-11 w-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
+          <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
             <Receipt className="h-5 w-5" />
           </div>
         </div>
@@ -251,10 +251,10 @@ export const AdminSuppliersPage: React.FC = () => {
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
           <input
             type="text"
-            placeholder="Tìm theo tên nhà cung cấp, số điện thoại hoặc mã NCC..."
+            placeholder="Tìm theo tên nhà cung cấp, số điện thoại hoặc mã..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            className="w-full pl-10 pr-9 py-2.5 text-xs rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 transition-colors"
+            className="w-full pl-10 pr-9 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 transition-colors"
           />
           {keyword && (
             <button
@@ -272,7 +272,7 @@ export const AdminSuppliersPage: React.FC = () => {
           <select
             value={activeFilter}
             onChange={(e) => setActiveFilter(e.target.value)}
-            className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
+            className="px-3.5 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
           >
             <option value="ALL">Tất cả trạng thái ({suppliers.length})</option>
             <option value="ACTIVE">Đang hợp tác ({activeCount})</option>
@@ -282,7 +282,7 @@ export const AdminSuppliersPage: React.FC = () => {
           <button
             type="button"
             onClick={loadSuppliers}
-            className="p-2.5 text-stone-500 hover:text-stone-900 rounded-xl hover:bg-stone-100 transition-colors border border-stone-200 shadow-xs"
+            className="p-2 text-stone-500 hover:text-stone-900 rounded-xl hover:bg-stone-100 transition-colors border border-stone-200 shadow-xs cursor-pointer"
             title="Tải lại danh sách"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-amber-600' : ''}`} />
@@ -290,20 +290,20 @@ export const AdminSuppliersPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Suppliers Table with Optimized Proportional Column Widths */}
+      {/* Suppliers Table with Optimized Proportional Column Widths & Sentence Case */}
       <div className="bg-white rounded-2xl border border-stone-200/80 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-stone-50/90 border-b border-stone-200 text-stone-600 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3.5 px-4 w-28 whitespace-nowrap">Mã NCC</th>
-                <th className="py-3.5 px-4 min-w-[280px]">Nhà Cung Cấp</th>
-                <th className="py-3.5 px-4 min-w-[220px] whitespace-nowrap">Liên Hệ</th>
-                <th className="py-3.5 px-4 min-w-[260px]">Địa Chỉ</th>
-                <th className="py-3.5 px-4 text-right w-44 whitespace-nowrap">Tổng Tiền Đã Nhập</th>
-                <th className="py-3.5 px-4 text-center w-32 whitespace-nowrap">Số Phiếu</th>
-                <th className="py-3.5 px-4 text-center w-32 whitespace-nowrap">Trạng Thái</th>
-                <th className="py-3.5 px-4 text-center w-36 whitespace-nowrap">Thao Tác</th>
+              <tr className="bg-stone-50/80 border-b border-stone-200 text-stone-600 font-semibold text-xs">
+                <th className="py-3 px-4 w-28 whitespace-nowrap">Mã NCC</th>
+                <th className="py-3 px-4 min-w-[260px]">Nhà cung cấp</th>
+                <th className="py-3 px-4 min-w-[200px] whitespace-nowrap">Liên hệ</th>
+                <th className="py-3 px-4 min-w-[260px]">Địa chỉ</th>
+                <th className="py-3 px-4 text-right w-40 whitespace-nowrap">Tổng tiền đã nhập</th>
+                <th className="py-3 px-4 text-center w-32 whitespace-nowrap">Số phiếu</th>
+                <th className="py-3 px-4 text-center w-32 whitespace-nowrap">Trạng thái</th>
+                <th className="py-3 px-4 text-center w-32 whitespace-nowrap">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
@@ -324,24 +324,24 @@ export const AdminSuppliersPage: React.FC = () => {
                 </tr>
               ) : (
                 suppliers.map((sup) => {
-                  const receiptsCount = sup.totalReceiptsCount ?? sup.stockReceiptsCount ?? 0;
+                  const count = sup.totalReceiptsCount ?? sup.stockReceiptsCount ?? 0;
                   return (
                     <tr key={sup.id} className="hover:bg-amber-50/30 transition-colors group">
-                      <td className="py-3.5 px-4 font-mono font-bold text-stone-800 whitespace-nowrap bg-stone-50/40">
+                      <td className="py-3 px-4 font-mono font-medium text-stone-900 whitespace-nowrap">
                         {sup.code}
                       </td>
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-stone-900 text-sm group-hover:text-amber-800 transition-colors">
+                      <td className="py-3 px-4">
+                        <div className="font-semibold text-stone-900 text-xs sm:text-sm group-hover:text-amber-800 transition-colors">
                           {sup.name}
                         </div>
                         {sup.note && (
-                          <div className="text-[11px] text-stone-400 mt-0.5 max-w-md line-clamp-1" title={sup.note}>
+                          <div className="text-[11px] text-stone-400 mt-0.5 line-clamp-1" title={sup.note}>
                             {sup.note}
                           </div>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 space-y-1 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5 font-mono text-stone-900 font-semibold text-xs">
+                      <td className="py-3 px-4 space-y-0.5 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5 font-mono text-stone-800 font-medium text-xs">
                           <Phone className="h-3.5 w-3.5 text-stone-400 shrink-0" />
                           <span>{sup.phone}</span>
                         </div>
@@ -354,7 +354,7 @@ export const AdminSuppliersPage: React.FC = () => {
                           <span className="text-[11px] text-stone-300 italic">Chưa có email</span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-stone-600" title={sup.address || ''}>
+                      <td className="py-3 px-4 text-stone-600" title={sup.address || ''}>
                         {sup.address ? (
                           <div className="flex items-start gap-1.5 max-w-sm">
                             <MapPin className="h-3.5 w-3.5 text-stone-400 shrink-0 mt-0.5" />
@@ -364,34 +364,34 @@ export const AdminSuppliersPage: React.FC = () => {
                           <span className="text-stone-300 italic">—</span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 whitespace-nowrap text-sm">
+                      <td className="py-3 px-4 text-right font-mono font-semibold text-amber-900 whitespace-nowrap text-xs sm:text-sm">
                         {formatVnd(sup.totalPurchasedAmount)}
                       </td>
-                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
                         <button
                           type="button"
                           onClick={() => openReceiptsModal(sup)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 hover:bg-amber-100 text-stone-700 hover:text-amber-900 font-semibold transition-colors cursor-pointer border border-stone-200/80 hover:border-amber-300"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-stone-50 hover:bg-amber-100 text-stone-700 hover:text-amber-900 font-medium transition-colors cursor-pointer border border-stone-200"
                           title="Bấm để xem lịch sử phiếu nhập của NCC này"
                         >
                           <Receipt className="h-3 w-3 text-stone-400" />
-                          <span className="font-mono font-bold">{receiptsCount}</span>
+                          <span className="font-mono font-semibold">{count}</span>
                           <span className="text-[11px] text-stone-500">phiếu</span>
                         </button>
                       </td>
-                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium whitespace-nowrap ${
                             sup.active
                               ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-stone-100 text-stone-500 border border-stone-200'
+                              : 'bg-stone-100 text-stone-600 border border-stone-200'
                           }`}
                         >
-                          <span className={`h-1.5 w-1.5 rounded-full ${sup.active ? 'bg-emerald-500' : 'bg-stone-400'}`} />
-                          {sup.active ? 'Đang hợp tác' : 'Tạm dừng'}
+                          <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${sup.active ? 'bg-emerald-500' : 'bg-stone-400'}`} />
+                          <span className="whitespace-nowrap">{sup.active ? 'Đang hợp tác' : 'Tạm dừng'}</span>
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
                         <div className="inline-flex items-center justify-center gap-1">
                           <button
                             type="button"
@@ -399,7 +399,7 @@ export const AdminSuppliersPage: React.FC = () => {
                             className="p-1.5 rounded-lg text-stone-500 hover:text-amber-700 hover:bg-amber-50 transition-colors"
                             title="Chỉnh sửa thông tin NCC"
                           >
-                            <Edit2 className="h-4 w-4" />
+                            <Edit2 className="h-3.5 w-3.5" />
                           </button>
                           <button
                             type="button"
@@ -411,7 +411,7 @@ export const AdminSuppliersPage: React.FC = () => {
                             }`}
                             title={sup.active ? 'Tạm ngừng hợp tác' : 'Kích hoạt lại'}
                           >
-                            {sup.active ? <Ban className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                            {sup.active ? <Ban className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
                           </button>
                           <button
                             type="button"
@@ -419,7 +419,7 @@ export const AdminSuppliersPage: React.FC = () => {
                             className="p-1.5 rounded-lg text-stone-500 hover:text-blue-700 hover:bg-blue-50 transition-colors"
                             title="Xem danh sách phiếu nhập"
                           >
-                            <Receipt className="h-4 w-4" />
+                            <Receipt className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       </td>
@@ -443,13 +443,13 @@ export const AdminSuppliersPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Truck className="h-5 w-5 text-amber-700" />
                 <h3 className="text-base font-bold text-stone-900">
-                  {editingSupplier ? 'Chỉnh Sửa Nhà Cung Cấp' : 'Thêm Nhà Cung Cấp Mới'}
+                  {editingSupplier ? 'Chỉnh sửa nhà cung cấp' : 'Thêm nhà cung cấp mới'}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowUpsertModal(false)}
-                className="p-1 rounded-lg text-stone-400 hover:text-stone-700"
+                className="p-1 rounded-lg text-stone-400 hover:text-stone-700 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -457,12 +457,12 @@ export const AdminSuppliersPage: React.FC = () => {
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block font-bold text-stone-700 mb-1">
+                <label className="block font-semibold text-stone-700 mb-1">
                   Tên nhà cung cấp <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="VD: Công Ty TNHH Nông Sản Xanh Mekong"
+                  placeholder="VD: Công ty TNHH Nông Sản Xanh Mekong"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
@@ -472,7 +472,7 @@ export const AdminSuppliersPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-stone-700 mb-1">
+                  <label className="block font-semibold text-stone-700 mb-1">
                     Số điện thoại <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -486,7 +486,7 @@ export const AdminSuppliersPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-stone-700 mb-1">Email</label>
+                  <label className="block font-semibold text-stone-700 mb-1">Email</label>
                   <input
                     type="email"
                     placeholder="VD: contact@ncc.vn"
@@ -498,7 +498,7 @@ export const AdminSuppliersPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-bold text-stone-700 mb-1">Địa chỉ giao dịch</label>
+                <label className="block font-semibold text-stone-700 mb-1">Địa chỉ giao dịch</label>
                 <input
                   type="text"
                   placeholder="VD: 123 Đường Hải Thượng Lãn Ông, Q.5, TP.HCM"
@@ -509,7 +509,7 @@ export const AdminSuppliersPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-bold text-stone-700 mb-1">Ghi chú đối tác</label>
+                <label className="block font-semibold text-stone-700 mb-1">Ghi chú đối tác</label>
                 <textarea
                   rows={2}
                   placeholder="VD: Nhà cung cấp thực phẩm VietGAP, giao hàng hằng ngày lúc 06:00 sáng..."
@@ -527,7 +527,7 @@ export const AdminSuppliersPage: React.FC = () => {
                   onChange={(e) => setForm({ ...form, active: e.target.checked })}
                   className="rounded text-amber-600 focus:ring-amber-500"
                 />
-                <label htmlFor="supActive" className="text-xs font-semibold text-stone-700 cursor-pointer">
+                <label htmlFor="supActive" className="text-xs font-medium text-stone-700 cursor-pointer">
                   Đang hợp tác và cho phép lập phiếu nhập hàng
                 </label>
               </div>
@@ -537,16 +537,16 @@ export const AdminSuppliersPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowUpsertModal(false)}
-                className="px-3 py-2 text-xs font-semibold rounded-xl text-stone-600 hover:bg-stone-100"
+                className="px-3 py-2 text-xs font-semibold rounded-xl text-stone-600 hover:bg-stone-100 cursor-pointer"
               >
                 Hủy bỏ
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-4 py-2 text-xs font-bold rounded-xl bg-amber-600 text-white hover:bg-amber-700 transition-colors shadow-sm disabled:opacity-50"
+                className="px-4 py-2 text-xs font-semibold rounded-xl bg-amber-700 text-white hover:bg-amber-800 transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
               >
-                {submitting ? 'Đang lưu...' : editingSupplier ? 'Cập Nhật NCC' : 'Thêm Nhà Cung Cấp'}
+                {submitting ? 'Đang lưu...' : editingSupplier ? 'Cập nhật' : 'Thêm nhà cung cấp'}
               </button>
             </div>
           </form>
@@ -560,7 +560,7 @@ export const AdminSuppliersPage: React.FC = () => {
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
               <div>
                 <h3 className="text-base font-bold text-stone-900">
-                  Lịch Sử Phiếu Nhập: {viewingSupplierReceipts.name}
+                  Lịch sử phiếu nhập: {viewingSupplierReceipts.name}
                 </h3>
                 <p className="text-xs text-stone-400 font-mono mt-0.5">
                   Mã: {viewingSupplierReceipts.code} • SĐT: {viewingSupplierReceipts.phone}
@@ -569,7 +569,7 @@ export const AdminSuppliersPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setViewingSupplierReceipts(null)}
-                className="p-1 rounded-lg text-stone-400 hover:text-stone-700"
+                className="p-1 rounded-lg text-stone-400 hover:text-stone-700 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>

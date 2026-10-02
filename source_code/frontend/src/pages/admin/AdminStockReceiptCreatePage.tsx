@@ -194,12 +194,12 @@ export const AdminStockReceiptCreatePage: React.FC = () => {
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-700">
+            <div className="flex items-center gap-2 text-xs font-semibold text-amber-700">
               <Receipt className="h-4 w-4" />
-              <span>Lập Chứng Từ Kho</span>
+              <span>Chứng từ kho & nhập hàng</span>
             </div>
-            <h1 className="text-2xl font-extrabold text-stone-900 tracking-tight mt-0.5">
-              Tạo Phiếu Nhập Nguyên Liệu Mới
+            <h1 className="text-2xl font-bold text-stone-900 tracking-tight mt-0.5">
+              Tạo phiếu nhập nguyên liệu mới
             </h1>
           </div>
         </div>
@@ -209,10 +209,10 @@ export const AdminStockReceiptCreatePage: React.FC = () => {
         {/* Left Column: Supplier & Items (2 Cols) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Supplier Header Box */}
-          <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm space-y-4 text-xs">
+          <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-xs space-y-4 text-xs">
             <h2 className="text-sm font-bold text-stone-900 flex items-center gap-2">
-              <Truck className="h-4 w-4 text-amber-600" />
-              <span>Thông Tin Nhà Cung Cấp & Ngày Nhập</span>
+              <Truck className="h-4 w-4 text-amber-700" />
+              <span>Thông tin nhà cung cấp & ngày nhập</span>
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

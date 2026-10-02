@@ -124,54 +124,54 @@ export const AdminCatalogPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-500">
+            <span className="text-xs font-medium text-stone-500">
               Tổng số món tiệc
             </span>
-            <p className="text-2xl sm:text-3xl font-extrabold text-stone-900">{stats.totalDishes}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-stone-900">{stats.totalDishes}</p>
             <span className="text-xs text-amber-700 font-medium">Trên {categories.length} danh mục</span>
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
             <Utensils className="h-5 w-5" />
           </div>
         </div>
 
         <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-500">
+            <span className="text-xs font-medium text-stone-500">
               Món đang phục vụ
             </span>
-            <p className="text-2xl sm:text-3xl font-extrabold text-emerald-700">{stats.activeCount}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-emerald-700">{stats.activeCount}</p>
             <span className="text-xs text-stone-500">Hiển thị cho khách đặt</span>
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">
             <CheckCircle2 className="h-5 w-5" />
           </div>
         </div>
 
         <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-500">
+            <span className="text-xs font-medium text-stone-500">
               Món đang tạm ẩn
             </span>
-            <p className="text-2xl sm:text-3xl font-extrabold text-stone-600">{stats.hiddenCount}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-stone-600">{stats.hiddenCount}</p>
             <span className="text-xs text-stone-500">Giữ nguyên lịch sử đơn</span>
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-stone-100 text-stone-500 border border-stone-200">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-stone-500 border border-stone-200">
             <EyeOff className="h-5 w-5" />
           </div>
         </div>
 
         <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-500">
+            <span className="text-xs font-medium text-stone-500">
               Nguyên liệu kho gốc
             </span>
-            <p className="text-2xl sm:text-3xl font-extrabold text-amber-700">
+            <p className="text-2xl sm:text-3xl font-bold text-amber-700">
               {stats.totalIngredients}
             </p>
             <span className="text-xs text-stone-500">Chuẩn hóa theo kg, lít...</span>
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
             <Package className="h-5 w-5" />
           </div>
         </div>
@@ -190,7 +190,7 @@ export const AdminCatalogPage: React.FC = () => {
             }`}
           >
             <Utensils className="h-4 w-4" />
-            <span>Món Ăn & Công Thức ({dishes.length})</span>
+            <span>Món ăn & công thức ({dishes.length})</span>
           </button>
 
           <button
@@ -203,7 +203,7 @@ export const AdminCatalogPage: React.FC = () => {
             }`}
           >
             <Package className="h-4 w-4" />
-            <span>Nguyên Liệu Gốc ({ingredients.length})</span>
+            <span>Nguyên liệu gốc ({ingredients.length})</span>
           </button>
         </div>
 
@@ -214,7 +214,7 @@ export const AdminCatalogPage: React.FC = () => {
             className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer shadow-xs"
           >
             <RefreshCw className="h-3.5 w-3.5" />
-            <span>Làm Mới</span>
+            <span>Làm mới</span>
           </button>
 
           {activeTab === 'dishes' ? (
@@ -227,7 +227,7 @@ export const AdminCatalogPage: React.FC = () => {
               className="inline-flex items-center gap-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
             >
               <Plus className="h-4 w-4" />
-              <span>Thêm Món Ăn Mới</span>
+              <span>Thêm món ăn mới</span>
             </button>
           ) : (
             <button
@@ -239,7 +239,7 @@ export const AdminCatalogPage: React.FC = () => {
               className="inline-flex items-center gap-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
             >
               <Plus className="h-4 w-4" />
-              <span>Thêm Nguyên Liệu</span>
+              <span>Thêm nguyên liệu</span>
             </button>
           )}
         </div>
@@ -305,13 +305,13 @@ export const AdminCatalogPage: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-stone-200 bg-stone-50/90 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">
-                      <th className="py-3.5 px-4 min-w-[280px]">Món Ăn</th>
-                      <th className="py-3.5 px-4 w-36 whitespace-nowrap">Danh Mục</th>
-                      <th className="py-3.5 px-4 text-right w-44 whitespace-nowrap">Đơn Giá / 01 Phần</th>
-                      <th className="py-3.5 px-4 min-w-[320px]">Công Thức Định Lượng (01 Phần)</th>
-                      <th className="py-3.5 px-4 w-32 text-center whitespace-nowrap">Trạng Thái</th>
-                      <th className="py-3.5 px-4 text-right w-40 whitespace-nowrap">Thao Tác Quản Trị</th>
+                    <tr className="border-b border-stone-200 bg-stone-50/80 text-left text-xs font-semibold text-stone-600">
+                      <th className="py-3 px-4 min-w-[280px]">Món ăn</th>
+                      <th className="py-3 px-4 w-36 whitespace-nowrap">Danh mục</th>
+                      <th className="py-3 px-4 text-right w-44 whitespace-nowrap">Đơn giá / 01 phần</th>
+                      <th className="py-3 px-4 min-w-[320px]">Công thức định lượng (01 phần)</th>
+                      <th className="py-3 px-4 w-32 text-center whitespace-nowrap">Trạng thái</th>
+                      <th className="py-3 px-4 text-right w-40 whitespace-nowrap">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100 text-xs">
@@ -383,7 +383,7 @@ export const AdminCatalogPage: React.FC = () => {
                               title="Cấu hình công thức định lượng nguyên liệu"
                             >
                               <Scale className="h-3.5 w-3.5 text-amber-700" />
-                              <span>Định Lượng</span>
+                              <span>Định lượng</span>
                             </button>
 
                             <button
@@ -441,14 +441,14 @@ export const AdminCatalogPage: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-stone-200 bg-stone-50/90 text-[11px] font-bold uppercase tracking-wider text-stone-600">
-                  <th className="py-3.5 px-4 w-32 whitespace-nowrap">Mã Nguyên Liệu</th>
-                  <th className="py-3.5 px-4 min-w-[280px]">Tên Nguyên Liệu</th>
-                  <th className="py-3.5 px-4 w-24 text-center whitespace-nowrap">Đơn Vị</th>
-                  <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Ngưỡng Tối Thiểu</th>
-                  <th className="py-3.5 px-4 text-right w-40 whitespace-nowrap">Tồn Vật Lý Hiện Tại</th>
-                  <th className="py-3.5 px-4 text-right w-44 whitespace-nowrap">Giá Vốn Bình Quân</th>
-                  <th className="py-3.5 px-4 text-right w-32 whitespace-nowrap">Thao Tác</th>
+                <tr className="border-b border-stone-200 bg-stone-50/80 text-xs font-semibold text-stone-600">
+                  <th className="py-3 px-4 w-32 whitespace-nowrap">Mã nguyên liệu</th>
+                  <th className="py-3 px-4 min-w-[280px]">Tên nguyên liệu</th>
+                  <th className="py-3 px-4 w-24 text-center whitespace-nowrap">Đơn vị</th>
+                  <th className="py-3 px-4 text-right w-36 whitespace-nowrap">Ngưỡng tối thiểu</th>
+                  <th className="py-3 px-4 text-right w-40 whitespace-nowrap">Tồn kho hiện tại</th>
+                  <th className="py-3 px-4 text-right w-44 whitespace-nowrap">Giá vốn bình quân</th>
+                  <th className="py-3 px-4 text-right w-32 whitespace-nowrap">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100 text-xs">
