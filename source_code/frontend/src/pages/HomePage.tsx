@@ -114,22 +114,22 @@ export const HomePage: React.FC = () => {
   const activeDish = carouselItems[currentSlide] || carouselItems[0] || null;
 
   return (
-    <div className="space-y-28 sm:space-y-36 pb-24">
+    <div className="space-y-24 sm:space-y-32 pb-20">
       {/* =========================================================================
-          HERO SECTION - THIẾT KẾ ĐẬM CHẤT CON NGƯỜI: CHỮ TO NỔI BẬT, THOÁNG ĐÃNG
+          HERO SECTION - THIẾT KẾ ĐẬM CHẤT CON NGƯỜI: CÂN ĐỐI, ẤM ÁP, THOÁNG ĐÃNG
          ========================================================================= */}
-      <section className="relative pt-10 pb-12 sm:pt-16 sm:pb-20">
+      <section className="relative -mt-4 pt-10 pb-16 sm:pt-14 sm:pb-20 bg-gradient-to-b from-[#fbf8f4] via-[#faf7f3]/70 to-transparent border-b border-stone-200/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
             {/* Cột trái: Headline to, sắc sảo, tự tin, không rối mắt */}
             <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
               <span className="inline-block text-xs font-semibold tracking-wider uppercase text-amber-800">
                 Nền tảng ẩm thực yến tiệc & hội nghị
               </span>
 
-              <h1 className="text-4xl sm:text-6xl lg:text-6xl xl:text-7xl font-extrabold text-stone-900 tracking-tight leading-[1.08]">
-                Tinh hoa yến tiệc,<br />
-                <span className="text-amber-800">minh bạch định lượng.</span>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[42px] xl:text-[48px] font-extrabold text-stone-900 tracking-tight leading-[1.2] max-w-xl mx-auto lg:mx-0">
+                Tinh hoa yến tiệc, <br className="hidden sm:inline" />
+                <span className="text-amber-800">minh bạch định lượng</span>
               </h1>
 
               <p className="text-base sm:text-lg text-stone-600 max-w-xl leading-relaxed mx-auto lg:mx-0 font-normal">
@@ -140,7 +140,7 @@ export const HomePage: React.FC = () => {
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
                 <Link
                   to="/dishes"
-                  className="inline-flex items-center gap-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white px-7 py-4 text-sm font-semibold shadow-sm hover:shadow-md transition-all duration-200"
+                  className="inline-flex items-center gap-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white px-7 py-3.5 text-sm font-semibold shadow-xs hover:shadow-md transition-all duration-200"
                 >
                   <span>Khám phá thực đơn</span>
                   <ArrowRight className="h-4 w-4" />
@@ -148,7 +148,7 @@ export const HomePage: React.FC = () => {
 
                 <Link
                   to="/dishes"
-                  className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-800 px-6 py-4 text-sm font-semibold transition-all duration-200"
+                  className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-800 px-6 py-3.5 text-sm font-semibold transition-all duration-200"
                 >
                   <span>Bảng tính giá bàn tiệc</span>
                 </Link>
@@ -548,33 +548,33 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* =========================================================================
-          BANNER TƯ VẤN CUỐI TRANG - ĐƠN GIẢN, BỀ THẾ, ẤN TƯỢNG
+          BANNER TƯ VẤN CUỐI TRANG - ĐỒNG ĐIỆU MÀU SẮC, THANH LỊCH, KHÔNG CHẮT ĐEN
          ========================================================================= */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-stone-900 text-white p-8 sm:p-14 shadow-lg">
+        <div className="rounded-3xl border border-amber-200/80 bg-gradient-to-br from-amber-50/80 via-white to-amber-100/40 p-8 sm:p-14 shadow-xs">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-8 space-y-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-amber-400">
+              <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
                 Tổ chức tiệc hoàn hảo
               </span>
-              <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-stone-900">
                 Tự thiết kế thực đơn & nhận báo giá ngay
               </h2>
-              <p className="text-sm text-stone-300 leading-relaxed max-w-2xl font-normal">
-                Thử nghiệm bảng tính giá bàn tiệc theo thời gian thực, xem định lượng nguyên liệu xuất kho chi tiết và trải nghiệm quy trình đặt tiệc trực tuyến tiện lợi.
+              <p className="text-sm text-stone-600 leading-relaxed max-w-2xl font-normal">
+                Trải nghiệm bảng tính chi phí bàn tiệc theo thời gian thực, xem định lượng nguyên liệu xuất kho chi tiết và đặt tiệc trực tuyến minh bạch cùng chuyên gia BanquetHub.
               </p>
             </div>
             <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
               <Link
                 to="/dishes"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-600 text-white px-6 py-4 text-xs sm:text-sm font-semibold shadow-sm transition-all"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white px-6 py-4 text-xs sm:text-sm font-semibold shadow-xs transition-all"
               >
                 <span>Mở bảng tính thực đơn</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-700 bg-stone-800 hover:bg-stone-700 text-white px-6 py-4 text-xs sm:text-sm font-semibold transition-all"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 px-6 py-4 text-xs sm:text-sm font-semibold transition-all shadow-xs"
               >
                 <span>Đăng ký thành viên</span>
               </Link>

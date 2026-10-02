@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
+import { Logo } from '../components/ui/Logo';
 
 export const AdminLayout: React.FC = () => {
   const { user, logout } = useAuth();
@@ -93,25 +94,28 @@ export const AdminLayout: React.FC = () => {
                 isOpen ? 'justify-between' : 'justify-center'
               }`}
             >
-              <Link
-                to="/"
-                className="flex items-center gap-2.5 overflow-hidden transition-all group"
-                title="Về trang chủ BanquetHub"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-600 text-white shadow-sm font-bold group-hover:bg-amber-500 transition-colors">
-                  <UtensilsCrossed className="h-5 w-5" />
-                </div>
-                {isOpen && (
-                  <div className="overflow-hidden whitespace-nowrap transition-opacity duration-200">
-                    <span className="text-base font-extrabold text-white tracking-tight">
-                      BANQUET<span className="text-amber-400">HUB</span>
-                    </span>
-                    <span className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 -mt-0.5">
-                      Admin Console
-                    </span>
+              {isOpen ? (
+                <Logo size="sm" variant="light" />
+              ) : (
+                <Link to="/" title="Về trang chủ BanquetHub">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-700 via-amber-800 to-amber-950 text-white shadow-sm ring-1 ring-amber-900/20">
+                    <svg
+                      viewBox="0 0 32 32"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5.5 w-5.5"
+                    >
+                      <circle cx="16" cy="8" r="2" fill="#FDE68A" />
+                      <path
+                        d="M7 21C7 13.5 11 11 16 11C21 11 25 13.5 25 21H7Z"
+                        fill="currentColor"
+                        fillOpacity="0.95"
+                      />
+                      <rect x="5" y="22.5" width="22" height="2" rx="1" fill="#FDE68A" />
+                    </svg>
                   </div>
-                )}
-              </Link>
+                </Link>
+              )}
 
               {/* Pin / Unpin Button (Shown when expanded or hovered) */}
               {isOpen && (
