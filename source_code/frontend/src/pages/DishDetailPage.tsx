@@ -108,25 +108,25 @@ export const DishDetailPage: React.FC = () => {
       </div>
 
       {/* Main Luxury Presentation Card (Full width 7xl) */}
-      <div className="overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-xs grid grid-cols-1 lg:grid-cols-12">
-        {/* Left: Large High-Resolution Culinary Showcase - Clean photo with no corner slop */}
-        <div className="lg:col-span-6 bg-stone-100 min-h-80 sm:min-h-96 relative overflow-hidden flex items-center justify-center">
+      <div className="overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-xs grid grid-cols-1 lg:grid-cols-12 items-stretch">
+        {/* Left: Fixed Dimension Culinary Showcase - Khung ảnh cố định chuẩn mực, chống vỡ layout */}
+        <div className="lg:col-span-5 xl:col-span-5 relative h-[320px] sm:h-[380px] lg:h-[420px] w-full bg-stone-100 overflow-hidden shrink-0 border-b lg:border-b-0 lg:border-r border-stone-200/70">
           {dish.imageUrl ? (
             <img
               src={dish.imageUrl}
               alt={dish.name}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover object-center block transition-transform duration-500 hover:scale-102"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-stone-400 py-24">
-              <Utensils className="h-20 w-20" />
+            <div className="flex h-full w-full items-center justify-center text-stone-400 bg-stone-100">
+              <Utensils className="h-16 w-16" />
             </div>
           )}
         </div>
 
         {/* Right: Dish Specs & Story */}
-        <div className="lg:col-span-6 p-6 sm:p-10 flex flex-col justify-between space-y-6">
-          <div className="space-y-4">
+        <div className="lg:col-span-7 xl:col-span-7 p-6 sm:p-8 lg:p-9 flex flex-col justify-between space-y-6">
+          <div className="space-y-3.5">
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="font-semibold text-amber-800 bg-amber-50 border border-amber-200/80 rounded-md px-2.5 py-0.5">
                 {dish.categoryName}
@@ -137,43 +137,58 @@ export const DishDetailPage: React.FC = () => {
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-stone-900 tracking-tight leading-tight">
               {dish.name}
             </h1>
 
-            <p className="text-sm text-stone-600 leading-relaxed">
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed max-w-2xl font-normal">
               {dish.description ||
                 'Món ăn chế biến theo quy chuẩn ẩm thực tiệc cưới và yến tiệc truyền thống Việt Nam, đảm bảo hương vị tinh túy và nguyên liệu tươi ngon nhất.'}
             </p>
+
+            {/* Quick Specs Strip */}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-1 text-xs text-stone-500">
+              <div className="flex items-center gap-1.5 font-medium text-stone-700">
+                <Users className="h-4 w-4 text-amber-700" />
+                <span>Tiêu chuẩn: 01 bàn / 10 khách</span>
+              </div>
+              <div className="flex items-center gap-1.5 font-medium text-stone-700">
+                <Layers className="h-4 w-4 text-amber-700" />
+                <span>{dish.recipeItems.length} loại nguyên liệu</span>
+              </div>
+              <div className="flex items-center gap-1.5 font-medium text-stone-700">
+                <Sparkles className="h-4 w-4 text-emerald-600" />
+                <span>Chế biến nóng tươi mới</span>
+              </div>
+            </div>
           </div>
 
           {/* Pricing & Serving Standard Box */}
-          <div className="rounded-xl border border-stone-200 bg-stone-50/70 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+          <div className="rounded-xl border border-stone-200 bg-stone-50/70 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <span className="text-xs font-medium text-stone-500">
                 Đơn giá niêm yết / 01 phần món
               </span>
-              <p className="text-3xl font-bold text-amber-700 tracking-tight mt-0.5">
+              <p className="text-2xl sm:text-3xl font-bold text-amber-700 tracking-tight mt-0.5">
                 {formatVnd(dish.price)}
               </p>
             </div>
 
-            <div className="text-xs text-stone-600 space-y-1.5 sm:border-l sm:border-stone-200 sm:pl-6">
-              <p className="flex items-center gap-2 font-medium">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                <span>Quy chuẩn 01 phần phục vụ 01 bàn (10 khách)</span>
-              </p>
-              <p className="flex items-center gap-2 font-medium">
-                <Layers className="h-4 w-4 text-amber-700 shrink-0" />
-                <span>Bao gồm {dish.recipeItems.length} loại nguyên liệu chuẩn hóa</span>
-              </p>
+            <div className="flex items-center gap-3">
+              <a
+                href="#recipe-section"
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-5 py-2.5 text-xs font-semibold shadow-xs transition-colors"
+              >
+                <Scale className="h-4 w-4" />
+                <span>Xem định lượng tiêu hao</span>
+              </a>
             </div>
           </div>
         </div>
       </div>
 
       {/* Interactive Ingredient Consumption Breakdown (No technical codes!) */}
-      <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8 shadow-xs space-y-6">
+      <div id="recipe-section" className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8 shadow-xs space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-100 pb-5">
           <div className="flex items-start gap-3.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
