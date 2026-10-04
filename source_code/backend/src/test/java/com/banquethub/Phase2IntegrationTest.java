@@ -41,7 +41,7 @@ class Phase2IntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static final String TEST_PHONE = "093" + (System.currentTimeMillis() % 10000000);
+    private static final String TEST_PHONE = "093" + String.format("%07d", Math.abs(System.currentTimeMillis() % 10000000));
     private static Long sharedDraftReceiptId;
 
     private String obtainAdminToken() throws Exception {
