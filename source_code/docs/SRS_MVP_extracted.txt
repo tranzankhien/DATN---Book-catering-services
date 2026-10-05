@@ -1,0 +1,444 @@
+SOFTWARE REQUIREMENTS SPECIFICATION
+ĐẶC TẢ YÊU CẦU PHẦN MỀM
+NỀN TẢNG ĐẶT TIỆC TÍCH HỢP QUẢN LÝ CƠ SỞ KINH DOANH
+BẢN PHẠM VI MVP – KHÁCH HÀNG CÓ THỂ CHỈNH SỬA
+Tài liệu đã lựa chọn các phương án triển khai cơ bản để mô tả phạm vi đầy đủ, không để danh sách câu hỏi bỏ ngỏ. Mọi nội dung trong file Word đều có thể chỉnh trực tiếp trước khi hai bên ký xác nhận.
+Thông tin
+Nội dung
+Mã tài liệu
+SRS-PARTY-001
+Phiên bản / ngày
+1.0 (MVP)  •  10/11/2026
+Tên sản phẩm
+Website đặt tiệc và quản lý cơ sở kinh doanh
+Khách hàng
+.....................................................................................
+Bên phát triển
+.....................................................................................
+Công nghệ
+Frontend React; Backend Web API Spring Boot; PostgreSQL
+Thanh toán
+VNPAY Sandbox (thử nghiệm, thanh toán 100%)
+Nguồn yêu cầu
+Phiếu giao đề tài đồ án tốt nghiệp và các yêu cầu nghiệp vụ đã trao đổi
+MỤC ĐÍCH
+Là tài liệu mô tả chức năng, quy tắc nghiệp vụ, giới hạn triển khai, kiểm thử nghiệm thu và hạng mục bàn giao. Hai bên có thể sửa nội dung ngay trong Word; phiên bản được hai bên ký/xác nhận sẽ là căn cứ đối chiếu phạm vi.
+NGUYÊN TẮC MVP
+Ưu tiên một cơ sở kinh doanh, quy trình vận hành thủ công kết hợp tự động ở các khâu quan trọng; triển khai website phục vụ demo đồ án, không mặc định bao gồm hạ tầng production hay tính năng kế toán chuyên sâu.
+1. Tổng quan sản phẩm
+Website cho phép khách xem món, chọn thực đơn mẫu hoặc tự xây dựng thực đơn cho tiệc, nhận 03 gợi ý thực đơn bằng AI theo mô tả bối cảnh, tạo đơn, trả trước qua VNPAY Sandbox và theo dõi đơn. Phía quản trị quản lý món ăn, công thức định lượng, nguyên liệu/kho, nhà cung cấp, nhập hàng, nhân viên, chấm công/lương, đơn hàng và báo cáo kinh doanh.
+1.1 Phạm vi vận hành mặc định
+Hạng mục
+Phạm vi MVP áp dụng
+Đơn vị kinh doanh
+01 cơ sở, 01 kho nguyên liệu, 01 danh mục món và thực đơn chung; chưa có nhiều chi nhánh.
+Người dùng
+Guest; User (khách đã đăng ký); Nhân viên; Admin.
+Hình thức đặt
+Đặt tiệc theo 01 thực đơn cho mỗi bàn; người mua chọn số bàn và ngày/giờ tổ chức. Giá tổng = giá thực đơn một bàn × số bàn.
+Đơn vị món
+Mỗi món có giá theo 01 phần/đĩa; khách chọn số phần món trên mỗi bàn. Số khách là thông tin tham khảo, không tự nhân giá.
+Thanh toán
+Trả trước 100% tổng tiền đơn bằng VNPAY Sandbox; không có đặt cọc, chia đợt hay chuyển tiền thật.
+Chi phí
+Dashboard hiển thị doanh thu, giá vốn nguyên liệu, lương, chi phí phát sinh nhập thủ công; báo cáo lợi nhuận tạm tính, không phải báo cáo kế toán chuẩn.
+Ngôn ngữ / tiền tệ
+Giao diện tiếng Việt; giá VND; múi giờ Việt Nam (UTC+7).
+Bàn giao
+Mã nguồn, cơ sở dữ liệu/migration, dữ liệu demo, tài liệu cài đặt và demo local; hosting production không thuộc phạm vi mặc định.
+1.2 Đối tượng và quyền sử dụng
+Vai trò
+Mô tả / nghiệp vụ
+Guest
+Không có phiên đăng nhập; xem danh sách, chi tiết món, thực đơn mẫu và giá.
+User
+Đăng ký/đăng nhập; chọn hoặc xây thực đơn, dùng AI gợi ý, tạo đơn, thanh toán, xem lịch sử/chi tiết/trạng thái đơn.
+Nhân viên
+Tài khoản do Admin tạo; xem danh sách/chi tiết đơn và cập nhật tiến độ chuẩn bị/hoàn thành; không xem chi phí/kho/lương.
+Admin
+Quản lý toàn bộ tài khoản, món/công thức, kho/NCC/nhập hàng, đơn, nhân viên/chấm công/bảng lương và dashboard.
+1.3 Nội dung không thuộc phạm vi MVP
+Không gồm: nhiều cơ sở/chi nhánh/kho; đặt chỗ hoặc quản lý sơ đồ bàn và công suất địa điểm; quản lý nhà bếp theo từng trạm; ứng dụng di động native; POS; vận chuyển/giao hàng; hóa đơn điện tử; kết nối phần mềm kế toán, ngân hàng hoặc chuyển lương thật; chấm công GPS/biometric; kho theo lô/hạn sử dụng; nhập nguyên liệu tự động từ nhà cung cấp; hoàn tiền VNPAY tự động; thanh toán production; coupon/thuế/chiết khấu tự động; AI huấn luyện riêng; email tự động cho nhà cung cấp; xuất PDF/Excel toàn bộ báo cáo (chỉ PDF phiếu nhập).
+2. Quy trình nghiệp vụ chính
+2.1 Tạo thực đơn – đặt tiệc – thanh toán
+User đăng nhập; xem món/thực đơn có sẵn, tự chọn món hoặc nhập yêu cầu bằng văn bản để AI trả về tối đa 03 phương án thực đơn cho 01 bàn.
+Người mua điều chỉnh số phần của từng món trong 01 bàn, chọn số bàn; hệ thống tính lại tổng giá và tổng lượng nguyên liệu theo công thức món.
+Người mua nhập ngày, giờ tổ chức, số khách, địa điểm tổ chức, họ tên, điện thoại liên hệ và ghi chú (không kiểm tra lịch trống địa điểm).
+Trước khi tạo phiên thanh toán, hệ thống kiểm tra tồn khả dụng và giữ tạm nguyên liệu trong 15 phút cho đơn chờ thanh toán; chưa trừ tồn vật lý.
+Hệ thống chuyển đến VNPAY Sandbox để thanh toán toàn bộ đơn. Server xác thực phản hồi/giao dịch trước khi công nhận thanh toán thành công.
+Khi thanh toán hợp lệ: ghi nhận đã trả, trừ nguyên liệu theo đúng định lượng/chứng từ của đơn một lần, ghi giá vốn và xếp đơn vào danh sách xử lý.
+User xem lịch sử và chi tiết đơn; hệ thống gửi email xác nhận thanh toán gồm mã đơn, chi tiết món, số bàn, tổng tiền, thời gian và đường dẫn xem đơn.
+Nhân viên/Admin cập nhật tiến độ “Đang chuẩn bị” → “Hoàn thành”; User xem trạng thái mới trên trang chi tiết.
+XỬ LÝ HẾT TỒN KHI CÓ NHIỀU ĐƠN CÙNG LÚC
+Tồn khả dụng = tồn vật lý − lượng đang giữ tạm chưa hết hạn. Sau 15 phút, phần giữ tạm hết hiệu lực; nếu thanh toán đến muộn mà không đủ nguyên liệu, không trừ âm kho, lưu giao dịch “Đã thanh toán – cần xử lý” để Admin đối soát thủ công. Hoàn tiền tự động không thuộc MVP.
+2.2 Nhập kho và quản lý nhà cung cấp
+Admin tạo nhà cung cấp; thêm phiếu nhập gồm ngày nhập, NCC, danh sách nguyên liệu, số lượng, đơn giá, tổng tiền và trạng thái thanh toán cho NCC (Chưa trả/Đã trả). Khi xác nhận phiếu, tồn tăng một lần và đơn giá vốn bình quân được cập nhật. Phiếu đã xác nhận không sửa trực tiếp; điều chỉnh bằng phiếu điều chỉnh kho có lý do. Có nút xuất PDF theo yêu cầu để in/lưu, không tự gửi email cho NCC.
+2.3 Chấm công – lập bảng lương
+Admin tạo hồ sơ nhân viên, khai báo lương tháng cố định; chấm công từng ngày ở mức 0 / 0,5 / 1 công; nhập ngày công chuẩn của từng tháng (mặc định 26); thêm phụ cấp và khấu trừ thủ công. Lương thực lĩnh = Lương tháng × công thực tế / công chuẩn + phụ cấp − khấu trừ. Hệ thống lập bảng lương theo tháng và cho phép Admin ghi nhận đã thanh toán cùng ngày trả (không chuyển khoản tự động).
+3. Đặc tả yêu cầu chức năng
+Các mã FR dưới đây mô tả đầy đủ các hạng mục của phạm vi MVP. Mọi thao tác quản trị đều yêu cầu đăng nhập và kiểm tra quyền ở API; dữ liệu có liên hệ giao dịch được ẩn/khóa thay vì xóa cứng.
+3.1 Tài khoản và phân quyền
+Mã / chức năng
+Mô tả nghiệp vụ áp dụng
+FR-AUT-01  |  Đăng ký / đăng nhập
+User đăng ký bằng họ tên, email duy nhất, mật khẩu; đăng nhập bằng email/mật khẩu; thông báo lỗi khi sai thông tin.
+FR-AUT-02  |  Đăng xuất / quên mật khẩu
+Đăng xuất làm vô hiệu phiên hiện tại; quên mật khẩu gửi liên kết đặt lại có hạn dùng vào email đăng ký.
+FR-AUT-03  |  Phân quyền bốn nhóm
+Guest chỉ xem công khai; User chỉ thao tác dữ liệu của chính mình; Nhân viên chỉ xem/cập nhật đơn; Admin quản trị đầy đủ.
+FR-AUT-04  |  Quản lý tài khoản
+Admin xem/tìm danh sách, tạo tài khoản nhân viên, sửa thông tin/vai trò và khóa/mở tài khoản; không hiển thị mật khẩu gốc.
+3.2 Món ăn, thực đơn mẫu và công thức
+Mã / chức năng
+Mô tả nghiệp vụ áp dụng
+FR-CAT-01  |  Danh mục và chi tiết món
+Guest/User xem ảnh, tên, mô tả, danh mục, giá theo phần, trạng thái kinh doanh. Tìm theo tên/danh mục.
+FR-CAT-02  |  Admin quản lý món
+Tạo/sửa/ẩn món, giá bán, ảnh, mô tả, danh mục; món đang được dùng trong đơn cũ vẫn giữ dữ liệu lịch sử.
+FR-REC-01  |  Cấu hình công thức món
+Mỗi món có danh sách ≥01 nguyên liệu kèm số lượng tiêu hao cho 01 phần; lượng >0, tham chiếu nguyên liệu trong kho.
+FR-REC-02  |  Quản trị định lượng
+Admin thêm/xóa/sửa thành phần trong công thức; mỗi đơn chốt bản sao số lượng định mức và giá để lịch sử không đổi khi cập nhật món.
+FR-CAT-03  |  Tạo thực đơn cá nhân
+User chọn các món và số phần/món cho 01 bàn; chỉnh sửa/xóa trước khi tạo đơn; hệ thống tính tổng giá cho 01 bàn.
+FR-CAT-04  |  Thực đơn mẫu
+Admin thêm/sửa/ẩn thực đơn mẫu gồm tên, mô tả, ảnh và danh sách món/số phần cho 01 bàn; User chọn và điều chỉnh theo nhu cầu.
+FR-REC-03  |  Kiểm tra khả năng phục vụ
+Hệ thống cộng nguyên liệu theo số phần × số bàn; món có công thức thiếu hoặc tồn không đủ không thể chuyển sang thanh toán.
+3.3 Kho nguyên liệu và nhà cung cấp
+Mã / chức năng
+Mô tả nghiệp vụ áp dụng
+FR-INV-01  |  Danh mục nguyên liệu
+Admin thêm/sửa/ẩn nguyên liệu, mã/tên, đơn vị gốc (kg, lít, cái...), tồn tối thiểu; cùng nguyên liệu luôn nhập và định lượng bằng đơn vị gốc.
+FR-SUP-01  |  Danh bạ nhà cung cấp
+Admin thêm/sửa/ẩn NCC: tên, số điện thoại, email (không bắt buộc), địa chỉ và ghi chú; liên kết NCC với phiếu nhập.
+FR-INV-02  |  Phiếu nhập nguyên liệu
+Admin nhập NCC, ngày nhập, nhiều dòng nguyên liệu/số lượng/đơn giá; thành tiền = số lượng × đơn giá; tổng phiếu tự cộng.
+FR-INV-03  |  Xác nhận tăng tồn
+Chỉ phiếu nhập hợp lệ được xác nhận; tăng tồn đúng một lần; ghi lịch sử biến động kho và cập nhật giá vốn bình quân.
+FR-SUP-02  |  Theo dõi tiền nhập hàng
+Lưu tổng tiền phải trả, trạng thái Chưa trả/Đã trả, ngày thanh toán và ghi chú; chỉ ghi vào dòng tiền ra khi đánh dấu Đã trả.
+FR-SUP-03  |  Xuất PDF phiếu nhập
+Admin bấm “Xuất PDF” trên phiếu nhập đã xác nhận; tài liệu có mã phiếu, ngày, NCC, danh sách nguyên liệu, đơn giá, thành tiền, tổng tiền.
+FR-INV-04  |  Trừ kho tự động
+Khi xác thực đơn đã thanh toán, trừ lượng nguyên liệu theo bản sao công thức lúc đặt; không trừ lại khi nhận callback trùng.
+FR-INV-05  |  Theo dõi biến động và điều chỉnh
+Ghi nguồn phát sinh, ngày giờ, số lượng tăng/giảm; Admin có phiếu điều chỉnh có lý do để sửa chênh lệch tồn (không sửa lịch sử gốc).
+FR-INV-06  |  Cảnh báo tồn thấp
+Màn hình kho và Dashboard cảnh báo khi tồn vật lý ≤ ngưỡng; cho phép xem nguyên liệu không đủ cho thực đơn đang chọn.
+3.4 Đơn đặt tiệc, thanh toán và email
+Mã / chức năng
+Mô tả nghiệp vụ áp dụng
+FR-ORD-01  |  Tạo đơn đặt tiệc
+User chọn thực đơn 01 bàn, số bàn ≥1, ngày/giờ, số khách ≥1, địa điểm, họ tên/số điện thoại, ghi chú; tổng tiền tự tính.
+FR-ORD-02  |  Lịch sử và chi tiết đơn
+User xem danh sách đơn của chính mình; trang chi tiết có mã đơn, ngày đặt, ngày tiệc, món/số phần, số bàn, giá, tổng, trạng thái.
+FR-ORD-03  |  Quản trị đơn
+Admin tìm/lọc đơn theo mã, người mua, ngày và tình trạng; xem chi tiết, lịch sử trạng thái/thanh toán, đánh dấu đơn cần xử lý.
+FR-ORD-04  |  Nhân viên xử lý đơn
+Nhân viên xem danh sách đơn đã thanh toán; được chuyển “Đã ghi nhận” → “Đang chuẩn bị” → “Hoàn thành”; không chỉnh giá/hủy/hoàn.
+FR-ORD-05  |  Trạng thái đơn
+Thanh toán: Chờ thanh toán/Đã thanh toán/Thất bại/Cần xử lý. Xử lý: Đã ghi nhận/Đang chuẩn bị/Hoàn thành. Đơn chưa trả có thể bị hủy tự động khi hết hạn.
+FR-PAY-01  |  VNPAY Sandbox
+Tạo URL giao dịch thanh toán 100% tổng tiền VND; kết nối môi trường thử nghiệm, không giao dịch tiền thật.
+FR-PAY-02  |  Đối soát kết quả
+Backend xác thực chữ ký, số tiền, mã giao dịch và kết quả trả về theo tích hợp VNPAY; lưu bản ghi giao dịch; không xác nhận từ client.
+FR-PAY-03  |  Nhất quán giao dịch
+Cập nhật thanh toán + trừ kho + ghi tiêu hao một lần/đơn; thanh toán thất bại không giảm tồn; giao dịch lặp không ghi doanh thu lặp.
+FR-PAY-04  |  Giữ tồn tạm
+Tại bước bắt đầu thanh toán giữ lượng nguyên liệu trong 15 phút; hết hạn giải phóng giữ tạm; xử lý quá hạn theo quy tắc tại Mục 2.
+FR-NOT-01  |  Email đơn hàng
+Sau thanh toán hợp lệ, gửi email xác nhận đơn tới email User (mã, món, số bàn, tổng, lịch tổ chức, trạng thái, liên kết xem đơn); lưu trạng thái gửi.
+FR-NOT-02  |  Theo dõi trạng thái
+User cập nhật màn hình để xem trạng thái mới; MVP không gửi email cho mỗi lần thay đổi tiến độ.
+3.5 AI gợi ý thực đơn
+Mã / chức năng
+Mô tả nghiệp vụ áp dụng
+FR-AI-01  |  Mô tả tiệc bằng ngôn ngữ tự nhiên
+User nhập mô tả bối cảnh, loại tiệc, yêu cầu món/khẩu vị; có ô ngân sách cho một bàn không bắt buộc.
+FR-AI-02  |  Tạo ba phương án gợi ý
+Backend gọi API AI Gemini bằng khóa cấu hình; trả về tối đa 03 thực đơn khác nhau cho 01 bàn, từ những món có sẵn trong hệ thống.
+FR-AI-03  |  Kiểm tra đầu ra AI
+Lọc món không tồn tại/ẩn/hết khả năng phục vụ; tính lại giá thực tế từ CSDL, không tin giá do AI tự sinh; thông báo khi không có phương án khả dụng.
+FR-AI-04  |  Sửa và chọn gợi ý
+User mở một phương án, thêm/bớt món/số phần và tiếp tục đặt tiệc; AI không tự tạo đơn hay thanh toán.
+3.6 Nhân viên, chấm công và lương
+Mã / chức năng
+Mô tả nghiệp vụ áp dụng
+FR-EMP-01  |  Quản lý nhân viên
+Admin tạo/sửa/khóa hồ sơ: họ tên, liên hệ, chức danh, ngày vào làm, lương tháng cố định, tình trạng làm việc.
+FR-HR-01  |  Chấm công ngày
+Admin chọn nhân viên và ngày, ghi 0 / 0,5 / 1 công; sửa chấm công, không cho trùng 2 bản ghi cho 01 nhân viên/ngày.
+FR-HR-02  |  Phụ cấp/khấu trừ
+Admin thêm khoản cộng/trừ theo nhân viên và tháng, có tên khoản, số tiền ≥0, ghi chú.
+FR-HR-03  |  Bảng lương tháng
+Công thức: lương cố định × tổng công / công chuẩn tháng (mặc định 26) + tổng phụ cấp − tổng khấu trừ; xem số thực lĩnh từng nhân viên.
+FR-HR-04  |  Quản lý thanh toán lương
+Admin ghi Chưa trả/Đã trả, ngày chi, số tiền thực chi (toàn bộ bảng lương một nhân viên/tháng); không chuyển tiền qua ngân hàng.
+FR-HR-05  |  Quyền dữ liệu nhân sự
+Chỉ Admin được xem/chỉnh chấm công, lương, khoản phụ cấp/khấu trừ; nhân viên không có màn hình bảng lương riêng trong MVP.
+3.7 Dashboard, chi phí và báo cáo
+Mã / chức năng
+Mô tả nghiệp vụ áp dụng
+FR-RPT-01  |  Dashboard đơn và doanh thu
+Thống kê tổng đơn, đơn đã thanh toán, đơn hoàn thành, doanh thu đã thanh toán và biểu đồ doanh thu ngày/tháng.
+FR-RPT-02  |  Kho và nhà cung cấp
+Thống kê tồn, tồn dưới ngưỡng, tổng giá trị nhập nguyên liệu, chi NCC đã trả/chưa trả, tra cứu theo NCC và tháng.
+FR-RPT-03  |  Chi phí tiền lương
+Tổng lương theo tháng, số đã trả/chưa trả; chi phí lương theo tháng lập bảng lương; không cộng lặp khi đánh dấu đã trả.
+FR-RPT-04  |  Chi phí vận hành khác
+Admin nhập thủ công khoản chi khác: ngày, nhóm chi phí, số tiền, ghi chú, tình trạng đã chi; dùng cho thống kê lời/lỗ.
+FR-RPT-05  |  Lợi nhuận tạm tính
+Theo tháng: doanh thu đơn được thanh toán − giá vốn nguyên liệu đã xuất − chi phí lương theo kỳ − chi phí vận hành khác được ghi nhận.
+FR-RPT-06  |  Dòng tiền thu/chi
+Dòng tiền = tiền thu từ đơn đã trả − tiền NCC đã chi − lương đã trả − khoản vận hành đã chi; hiển thị riêng với lợi nhuận.
+FR-RPT-07  |  Bộ lọc thống kê
+Dashboard lọc theo tháng/năm; thống kê đơn/doanh thu có thể xem theo khoảng ngày. Không xuất Excel/PDF báo cáo tổng hợp ở MVP.
+4. Quy tắc dữ liệu và tính toán
+Mã
+Quy tắc thống nhất
+BR-01
+Tổng tiền đơn = số bàn × Σ(giá bán một phần × số phần món cho một bàn). Giá chốt tại lúc đặt được lưu vào dòng đơn; sửa giá danh mục không thay đổi đơn cũ.
+BR-02
+Lượng tiêu hao nguyên liệu i = số bàn × Σ(số phần món j/bàn × định lượng i trong 01 phần món j). Cộng gộp nguyên liệu xuất hiện ở nhiều món.
+BR-03
+Mọi nguyên liệu có một đơn vị chuẩn trong công thức và kho, ví dụ kg hoặc lít. Admin nhập theo đúng đơn vị này; không tự đổi g↔kg, ml↔l trong MVP.
+BR-04
+Tồn khả dụng = tồn vật lý − tổng lượng đang giữ hợp lệ. Kiểm tra và giữ tạm có khóa giao dịch, không để hai đơn cùng dùng vượt tồn.
+BR-05
+Trừ kho chỉ diễn ra sau khi server xác minh thanh toán thành công; mỗi đơn chỉ phát sinh một lần xuất kho. Sửa công thức món không sửa lượng tiêu hao đã lưu ở đơn cũ.
+BR-06
+Phiếu nhập đã xác nhận không xóa/sửa làm mất lịch sử; điều chỉnh tồn bằng chứng từ có lý do. Phiếu PDF xuất thủ công.
+BR-07
+Giá vốn nguyên liệu dùng phương pháp bình quân gia quyền di động; khi nhập lại tính bình quân mới, khi trừ ghi đơn giá vốn tại thời điểm trừ.
+BR-08
+Đơn đã thanh toán không được User tự hủy. Hủy/hoàn tiền giao dịch đã thanh toán và phục hồi kho tự động không nằm trong MVP; Admin xử lý ngoại lệ thủ công ngoài hệ thống nếu có.
+BR-09
+Lợi nhuận tạm tính và dòng tiền là hai chỉ số khác nhau; tiền nhập kho chưa được coi là giá vốn nguyên liệu tiêu hao để tránh hạch toán hai lần.
+BR-10
+Lương tính theo tháng với công chuẩn mặc định 26; cho phép Admin chỉnh công chuẩn từng kỳ. Không tính thuế TNCN, bảo hiểm, tăng ca hay lương ca trong MVP.
+BR-11
+Nhà cung cấp/phiếu nhập, tiền lương, thu/chi khác chỉ hỗ trợ ghi nhận thanh toán toàn bộ (đã trả/chưa trả); không hỗ trợ trả một phần.
+BR-12
+Email gửi thất bại không làm thay đổi đơn đã thanh toán; lưu log kết quả gửi để Admin phát hiện và thực hiện gửi lại thủ công nếu cần.
+4.1 Ví dụ tính toán minh họa
+Tình huống
+Kết quả đúng
+Món A dùng 0,2 kg thịt và 0,1 kg rau/phần; thực đơn có 3 phần A/bàn; đặt 2 bàn.
+Thịt xuất = 0,2 × 3 × 2 = 1,2 kg; rau xuất = 0,1 × 3 × 2 = 0,6 kg.
+Một bàn có 2 phần món giá 120.000đ và 1 phần món giá 80.000đ; đặt 3 bàn.
+Tổng đơn = (2 × 120.000 + 80.000) × 3 = 960.000đ.
+Lương 8.000.000đ, 22 công, công chuẩn 26, phụ cấp 500.000đ, khấu trừ 200.000đ.
+Thực lĩnh = 8.000.000 × 22/26 + 500.000 − 200.000 = 7.069.231đ (làm tròn VND).
+5. Ma trận phân quyền MVP
+Ký hiệu: “Có” là quyền được thực hiện; “Không” là quyền bị từ chối cả ở giao diện và API.
+Chức năng
+Guest
+User
+NV
+Admin
+Xem món/thực đơn
+Có
+Có
+Có
+Có
+Tạo thực đơn, gợi ý AI
+Không
+Có
+Không
+Có
+Đặt tiệc/thanh toán VNPAY
+Không
+Có
+Không
+Không
+Xem đơn cá nhân
+Không
+Có
+Không
+Có
+Xem toàn bộ đơn
+Không
+Không
+Có
+Có
+Cập nhật tiến độ đơn
+Không
+Không
+Có
+Có
+Quản lý món/công thức
+Không
+Không
+Không
+Có
+Kho/NCC/PDF phiếu nhập
+Không
+Không
+Không
+Có
+Quản lý tài khoản/nhân viên
+Không
+Không
+Không
+Có
+Chấm công/lương/chi phí
+Không
+Không
+Không
+Có
+Dashboard doanh thu/lợi nhuận
+Không
+Không
+Không
+Có
+6. Mô hình dữ liệu nghiệp vụ
+Danh sách thực thể ở mức định hướng thiết kế CSDL, tên bảng/cột có thể điều chỉnh trong code miễn bảo đảm chức năng và dữ liệu kiểm thử.
+Nhóm
+Thực thể dữ liệu chính
+Ràng buộc đáng chú ý
+Tài khoản
+User, Role, Employee
+Role cho quyền; Employee chỉ liên kết tài khoản vai trò nhân viên.
+Danh mục
+Dish, DishCategory, Menu, MenuItem
+Lưu giá và định lượng chốt vào OrderLine để giữ lịch sử.
+Công thức
+Ingredient, RecipeItem
+Dish → nhiều RecipeItem; mỗi thành phần có lượng cho 01 phần.
+Nhập kho
+Supplier, StockReceipt, ReceiptLine, StockMovement
+Phiếu nhập và xuất tồn có khóa chống ghi trùng.
+Đặt tiệc
+Order, OrderLine, OrderStockSnapshot, StockHold
+Đơn có bàn, thời điểm tiệc, địa điểm, số khách, lịch sử trạng thái.
+Thanh toán
+PaymentTransaction
+Lưu mã giao dịch gateway, kết quả kiểm chứng và thời điểm.
+Nhân sự
+Attendance, Payroll, PayrollAdjustment, SalaryPayment
+Một bảng lương/nhân viên/tháng, chấm công/nhân viên/ngày.
+Báo cáo
+OperatingExpense, EmailLog
+Chi phí thủ công và lịch sử gửi email phục vụ truy vết.
+7. Yêu cầu phi chức năng và tích hợp
+Mã
+Yêu cầu / điều kiện thực hiện
+NFR-01
+Website responsive trên desktop và điện thoại; các trang danh mục, đặt đơn, quản trị sử dụng được bằng trình duyệt Chrome/Edge hiện hành.
+NFR-02
+Backend Spring Boot Web API, frontend React, cơ sở dữ liệu PostgreSQL; giao diện tiếng Việt và mã tiền VND.
+NFR-03
+Mật khẩu lưu dạng hash an toàn; phân quyền server-side; giao tiếp HTTPS khi triển khai công khai; không lưu mật khẩu hay khóa API trong frontend.
+NFR-04
+Các thao tác tiền/kho dùng DB transaction; callback VNPAY chống lặp; xử lý cạnh tranh tồn và lưu nhật ký giao dịch.
+NFR-05
+Tích hợp VNPAY Sandbox bằng cấu hình tài khoản/secret môi trường; không coi trang quay về trình duyệt là bằng chứng duy nhất để ghi nhận thanh toán.
+NFR-06
+Email xác nhận và đặt lại mật khẩu dùng SMTP có cấu hình; phải có tài khoản gửi thử nghiệm hợp lệ để demo chức năng.
+NFR-07
+AI thực thi qua Gemini API, dùng API key do bên triển khai cấu hình; chỉ dùng món trong catalog; khi API lỗi hiển thị thông báo và vẫn cho User tạo thực đơn thủ công.
+NFR-08
+Kiểm tra dữ liệu đầu vào: số tiền/định lượng/số bàn dương; email đúng định dạng; các thao tác thất bại có thông báo dễ hiểu.
+NFR-09
+Dữ liệu demo: tối thiểu 10 món, 10 nguyên liệu, 2 NCC, 3 thực đơn, 3 nhân viên và các đơn thử ở nhiều trạng thái; đủ để kiểm tra dashboard.
+NFR-10
+Bàn giao file SQL/migration và hướng dẫn sao lưu/khôi phục cơ bản; không bao gồm bảo đảm uptime 24/7 hay vận hành hạ tầng lâu dài.
+8. Kịch bản nghiệm thu chức năng
+Kết quả “đạt” khi trình diễn thao tác thật bằng dữ liệu mẫu trên phiên bản bàn giao và kiểm tra các trường hợp lỗi nêu trong bảng.
+TC
+Thử nghiệm
+Kết quả kỳ vọng
+AT-01
+Guest truy cập danh mục, thử vào quản trị
+Xem món/thực đơn công khai; truy cập API quản trị bị chặn.
+AT-02
+User đăng ký email, đăng nhập, quên mật khẩu
+Tạo được tài khoản; phiên đăng nhập đúng; email đặt lại mật khẩu hoạt động.
+AT-03
+Admin tạo 01 món có 02 nguyên liệu
+Lưu được công thức theo định lượng; không nhận lượng 0 hoặc nguyên liệu không tồn tại.
+AT-04
+User tạo thực đơn cho 2 bàn từ món đã cấu hình
+Tổng giá và tổng lượng nguyên liệu đúng theo số phần và số bàn.
+AT-05
+User nhập bối cảnh và gọi AI
+Hiển thị tối đa 03 phương án món từ catalog; User sửa/chọn được 01 phương án.
+AT-06
+Nhập phiếu 10kg giá 50.000đ/kg từ NCC
+Tồn tăng 10kg, tổng phiếu 500.000đ, giá bình quân cập nhật, chứng từ lưu được.
+AT-07
+Xuất PDF của phiếu nhập
+PDF chứa NCC, ngày, các dòng nguyên liệu, thành tiền và tổng, không tự gửi email.
+AT-08
+Chọn thực đơn thiếu 01 nguyên liệu
+Không được tiến hành thanh toán; hệ thống thông báo thiếu tồn rõ ràng.
+AT-09
+Tạo đơn chờ trả; không thanh toán trong 15 phút
+Tồn vật lý không trừ; giữ tạm hết hạn, tồn khả dụng được trả lại.
+AT-10
+Thanh toán thành công qua VNPAY Sandbox
+Đơn ghi nhận đã trả; kho trừ một lần theo công thức; User xem đúng chi tiết.
+AT-11
+Gửi lại callback giao dịch đã thành công
+Không trừ kho, ghi doanh thu hoặc gửi email xác nhận đơn hàng lặp.
+AT-12
+Thanh toán thất bại / hủy trang thanh toán
+Không ghi nhận đã thanh toán; không trừ kho.
+AT-13
+Email xác nhận đơn sau thanh toán
+User nhận email đúng mã đơn, thực đơn, số bàn, tổng tiền và thời gian tổ chức.
+AT-14
+User A dùng ID của User B truy cập đơn
+API từ chối và không trả thông tin đơn người khác.
+AT-15
+Nhân viên chuyển đơn sang Đang chuẩn bị, Hoàn thành
+User thấy trạng thái mới; nhân viên không có quyền sửa chi phí/kho.
+AT-16
+Admin chấm 22 công, lương 8 triệu, phụ cấp 500k, trừ 200k, công chuẩn 26
+Bảng lương thực lĩnh 7.069.231đ; hiển thị chi tiết công/phụ cấp/khấu trừ.
+AT-17
+Admin ghi nhận đã trả lương một tháng
+Lưu ngày trả, số tiền, trạng thái; không chuyển khoản tự động.
+AT-18
+Dashboard có đơn 960k và xuất kho giá vốn 300k
+Doanh thu 960k, giá vốn 300k; khi mua thêm kho không cộng tiền nhập làm giá vốn lần hai.
+AT-19
+Admin ghi NCC đã trả và khoản chi vận hành
+Dòng tiền trừ khoản đã thực chi; khoản chưa trả không làm giảm dòng tiền.
+AT-20
+Hai đơn đồng thời giữ cùng nguyên liệu sắp hết
+Tổng giữ không vượt tồn; callback đến muộn thiếu tồn được đưa vào “Cần xử lý”, không trừ âm.
+9. Bàn giao và giới hạn triển khai
+9.1 Bộ bàn giao MVP
+Mã nguồn frontend React, backend Spring Boot, tệp cấu hình mẫu không chứa secret và tài liệu chạy project.
+Schema/migration PostgreSQL, dữ liệu demo để kiểm thử các vai trò và báo cáo.
+Tài khoản demo Guest/User/Nhân viên/Admin (hoặc hướng dẫn tự khởi tạo); hướng dẫn thử thanh toán VNPAY Sandbox.
+Hướng dẫn cấu hình SMTP và Gemini API key, tải mẫu PDF phiếu nhập, vận hành cơ bản và backup/restore CSDL.
+Biên bản trình diễn các kịch bản AT-01 đến AT-20; ghi nhận lỗi nếu có và cách tái hiện.
+9.2 Phạm vi kỹ thuật và điều kiện demo
+Hệ thống được cài đặt và nghiệm thu trên môi trường local/demo hoặc máy chủ thử nghiệm do bên phát triển chuẩn bị. Hosting, domain, SSL public, cổng VNPAY production, chi phí hạ tầng trả phí, phí AI, dịch vụ email thương mại và vận hành sau bàn giao không tự động nằm trong phạm vi này. Việc demo tính năng tích hợp cần các thông số sandbox, SMTP và Gemini API key còn hiệu lực.
+9.3 Nguyên tắc xử lý phát sinh
+Mọi thay đổi sau khi hai bên xác nhận bản này (ví dụ chuyển từ 01 cơ sở sang đa chi nhánh, bổ sung app di động, đặt cọc, AI nâng cao, kho theo lô hoặc quy trình hoàn tiền) cần ghi rõ nội dung thay đổi, tác động đến thời gian/chi phí và xác nhận bằng văn bản trước triển khai. Lỗi của chức năng đã mô tả trong SRS vẫn thuộc phạm vi sửa lỗi nghiệm thu.
+Thông tin thương mại
+Giá trị/đầu mối tham chiếu
+Giá trị dự án, tiến độ, lịch thanh toán
+Theo hợp đồng hoặc báo giá được hai bên thống nhất riêng.
+Thời gian hỗ trợ sau bàn giao
+Theo thỏa thuận hỗ trợ hoặc hợp đồng riêng.
+Các thay đổi ngoài phạm vi
+Lập yêu cầu thay đổi (CR) và chỉ triển khai khi được duyệt.
+10. Xác nhận nội dung và phạm vi
+Hai bên xác nhận rằng tài liệu mô tả phạm vi MVP của website đặt tiệc tích hợp quản lý cơ sở kinh doanh, bao gồm yêu cầu chức năng, quy tắc, kịch bản nghiệm thu và giới hạn triển khai. Khách hàng có thể chỉnh trực tiếp các điều khoản trước khi ký; nội dung cuối cùng được ký/xác nhận bằng văn bản sẽ là căn cứ để triển khai và nghiệm thu.
+ĐẠI DIỆN KHÁCH HÀNG / BÊN YÊU CẦU
+ĐẠI DIỆN BÊN PHÁT TRIỂN
+Họ và tên: ....................................................
+Họ và tên: ....................................................
+Đơn vị/chức danh: ........................................
+Đơn vị/chức danh: ........................................
+Ngày: ......... / ......... / ..............
+Ngày: ......... / ......... / ..............
+Ký tên / xác nhận:
+Ký tên / xác nhận:
+PHỤ LỤC: THAM CHIẾU NGUỒN
+Phiếu giao đề tài đồ án/khóa luận tốt nghiệp – “Xây dựng nền tảng đặt tiệc tích hợp quản lý cơ sở kinh doanh”; yêu cầu chức năng bổ sung đã được cung cấp trong trao đổi về Guest/User/Nhân viên/Admin, VNPAY Sandbox, AI, kho nguyên liệu, định lượng món ăn, nhà cung cấp, phiếu nhập PDF, đơn hàng/email, nhân sự và dashboard.
