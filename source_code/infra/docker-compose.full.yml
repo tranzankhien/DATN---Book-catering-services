@@ -1,0 +1,69 @@
+# =====================================================================
+# BanquetHub - Full Stack Docker Compose (Database + Backend + Frontend)
+# Chay toan bo ung dung chi voi Docker Desktop: docker compose -f infra/docker-compose.full.yml up -d --build
+# =====================================================================
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: banquet-hub-postgres
+    restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: false
+      - path: ./.env
+        required: false
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-banquet_hub}
+      POSTGRES_USER: ${POSTGRES_USER:-banquet_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-BanquetHub_Local_2026!}
+      TZ: Asia/Ho_Chi_Minh
+      PGTZ: Asia/Ho_Chi_Minh
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - banquet_hub_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: banquet-hub-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - path: ../.env
+        required: false
+      - path: ./.env
+        required: false
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-banquet_hub}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-banquet_user}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-BanquetHub_Local_2026!}
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-BanquetHub_Local_Jwt_Secret_Key_2026_For_HS256_Signing_Min32Bytes}
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: banquet-hub-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+
+volumes:
+  banquet_hub_pgdata:
+    name: banquet_hub_pgdata

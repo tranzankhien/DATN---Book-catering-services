@@ -51,77 +51,69 @@ banquet-hub/
 
 ---
 
-## 3. Yêu cầu môi trường (Windows 11 / PowerShell)
+## 3. Lựa chọn cách chạy hệ thống
 
-- **Java JDK**: Yêu cầu JDK 21+ (Nếu máy đang để `JAVA_HOME` ở JDK 17 nhưng đã cài `C:\Program Files\Java\jdk-21` hoặc `C:\Program Files\Java\jdk-24`, script `backend\mvnw.cmd` tự động chọn JDK 21+ cục bộ mà không làm thay đổi biến môi trường hệ thống. Nếu chưa có JDK 21+, tải bản chính thức tại [Eclipse Adoptium Temurin 21 LTS](https://adoptium.net/temurin/releases/?version=21)).
-- **Node.js & npm**: Node.js `>= 20.x` (hiện tại `v24.19.0`), npm `>= 10.x`.
-- **Docker Desktop**: Đang chạy để khởi tạo container PostgreSQL 17.
-- **Git**: `>= 2.40`.
+Hệ thống hỗ trợ 2 cách vận hành linh hoạt tùy thuộc vào mục đích sử dụng trên máy của bạn:
 
----
-
-## 4. Hướng dẫn chạy toàn bộ hệ thống trên Windows (PowerShell)
-
-### Bước 1: Tạo file biến môi trường `.env`
-
-Tại thư mục gốc `banquet-hub`, sao chép `.env.example` sang `.env`, `infra/.env` và `frontend/.env` (nếu chưa có):
-
-```powershell
-Copy-Item .env.example .env
-Copy-Item .env.example infra/.env
-Copy-Item frontend/.env.example frontend/.env
-```
-
-*(Lưu ý: Mở `.env` và `infra/.env` để đặt mật khẩu local dev mong muốn cho `POSTGRES_PASSWORD`, `SPRING_DATASOURCE_PASSWORD` và `APP_JWT_SECRET`).*
-
-### Bước 2: Khởi động PostgreSQL 17 bằng Docker Compose
-
-```powershell
-docker compose -f infra/docker-compose.yml up -d
-```
-
-Kiểm tra trạng thái container:
-
-```powershell
-docker ps --filter "name=banquet-hub-postgres"
-```
-
-### Bước 3: Chạy Spring Boot Backend (Port 8080)
-
-```powershell
-cd backend
-.\mvnw.cmd spring-boot:run
-```
-
-Khi khởi động, Flyway tự động chạy migration `V1` (tạo schema) và `V2` (khởi tạo 5 danh mục, 12 nguyên liệu, 10 món ăn và 25 dòng công thức định lượng), đồng thời `DemoDataInitializer` tạo sẵn các tài khoản demo (không nhân bản khi khởi động lại).
-
-### Bước 4: Chạy React Frontend (Port 5173)
-
-Mở một cửa sổ PowerShell mới tại thư mục gốc `banquet-hub`:
-
-```powershell
-cd frontend
-npm install
-npm run dev
-```
+* **Cách 1: Chạy Full Docker (Khuyên dùng khi máy đã cài Docker Desktop)**
+  * **Yêu cầu**: Chỉ cần cài **Docker Desktop** (không cần cài Java, không cần cài Node.js, không sợ xung đột phiên bản).
+  * **Lệnh chạy**: 1 lệnh duy nhất khởi động toàn bộ DB + Backend + Frontend.
+* **Cách 2: Chạy Local Dev (Dành cho lập trình viên muốn code & hot-reload)**
+  * **Yêu cầu**: Docker Desktop + Java JDK 21+ + Node.js 20+.
+  * **Lệnh chạy**: Script 1-click `.\run-dev.ps1`.
 
 ---
 
-### *Cách chạy nhanh: Bật toàn bộ hệ thống bằng 1 lệnh duy nhất (One-click Startup)*
+## 4. Hướng dẫn chi tiết từng cách chạy
 
-Từ thư mục gốc `banquet-hub`, chạy script tiện ích PowerShell:
+### Cách 1: Chạy trọn gói bằng Docker Desktop (Nhanh nhất & Mượt nhất)
+
+Nếu máy đã có sẵn **Docker Desktop**:
+
+1. **Bật Docker Desktop**.
+2. Mở terminal tại thư mục gốc `banquet-hub`, chạy:
+   ```powershell
+   # Sao chép file cấu hình mẫu (nếu chưa có .env)
+   Copy-Item .env.example .env
+
+   # Khởi động toàn bộ: PostgreSQL 17 + Spring Boot API + React Vite
+   docker compose -f infra/docker-compose.full.yml up -d --build
+   ```
+3. Truy cập ngay:
+   * **Giao diện Web (React)**: [http://localhost:5173](http://localhost:5173)
+   * **Quản trị Catalog & Kho**: [http://localhost:5173/admin/catalog](http://localhost:5173/admin/catalog)
+   * **Swagger API Docs**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+   * **Health Check**: [http://localhost:8080/api/v1/health](http://localhost:8080/api/v1/health)
+
+*(Để dừng toàn bộ dịch vụ: `docker compose -f infra/docker-compose.full.yml down`)*
+
+---
+
+### Cách 2: Chạy môi trường Local Development (Dành cho việc code tiếp)
+
+#### Yêu cầu phần mềm trên máy:
+1. **Docker Desktop**: Đang bật (để chạy container PostgreSQL 17).
+2. **Java JDK 21+**: Tải bản chính thức [Eclipse Adoptium Temurin 21 LTS](https://adoptium.net/temurin/releases/?version=21) (chọn file `.msi`, khi cài nhớ tích chọn *Set JAVA_HOME*).
+3. **Node.js LTS (>= 20.x)**: Tải tại [nodejs.org](https://nodejs.org/).
+
+#### Khởi chạy bằng 1 lệnh duy nhất (One-click Startup):
+
+Từ thư mục gốc `banquet-hub`, mở PowerShell và chạy:
 
 ```powershell
 .\run-dev.ps1
 ```
 
-*Script trên sẽ tự động khởi động PostgreSQL 17 (nếu chưa bật) và mở 2 cửa sổ PowerShell riêng biệt cho Backend (:8080) và Frontend (:5173).*
+*Script `run-dev.ps1` sẽ tự động hoàn toàn:*
+* *Tự kiểm tra và tạo file `.env` chuẩn nếu máy chưa có.*
+* *Tự khởi động container PostgreSQL 17 trong Docker.*
+* *Tự chạy `npm install` nếu thư viện Frontend chưa được tải.*
+* *Tự động mở 2 cửa sổ PowerShell riêng biệt cho Backend (Port 8080) và Frontend (Port 5173).*
 
-Hoặc chạy trực tiếp lệnh PowerShell một dòng:
-
-```powershell
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd backend; .\mvnw.cmd spring-boot:run"; Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd frontend; npm run dev"
-```
+*(Nếu muốn chạy thủ công từng bước:)*
+1. `docker compose -f infra/docker-compose.yml up -d`
+2. `cd backend; .\mvnw.cmd spring-boot:run`
+3. `cd frontend; npm install; npm run dev`
 
 ---
 
