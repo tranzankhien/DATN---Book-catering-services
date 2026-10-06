@@ -15,19 +15,44 @@ if (-not (Test-Path "$root\.env")) {
     Write-Host "  -> Da tao .env voi cau hinh local chuan!" -ForegroundColor Green
 }
 
-# 1. Kiem tra Docker Desktop & Khoi dong PostgreSQL 17
-Write-Host "`n[1/4] Kiem tra Docker & Khoi dong PostgreSQL 17..." -ForegroundColor Yellow
-try {
-    docker compose -f "$root\infra\docker-compose.yml" up -d
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "[CANH BAO] Docker chua bat hoac loi khoi dong. Vui long bat Docker Desktop!" -ForegroundColor Red
-        pause
-        exit 1
-    }
-} catch {
-    Write-Host "[LOI] Khong the goi lenh docker. Vui long kiem tra Docker Desktop da duoc bat!" -ForegroundColor Red
-    pause
+# 1. Kiem tra Docker Engine dang chay
+Write-Host "`n[1/4] Kiem tra Docker Desktop..." -ForegroundColor Yellow
+$dockerCheck = docker info 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "`n[LOI NGHIEP TRONG] Docker Desktop chua duoc bat hoac dang khoi dong do dang!" -ForegroundColor Red
+    Write-Host "-> Huong dan xu ly:" -ForegroundColor Yellow
+    Write-Host "   1. Mo ung dung Docker Desktop tren Windows." -ForegroundColor White
+    Write-Host "   2. Doi bieu tuong Docker (con ca voi o goc phai man hinh) hien mau XANH LA (Engine running)." -ForegroundColor White
+    Write-Host "   3. Chay lai lenh: .\run-dev.ps1" -ForegroundColor White
+    Write-Host "`nNhan phim bat ky de thoat..." -ForegroundColor Gray
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit 1
+}
+
+# Khoi dong PostgreSQL 17
+Write-Host "  -> Dang khoi dong container PostgreSQL 17..." -ForegroundColor Cyan
+docker compose -f "$root\infra\docker-compose.yml" up -d
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "[LOI] Khong the khoi dong container PostgreSQL 17." -ForegroundColor Red
+    exit 1
+}
+
+# Doi PostgreSQL 17 san sang nhan ket noi (Health check)
+Write-Host "  -> Dang doi PostgreSQL 17 san sang nhan ket noi..." -ForegroundColor Cyan
+$pgReady = $false
+for ($i = 1; $i -le 25; $i++) {
+    $status = docker compose -f "$root\infra\docker-compose.yml" exec -T postgres pg_isready -U banquet_user -d banquet_hub 2>&1
+    if ($status -match "accepting connections") {
+        $pgReady = $true
+        Write-Host "  -> PostgreSQL 17 da san sang!" -ForegroundColor Green
+        break
+    }
+    Start-Sleep -Seconds 1
+    Write-Host "     (Dang doi DB khoi tao... ${i}s)" -ForegroundColor Gray
+}
+
+if (-not $pgReady) {
+    Write-Host "[CANH BAO] PostgreSQL khoi dong lau hon binh thuong, nhung tiep tuc tien hanh..." -ForegroundColor Yellow
 }
 
 # 2. Kiem tra dependencies cua Frontend (node_modules)
@@ -62,4 +87,3 @@ Write-Host "  - Admin:    admin@banquethub.vn    / Admin@123" -ForegroundColor G
 Write-Host "  - Employee: employee@banquethub.vn / Employee@123" -ForegroundColor Gray
 Write-Host "  - User:     user@banquethub.vn     / User@123" -ForegroundColor Gray
 Write-Host "==========================================================" -ForegroundColor Green
-
