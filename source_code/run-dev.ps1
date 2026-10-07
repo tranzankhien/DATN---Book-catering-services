@@ -15,6 +15,20 @@ if (-not (Test-Path "$root\.env")) {
     Write-Host "  -> Da tao .env voi cau hinh local chuan!" -ForegroundColor Green
 }
 
+# Dong bo .env sang infra/.env de dam bao Docker luon khop mat khau
+Copy-Item "$root\.env" "$root\infra\.env" -Force
+
+# Doc POSTGRES_PASSWORD tu .env
+$dbPass = "BanquetHub_Local_2026!"
+if (Test-Path "$root\.env") {
+    $envLines = Get-Content "$root\.env"
+    foreach ($line in $envLines) {
+        if ($line -match "^POSTGRES_PASSWORD=(.+)$") {
+            $dbPass = $matches[1].Trim()
+        }
+    }
+}
+
 # 1. Kiem tra Docker Engine dang chay
 Write-Host "`n[1/4] Kiem tra Docker Desktop..." -ForegroundColor Yellow
 $dockerCheck = docker info 2>&1
@@ -51,8 +65,15 @@ for ($i = 1; $i -le 25; $i++) {
     Write-Host "     (Dang doi DB khoi tao... ${i}s)" -ForegroundColor Gray
 }
 
-if (-not $pgReady) {
-    Write-Host "[CANH BAO] PostgreSQL khoi dong lau hon binh thuong, nhung tiep tuc tien hanh..." -ForegroundColor Yellow
+# Kiem tra xac thuc mat khau: Neu volume cu tao truoc do co password khac, tu dong reset volume
+$authCheck = docker compose -f "$root\infra\docker-compose.yml" exec -T -e PGPASSWORD=$dbPass postgres psql -U banquet_user -d banquet_hub -c "SELECT 1;" 2>&1
+if ($authCheck -match "password authentication failed") {
+    Write-Host "`n[CANH BAO] Phat hien Database volume cu co mat khau khong khop!" -ForegroundColor Yellow
+    Write-Host "  -> Dang tu dong reset volume database de dong bo mat khau moi..." -ForegroundColor Cyan
+    docker compose -f "$root\infra\docker-compose.yml" down -v
+    docker compose -f "$root\infra\docker-compose.yml" up -d
+    Start-Sleep -Seconds 5
+    Write-Host "  -> Da reset database thanh cong voi mat khau chuan tu .env!" -ForegroundColor Green
 }
 
 # 2. Kiem tra dependencies cua Frontend (node_modules)
