@@ -15,7 +15,8 @@ if (-not (Test-Path "$root\.env")) {
     Write-Host "  -> Da tao .env voi cau hinh local chuan!" -ForegroundColor Green
 }
 
-# Dong bo .env sang infra/.env de dam bao Docker luon khop mat khau
+# Dong bo .env sang backend/.env va infra/.env de dam bao moi service luon khop mat khau
+Copy-Item "$root\.env" "$root\backend\.env" -Force
 Copy-Item "$root\.env" "$root\infra\.env" -Force
 
 # Doc POSTGRES_PASSWORD tu .env
@@ -89,7 +90,7 @@ if (-not (Test-Path "$root\frontend\node_modules")) {
 
 # 3. Bat Spring Boot Backend o cua so PowerShell rieng (Port 8080)
 Write-Host "`n[3/4] Dang bat Spring Boot Backend (Port 8080)..." -ForegroundColor Yellow
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "Write-Host '--- BANQUETHUB BACKEND (SPRING BOOT :8080) ---' -ForegroundColor Yellow; Set-Location '$root\backend'; .\mvnw.cmd spring-boot:run"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "`$env:SPRING_DATASOURCE_PASSWORD='$dbPass'; `$env:SPRING_DATASOURCE_USERNAME='banquet_user'; Write-Host '--- BANQUETHUB BACKEND (SPRING BOOT :8080) ---' -ForegroundColor Yellow; Set-Location '$root\backend'; .\mvnw.cmd spring-boot:run"
 
 # 4. Bat React Frontend o cua so PowerShell rieng (Port 5173)
 Write-Host "`n[4/4] Dang bat React Vite Frontend (Port 5173)..." -ForegroundColor Yellow

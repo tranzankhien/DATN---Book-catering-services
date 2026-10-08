@@ -8,7 +8,7 @@ spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/banquet_hub}
     username: ${SPRING_DATASOURCE_USERNAME:banquet_user}
-    password: ${SPRING_DATASOURCE_PASSWORD:}
+    password: ${SPRING_DATASOURCE_PASSWORD:BanquetHub_Local_2026!}
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false
@@ -48,18 +48,18 @@ springdoc:
 
 app:
   jwt:
-    secret: ${APP_JWT_SECRET:}
+    secret: ${APP_JWT_SECRET:BanquetHub_Local_Jwt_Secret_Key_2026_For_HS256_Signing_Min32Bytes}
     expiration-ms: ${APP_JWT_EXPIRATION_MS:86400000}
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
   seed:
     enabled: ${APP_SEED_ENABLED:true}
     admin-email: ${APP_SEED_ADMIN_EMAIL:admin@banquethub.vn}
-    admin-password: ${APP_SEED_ADMIN_PASSWORD:}
+    admin-password: ${APP_SEED_ADMIN_PASSWORD:Admin@123}
     employee-email: ${APP_SEED_EMPLOYEE_EMAIL:employee@banquethub.vn}
-    employee-password: ${APP_SEED_EMPLOYEE_PASSWORD:}
+    employee-password: ${APP_SEED_EMPLOYEE_PASSWORD:Employee@123}
     user-email: ${APP_SEED_USER_EMAIL:user@banquethub.vn}
-    user-password: ${APP_SEED_USER_PASSWORD:}
+    user-password: ${APP_SEED_USER_PASSWORD:User@123}
 
 logging:
   level:
