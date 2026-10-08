@@ -8,8 +8,20 @@ Write-Host "==========================================================" -Foregro
 Write-Host "       BANQUETHUB - KHOI DONG HE THONG TOAN DIEN          " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
-# 0. Kiem tra va tu dong tao file .env neu chua co
-if (-not (Test-Path "$root\.env")) {
+# 0. Kiem tra va tu dong tao / cap nhat file .env
+if (Test-Path "$root\.env") {
+    $content = Get-Content "$root\.env" -Raw
+    if ($content -match "CHANGE_ME") {
+        Write-Host "`n[0/4] Phat hien .env cu chua dat mat khau, dang tu dong cap nhat..." -ForegroundColor Yellow
+        $content = $content -replace "CHANGE_ME_LOCAL_DEV_PASSWORD", "BanquetHub_Local_2026!"
+        $content = $content -replace "CHANGE_ME_WITH_AT_LEAST_32_BYTES_SECRET_KEY_FOR_HS256", "BanquetHub_Local_Jwt_Secret_Key_2026_For_HS256_Signing_Min32Bytes"
+        $content = $content -replace "CHANGE_ME_ADMIN_DEMO_PASSWORD", "Admin@123"
+        $content = $content -replace "CHANGE_ME_EMPLOYEE_DEMO_PASSWORD", "Employee@123"
+        $content = $content -replace "CHANGE_ME_USER_DEMO_PASSWORD", "User@123"
+        Set-Content -Path "$root\.env" -Value $content -NoNewline
+        Write-Host "  -> Da cap nhat .env voi mat khau chuan!" -ForegroundColor Green
+    }
+} else {
     Write-Host "`n[0/4] Chua co file .env, dang tu dong tao tu .env.example..." -ForegroundColor Yellow
     Copy-Item "$root\.env.example" "$root\.env"
     Write-Host "  -> Da tao .env voi cau hinh local chuan!" -ForegroundColor Green
