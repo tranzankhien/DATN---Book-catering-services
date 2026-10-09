@@ -6,7 +6,7 @@ spring:
       - optional:file:.env[.properties]
       - optional:file:../.env[.properties]
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/banquet_hub}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/banquet_hub}
     username: ${SPRING_DATASOURCE_USERNAME:banquet_user}
     password: ${SPRING_DATASOURCE_PASSWORD:BanquetHub_Local_2026!}
     driver-class-name: org.postgresql.Driver

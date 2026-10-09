@@ -11,3 +11,4 @@ COPY --from=build /app/target/banquet-hub-api-*.jar app.jar
 ENV TZ=Asia/Ho_Chi_Minh
 EXPOSE 8080
 ENTRYPOINT ["java", "-Duser.timezone=Asia/Ho_Chi_Minh", "-jar", "app.jar"]
+

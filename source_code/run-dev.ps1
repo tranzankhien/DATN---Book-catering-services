@@ -1,123 +1,169 @@
 # =====================================================================
 # BanquetHub - Script khoi chay toan bo he thong local (Windows PowerShell)
 # =====================================================================
+# Luu y: file nay chi dung ky tu ASCII de PowerShell 5.1 doc dung.
 
+$ErrorActionPreference = "Continue"
 $root = $PSScriptRoot
+$composeFile = "$root\infra\docker-compose.yml"
 
-Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "       BANQUETHUB - KHOI DONG HE THONG TOAN DIEN          " -ForegroundColor Cyan
-Write-Host "==========================================================" -ForegroundColor Cyan
-
-# 0. Kiem tra va tu dong tao / cap nhat file .env
-if (Test-Path "$root\.env") {
-    $content = Get-Content "$root\.env" -Raw
-    if ($content -match "CHANGE_ME") {
-        Write-Host "`n[0/4] Phat hien .env cu chua dat mat khau, dang tu dong cap nhat..." -ForegroundColor Yellow
-        $content = $content -replace "CHANGE_ME_LOCAL_DEV_PASSWORD", "BanquetHub_Local_2026!"
-        $content = $content -replace "CHANGE_ME_WITH_AT_LEAST_32_BYTES_SECRET_KEY_FOR_HS256", "BanquetHub_Local_Jwt_Secret_Key_2026_For_HS256_Signing_Min32Bytes"
-        $content = $content -replace "CHANGE_ME_ADMIN_DEMO_PASSWORD", "Admin@123"
-        $content = $content -replace "CHANGE_ME_EMPLOYEE_DEMO_PASSWORD", "Employee@123"
-        $content = $content -replace "CHANGE_ME_USER_DEMO_PASSWORD", "User@123"
-        Set-Content -Path "$root\.env" -Value $content -NoNewline
-        Write-Host "  -> Da cap nhat .env voi mat khau chuan!" -ForegroundColor Green
-    }
-} else {
-    Write-Host "`n[0/4] Chua co file .env, dang tu dong tao tu .env.example..." -ForegroundColor Yellow
-    Copy-Item "$root\.env.example" "$root\.env"
-    Write-Host "  -> Da tao .env voi cau hinh local chuan!" -ForegroundColor Green
-}
-
-# Dong bo .env sang backend/.env va infra/.env de dam bao moi service luon khop mat khau
-Copy-Item "$root\.env" "$root\backend\.env" -Force
-Copy-Item "$root\.env" "$root\infra\.env" -Force
-
-# Doc POSTGRES_PASSWORD tu .env
-$dbPass = "BanquetHub_Local_2026!"
-if (Test-Path "$root\.env") {
-    $envLines = Get-Content "$root\.env"
-    foreach ($line in $envLines) {
-        if ($line -match "^POSTGRES_PASSWORD=(.+)$") {
-            $dbPass = $matches[1].Trim()
-        }
-    }
-}
-
-# 1. Kiem tra Docker Engine dang chay
-Write-Host "`n[1/4] Kiem tra Docker Desktop..." -ForegroundColor Yellow
-$dockerCheck = docker info 2>&1
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "`n[LOI NGHIEP TRONG] Docker Desktop chua duoc bat hoac dang khoi dong do dang!" -ForegroundColor Red
-    Write-Host "-> Huong dan xu ly:" -ForegroundColor Yellow
-    Write-Host "   1. Mo ung dung Docker Desktop tren Windows." -ForegroundColor White
-    Write-Host "   2. Doi bieu tuong Docker (con ca voi o goc phai man hinh) hien mau XANH LA (Engine running)." -ForegroundColor White
-    Write-Host "   3. Chay lai lenh: .\run-dev.ps1" -ForegroundColor White
-    Write-Host "`nNhan phim bat ky de thoat..." -ForegroundColor Gray
+function Fail($msg) {
+    Write-Host "`n[LOI] $msg" -ForegroundColor Red
+    Write-Host "Nhan phim bat ky de thoat..." -ForegroundColor Gray
     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit 1
 }
 
-# Khoi dong PostgreSQL 17
-Write-Host "  -> Dang khoi dong container PostgreSQL 17..." -ForegroundColor Cyan
-docker compose -f "$root\infra\docker-compose.yml" up -d
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "[LOI] Khong the khoi dong container PostgreSQL 17." -ForegroundColor Red
-    exit 1
-}
+Write-Host "==========================================================" -ForegroundColor Cyan
+Write-Host "       BANQUETHUB - KHOI DONG HE THONG LOCAL              " -ForegroundColor Cyan
+Write-Host "==========================================================" -ForegroundColor Cyan
 
-# Doi PostgreSQL 17 san sang nhan ket noi (Health check)
-Write-Host "  -> Dang doi PostgreSQL 17 san sang nhan ket noi..." -ForegroundColor Cyan
-$pgReady = $false
-for ($i = 1; $i -le 25; $i++) {
-    $status = docker compose -f "$root\infra\docker-compose.yml" exec -T postgres pg_isready -U banquet_user -d banquet_hub 2>&1
-    if ($status -match "accepting connections") {
-        $pgReady = $true
-        Write-Host "  -> PostgreSQL 17 da san sang!" -ForegroundColor Green
-        break
-    }
-    Start-Sleep -Seconds 1
-    Write-Host "     (Dang doi DB khoi tao... ${i}s)" -ForegroundColor Gray
-}
-
-# Kiem tra xac thuc mat khau: Neu volume cu tao truoc do co password khac, tu dong reset volume
-$authCheck = docker compose -f "$root\infra\docker-compose.yml" exec -T -e PGPASSWORD=$dbPass postgres psql -U banquet_user -d banquet_hub -c "SELECT 1;" 2>&1
-if ($authCheck -match "password authentication failed") {
-    Write-Host "`n[CANH BAO] Phat hien Database volume cu co mat khau khong khop!" -ForegroundColor Yellow
-    Write-Host "  -> Dang tu dong reset volume database de dong bo mat khau moi..." -ForegroundColor Cyan
-    docker compose -f "$root\infra\docker-compose.yml" down -v
-    docker compose -f "$root\infra\docker-compose.yml" up -d
-    Start-Sleep -Seconds 5
-    Write-Host "  -> Da reset database thanh cong voi mat khau chuan tu .env!" -ForegroundColor Green
-}
-
-# 2. Kiem tra dependencies cua Frontend (node_modules)
-if (-not (Test-Path "$root\frontend\node_modules")) {
-    Write-Host "`n[2/4] Chua cai dat thu vien Frontend, dang chay npm install..." -ForegroundColor Yellow
-    Set-Location "$root\frontend"
-    npm install
-    Set-Location $root
-    Write-Host "  -> Cai dat npm dependencies hoan tat!" -ForegroundColor Green
+# ---------------------------------------------------------------------
+# 0. Chuan bi file .env (tao moi hoac nang cap file cu)
+# ---------------------------------------------------------------------
+if (-not (Test-Path "$root\.env")) {
+    Copy-Item "$root\.env.example" "$root\.env"
+    Write-Host "[0/5] Da tao .env tu .env.example" -ForegroundColor Green
 } else {
-    Write-Host "`n[2/4] Thu vien Frontend da san sang." -ForegroundColor Green
+    $content = Get-Content "$root\.env" -Raw
+    $original = $content
+    # Thay cac gia tri mau cu
+    $content = $content -replace "CHANGE_ME_LOCAL_DEV_PASSWORD", "BanquetHub_Local_2026!"
+    $content = $content -replace "CHANGE_ME_WITH_AT_LEAST_32_BYTES_SECRET_KEY_FOR_HS256", "BanquetHub_Local_Jwt_Secret_Key_2026_For_HS256_Signing_Min32Bytes"
+    $content = $content -replace "CHANGE_ME_ADMIN_DEMO_PASSWORD", "Admin@123"
+    $content = $content -replace "CHANGE_ME_EMPLOYEE_DEMO_PASSWORD", "Employee@123"
+    $content = $content -replace "CHANGE_ME_USER_DEMO_PASSWORD", "User@123"
+    # Chuyen cong cu 5432 -> 5433 (tranh dung do PostgreSQL cai san tren Windows)
+    $content = $content -replace "(?m)^POSTGRES_PORT=5432\s*$", "POSTGRES_PORT=5433"
+    $content = $content -replace "localhost:5432/", "localhost:5433/"
+    if ($content -ne $original) {
+        Set-Content -Path "$root\.env" -Value $content -NoNewline
+        Write-Host "[0/5] Da nang cap .env cu (mat khau mau / cong 5433)" -ForegroundColor Green
+    } else {
+        Write-Host "[0/5] File .env da san sang" -ForegroundColor Green
+    }
 }
 
-# 3. Bat Spring Boot Backend o cua so PowerShell rieng (Port 8080)
-Write-Host "`n[3/4] Dang bat Spring Boot Backend (Port 8080)..." -ForegroundColor Yellow
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "`$env:SPRING_DATASOURCE_PASSWORD='$dbPass'; `$env:SPRING_DATASOURCE_USERNAME='banquet_user'; Write-Host '--- BANQUETHUB BACKEND (SPRING BOOT :8080) ---' -ForegroundColor Yellow; Set-Location '$root\backend'; .\mvnw.cmd spring-boot:run"
+# Doc .env thanh bang tra cuu
+$cfg = @{}
+foreach ($line in Get-Content "$root\.env") {
+    if ($line -match "^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$") { $cfg[$matches[1]] = $matches[2].Trim() }
+}
+$dbName = if ($cfg.POSTGRES_DB) { $cfg.POSTGRES_DB } else { "banquet_hub" }
+$dbUser = if ($cfg.POSTGRES_USER) { $cfg.POSTGRES_USER } else { "banquet_user" }
+$dbPass = if ($cfg.POSTGRES_PASSWORD) { $cfg.POSTGRES_PASSWORD } else { "BanquetHub_Local_2026!" }
+$dbPort = if ($cfg.POSTGRES_PORT) { $cfg.POSTGRES_PORT } else { "5433" }
+$jdbcUrl = "jdbc:postgresql://localhost:$dbPort/$dbName"
 
-# 4. Bat React Frontend o cua so PowerShell rieng (Port 5173)
-Write-Host "`n[4/4] Dang bat React Vite Frontend (Port 5173)..." -ForegroundColor Yellow
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "Write-Host '--- BANQUETHUB FRONTEND (REACT VITE :5173) ---' -ForegroundColor Green; Set-Location '$root\frontend'; npm run dev"
+Copy-Item "$root\.env" "$root\infra\.env" -Force
+Copy-Item "$root\.env" "$root\backend\.env" -Force
 
-Write-Host "`n==========================================================" -ForegroundColor Green
-Write-Host ">>> DA KHOI DONG TOAN BO DICH VU THANH CONG!" -ForegroundColor Green
-Write-Host "==========================================================" -ForegroundColor Green
-Write-Host "  - Frontend (Giao dien): http://localhost:5173" -ForegroundColor White
-Write-Host "  - Quan tri (Admin):     http://localhost:5173/admin/catalog" -ForegroundColor White
-Write-Host "  - Backend REST API:     http://localhost:8080/api/v1" -ForegroundColor White
-Write-Host "  - Swagger API Docs:     http://localhost:8080/swagger-ui.html" -ForegroundColor White
-Write-Host "  - Health Check:         http://localhost:8080/api/v1/health" -ForegroundColor White
+# ---------------------------------------------------------------------
+# 1. Docker Desktop phai dang chay
+# ---------------------------------------------------------------------
+Write-Host "`n[1/5] Kiem tra Docker Desktop..." -ForegroundColor Yellow
+docker info *> $null
+if ($LASTEXITCODE -ne 0) {
+    Fail "Docker Desktop chua chay. Hay mo Docker Desktop, doi bieu tuong chuyen xanh (Engine running) roi chay lai .\run-dev.ps1"
+}
+Write-Host "  -> Docker dang chay" -ForegroundColor Green
+
+# ---------------------------------------------------------------------
+# 2. Kiem tra cong DB: khong duoc co chuong trinh KHAC Docker chiem cong
+# ---------------------------------------------------------------------
+Write-Host "`n[2/5] Kiem tra cong PostgreSQL $dbPort..." -ForegroundColor Yellow
+$dockerProcs = @("com.docker.backend", "com.docker.proxy", "vpnkit", "wslrelay", "docker-proxy", "com.docker.vpnkit")
+$listeners = Get-NetTCPConnection -LocalPort $dbPort -State Listen -ErrorAction SilentlyContinue
+foreach ($l in $listeners) {
+    $p = Get-Process -Id $l.OwningProcess -ErrorAction SilentlyContinue
+    if ($p -and ($dockerProcs -notcontains $p.ProcessName)) {
+        Fail ("Cong $dbPort dang bi chuong trinh '" + $p.ProcessName + "' (PID " + $p.Id + ") chiem. " +
+              "Hay doi POSTGRES_PORT va SPRING_DATASOURCE_URL trong file .env sang cong khac (vd 5434) roi chay lai.")
+    }
+}
+# Thong tin: phat hien PostgreSQL cai truc tiep tren Windows (nguyen nhan loi password cu)
+$native = Get-Service -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "postgresql*" -and $_.Status -eq "Running" }
+if ($native) {
+    Write-Host ("  -> Luu y: may co PostgreSQL cai san (" + ($native.Name -join ", ") + ") dang chay o cong 5432. " +
+                "Du an dung cong $dbPort nen khong bi anh huong.") -ForegroundColor DarkYellow
+}
+Write-Host "  -> Cong $dbPort hop le" -ForegroundColor Green
+
+# ---------------------------------------------------------------------
+# 3. Khoi dong PostgreSQL 17 + dong bo mat khau
+# ---------------------------------------------------------------------
+Write-Host "`n[3/5] Khoi dong PostgreSQL 17 (Docker)..." -ForegroundColor Yellow
+docker compose -f $composeFile up -d
+if ($LASTEXITCODE -ne 0) { Fail "Khong khoi dong duoc container PostgreSQL." }
+
+$ready = $false
+for ($i = 1; $i -le 30; $i++) {
+    docker compose -f $composeFile exec -T postgres pg_isready -U $dbUser -d $dbName *> $null
+    if ($LASTEXITCODE -eq 0) { $ready = $true; break }
+    Start-Sleep -Seconds 1
+}
+if (-not $ready) { Fail "PostgreSQL khong san sang sau 30 giay. Xem log: docker logs banquet-hub-postgres" }
+
+# Dong bo mat khau trong DB voi .env (qua socket noi bo, khong can mat khau).
+# Giai quyet truong hop volume cu duoc tao voi mat khau khac.
+$sqlPass = $dbPass.Replace("'", "''")
+docker compose -f $composeFile exec -T postgres psql -U $dbUser -d $dbName -v ON_ERROR_STOP=1 -c "ALTER USER $dbUser WITH PASSWORD '$sqlPass';" *> $null
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "  -> Volume cu khong tuong thich (sai user/DB). Dang tao lai database sach..." -ForegroundColor DarkYellow
+    docker compose -f $composeFile down -v
+    docker compose -f $composeFile up -d
+    for ($i = 1; $i -le 30; $i++) {
+        docker compose -f $composeFile exec -T postgres pg_isready -U $dbUser -d $dbName *> $null
+        if ($LASTEXITCODE -eq 0) { break }
+        Start-Sleep -Seconds 1
+    }
+}
+Write-Host "  -> PostgreSQL san sang tai localhost:$dbPort, mat khau da dong bo voi .env" -ForegroundColor Green
+
+# ---------------------------------------------------------------------
+# 4. Thu vien Frontend
+# ---------------------------------------------------------------------
+if (-not (Test-Path "$root\frontend\node_modules")) {
+    Write-Host "`n[4/5] Cai thu vien Frontend (npm install)..." -ForegroundColor Yellow
+    Push-Location "$root\frontend"; npm install; Pop-Location
+} else {
+    Write-Host "`n[4/5] Thu vien Frontend da san sang" -ForegroundColor Green
+}
+
+# ---------------------------------------------------------------------
+# 5. Bat Backend + Frontend (truyen thang bien moi truong cho Backend)
+# ---------------------------------------------------------------------
+Write-Host "`n[5/5] Bat Backend (:8080) va Frontend (:5173)..." -ForegroundColor Yellow
+$psPass = $dbPass.Replace("'", "''")
+$backendCmd = "`$env:SPRING_DATASOURCE_URL='$jdbcUrl'; `$env:SPRING_DATASOURCE_USERNAME='$dbUser'; `$env:SPRING_DATASOURCE_PASSWORD='$psPass'; " +
+              "Write-Host '--- BANQUETHUB BACKEND (SPRING BOOT :8080) -> $jdbcUrl ---' -ForegroundColor Yellow; " +
+              "Set-Location '$root\backend'; .\mvnw.cmd spring-boot:run"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", $backendCmd
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "Write-Host '--- BANQUETHUB FRONTEND (VITE :5173) ---' -ForegroundColor Green; Set-Location '$root\frontend'; npm run dev"
+
+# Doi Backend len that su roi moi bao thanh cong
+Write-Host "  -> Dang doi Backend khoi dong (toi da 120 giay)..." -ForegroundColor Cyan
+$up = $false
+for ($i = 1; $i -le 60; $i++) {
+    Start-Sleep -Seconds 2
+    try {
+        $r = Invoke-RestMethod -Uri "http://localhost:8080/api/v1/health" -TimeoutSec 2
+        if ($r) { $up = $true; break }
+    } catch { }
+}
+
+if ($up) {
+    Write-Host "`n==========================================================" -ForegroundColor Green
+    Write-Host ">>> HE THONG DA CHAY THANH CONG" -ForegroundColor Green
+    Write-Host "==========================================================" -ForegroundColor Green
+} else {
+    Write-Host "`n[CANH BAO] Backend chua phan hoi sau 120 giay. Xem loi trong cua so BACKEND." -ForegroundColor Red
+}
+Write-Host "  - Frontend:     http://localhost:5173" -ForegroundColor White
+Write-Host "  - Admin:        http://localhost:5173/admin/catalog" -ForegroundColor White
+Write-Host "  - Backend API:  http://localhost:8080/api/v1" -ForegroundColor White
+Write-Host "  - Swagger:      http://localhost:8080/swagger-ui.html" -ForegroundColor White
 Write-Host "`nTai khoan demo:" -ForegroundColor Cyan
 Write-Host "  - Admin:    admin@banquethub.vn    / Admin@123" -ForegroundColor Gray
 Write-Host "  - Employee: employee@banquethub.vn / Employee@123" -ForegroundColor Gray
 Write-Host "  - User:     user@banquethub.vn     / User@123" -ForegroundColor Gray
-Write-Host "==========================================================" -ForegroundColor Green
