@@ -65,7 +65,24 @@ flowchart LR
     - `service/StockReceiptService`: Lập phiếu nhập (Nháp/Xác nhận), kiểm tra tính hợp lệ, tăng tồn kho đúng 1 lần, cập nhật giá vốn bình quân di động, ghi sổ `StockMovement`, ghi nhận thanh toán.
     - `service/PdfExportService`: Xuất phiếu nhập PDF A4 tiếng Việt có dấu chuẩn OpenPDF + Noto Sans Unicode SIL OFL.
     - `controller/`: `AdminInventoryController`, `AdminStockReceiptController`.
-  - **Dự kiến mở rộng ở Phase 3–7**: `orders`, `payments`, `ai`, `notifications`, `employees`, `payroll`, `reports`.
+  - **`menus` (Phase 3)**:
+    - `entity/`: `Menu`, `MenuItem`, `MenuStatus`.
+    - `repository/`: `MenuRepository`, `MenuItemRepository`.
+    - `service/MenuService`: Quản lý thực đơn mẫu, tính đơn giá bàn, quản trị CRUD thực đơn.
+    - `controller/`: `MenuController` (Public), `AdminMenuController` (Admin).
+  - **`reservations` (Phase 3)**:
+    - `entity/`: `StockReservation`, `StockReservationItem`, `ReservationStatus`.
+    - `repository/`: `StockReservationRepository`, `StockReservationItemRepository`.
+    - `service/StockReservationService`: Khóa bi quan `PESSIMISTIC_WRITE`, kiểm tra tồn khả dụng (`physicalStock - activeReservedStock`), tạo lệnh giữ kho 15 phút, giải phóng kho.
+    - `service/ReservationExpiryScheduler`: `@Scheduled(cron = "0 * * * * *")` tự động quét và hủy các đơn giữ kho quá 15 phút chưa thanh toán.
+    - `controller/AdminReservationController`: Tra cứu lệnh giữ kho và báo cáo đối chiếu tồn khả dụng.
+  - **`orders` (Phase 3)**:
+    - `entity/`: `Order`, `OrderItem`, `OrderStatus`, `PaymentStatus`, `OrderStatusHistory`.
+    - `repository/`: `OrderRepository` (hỗ trợ `JpaSpecificationExecutor`), `OrderItemRepository`, `OrderStatusHistoryRepository`.
+    - `service/OrderPreviewService`: Tính thử realtime giá mỗi bàn, tổng tiền và nhu cầu nguyên liệu cho client.
+    - `service/OrderService`: Tạo đơn đặt tiệc với Idempotency Key, chụp ảnh bất biến giá món (`dish_name_snapshot`, `unit_price_snapshot`), tích hợp giữ kho, hủy đơn và ghi audit log.
+    - `controller/`: `OrderPreviewController`, `OrderController`, `AdminOrderController`, `EmployeeOrderController`.
+  - **Dự kiến mở rộng ở Phase 4–7**: `payments (VNPAY)`, `ai`, `notifications`, `employees (ca làm & chấm công)`, `payroll`, `reports`.
 
 ---
 

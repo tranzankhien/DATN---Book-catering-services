@@ -148,3 +148,46 @@
   ]
 }
 ```
+
+---
+
+## 9. Thực Đơn Mẫu & Xem Trước Giá (`menus` & `admin/menus`)
+
+| Phương thức | Endpoint | Quyền | Mô tả |
+|-------------|----------|-------|-------|
+| `GET` | `/api/v1/menus` | Public | Danh sách thực đơn mẫu đang hoạt động (`ACTIVE`) kèm giá mỗi bàn |
+| `GET` | `/api/v1/menus/{id}` | Public | Chi tiết thực đơn mẫu kèm danh sách món, đơn giá món và giá mỗi bàn |
+| `GET` | `/api/v1/menus/{id}/preview?tableCount=N` | Public | Tính thử đơn giá và kiểm tra tồn kho cho thực đơn mẫu theo quy mô N bàn |
+| `GET` | `/api/v1/admin/menus?keyword=&status=&page=&size=` | `ROLE_ADMIN` | Quản trị danh sách thực đơn mẫu |
+| `GET` | `/api/v1/admin/menus/{id}` | `ROLE_ADMIN` | Chi tiết thực đơn mẫu bất kỳ trạng thái |
+| `POST` | `/api/v1/admin/menus` | `ROLE_ADMIN` | Tạo thực đơn mẫu mới (kèm danh sách món và số phần/món/bàn) |
+| `PUT` | `/api/v1/admin/menus/{id}` | `ROLE_ADMIN` | Cập nhật thông tin và danh sách món của thực đơn |
+| `PATCH` | `/api/v1/admin/menus/{id}/status` | `ROLE_ADMIN` | Cập nhật trạng thái áp dụng thực đơn (`ACTIVE` / `INACTIVE`) |
+
+---
+
+## 10. Đặt Tiệc & Quản Lý Đơn Hàng (`orders`, `admin/orders`, `employee/orders`)
+
+| Phương thức | Endpoint | Quyền | Mô tả |
+|-------------|----------|-------|-------|
+| `POST` | `/api/v1/orders/preview` | Public | Xem trước chi phí, tổng tiền, nhu cầu nguyên liệu và cảnh báo thiếu tồn kho (không tạo đơn) |
+| `POST` | `/api/v1/orders` | Public / User | Đặt tiệc chính thức (hỗ trợ Header `Idempotency-Key`, snapshot giá, khóa giữ kho 15 phút) |
+| `GET` | `/api/v1/orders/my-orders?status=&page=&size=` | `ROLE_USER`, `ROLE_EMPLOYEE`, `ROLE_ADMIN` | Danh sách đơn đặt tiệc của tài khoản đăng nhập |
+| `GET` | `/api/v1/orders/{id}` | `ROLE_USER`, `ROLE_EMPLOYEE`, `ROLE_ADMIN` | Chi tiết đơn đặt tiệc (chặn truy cập chéo đơn của tài khoản khác) |
+| `GET` | `/api/v1/orders/by-code/{orderCode}` | Public | Tra cứu đơn hàng theo mã đơn tiệc |
+| `POST` | `/api/v1/orders/{id}/cancel` | `ROLE_USER`, `ROLE_EMPLOYEE`, `ROLE_ADMIN` | Khách hàng hủy đơn tiệc khi còn trong hạn thanh toán 15 phút, lập tức giải phóng kho |
+| `GET` | `/api/v1/admin/orders?keyword=&orderStatus=&paymentStatus=&fromDate=&toDate=&page=&size=` | `ROLE_ADMIN` | Quản trị danh sách toàn bộ đơn đặt tiệc |
+| `GET` | `/api/v1/admin/orders/{id}` | `ROLE_ADMIN` | Chi tiết hợp đồng đơn tiệc, món snapshot, giữ kho và audit log |
+| `POST` | `/api/v1/admin/orders/{id}/cancel` | `ROLE_ADMIN` | Quản trị viên hủy đơn tiệc kèm lý do nghiệp vụ bắt buộc |
+| `GET` | `/api/v1/employee/orders?orderStatus=&fromDate=&toDate=&page=&size=` | `ROLE_EMPLOYEE`, `ROLE_ADMIN` | Danh sách lịch đặt tiệc theo thời gian tổ chức cho bộ phận bếp |
+| `GET` | `/api/v1/employee/orders/{id}` | `ROLE_EMPLOYEE`, `ROLE_ADMIN` | Phiếu chuẩn bị bếp, số phần cần nấu (`quantityPerTable * tableCount`) và nguyên liệu cần xuất |
+
+---
+
+## 11. Theo Dõi Giữ Chỗ Tồn Kho (`admin/inventory/reservations`)
+
+| Phương thức | Endpoint | Quyền | Mô tả |
+|-------------|----------|-------|-------|
+| `GET` | `/api/v1/admin/inventory/reservations?status=&page=&size=` | `ROLE_ADMIN` | Danh sách lệnh khóa giữ tồn kho 15 phút |
+| `GET` | `/api/v1/admin/inventory/reservations/availability` | `ROLE_ADMIN` | Báo cáo đối chiếu tồn kho vật lý (`physicalStock`), tồn đang giữ (`reservedStock`) và tồn khả dụng thực tế (`availableStock`) |
+

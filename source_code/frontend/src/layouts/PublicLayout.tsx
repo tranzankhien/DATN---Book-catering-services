@@ -111,6 +111,30 @@ export const PublicLayout: React.FC = () => {
               Trang chủ
             </NavLink>
             <NavLink
+              to="/menus"
+              className={({ isActive }) =>
+                `rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-amber-50 text-amber-900 font-semibold'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/70'
+                }`
+              }
+            >
+              Thực đơn mẫu
+            </NavLink>
+            <NavLink
+              to="/menu-builder"
+              className={({ isActive }) =>
+                `rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-amber-50 text-amber-900 font-semibold'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/70'
+                }`
+              }
+            >
+              Tự phối thực đơn
+            </NavLink>
+            <NavLink
               to="/dishes"
               className={({ isActive }) =>
                 `rounded-xl px-4 py-2 text-sm font-medium transition-all ${
@@ -120,7 +144,7 @@ export const PublicLayout: React.FC = () => {
                 }`
               }
             >
-              Thực đơn món tiệc
+              Món tiệc
             </NavLink>
           </nav>
 
@@ -150,6 +174,26 @@ export const PublicLayout: React.FC = () => {
                         {getRoleLabel(user.role)}
                       </span>
                     </div>
+
+                    <Link
+                      to="/my-orders"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-stone-700 hover:bg-amber-50 hover:text-amber-900 transition-colors"
+                    >
+                      <Award className="h-4 w-4 text-amber-800" />
+                      <span>Đơn đặt tiệc của tôi</span>
+                    </Link>
+
+                    {user.role === 'ROLE_EMPLOYEE' && (
+                      <Link
+                        to="/employee/orders"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-stone-700 hover:bg-amber-50 hover:text-amber-900 transition-colors"
+                      >
+                        <ShieldCheck className="h-4 w-4 text-amber-800" />
+                        <span>Lịch điều phối bếp</span>
+                      </Link>
+                    )}
 
                     {user.role === 'ROLE_ADMIN' && (
                       <Link
@@ -215,11 +259,25 @@ export const PublicLayout: React.FC = () => {
               Trang chủ
             </NavLink>
             <NavLink
+              to="/menus"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100"
+            >
+              Thực đơn mẫu
+            </NavLink>
+            <NavLink
+              to="/menu-builder"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100"
+            >
+              Tự phối thực đơn
+            </NavLink>
+            <NavLink
               to="/dishes"
               onClick={() => setMobileMenuOpen(false)}
               className="block rounded-lg px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100"
             >
-              Thực đơn món tiệc
+              Món tiệc
             </NavLink>
 
             <div className="border-t border-stone-100 pt-2 flex flex-col gap-2">

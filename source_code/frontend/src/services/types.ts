@@ -158,7 +158,7 @@ export interface SupplierUpsertPayload {
 }
 
 export type StockReceiptStatus = 'DRAFT' | 'CONFIRMED';
-export type PaymentStatus = 'UNPAID' | 'PARTIALLY_PAID' | 'PAID';
+export type PaymentStatus = 'UNPAID' | 'PARTIALLY_PAID' | 'PAID' | 'REFUNDED';
 export type MovementType = 'IMPORT' | 'EXPORT' | 'ADJUSTMENT';
 export type ReferenceType = 'STOCK_RECEIPT' | 'STOCK_ADJUSTMENT' | 'ORDER' | 'MANUAL';
 
@@ -288,4 +288,198 @@ export interface InventorySummaryDto {
   recentReceipts: StockReceiptDto[];
   recentMovements: StockMovementDto[];
 }
+
+// ==========================================
+// PHASE 3: MENUS, ORDERS & RESERVATIONS
+// ==========================================
+
+export type MenuStatus = 'ACTIVE' | 'INACTIVE';
+export type OrderStatus = 'PENDING_PAYMENT' | 'PAID' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED';
+export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'RELEASED';
+
+export interface MenuItemDto {
+  id: number;
+  dishId: number;
+  dishCode: string;
+  dishName: string;
+  dishImageUrl?: string | null;
+  categoryName?: string;
+  dishPrice: number;
+  quantityPerTable: number;
+  lineTotalPerTable: number;
+  displayOrder: number;
+}
+
+export interface MenuDto {
+  id: number;
+  code: string;
+  name: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  status: MenuStatus;
+  pricePerTable: number;
+  itemsCount: number;
+  items: MenuItemDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MenuItemPayload {
+  dishId: number;
+  quantityPerTable: number;
+  displayOrder?: number;
+}
+
+export interface CreateMenuPayload {
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  items: MenuItemPayload[];
+}
+
+export interface UpdateMenuPayload {
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  items: MenuItemPayload[];
+}
+
+export interface OrderItemDto {
+  id: number;
+  dishId?: number;
+  dishCode?: string;
+  dishNameSnapshot: string;
+  dishImageUrl?: string | null;
+  unitPriceSnapshot: number;
+  quantityPerTable: number;
+  totalQuantity: number;
+  lineTotal: number;
+}
+
+export interface OrderStatusHistoryDto {
+  id: number;
+  fromStatus?: OrderStatus;
+  toStatus: OrderStatus;
+  changedByName: string;
+  reason?: string | null;
+  createdAt: string;
+}
+
+export interface StockReservationItemDto {
+  id: number;
+  ingredientId: number;
+  ingredientCode: string;
+  ingredientName: string;
+  unit: string;
+  quantity: number;
+}
+
+export interface StockReservationDto {
+  id: number;
+  orderId?: number;
+  orderCode?: string;
+  customerName?: string;
+  status: ReservationStatus;
+  expiresAt: string;
+  createdAt: string;
+  releasedAt?: string | null;
+  items: StockReservationItemDto[];
+}
+
+export interface OrderDto {
+  id: number;
+  orderCode: string;
+  userId?: number | null;
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  eventDateTime: string;
+  tableCount: number;
+  note?: string | null;
+  menuId?: number | null;
+  menuNameSnapshot?: string | null;
+  totalAmount: number;
+  orderStatus: OrderStatus;
+  paymentStatus: PaymentStatus;
+  paymentExpiresAt?: string | null;
+  secondsRemaining?: number | null;
+  items: OrderItemDto[];
+  reservation?: StockReservationDto | null;
+  statusHistories: OrderStatusHistoryDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrderItemPreviewDto {
+  dishId: number;
+  dishCode: string;
+  dishName: string;
+  dishImageUrl?: string | null;
+  categoryName?: string;
+  unitPrice: number;
+  quantityPerTable: number;
+  totalQuantity: number;
+  lineTotal: number;
+}
+
+export interface IngredientDemandPreviewDto {
+  ingredientId: number;
+  ingredientCode: string;
+  ingredientName: string;
+  unit: string;
+  requiredQuantity: number;
+  physicalStock: number;
+  activeReservedStock: number;
+  availableStock: number;
+  sufficient: boolean;
+  shortageQuantity: number;
+}
+
+export interface OrderPreviewResponseDto {
+  menuId?: number | null;
+  menuName?: string | null;
+  tableCount: number;
+  pricePerTable: number;
+  totalAmount: number;
+  items: OrderItemPreviewDto[];
+  ingredientDemands: IngredientDemandPreviewDto[];
+  canProceed: boolean;
+  validationMessages: string[];
+}
+
+export interface CreateOrderItemPayload {
+  dishId: number;
+  quantityPerTable: number;
+}
+
+export interface CreateOrderPayload {
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  eventDateTime: string;
+  tableCount: number;
+  note?: string;
+  menuId?: number;
+  items: CreateOrderItemPayload[];
+  idempotencyKey?: string;
+}
+
+export interface OrderPreviewPayload {
+  menuId?: number;
+  tableCount: number;
+  items?: CreateOrderItemPayload[];
+}
+
+export interface StockAvailabilityDto {
+  ingredientId: number;
+  ingredientCode: string;
+  ingredientName: string;
+  unit: string;
+  physicalStock: number;
+  reservedStock: number;
+  availableStock: number;
+  minStockThreshold: number;
+  lowStock: boolean;
+}
+
 

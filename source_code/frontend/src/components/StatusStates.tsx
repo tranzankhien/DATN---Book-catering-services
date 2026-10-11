@@ -2,17 +2,21 @@ import React from 'react';
 import { AlertCircle, Inbox, RefreshCw, Loader2 } from 'lucide-react';
 import type { DishStatus } from '../services/types';
 
-export const LoadingState: React.FC<{ label?: string }> = ({
-  label = 'Đang tải dữ liệu từ hệ thống...',
-}) => (
-  <div className="flex flex-col items-center justify-center rounded-2xl border border-stone-200/80 bg-white py-16 px-6 text-center shadow-xs">
-    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 mb-3.5">
-      <Loader2 className="h-6 w-6 animate-spin" />
+export const LoadingState: React.FC<{ label?: string; message?: string }> = ({
+  label,
+  message,
+}) => {
+  const text = label || message || 'Đang tải dữ liệu từ hệ thống...';
+  return (
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-stone-200/80 bg-white py-16 px-6 text-center shadow-xs">
+      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 mb-3.5">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+      <h4 className="text-sm font-semibold text-stone-900">{text}</h4>
+      <p className="mt-1 text-xs text-stone-500">Vui lòng chờ trong giây lát</p>
     </div>
-    <h4 className="text-sm font-semibold text-stone-900">{label}</h4>
-    <p className="mt-1 text-xs text-stone-500">Vui lòng chờ trong giây lát</p>
-  </div>
-);
+  );
+};
 
 export const ErrorState: React.FC<{
   title?: string;

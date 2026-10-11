@@ -245,3 +245,80 @@ Ghi nhận đầy đủ lịch sử biến động kho cho từng nguyên liệu
 - `reference_code`: Mã chứng từ (PN-..., DC-...).
 - Ràng buộc chống xác nhận cộng kho 2 lần:
   `CREATE UNIQUE INDEX uq_stock_movement_receipt_item ON stock_movements (reference_id, ingredient_id) WHERE reference_type = 'STOCK_RECEIPT';`
+
+---
+
+## 4. Chi tiết các bảng Phase 3 (`V5__phase3_menu_orders_reservation.sql` & `V6__seed_phase3_menus.sql`)
+
+### 4.1. Bảng `menus` (Thực Đơn Mẫu)
+Lưu trữ các bộ thực đơn chuẩn của nhà hàng.
+- `id`: `BIGSERIAL PRIMARY KEY`.
+- `code`: `VARCHAR(32) UNIQUE NOT NULL` (sinh tự động qua sequence `menu_code_seq`, định dạng `MN-001`).
+- `name`: `VARCHAR(200) NOT NULL`.
+- `description`: `TEXT NULL`.
+- `image_url`: `VARCHAR(500) NULL`.
+- `status`: `VARCHAR(30) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE'))`.
+- `created_at`, `updated_at`: `TIMESTAMPTZ NOT NULL`.
+
+### 4.2. Bảng `menu_items` (Món Ăn Trong Thực Đơn)
+- `id`: `BIGSERIAL PRIMARY KEY`.
+- `menu_id`: `BIGINT NOT NULL REFERENCES menus(id) ON DELETE CASCADE`.
+- `dish_id`: `BIGINT NOT NULL REFERENCES dishes(id) ON DELETE RESTRICT`.
+- `quantity_per_table`: `INTEGER NOT NULL DEFAULT 1 CHECK (quantity_per_table >= 1)`.
+- `display_order`: `INTEGER NOT NULL DEFAULT 0`.
+- Ràng buộc duy nhất: `CONSTRAINT uq_menu_dish UNIQUE(menu_id, dish_id)`.
+
+### 4.3. Bảng `orders` (Hợp Đồng Đặt Tiệc)
+Lưu thông tin chính của đơn đặt tiệc.
+- `id`: `BIGSERIAL PRIMARY KEY`.
+- `order_code`: `VARCHAR(32) UNIQUE NOT NULL` (sinh theo ngày `ORD-YYYYMMDD-0001` qua sequence `order_code_seq`).
+- `user_id`: `BIGINT NULL REFERENCES users(id) ON DELETE SET NULL` (hỗ trợ cả khách vãng lai và thành viên).
+- `customer_name`: `VARCHAR(120) NOT NULL`.
+- `customer_phone`: `VARCHAR(20) NOT NULL`.
+- `customer_email`: `VARCHAR(150) NOT NULL`.
+- `event_date_time`: `TIMESTAMPTZ NOT NULL`.
+- `table_count`: `INTEGER NOT NULL CHECK (table_count >= 1)`.
+- `note`: `TEXT NULL`.
+- `menu_id`: `BIGINT NULL REFERENCES menus(id) ON DELETE SET NULL`.
+- `menu_name_snapshot`: `VARCHAR(200) NULL`.
+- `total_amount`: `NUMERIC(15, 2) NOT NULL CHECK (total_amount >= 0)`.
+- `order_status`: `VARCHAR(30) NOT NULL DEFAULT 'PENDING_PAYMENT' CHECK (order_status IN ('PENDING_PAYMENT', 'PAID', 'PROCESSING', 'COMPLETED', 'CANCELLED'))`.
+- `payment_status`: `VARCHAR(30) NOT NULL DEFAULT 'UNPAID' CHECK (payment_status IN ('UNPAID', 'PARTIALLY_PAID', 'PAID', 'REFUNDED'))`.
+- `payment_expires_at`: `TIMESTAMPTZ NOT NULL` (gán = `NOW() + 15 phút` lúc tạo đơn).
+- `idempotency_key`: `VARCHAR(64) UNIQUE NULL` — Chống trùng lặp đơn hàng khi gửi lại request.
+- `created_at`, `updated_at`: `TIMESTAMPTZ NOT NULL`.
+
+### 4.4. Bảng `order_items` (Chi Tiết Món Ăn Đặt Tiệc – Snapshot Bất Biến)
+- `id`: `BIGSERIAL PRIMARY KEY`.
+- `order_id`: `BIGINT NOT NULL REFERENCES orders(id) ON DELETE CASCADE`.
+- `dish_id`: `BIGINT NULL REFERENCES dishes(id) ON DELETE SET NULL`.
+- `dish_name_snapshot`: `VARCHAR(150) NOT NULL` (bảo toàn lịch sử khi tên món thay đổi sau này).
+- `unit_price_snapshot`: `NUMERIC(15, 2) NOT NULL CHECK (unit_price_snapshot >= 0)` (bảo toàn lịch sử khi giá món tăng/giảm).
+- `quantity_per_table`: `INTEGER NOT NULL CHECK (quantity_per_table >= 1)`.
+- `total_quantity`: `INTEGER NOT NULL CHECK (total_quantity >= 1)` = `quantity_per_table * table_count`.
+- `line_total`: `NUMERIC(15, 2) NOT NULL CHECK (line_total >= 0)`.
+
+### 4.5. Bảng `stock_reservations` (Lệnh Khóa Giữ Tồn Kho 15 Phút)
+- `id`: `BIGSERIAL PRIMARY KEY`.
+- `order_id`: `BIGINT UNIQUE NOT NULL REFERENCES orders(id) ON DELETE CASCADE`.
+- `status`: `VARCHAR(30) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'CONFIRMED', 'RELEASED'))`.
+- `expires_at`: `TIMESTAMPTZ NOT NULL`.
+- `released_at`: `TIMESTAMPTZ NULL`.
+- `created_at`, `updated_at`: `TIMESTAMPTZ NOT NULL`.
+
+### 4.6. Bảng `stock_reservation_items` (Định Mức Nguyên Liệu Khóa Giữ)
+- `id`: `BIGSERIAL PRIMARY KEY`.
+- `reservation_id`: `BIGINT NOT NULL REFERENCES stock_reservations(id) ON DELETE CASCADE`.
+- `ingredient_id`: `BIGINT NOT NULL REFERENCES ingredients(id) ON DELETE RESTRICT`.
+- `quantity`: `NUMERIC(12, 3) NOT NULL CHECK (quantity > 0)`.
+- Ràng buộc duy nhất: `CONSTRAINT uq_reservation_ingredient UNIQUE(reservation_id, ingredient_id)`.
+
+### 4.7. Bảng `order_status_histories` (Nhật Ký Biến Động Trạng Thái – Audit Trail)
+- `id`: `BIGSERIAL PRIMARY KEY`.
+- `order_id`: `BIGINT NOT NULL REFERENCES orders(id) ON DELETE CASCADE`.
+- `from_status`: `VARCHAR(30) NULL`.
+- `to_status`: `VARCHAR(30) NOT NULL`.
+- `changed_by`: `BIGINT NULL REFERENCES users(id) ON DELETE SET NULL`.
+- `reason`: `TEXT NULL`.
+- `created_at`: `TIMESTAMPTZ NOT NULL`.
+

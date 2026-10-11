@@ -22,6 +22,8 @@ public interface DishRepository extends JpaRepository<Dish, Long> {
     @EntityGraph(attributePaths = {"category", "recipeItems", "recipeItems.ingredient"})
     Optional<Dish> findWithDetailsByIdAndStatus(Long id, DishStatus status);
 
+    Optional<Dish> findByCodeIgnoreCase(String code);
+
     boolean existsByCodeIgnoreCase(String code);
 
     boolean existsByCodeIgnoreCaseAndIdNot(String code, Long id);
