@@ -12,6 +12,7 @@ import {
   Sliders,
   Sparkles,
   Trash2,
+  Layers,
 } from 'lucide-react';
 import { menuService } from '../../services/menuService';
 import { catalogService } from '../../services/catalogService';
@@ -194,186 +195,225 @@ export const AdminMenusPage: React.FC = () => {
   }, 0);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="w-full max-w-[1720px] mx-auto space-y-8 animate-fade-up-1">
+      {/* Top Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-serif font-bold text-stone-900">
-            Quản Lý Thực Đơn Tiệc Mẫu
+          <div className="flex items-center gap-2 text-xs font-semibold text-amber-700">
+            <Utensils className="h-4 w-4" />
+            <span>Phân hệ thực đơn tiệc mẫu</span>
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold text-stone-900 tracking-tight mt-1">
+            Quản lý thực đơn tiệc mẫu
           </h1>
-          <p className="text-xs text-stone-500 mt-1">
-            Quản lý các bộ thực đơn chuẩn của nhà hàng phục vụ khách hàng đặt tiệc nhanh.
+          <p className="text-sm text-stone-500 mt-1">
+            Cấu hình các bộ thực đơn chuẩn của nhà hàng phục vụ khách đặt tiệc nhanh và tính nháp giá vốn.
           </p>
         </div>
 
-        <button
-          onClick={openCreateModal}
-          className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Tạo Thực Đơn Mới
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={fetchMenus}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 transition-colors shadow-xs cursor-pointer"
+            title="Làm mới số liệu"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-amber-600' : ''}`} />
+            <span>Làm mới</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-amber-800 text-white hover:bg-amber-900 transition-colors shadow-xs cursor-pointer"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Tạo thực đơn mới</span>
+          </button>
+        </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3 flex-1 min-w-[240px]">
-          <div className="relative w-full max-w-sm">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
+      {/* Filter Toolbar */}
+      <div className="bg-white p-3.5 rounded-2xl border border-stone-200/80 shadow-xs space-y-3">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
             <input
               type="text"
-              placeholder="Tìm kiếm theo mã hoặc tên thực đơn..."
+              placeholder="Tìm theo mã thực đơn (MN-001) hoặc tên thực đơn..."
               value={keyword}
               onChange={(e) => {
                 setKeyword(e.target.value);
                 setPage(0);
               }}
-              className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full pl-10 pr-9 py-2.5 text-xs rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 transition-colors"
             />
+            {keyword && (
+              <button
+                type="button"
+                onClick={() => setKeyword('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                title="Xóa tìm kiếm"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value as MenuStatus | '');
-              setPage(0);
-            }}
-            className="px-3 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
-          >
-            <option value="">Tất cả trạng thái</option>
-            <option value="ACTIVE">Đang hoạt động (ACTIVE)</option>
-            <option value="INACTIVE">Ngưng áp dụng (INACTIVE)</option>
-          </select>
+          <div className="flex items-center gap-2.5">
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value as MenuStatus | '');
+                setPage(0);
+              }}
+              className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="ACTIVE">Đang áp dụng (ACTIVE)</option>
+              <option value="INACTIVE">Ngưng áp dụng (INACTIVE)</option>
+            </select>
+          </div>
         </div>
-
-        <button
-          onClick={fetchMenus}
-          className="text-xs text-stone-500 hover:text-stone-900 flex items-center gap-1 font-medium"
-        >
-          <RefreshCw className="w-3.5 h-3.5" /> Làm mới
-        </button>
       </div>
 
-      {/* Menus Table */}
-      {loading && <LoadingState message="Đang tải danh sách thực đơn..." />}
-      {error && <ErrorState message={error} onRetry={fetchMenus} />}
-
-      {!loading && !error && (
-        <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-stone-50 border-b border-stone-200 text-stone-500 uppercase tracking-wider font-semibold">
+      {/* Table Container */}
+      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-stone-50 border-b border-stone-200 text-stone-500 uppercase tracking-wider font-semibold text-[11px]">
+              <tr>
+                <th className="py-3.5 px-4">Mã</th>
+                <th className="py-3.5 px-4">Tên thực đơn</th>
+                <th className="py-3.5 px-4 text-center">Số món</th>
+                <th className="py-3.5 px-4 text-right">Đơn giá / Bàn</th>
+                <th className="py-3.5 px-4 text-center">Trạng thái</th>
+                <th className="py-3.5 px-4 text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-stone-100">
+              {loading && menus.length === 0 ? (
                 <tr>
-                  <th className="py-3 px-4">Mã</th>
-                  <th className="py-3 px-4">Tên thực đơn</th>
-                  <th className="py-3 px-4">Số món</th>
-                  <th className="py-3 px-4">Đơn giá / Bàn</th>
-                  <th className="py-3 px-4">Trạng thái</th>
-                  <th className="py-3 px-4 text-right">Thao tác</th>
+                  <td colSpan={6} className="py-16 text-center text-stone-400">
+                    <RefreshCw className="h-6 w-6 animate-spin mx-auto text-amber-600 mb-2" />
+                    <span className="font-medium">Đang tải danh sách thực đơn...</span>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-100">
-                {menus.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-stone-400">
-                      Không tìm thấy thực đơn nào.
+              ) : menus.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-16 text-center text-stone-400">
+                    <Utensils className="h-8 w-8 mx-auto text-stone-300 mb-2" />
+                    <p className="font-semibold text-stone-600 text-sm">Không tìm thấy thực đơn nào</p>
+                    <p className="text-xs text-stone-400 mt-1">Thử thay đổi từ khóa hoặc bộ lọc trạng thái</p>
+                  </td>
+                </tr>
+              ) : (
+                menus.map((m) => (
+                  <tr key={m.id} className="hover:bg-amber-50/30 transition-colors group">
+                    <td className="py-3.5 px-4 font-mono font-bold text-stone-900 bg-stone-50/40 whitespace-nowrap">
+                      {m.code}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
+                        {m.name}
+                      </div>
+                      {m.description && (
+                        <div className="text-[11px] text-stone-400 line-clamp-1 mt-0.5">
+                          {m.description}
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4 text-center font-bold text-stone-700 whitespace-nowrap">
+                      {m.itemsCount} món
+                    </td>
+                    <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 text-sm whitespace-nowrap">
+                      {formatVnd(m.pricePerTable)}
+                    </td>
+                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleStatus(m)}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-colors cursor-pointer ${
+                          m.status === 'ACTIVE'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                            : 'bg-stone-100 text-stone-600 border-stone-200 hover:bg-stone-200'
+                        }`}
+                      >
+                        {m.status === 'ACTIVE' ? (
+                          <>
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            Đang áp dụng
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="h-3.5 w-3.5" />
+                            Ngưng áp dụng
+                          </>
+                        )}
+                      </button>
+                    </td>
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => openEditModal(m)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-stone-200 hover:bg-amber-50 hover:text-amber-900 text-stone-600 px-2.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                        <span>Sửa</span>
+                      </button>
                     </td>
                   </tr>
-                ) : (
-                  menus.map((m) => (
-                    <tr key={m.id} className="hover:bg-stone-50/80 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-amber-800">{m.code}</td>
-                      <td className="py-3.5 px-4">
-                        <div className="font-semibold text-stone-900">{m.name}</div>
-                        {m.description && (
-                          <div className="text-[11px] text-stone-500 line-clamp-1">
-                            {m.description}
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4 font-semibold text-stone-700">{m.itemsCount} món</td>
-                      <td className="py-3.5 px-4 font-serif font-bold text-stone-900 text-sm">
-                        {formatVnd(m.pricePerTable)}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <button
-                          onClick={() => handleToggleStatus(m)}
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border transition-colors ${
-                            m.status === 'ACTIVE'
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
-                              : 'bg-stone-100 text-stone-600 border-stone-300 hover:bg-stone-200'
-                          }`}
-                        >
-                          {m.status === 'ACTIVE' ? (
-                            <>
-                              <CheckCircle2 className="w-3 h-3" /> Hoạt động
-                            </>
-                          ) : (
-                            <>
-                              <XCircle className="w-3 h-3" /> Tạm dừng
-                            </>
-                          )}
-                        </button>
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <button
-                          onClick={() => openEditModal(m)}
-                          className="px-2.5 py-1.5 rounded-lg border border-stone-200 hover:bg-amber-50 hover:text-amber-800 text-stone-600 transition-colors inline-flex items-center gap-1 font-medium"
-                        >
-                          <Edit2 className="w-3 h-3" /> Sửa
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="p-4 border-t border-stone-100 flex justify-center gap-2">
-              <button
-                disabled={page === 0}
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-                className="px-3 py-1 rounded-lg border border-stone-200 text-xs disabled:opacity-40"
-              >
-                Trang trước
-              </button>
-              <span className="px-3 py-1 text-xs text-stone-500">
-                Trang {page + 1} / {totalPages}
-              </span>
-              <button
-                disabled={page >= totalPages - 1}
-                onClick={() => setPage((p) => p + 1)}
-                className="px-3 py-1 rounded-lg border border-stone-200 text-xs disabled:opacity-40"
-              >
-                Trang sau
-              </button>
-            </div>
-          )}
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="p-4 border-t border-stone-100 flex justify-center items-center gap-2">
+            <button
+              disabled={page === 0}
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors"
+            >
+              Trang trước
+            </button>
+            <span className="px-3 py-1.5 text-xs text-stone-500 font-medium">
+              Trang {page + 1} / {totalPages}
+            </span>
+            <button
+              disabled={page >= totalPages - 1}
+              onClick={() => setPage((p) => p + 1)}
+              className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors"
+            >
+              Trang sau
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Upsert Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-stone-200 max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-50 bg-stone-950/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-stone-200 max-h-[90vh] flex flex-col space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <h3 className="font-serif font-bold text-base text-stone-900">
-                {editingMenu ? `Chỉnh Sửa Thực Đơn (${editingMenu.code})` : 'Tạo Thực Đơn Tiệc Mẫu Mới'}
+              <h3 className="font-bold text-base text-stone-900">
+                {editingMenu ? `Chỉnh sửa thực đơn (${editingMenu.code})` : 'Tạo thực đơn tiệc mẫu mới'}
               </h3>
               <button
+                type="button"
                 onClick={() => setModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-700"
+                className="p-1.5 rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-700 transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveMenu} className="flex-1 overflow-y-auto py-4 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-stone-600 mb-1">
+            <form onSubmit={handleSaveMenu} className="flex-1 overflow-y-auto space-y-4 pr-1">
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-stone-700">
                   Tên thực đơn <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -382,47 +422,45 @@ export const AdminMenusPage: React.FC = () => {
                   placeholder="Ví dụ: Set Menu Hỷ Sự Hoàng Gia"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs focus:ring-2 focus:ring-amber-500"
+                  className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs sm:text-sm focus:border-amber-600 focus:outline-none shadow-xs"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-stone-600 mb-1">Mô tả</label>
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-stone-700">Mô tả thực đơn</label>
                 <textarea
                   rows={2}
                   placeholder="Mô tả phong vị, ý nghĩa món ăn..."
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs focus:ring-2 focus:ring-amber-500"
+                  className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs sm:text-sm focus:border-amber-600 focus:outline-none shadow-xs"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-stone-600 mb-1">Ảnh đại diện URL</label>
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-stone-700">Ảnh minh họa (URL)</label>
                 <input
                   type="url"
-                  placeholder="https://..."
+                  placeholder="https://images.unsplash.com/..."
                   value={formImageUrl}
                   onChange={(e) => setFormImageUrl(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs focus:ring-2 focus:ring-amber-500"
+                  className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs sm:text-sm focus:border-amber-600 focus:outline-none shadow-xs"
                 />
               </div>
 
               {/* Dish Items Selector */}
-              <div className="pt-2 border-t border-stone-100">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-semibold text-stone-700 uppercase tracking-wider">
+              <div className="pt-2 border-t border-stone-100 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">
                     Danh sách món trong bàn ({formItems.length} món)
                   </label>
-                  <span className="text-xs font-serif font-bold text-amber-800">
+                  <span className="text-xs font-bold text-amber-900 font-mono">
                     Đơn giá tính toán: {formatVnd(calculatedModalPrice)}
                   </span>
                 </div>
 
-                {/* Add dish dropdown */}
-                <div className="flex gap-2 mb-3">
+                <div className="flex gap-2">
                   <select
-                    id="add-dish-select"
                     defaultValue=""
                     onChange={(e) => {
                       if (e.target.value) {
@@ -430,10 +468,10 @@ export const AdminMenusPage: React.FC = () => {
                         e.target.value = '';
                       }
                     }}
-                    className="flex-1 px-3 py-2 rounded-xl border border-stone-200 text-xs bg-white focus:ring-2 focus:ring-amber-500"
+                    className="flex-1 rounded-xl border border-stone-300 px-3 py-2 text-xs bg-white focus:border-amber-600 focus:outline-none shadow-xs"
                   >
                     <option value="" disabled>
-                      -- Chọn món ăn từ catalog để thêm vào thực đơn --
+                      -- Chọn món ăn từ danh mục để thêm vào thực đơn --
                     </option>
                     {allDishes.map((d) => (
                       <option key={d.id} value={d.id}>
@@ -443,17 +481,16 @@ export const AdminMenusPage: React.FC = () => {
                   </select>
                 </div>
 
-                {/* Selected dish items table */}
-                <div className="max-h-48 overflow-y-auto divide-y divide-stone-100 border border-stone-200 rounded-xl p-2 bg-stone-50/50">
+                <div className="max-h-48 overflow-y-auto divide-y divide-stone-100 border border-stone-200 rounded-xl p-2 bg-stone-50">
                   {formItems.length === 0 ? (
-                    <div className="py-4 text-center text-stone-400 text-xs">
+                    <div className="py-6 text-center text-stone-400 text-xs">
                       Chưa chọn món nào cho thực đơn.
                     </div>
                   ) : (
                     formItems.map((it) => (
                       <div key={it.dishId} className="py-2 flex items-center justify-between text-xs">
                         <div className="flex-1 min-w-0 pr-2">
-                          <span className="font-semibold text-stone-900 truncate block">
+                          <span className="font-bold text-stone-900 truncate block">
                             {it.dish?.name || `Món #${it.dishId}`}
                           </span>
                           <span className="text-[11px] text-stone-400">
@@ -476,7 +513,7 @@ export const AdminMenusPage: React.FC = () => {
                             onClick={() => handleRemoveModalItem(it.dishId)}
                             className="p-1 text-stone-400 hover:text-rose-600 rounded"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
                       </div>
@@ -485,20 +522,20 @@ export const AdminMenusPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-stone-100 flex justify-end gap-2">
+              <div className="pt-3 border-t border-stone-100 flex justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-stone-200 text-stone-700 text-xs font-semibold hover:bg-stone-50"
+                  className="rounded-xl border border-stone-300 bg-white hover:bg-stone-50 px-4 py-2 text-xs font-semibold text-stone-700 shadow-xs"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold shadow-sm"
+                  className="rounded-xl bg-amber-800 hover:bg-amber-900 text-white px-4 py-2 text-xs font-semibold shadow-xs"
                 >
-                  {saving ? 'Đang lưu...' : editingMenu ? 'Cập Nhật' : 'Tạo Thực Đơn'}
+                  {saving ? 'Đang lưu...' : editingMenu ? 'Cập nhật' : 'Tạo thực đơn'}
                 </button>
               </div>
             </form>

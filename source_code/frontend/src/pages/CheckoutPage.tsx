@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   CreditCard,
   ShoppingBag,
+  Info,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
@@ -47,7 +48,7 @@ export const CheckoutPage: React.FC = () => {
   const [eventDate, setEventDate] = useState<string>('');
   const [eventTime, setEventTime] = useState<string>('18:00');
   const [tableCount, setTableCount] = useState<number>(
-    tablesParam ? Math.max(1, parseInt(tablesParam) || 1) : 5
+    tablesParam ? Math.max(1, parseInt(tablesParam) || 1) : 6
   );
   const [note, setNote] = useState<string>('');
   const [menuId, setMenuId] = useState<number | undefined>(
@@ -124,7 +125,7 @@ export const CheckoutPage: React.FC = () => {
 
         // If no menu and no draft
         if (mounted) {
-          setError('Không tìm thấy thông tin thực đơn đặt tiệc. Vui lòng chọn món trước.');
+          setError('Chưa có thông tin thực đơn đặt tiệc. Vui lòng chọn món hoặc thực đơn mẫu trước.');
         }
       } catch (err) {
         if (mounted) setError(extractErrorMessage(err));
@@ -137,7 +138,6 @@ export const CheckoutPage: React.FC = () => {
     };
   }, [menuIdParam]);
 
-  // Update preview when tableCount changes
   const handleTableCountChange = async (newCount: number) => {
     const validCount = Math.max(1, newCount);
     setTableCount(validCount);
@@ -185,10 +185,7 @@ export const CheckoutPage: React.FC = () => {
       setSubmitting(true);
       setError(null);
 
-      // Construct ISO OffsetDateTime with local timezone +07:00
       const eventDateTimeIso = `${eventDate}T${eventTime || '18:00'}:00+07:00`;
-
-      // Generate idempotency key
       const idempotencyKey = crypto.randomUUID();
 
       const payload: CreateOrderPayload = {
@@ -205,9 +202,8 @@ export const CheckoutPage: React.FC = () => {
 
       const createdOrder = await orderService.createOrder(payload, idempotencyKey);
 
-      // Clear draft
       sessionStorage.removeItem(STORAGE_KEY);
-      showToast('Đặt tiệc thành công! Hệ thống đang giữ nguyên liệu trong 15 phút.', 'success');
+      showToast('Đặt tiệc thành công! Hệ thống đang khóa giữ nguyên liệu 15 phút.', 'success');
       navigate(`/orders/confirmation/${createdOrder.id}`);
     } catch (err) {
       const errMsg = extractErrorMessage(err);
@@ -220,28 +216,28 @@ export const CheckoutPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#faf8f5] py-20">
-        <LoadingState message="Đang khởi tạo thông tin đặt tiệc..." />
+      <div className="mx-auto max-w-7xl px-4 py-16">
+        <LoadingState label="Đang khởi tạo thông tin hợp đồng tiệc..." />
       </div>
     );
   }
 
   if (error && !preview) {
     return (
-      <div className="min-h-screen bg-[#faf8f5] py-20 max-w-3xl mx-auto px-4">
+      <div className="mx-auto max-w-2xl px-4 py-16 space-y-4">
         <ErrorState message={error} />
-        <div className="mt-6 text-center flex justify-center gap-4">
+        <div className="text-center flex justify-center gap-3">
           <Link
             to="/menus"
-            className="px-4 py-2 rounded-xl bg-amber-500 text-stone-950 font-semibold text-sm"
+            className="rounded-xl bg-amber-800 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-amber-900 transition-colors"
           >
-            Xem Thực Đơn Mẫu
+            Xem thực đơn mẫu
           </Link>
           <Link
             to="/menu-builder"
-            className="px-4 py-2 rounded-xl bg-stone-200 text-stone-800 font-medium text-sm"
+            className="rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors shadow-xs"
           >
-            Tự Phối Món
+            Tự phối món
           </Link>
         </div>
       </div>
@@ -249,269 +245,299 @@ export const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] text-stone-800 pb-20">
-      {/* Header */}
-      <div className="bg-stone-900 text-white py-8 px-4 sm:px-8 border-b border-amber-500/20">
-        <div className="max-w-7xl mx-auto">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-2 text-xs text-stone-500 font-medium">
+        <Link to="/" className="hover:text-stone-900 transition-colors">
+          Trang chủ
+        </Link>
+        <span>/</span>
+        <Link to="/menu-builder" className="hover:text-stone-900 transition-colors">
+          Phối thực đơn
+        </Link>
+        <span>/</span>
+        <span className="font-semibold text-stone-900">Xác nhận đặt tiệc</span>
+      </nav>
+
+      {/* Header Banner */}
+      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
+              <Lock className="h-3.5 w-3.5 text-amber-600" />
+              <span>Bảo mật & Giữ nguyên liệu tức thì</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+              Xác nhận thông tin & Đặt tiệc
+            </h1>
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              Vui lòng kiểm tra lại thông tin liên hệ và lịch tổ chức. Sau khi xác nhận, hệ thống sẽ kích hoạt lệnh khóa giữ nguyên liệu tồn kho cho tiệc của bạn trong 15 phút.
+            </p>
+          </div>
+
           <Link
             to="/menu-builder"
-            className="inline-flex items-center gap-1.5 text-xs text-stone-400 hover:text-amber-300 transition-colors mb-3"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 hover:text-amber-900 transition-colors shrink-0"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Quay lại chọn món
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Quay lại chỉnh sửa thực đơn</span>
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white">
-            Xác Nhận & Đặt Tiệc BanquetHub
-          </h1>
-          <p className="text-stone-300 text-xs sm:text-sm mt-1">
-            Điền thông tin liên hệ và thời gian tổ chức tiệc. Hệ thống sẽ tự động giữ nguyên liệu ngay khi tạo đơn.
-          </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8">
-        <form onSubmit={handleSubmitOrder}>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* LEFT: CUSTOMER FORM (7 Cols) */}
-            <div className="lg:col-span-7 space-y-6">
-              {/* Customer Contact Information */}
-              <div className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm space-y-5">
-                <h3 className="font-serif font-bold text-stone-900 text-base flex items-center gap-2">
-                  <User className="w-5 h-5 text-amber-600" />
-                  Thông Tin Người Đặt Tiệc
+      {/* Main Form & Summary Grid */}
+      <form onSubmit={handleSubmitOrder}>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* LEFT: FORM FIELDS (7 Cols) */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* Customer Details Card */}
+            <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-5">
+              <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
+                <User className="h-4 w-4 text-amber-700" />
+                <h3 className="font-bold text-base text-stone-900 tracking-tight">
+                  Thông tin người đặt tiệc
                 </h3>
+              </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-600 mb-1.5">
-                      Họ và tên <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Nguyễn Văn A"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-600 mb-1.5">
-                      Số điện thoại <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="0912345678"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-stone-600 mb-1.5">
-                    Email nhận thông báo <span className="text-rose-500">*</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-stone-700">
+                    Họ và tên <span className="text-rose-500">*</span>
                   </label>
                   <input
-                    type="email"
+                    type="text"
                     required
-                    placeholder="khachhang@gmail.com"
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    placeholder="Nguyễn Văn A"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
                   />
-                  <p className="text-[11px] text-stone-400 mt-1">
-                    Mã xác nhận đơn hàng và hướng dẫn sẽ được gửi về email này.
-                  </p>
-                </div>
-              </div>
-
-              {/* Event Schedule & Size */}
-              <div className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm space-y-5">
-                <h3 className="font-serif font-bold text-stone-900 text-base flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-amber-600" />
-                  Thời Gian & Quy Mô Buổi Tiệc
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-600 mb-1.5">
-                      Ngày tổ chức tiệc <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      required
-                      value={eventDate}
-                      onChange={(e) => setEventDate(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-600 mb-1.5">
-                      Giờ đón khách <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="time"
-                      required
-                      value={eventTime}
-                      onChange={(e) => setEventTime(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-stone-600 mb-1.5">
-                    Số lượng bàn tiệc:
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-stone-700">
+                    Số điện thoại <span className="text-rose-500">*</span>
                   </label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="number"
-                      min="1"
-                      max="500"
-                      value={tableCount}
-                      onChange={(e) => handleTableCountChange(parseInt(e.target.value) || 1)}
-                      className="w-24 px-3 py-2 border border-stone-300 rounded-xl text-center font-bold text-lg text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                    <span className="text-xs text-stone-500">
-                      Bàn tiêu chuẩn (Quy mô dự kiến {tableCount * 10} khách)
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-stone-600 mb-1.5">
-                    Ghi chú hoặc yêu cầu đặc biệt
-                  </label>
-                  <textarea
-                    rows={3}
-                    placeholder="Ví dụ: Cần chuẩn bị thêm 2 ghế trẻ em, phòng tiệc ấm cúng, ít cay..."
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  <input
+                    type="tel"
+                    required
+                    placeholder="0912345678"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
                   />
                 </div>
               </div>
 
-              {/* Payment Phase 4 Notice */}
-              <div className="bg-amber-50 border border-amber-300/80 rounded-2xl p-5 text-amber-900 space-y-2">
-                <div className="flex items-center gap-2 font-bold text-sm text-amber-950">
-                  <CreditCard className="w-4 h-4 text-amber-700" />
-                  Thông Báo Thanh Toán Trực Tuyến (Phase 4)
-                </div>
-                <p className="text-xs leading-relaxed text-amber-800">
-                  Cổng thanh toán điện tử trực tuyến VNPAY sẽ chính thức được kích hoạt tại <strong>Phase 4</strong>.
-                  Sau khi bạn nhấn xác nhận đặt tiệc, đơn hàng sẽ được ghi nhận ở trạng thái <strong>CHỜ THANH TOÁN (PENDING_PAYMENT)</strong>.
-                  Hệ thống cam kết lập tức kích hoạt cơ chế <strong>khóa giữ toàn bộ nguyên liệu tồn kho</strong> cho buổi tiệc của bạn trong vòng <strong>15 phút</strong>.
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-stone-700">
+                  Địa chỉ email liên hệ <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="khachhang@banquethub.vn"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
+                />
+                <p className="text-[11px] text-stone-400">
+                  Thông báo mã đơn và biên nhận đặt tiệc sẽ được gửi về hộp thư này.
                 </p>
               </div>
             </div>
 
-            {/* RIGHT: ORDER SUMMARY (5 Cols) */}
-            <div className="lg:col-span-5 space-y-6">
-              <div className="bg-white rounded-2xl p-6 border border-stone-200 shadow-md sticky top-6">
-                <h3 className="font-serif font-bold text-stone-900 text-base pb-3 border-b border-stone-200 flex items-center gap-2">
-                  <ShoppingBag className="w-5 h-5 text-amber-600" />
-                  Tóm Tắt Đơn Tiệc
+            {/* Event Time & Scale Card */}
+            <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-5">
+              <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
+                <Calendar className="h-4 w-4 text-amber-700" />
+                <h3 className="font-bold text-base text-stone-900 tracking-tight">
+                  Thời gian & Quy mô buổi tiệc
                 </h3>
+              </div>
 
-                {/* Items breakdown */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-stone-700">
+                    Ngày diễn ra tiệc <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={eventDate}
+                    onChange={(e) => setEventDate(e.target.value)}
+                    className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-stone-700">
+                    Giờ đón khách <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="time"
+                    required
+                    value={eventTime}
+                    onChange={(e) => setEventTime(e.target.value)}
+                    className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-stone-700">
+                  Số lượng bàn tiệc:
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    min="1"
+                    max="500"
+                    value={tableCount}
+                    onChange={(e) => handleTableCountChange(parseInt(e.target.value) || 1)}
+                    className="w-24 rounded-xl border border-stone-300 py-2 text-center font-bold text-base text-stone-900 focus:border-amber-600 focus:outline-none shadow-xs"
+                  />
+                  <span className="text-xs text-stone-500">
+                    Bàn tiêu chuẩn (khoảng <strong className="text-stone-800">{tableCount * 10}</strong> khách tham dự)
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-stone-700">
+                  Ghi chú hoặc yêu cầu đặc biệt
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Ví dụ: Bàn tiệc cần vị trí view sân vườn, bổ sung 2 ghế trẻ em..."
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
+                />
+              </div>
+            </div>
+
+            {/* Phase 4 Payment Notice */}
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 text-amber-950 space-y-2">
+              <div className="flex items-center gap-2 font-bold text-xs sm:text-sm text-amber-900">
+                <CreditCard className="h-4 w-4 text-amber-700" />
+                <span>Phương thức thanh toán trực tuyến (Kế hoạch Phase 4)</span>
+              </div>
+              <p className="text-xs leading-relaxed text-amber-800">
+                Cổng thanh toán điện tử trực tuyến VNPAY sẽ chính thức được kích hoạt tại <strong>Phase 4</strong>. Hiện tại, sau khi quý khách bấm <strong>Xác nhận đặt tiệc</strong>, đơn sẽ được ghi nhận ở trạng thái <strong>CHỜ THANH TOÁN (PENDING_PAYMENT)</strong> và hệ thống tự động khóa giữ toàn bộ nguyên liệu tồn kho độc quyền trong vòng <strong>15 phút</strong>.
+              </p>
+            </div>
+          </div>
+
+          {/* RIGHT: ORDER SUMMARY (5 Cols) */}
+          <div className="lg:col-span-5 sticky top-24 space-y-5">
+            <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-5">
+              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <ShoppingBag className="h-5 w-5 text-amber-700" />
+                  <h3 className="font-bold text-base text-stone-900 tracking-tight">
+                    Tóm tắt đơn đặt tiệc
+                  </h3>
+                </div>
                 {preview && (
-                  <div className="py-3">
-                    <div className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">
-                      Món ăn trong mỗi bàn ({preview.items.length} món):
-                    </div>
-                    <div className="max-h-60 overflow-y-auto divide-y divide-stone-100 pr-1 scrollbar-thin">
-                      {preview.items.map((it) => (
-                        <div key={it.dishId} className="py-2.5 flex items-center justify-between text-xs">
-                          <div className="min-w-0 flex-1 pr-2">
-                            <span className="font-semibold text-stone-900 truncate block">
-                              {it.dishName}
-                            </span>
-                            <span className="text-[11px] text-stone-500">
-                              {formatVnd(it.unitPrice)} x {it.quantityPerTable} phần/bàn
-                            </span>
+                  <span className="font-mono text-xs font-semibold text-stone-500">
+                    {preview.tableCount} bàn
+                  </span>
+                )}
+              </div>
+
+              {/* Items Breakdown */}
+              {preview && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-[11px] font-bold text-stone-400 uppercase tracking-wider">
+                    <span>Món ăn mỗi bàn</span>
+                    <span>Thành tiền</span>
+                  </div>
+
+                  <div className="max-h-60 overflow-y-auto divide-y divide-stone-100 rounded-xl bg-stone-50 p-3 border border-stone-100 scrollbar-thin">
+                    {preview.items.map((it) => (
+                      <div key={it.dishId} className="py-2 flex items-center justify-between text-xs">
+                        <div className="min-w-0 flex-1 pr-2">
+                          <span className="font-bold text-stone-900 truncate block">
+                            {it.dishName}
+                          </span>
+                          <span className="text-[11px] text-stone-500">
+                            {formatVnd(it.unitPrice)} x {it.quantityPerTable} phần/bàn
+                          </span>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="font-bold text-stone-900">
+                            {formatVnd(it.lineTotal)}
                           </div>
-                          <div className="text-right flex-shrink-0">
-                            <div className="font-semibold text-stone-800">
-                              {formatVnd(it.lineTotal)}
-                            </div>
-                            <div className="text-[10px] text-stone-400">
-                              Tổng {it.totalQuantity} phần
-                            </div>
+                          <div className="text-[10px] text-stone-400 font-mono">
+                            Tổng {it.totalQuantity} phần
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Stock warnings */}
-                {preview && !preview.canProceed && (
-                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 mb-3 space-y-1">
-                    <div className="font-semibold flex items-center gap-1.5 text-rose-900">
-                      <AlertTriangle className="w-4 h-4 text-rose-600" />
-                      Không đủ nguyên liệu trong kho:
-                    </div>
-                    {preview.validationMessages.map((msg, idx) => (
-                      <div key={idx} className="pl-5 text-rose-700">
-                        • {msg}
                       </div>
                     ))}
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* Price Breakdown */}
-                {preview && (
-                  <div className="pt-4 border-t border-stone-200 space-y-2.5 text-xs">
-                    <div className="flex justify-between text-stone-600">
-                      <span>Đơn giá mỗi bàn:</span>
-                      <span className="font-semibold text-stone-900">
-                        {formatVnd(preview.pricePerTable)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-stone-600">
-                      <span>Số lượng bàn:</span>
-                      <span className="font-semibold text-stone-900">{preview.tableCount} bàn</span>
-                    </div>
-                    <div className="flex justify-between text-base font-bold text-stone-900 pt-3 border-t border-stone-100">
-                      <span>Tổng giá trị đơn tiệc:</span>
-                      <span className="font-serif text-xl text-amber-800">
-                        {formatVnd(preview.totalAmount)}
-                      </span>
-                    </div>
+              {/* Stock Warning Alert */}
+              {preview && !preview.canProceed && (
+                <div className="rounded-xl bg-rose-50 border border-rose-200 p-3.5 text-xs text-rose-800 space-y-1">
+                  <div className="font-bold flex items-center gap-1.5 text-rose-900">
+                    <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0" />
+                    <span>Kho không đủ nguyên liệu:</span>
                   </div>
-                )}
-
-                {/* Submit button */}
-                <div className="mt-6">
-                  <button
-                    type="submit"
-                    disabled={submitting || (preview !== null && !preview.canProceed)}
-                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm tracking-wide flex items-center justify-center gap-2 shadow-lg transition-all ${
-                      submitting || (preview !== null && !preview.canProceed)
-                        ? 'bg-stone-300 text-stone-500 cursor-not-allowed shadow-none'
-                        : 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-amber-500/20'
-                    }`}
-                  >
-                    <Lock className="w-4 h-4" />
-                    {submitting ? 'Đang Xử Lý Đặt Tiệc & Giữ Kho...' : 'Xác Nhận Đặt Tiệc'}
-                  </button>
+                  {preview.validationMessages.map((msg, idx) => (
+                    <div key={idx} className="pl-5 text-rose-700 text-[11px]">
+                      • {msg}
+                    </div>
+                  ))}
                 </div>
+              )}
 
-                <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-stone-500">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  Được bảo vệ bởi cơ chế chống trùng lặp Idempotency
+              {/* Price Calculation Box */}
+              {preview && (
+                <div className="rounded-xl bg-stone-50 p-4 border border-stone-100 space-y-2.5 text-xs">
+                  <div className="flex justify-between text-stone-600">
+                    <span>Đơn giá 01 bàn:</span>
+                    <span className="font-semibold text-stone-900">{formatVnd(preview.pricePerTable)}</span>
+                  </div>
+                  <div className="flex justify-between text-stone-600">
+                    <span>Số lượng bàn:</span>
+                    <span className="font-semibold text-stone-900">{preview.tableCount} bàn</span>
+                  </div>
+                  <div className="border-t border-stone-200 pt-3 flex justify-between items-baseline text-sm font-bold text-stone-900">
+                    <span>Tổng giá trị đơn tiệc:</span>
+                    <span className="text-xl font-bold text-amber-900">
+                      {formatVnd(preview.totalAmount)}
+                    </span>
+                  </div>
                 </div>
+              )}
+
+              {/* Confirm Button */}
+              <button
+                type="submit"
+                disabled={submitting || (preview !== null && !preview.canProceed)}
+                className={`w-full inline-flex items-center justify-center gap-2 rounded-xl text-xs font-semibold py-3.5 shadow-xs transition-all ${
+                  submitting || (preview !== null && !preview.canProceed)
+                    ? 'bg-stone-300 text-stone-500 cursor-not-allowed shadow-none'
+                    : 'bg-amber-800 hover:bg-amber-900 text-white cursor-pointer'
+                }`}
+              >
+                <Lock className="h-4 w-4" />
+                <span>
+                  {submitting ? 'Đang tạo đơn & giữ kho...' : 'Xác nhận đặt tiệc'}
+                </span>
+              </button>
+
+              <div className="flex items-center justify-center gap-2 text-[11px] text-stone-500">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                <span>Bảo vệ chống trùng lặp Idempotency</span>
               </div>
             </div>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 };
