@@ -264,9 +264,10 @@ export const AdminReservationsPage: React.FC = () => {
                 className="px-3.5 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
               >
                 <option value="">Tất cả trạng thái</option>
-                <option value="PENDING">Chờ thanh toán (PENDING)</option>
-                <option value="CONFIRMED">Đã xác nhận (CONFIRMED)</option>
+                <option value="ACTIVE">Đang giữ chỗ (ACTIVE)</option>
                 <option value="RELEASED">Đã giải phóng (RELEASED)</option>
+                <option value="FULFILLED">Đã xuất dùng tiệc (FULFILLED)</option>
+                <option value="EXPIRED">Đã hết hạn giữ (EXPIRED)</option>
               </select>
             </div>
           </div>
@@ -315,14 +316,22 @@ export const AdminReservationsPage: React.FC = () => {
                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
                           <span
                             className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
-                              res.status === 'CONFIRMED'
-                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                                : res.status === 'PENDING'
+                              res.status === 'ACTIVE'
                                 ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                : res.status === 'FULFILLED'
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                : res.status === 'EXPIRED'
+                                ? 'bg-rose-50 text-rose-800 border-rose-200'
                                 : 'bg-stone-100 text-stone-600 border-stone-200'
                             }`}
                           >
-                            {res.status}
+                            {res.status === 'ACTIVE'
+                              ? 'Đang giữ chỗ'
+                              : res.status === 'FULFILLED'
+                              ? 'Đã xuất dùng'
+                              : res.status === 'EXPIRED'
+                              ? 'Đã hết hạn'
+                              : 'Đã giải phóng'}
                           </span>
                         </td>
                         <td className="py-3.5 px-4 font-mono text-stone-600 whitespace-nowrap">

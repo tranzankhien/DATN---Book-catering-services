@@ -93,10 +93,15 @@ export const AdminMenusPage: React.FC = () => {
   }, [keyword, statusFilter, page]);
 
   const handleToggleStatus = async (menu: MenuDto) => {
-    const nextStatus: MenuStatus = menu.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    const nextStatus: MenuStatus = menu.status === 'ACTIVE' ? 'HIDDEN' : 'ACTIVE';
     try {
       await menuService.updateMenuStatus(menu.id, nextStatus);
-      showToast(`Đã chuyển trạng thái thực đơn ${menu.code} sang ${nextStatus}`, 'success');
+      showToast(
+        `Đã chuyển trạng thái thực đơn ${menu.code} sang ${
+          nextStatus === 'ACTIVE' ? 'Kích hoạt (Hiển thị)' : 'Ẩn'
+        }`,
+        'success'
+      );
       fetchMenus();
     } catch (err) {
       showToast(extractErrorMessage(err), 'error');
@@ -271,8 +276,9 @@ export const AdminMenusPage: React.FC = () => {
               className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
             >
               <option value="">Tất cả trạng thái</option>
-              <option value="ACTIVE">Đang áp dụng (ACTIVE)</option>
-              <option value="INACTIVE">Ngưng áp dụng (INACTIVE)</option>
+              <option value="ACTIVE">Đang hiển thị (ACTIVE)</option>
+              <option value="HIDDEN">Đã ẩn (HIDDEN)</option>
+              <option value="ARCHIVED">Lưu trữ (ARCHIVED)</option>
             </select>
           </div>
         </div>
@@ -337,18 +343,30 @@ export const AdminMenusPage: React.FC = () => {
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-colors cursor-pointer ${
                           m.status === 'ACTIVE'
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                            : m.status === 'HIDDEN'
+                            ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
                             : 'bg-stone-100 text-stone-600 border-stone-200 hover:bg-stone-200'
                         }`}
+                        title={
+                          m.status === 'ACTIVE'
+                            ? 'Bấm để ẩn thực đơn khỏi khách đặt tiệc'
+                            : 'Bấm để kích hoạt hiển thị thực đơn'
+                        }
                       >
                         {m.status === 'ACTIVE' ? (
                           <>
                             <CheckCircle2 className="h-3.5 w-3.5" />
-                            Đang áp dụng
+                            Đang hiển thị
+                          </>
+                        ) : m.status === 'HIDDEN' ? (
+                          <>
+                            <XCircle className="h-3.5 w-3.5" />
+                            Đã ẩn
                           </>
                         ) : (
                           <>
                             <XCircle className="h-3.5 w-3.5" />
-                            Ngưng áp dụng
+                            Lưu trữ
                           </>
                         )}
                       </button>

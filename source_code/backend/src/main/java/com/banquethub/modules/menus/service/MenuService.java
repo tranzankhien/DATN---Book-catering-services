@@ -51,6 +51,26 @@ public class MenuService {
     }
 
     @Transactional(readOnly = true)
+    public MenuResponse getPublicMenuById(Long id) {
+        Menu menu = menuRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thực đơn với ID: " + id));
+        if (menu.getStatus() != MenuStatus.ACTIVE) {
+            throw new ResourceNotFoundException("Thực đơn này hiện đang tạm ẩn hoặc ngừng phục vụ.");
+        }
+        return MenuResponse.fromEntity(menu);
+    }
+
+    @Transactional(readOnly = true)
+    public MenuResponse getPublicMenuByCode(String code) {
+        Menu menu = menuRepository.findByCodeIgnoreCase(code)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thực đơn với mã: " + code));
+        if (menu.getStatus() != MenuStatus.ACTIVE) {
+            throw new ResourceNotFoundException("Thực đơn này hiện đang tạm ẩn hoặc ngừng phục vụ.");
+        }
+        return MenuResponse.fromEntity(menu);
+    }
+
+    @Transactional(readOnly = true)
     public MenuResponse getMenuById(Long id) {
         Menu menu = menuRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thực đơn với ID: " + id));

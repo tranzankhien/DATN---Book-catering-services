@@ -10,6 +10,7 @@ import com.banquethub.modules.catalog.repository.DishRepository;
 import com.banquethub.modules.catalog.repository.IngredientRepository;
 import com.banquethub.modules.menus.entity.Menu;
 import com.banquethub.modules.menus.entity.MenuItem;
+import com.banquethub.modules.menus.entity.MenuStatus;
 import com.banquethub.modules.menus.repository.MenuRepository;
 import com.banquethub.modules.orders.dto.IngredientDemandPreview;
 import com.banquethub.modules.orders.dto.OrderItemPreviewResponse;
@@ -58,6 +59,9 @@ public class OrderPreviewService {
         if (request.getTableCount() == null || request.getTableCount() <= 0) {
             throw new BusinessValidationException("Số lượng bàn tiệc phải từ 1 trở lên.");
         }
+        if (request.getTableCount() > 500) {
+            throw new BusinessValidationException("Số lượng bàn tiệc không được vượt quá 500 bàn.");
+        }
 
         List<OrderPreviewItemRequest> itemRequests = request.getItems();
         String menuName = null;
@@ -66,16 +70,40 @@ public class OrderPreviewService {
         if ((itemRequests == null || itemRequests.isEmpty()) && request.getMenuId() != null) {
             Menu menu = menuRepository.findById(request.getMenuId())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thực đơn ID: " + request.getMenuId()));
+            if (menu.getStatus() != MenuStatus.ACTIVE) {
+                throw new BusinessValidationException("Thực đơn '" + menu.getName() + "' hiện đang tạm ẩn hoặc ngừng phục vụ.");
+            }
             menuName = menu.getName();
             itemRequests = menu.getMenuItems().stream()
                     .map(mi -> new OrderPreviewItemRequest(mi.getDish().getId(), mi.getQuantityPerTable()))
                     .toList();
         } else if (request.getMenuId() != null) {
-            menuRepository.findById(request.getMenuId()).ifPresent(m -> {});
+            menuRepository.findById(request.getMenuId()).ifPresent(m -> {
+                if (m.getStatus() != MenuStatus.ACTIVE) {
+                    throw new BusinessValidationException("Thực đơn '" + m.getName() + "' hiện đang tạm ẩn hoặc ngừng phục vụ.");
+                }
+            });
         }
 
         if (itemRequests == null || itemRequests.isEmpty()) {
             throw new BusinessValidationException("Thực đơn đặt tiệc phải có ít nhất 1 món ăn.");
+        }
+
+        // Validate items and ensure no duplicates
+        java.util.Set<Long> uniqueDishIds = new java.util.HashSet<>();
+        for (OrderPreviewItemRequest ir : itemRequests) {
+            if (ir.getDishId() == null) {
+                throw new BusinessValidationException("Món ăn không được để trống.");
+            }
+            if (ir.getQuantityPerTable() == null || ir.getQuantityPerTable() <= 0) {
+                throw new BusinessValidationException("Số lượng món mỗi bàn phải từ 1 trở lên.");
+            }
+            if (ir.getQuantityPerTable() > 100) {
+                throw new BusinessValidationException("Số lượng món mỗi bàn không được vượt quá 100 phần.");
+            }
+            if (!uniqueDishIds.add(ir.getDishId())) {
+                throw new BusinessValidationException("Món ăn không được trùng lặp trong cùng một đơn đặt tiệc.");
+            }
         }
 
         int tableCount = request.getTableCount();
@@ -102,9 +130,12 @@ public class OrderPreviewService {
                 canProceed = false;
                 validationMessages.add(String.format("Món '%s' hiện đang ngừng phục vụ.", dish.getName()));
             }
+            if (dish.getRecipeItems() == null || dish.getRecipeItems().isEmpty()) {
+                canProceed = false;
+                validationMessages.add(String.format("Món '%s' chưa có công thức định lượng nguyên liệu.", dish.getName()));
+            }
 
-            int qtyPerTable = (itemReq.getQuantityPerTable() != null && itemReq.getQuantityPerTable() > 0)
-                    ? itemReq.getQuantityPerTable() : 1;
+            int qtyPerTable = itemReq.getQuantityPerTable();
             int totalQuantity = qtyPerTable * tableCount;
             BigDecimal linePricePerTable = dish.getPrice().multiply(BigDecimal.valueOf(qtyPerTable));
             BigDecimal lineTotal = dish.getPrice().multiply(BigDecimal.valueOf(totalQuantity));

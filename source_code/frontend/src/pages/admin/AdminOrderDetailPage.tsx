@@ -142,7 +142,7 @@ export const AdminOrderDetailPage: React.FC = () => {
             <span>Làm mới</span>
           </button>
 
-          {order.orderStatus !== 'CANCELLED' && order.orderStatus !== 'COMPLETED' && (
+          {(order.orderStatus === 'PENDING_PAYMENT' || order.orderStatus === 'PAID') && (
             <button
               type="button"
               onClick={() => setCancelModalOpen(true)}
@@ -164,14 +164,27 @@ export const AdminOrderDetailPage: React.FC = () => {
                 ? 'bg-amber-50 text-amber-800 border-amber-200'
                 : order.orderStatus === 'PAID'
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                : order.orderStatus === 'PROCESSING'
+                : order.orderStatus === 'PREPARING'
                 ? 'bg-blue-50 text-blue-800 border-blue-200'
                 : order.orderStatus === 'COMPLETED'
                 ? 'bg-stone-100 text-stone-700 border-stone-200'
+                : order.orderStatus === 'EXPIRED'
+                ? 'bg-stone-100 text-stone-500 border-stone-300'
                 : 'bg-rose-50 text-rose-800 border-rose-200'
             }`}
           >
-            Trạng thái đơn: {order.orderStatus}
+            Trạng thái đơn:{' '}
+            {order.orderStatus === 'PENDING_PAYMENT'
+              ? 'Chờ thanh toán (Giữ kho 15p)'
+              : order.orderStatus === 'PAID'
+              ? 'Đã thanh toán'
+              : order.orderStatus === 'PREPARING'
+              ? 'Đang chuẩn bị tiệc'
+              : order.orderStatus === 'COMPLETED'
+              ? 'Hoàn thành'
+              : order.orderStatus === 'EXPIRED'
+              ? 'Hết hạn giữ chỗ'
+              : 'Đã hủy'}
           </span>
 
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-stone-100 text-stone-700 border border-stone-200">
@@ -192,7 +205,9 @@ export const AdminOrderDetailPage: React.FC = () => {
             <span className="font-bold text-stone-900 text-sm mt-0.5 block">
               {formatDateTimeVn(order.eventDateTime)}
             </span>
-            <span className="text-stone-500">{order.tableCount} bàn (~{order.tableCount * 10} người)</span>
+            <span className="text-stone-500">
+              {order.tableCount} bàn {order.guestCount ? `(~${order.guestCount} khách)` : `(~${order.tableCount * 10} người)`}
+            </span>
           </div>
 
           <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
@@ -211,11 +226,23 @@ export const AdminOrderDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {order.note && (
-          <div className="rounded-xl bg-stone-50 p-3.5 border border-stone-200 text-xs text-stone-700">
-            <strong className="text-stone-900 font-semibold">Ghi chú từ khách hàng:</strong> {order.note}
+        {/* Location & Note */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div className="rounded-xl bg-stone-50 p-3.5 border border-stone-200">
+            <strong className="text-stone-900 font-semibold block mb-0.5">Địa điểm tổ chức:</strong>
+            <span className="text-stone-700">{order.eventLocation || 'Tại sảnh tiệc BanquetHub'}</span>
           </div>
-        )}
+
+          {order.note ? (
+            <div className="rounded-xl bg-stone-50 p-3.5 border border-stone-200 text-xs text-stone-700">
+              <strong className="text-stone-900 font-semibold block mb-0.5">Ghi chú từ khách hàng:</strong> {order.note}
+            </div>
+          ) : (
+            <div className="rounded-xl bg-stone-50 p-3.5 border border-stone-200 text-xs text-stone-400 italic">
+              Không có ghi chú thêm từ khách hàng
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Two Columns: Dishes Snapshot & Reservation Details */}
@@ -272,15 +299,23 @@ export const AdminOrderDetailPage: React.FC = () => {
                   </h3>
                 </div>
                 <span
-                  className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                    order.reservation.status === 'CONFIRMED'
-                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                      : order.reservation.status === 'PENDING'
-                      ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                      : 'bg-stone-100 text-stone-600 border border-stone-200'
+                  className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                    order.reservation.status === 'ACTIVE'
+                      ? 'bg-amber-50 text-amber-800 border-amber-200'
+                      : order.reservation.status === 'FULFILLED'
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      : order.reservation.status === 'EXPIRED'
+                      ? 'bg-rose-50 text-rose-800 border-rose-200'
+                      : 'bg-stone-100 text-stone-600 border-stone-200'
                   }`}
                 >
-                  {order.reservation.status}
+                  {order.reservation.status === 'ACTIVE'
+                    ? 'Đang giữ chỗ'
+                    : order.reservation.status === 'FULFILLED'
+                    ? 'Đã xuất dùng'
+                    : order.reservation.status === 'EXPIRED'
+                    ? 'Đã hết hạn'
+                    : 'Đã giải phóng'}
                 </span>
               </div>
 

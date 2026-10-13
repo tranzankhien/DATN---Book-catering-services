@@ -60,6 +60,12 @@ public class Order {
     @Column(name = "note", length = 1000)
     private String note;
 
+    @Column(name = "event_location", length = 255)
+    private String eventLocation;
+
+    @Column(name = "guest_count")
+    private Integer guestCount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "menu_id")
     private Menu menu;
@@ -206,6 +212,22 @@ public class Order {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getEventLocation() {
+        return eventLocation;
+    }
+
+    public void setEventLocation(String eventLocation) {
+        this.eventLocation = eventLocation;
+    }
+
+    public Integer getGuestCount() {
+        return guestCount;
+    }
+
+    public void setGuestCount(Integer guestCount) {
+        this.guestCount = guestCount;
     }
 
     public Menu getMenu() {

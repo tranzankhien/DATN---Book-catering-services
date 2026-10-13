@@ -25,6 +25,8 @@ public class OrderResponse {
     private OffsetDateTime eventDateTime;
     private Integer tableCount;
     private String note;
+    private String eventLocation;
+    private Integer guestCount;
     private Long menuId;
     private String menuNameSnapshot;
     private BigDecimal totalAmount;
@@ -53,6 +55,8 @@ public class OrderResponse {
         resp.setEventDateTime(order.getEventDateTime());
         resp.setTableCount(order.getTableCount());
         resp.setNote(order.getNote());
+        resp.setEventLocation(order.getEventLocation());
+        resp.setGuestCount(order.getGuestCount());
         if (order.getMenu() != null) {
             resp.setMenuId(order.getMenu().getId());
         }
@@ -165,6 +169,22 @@ public class OrderResponse {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getEventLocation() {
+        return eventLocation;
+    }
+
+    public void setEventLocation(String eventLocation) {
+        this.eventLocation = eventLocation;
+    }
+
+    public Integer getGuestCount() {
+        return guestCount;
+    }
+
+    public void setGuestCount(Integer guestCount) {
+        this.guestCount = guestCount;
     }
 
     public Long getMenuId() {

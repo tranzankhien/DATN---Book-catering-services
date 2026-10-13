@@ -45,7 +45,7 @@ public class AdminReservationController {
         return ResponseEntity.ok(ApiResponse.ok("Lấy danh sách giữ kho thành công", result));
     }
 
-    @GetMapping("/availability")
+    @GetMapping({"/availability", "/reservations/availability"})
     @Operation(summary = "Xem tổng quan tồn kho khả dụng (Tồn thực tế - Đang giữ)")
     public ResponseEntity<ApiResponse<List<StockAvailabilityResponse>>> getStockAvailability() {
         List<StockAvailabilityResponse> list = reservationService.getStockAvailabilityList();

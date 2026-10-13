@@ -51,8 +51,22 @@ export const AppRouter: React.FC = () => {
           <Route path="/menus" element={<MenusPage />} />
           <Route path="/menus/:id" element={<MenuDetailPage />} />
           <Route path="/menu-builder" element={<MenuBuilderPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/orders/confirmation/:id" element={<BookingConfirmationPage />} />
+          <Route
+            path="/checkout"
+            element={
+              <ProtectedRoute allowedRoles={['ROLE_USER', 'ROLE_EMPLOYEE', 'ROLE_ADMIN']}>
+                <CheckoutPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/confirmation/:id"
+            element={
+              <ProtectedRoute allowedRoles={['ROLE_USER', 'ROLE_EMPLOYEE', 'ROLE_ADMIN']}>
+                <BookingConfirmationPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 

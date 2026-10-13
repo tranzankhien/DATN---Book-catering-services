@@ -98,12 +98,12 @@ export const EmployeeOrderDetailPage: React.FC = () => {
               Quy mô chế biến:
             </span>
             <span className="font-bold text-stone-900 text-lg">
-              {order.tableCount} bàn (~{order.tableCount * 10} khách)
+              {order.tableCount} bàn {order.guestCount ? `(~${order.guestCount} khách)` : `(~${order.tableCount * 10} khách)`}
             </span>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
           <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
             <span className="block text-[11px] text-stone-400 font-medium">Thời gian diễn ra tiệc:</span>
             <span className="font-bold text-stone-900 text-sm mt-0.5 block">
@@ -115,6 +115,13 @@ export const EmployeeOrderDetailPage: React.FC = () => {
             <span className="block text-[11px] text-stone-400 font-medium">Khách hàng liên hệ:</span>
             <span className="font-bold text-stone-900 text-sm mt-0.5 block">{order.customerName}</span>
             <span className="text-stone-500 font-mono">{order.customerPhone}</span>
+          </div>
+
+          <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
+            <span className="block text-[11px] text-stone-400 font-medium">Địa điểm tổ chức:</span>
+            <span className="font-bold text-stone-900 text-sm mt-0.5 block">
+              {order.eventLocation || 'Tại sảnh tiệc BanquetHub'}
+            </span>
           </div>
 
           <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">

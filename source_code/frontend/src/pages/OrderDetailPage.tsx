@@ -19,6 +19,7 @@ import {
   CreditCard,
   X,
   FileCheck,
+  RotateCcw,
 } from 'lucide-react';
 import { orderService } from '../services/orderService';
 import type { OrderDto } from '../services/types';
@@ -82,6 +83,27 @@ export const OrderDetailPage: React.FC = () => {
     }
   };
 
+  const handleReorder = () => {
+    if (!order || !order.items || order.items.length === 0) return;
+    const draft = {
+      items: order.items.map((it) => ({
+        dishId: it.dishId,
+        quantityPerTable: it.quantityPerTable,
+      })),
+      tableCount: order.tableCount,
+    };
+    sessionStorage.setItem('banquethub_builder_draft', JSON.stringify(draft));
+    showToast('Đã tải lại danh sách món vào bộ phối thực đơn!', 'success');
+    navigate('/menu-builder');
+  };
+
+  const isExpired =
+    order?.orderStatus === 'EXPIRED' ||
+    (order?.paymentExpiresAt && new Date(order.paymentExpiresAt).getTime() < Date.now());
+
+  const canCancel =
+    order?.orderStatus === 'PENDING_PAYMENT' && !isExpired;
+
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-16">
@@ -141,32 +163,50 @@ export const OrderDetailPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <span
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
                 order.orderStatus === 'PENDING_PAYMENT'
-                  ? 'bg-amber-50 text-amber-800 border-amber-200'
+                  ? isExpired
+                    ? 'bg-stone-100 text-stone-500 border-stone-300'
+                    : 'bg-amber-50 text-amber-800 border-amber-200'
                   : order.orderStatus === 'PAID'
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                  : order.orderStatus === 'PROCESSING'
+                  : order.orderStatus === 'PREPARING'
                   ? 'bg-blue-50 text-blue-800 border-blue-200'
                   : order.orderStatus === 'COMPLETED'
                   ? 'bg-stone-100 text-stone-700 border-stone-200'
+                  : order.orderStatus === 'EXPIRED'
+                  ? 'bg-stone-100 text-stone-500 border-stone-300'
                   : 'bg-rose-50 text-rose-800 border-rose-200'
               }`}
             >
               {order.orderStatus === 'PENDING_PAYMENT'
-                ? 'Chờ thanh toán (Giữ kho 15p)'
+                ? isExpired
+                  ? 'Hết hạn giữ chỗ'
+                  : 'Chờ thanh toán (Giữ kho 15p)'
                 : order.orderStatus === 'PAID'
                 ? 'Đã thanh toán'
-                : order.orderStatus === 'PROCESSING'
+                : order.orderStatus === 'PREPARING'
                 ? 'Đang chuẩn bị tiệc'
                 : order.orderStatus === 'COMPLETED'
                 ? 'Hoàn thành'
+                : order.orderStatus === 'EXPIRED'
+                ? 'Hết hạn giữ chỗ'
                 : 'Đã hủy'}
             </span>
 
-            {order.orderStatus === 'PENDING_PAYMENT' && (
+            <button
+              type="button"
+              onClick={handleReorder}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              title="Khôi phục lại danh sách món và số bàn vào Menu Builder"
+            >
+              <RotateCcw className="h-3.5 w-3.5 text-amber-700" />
+              <span>Đặt lại đơn này</span>
+            </button>
+
+            {canCancel && (
               <button
                 type="button"
                 onClick={() => setCancelModalOpen(true)}
@@ -190,7 +230,7 @@ export const OrderDetailPage: React.FC = () => {
           <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
             <span className="block text-[11px] text-stone-400 font-medium">Quy mô bàn tiệc:</span>
             <span className="font-bold text-stone-900 text-sm mt-0.5 block">
-              {order.tableCount} bàn (~{order.tableCount * 10} khách)
+              {order.tableCount} bàn {order.guestCount ? `(~${order.guestCount} khách)` : `(~${order.tableCount * 10} khách)`}
             </span>
           </div>
 
@@ -209,8 +249,8 @@ export const OrderDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Customer & Note */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
+        {/* Customer, Location & Note */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs pt-1">
           <div className="space-y-1">
             <span className="font-semibold text-stone-500 uppercase tracking-wider text-[11px]">
               Người liên hệ:
@@ -221,7 +261,19 @@ export const OrderDetailPage: React.FC = () => {
             <div className="text-stone-500">{order.customerEmail}</div>
           </div>
 
-          {order.note && (
+          <div className="space-y-1">
+            <span className="font-semibold text-stone-500 uppercase tracking-wider text-[11px]">
+              Địa điểm tổ chức:
+            </span>
+            <div className="font-bold text-stone-800">
+              {order.eventLocation || 'Tại sảnh tiệc BanquetHub'}
+            </div>
+            {order.guestCount && (
+              <div className="text-stone-500">Quy mô: {order.guestCount} khách ({order.tableCount} bàn)</div>
+            )}
+          </div>
+
+          {order.note ? (
             <div className="space-y-1">
               <span className="font-semibold text-stone-500 uppercase tracking-wider text-[11px]">
                 Ghi chú của khách:
@@ -229,6 +281,13 @@ export const OrderDetailPage: React.FC = () => {
               <p className="rounded-xl bg-stone-50 p-2.5 text-stone-700 border border-stone-200 text-xs">
                 {order.note}
               </p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              <span className="font-semibold text-stone-500 uppercase tracking-wider text-[11px]">
+                Ghi chú:
+              </span>
+              <p className="text-stone-400 italic">Không có ghi chú thêm</p>
             </div>
           )}
         </div>

@@ -8,9 +8,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -28,6 +31,19 @@ public class OrderPreviewController {
     @Operation(summary = "Xem trước giá và nguyên liệu cho thực đơn (theo số bàn)")
     public ResponseEntity<ApiResponse<OrderPreviewResponse>> previewMenu(@Valid @RequestBody OrderPreviewRequest request) {
         OrderPreviewResponse response = previewService.previewOrder(request);
+        return ResponseEntity.ok(ApiResponse.ok("Tính toán xem trước thực đơn thành công", response));
+    }
+
+    @GetMapping("/menus/{id}/preview")
+    @Operation(summary = "Xem trước giá và nguyên liệu cho thực đơn mẫu theo ID và số bàn")
+    public ResponseEntity<ApiResponse<OrderPreviewResponse>> previewMenuById(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "1") int tableCount
+    ) {
+        OrderPreviewRequest req = new OrderPreviewRequest();
+        req.setMenuId(id);
+        req.setTableCount(Math.max(1, tableCount));
+        OrderPreviewResponse response = previewService.previewOrder(req);
         return ResponseEntity.ok(ApiResponse.ok("Tính toán xem trước thực đơn thành công", response));
     }
 

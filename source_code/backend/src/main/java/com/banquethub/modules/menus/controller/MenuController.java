@@ -34,14 +34,14 @@ public class MenuController {
     @GetMapping("/{id}")
     @Operation(summary = "Lấy chi tiết thực đơn theo ID")
     public ResponseEntity<ApiResponse<MenuResponse>> getMenuById(@PathVariable Long id) {
-        MenuResponse menu = menuService.getMenuById(id);
+        MenuResponse menu = menuService.getPublicMenuById(id);
         return ResponseEntity.ok(ApiResponse.ok("Lấy chi tiết thực đơn thành công", menu));
     }
 
     @GetMapping("/code/{code}")
     @Operation(summary = "Lấy chi tiết thực đơn theo mã")
     public ResponseEntity<ApiResponse<MenuResponse>> getMenuByCode(@PathVariable String code) {
-        MenuResponse menu = menuService.getMenuByCode(code);
+        MenuResponse menu = menuService.getPublicMenuByCode(code);
         return ResponseEntity.ok(ApiResponse.ok("Lấy chi tiết thực đơn thành công", menu));
     }
 }

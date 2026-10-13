@@ -80,7 +80,7 @@ export const AdminOrdersPage: React.FC = () => {
             <span>Đã thanh toán</span>
           </span>
         );
-      case 'PROCESSING':
+      case 'PREPARING':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
             <RefreshCw className="h-3 w-3 text-blue-600 animate-spin" />
@@ -99,6 +99,13 @@ export const AdminOrdersPage: React.FC = () => {
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
             <XCircle className="h-3 w-3 text-rose-600" />
             <span>Đã hủy</span>
+          </span>
+        );
+      case 'EXPIRED':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-stone-100 text-stone-500 border border-stone-300">
+            <AlertCircle className="h-3 w-3 text-stone-400" />
+            <span>Hết hạn giữ chỗ</span>
           </span>
         );
       default:
@@ -178,9 +185,10 @@ export const AdminOrdersPage: React.FC = () => {
             <option value="">Tất cả trạng thái đơn</option>
             <option value="PENDING_PAYMENT">Chờ thanh toán (PENDING_PAYMENT)</option>
             <option value="PAID">Đã thanh toán (PAID)</option>
-            <option value="PROCESSING">Đang chuẩn bị (PROCESSING)</option>
+            <option value="PREPARING">Đang chuẩn bị (PREPARING)</option>
             <option value="COMPLETED">Hoàn thành (COMPLETED)</option>
             <option value="CANCELLED">Đã hủy (CANCELLED)</option>
+            <option value="EXPIRED">Hết hạn (EXPIRED)</option>
           </select>
 
           <input
@@ -261,6 +269,11 @@ export const AdminOrdersPage: React.FC = () => {
                     </td>
                     <td className="py-3.5 px-4 text-center font-bold text-stone-800 whitespace-nowrap">
                       {ord.tableCount} bàn
+                      {ord.guestCount && (
+                        <span className="block text-[10px] text-stone-400 font-normal">
+                          ~{ord.guestCount} khách
+                        </span>
+                      )}
                     </td>
                     <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 text-sm whitespace-nowrap">
                       {formatVnd(ord.totalAmount)}

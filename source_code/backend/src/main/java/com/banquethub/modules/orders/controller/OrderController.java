@@ -48,6 +48,7 @@ public class OrderController {
     }
 
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Tạo mới đơn đặt tiệc và giữ nguyên liệu trong 15 phút")
     public ResponseEntity<ApiResponse<OrderResponse>> createOrder(
             @Valid @RequestBody CreateOrderRequest request,
@@ -59,7 +60,7 @@ public class OrderController {
                 .body(ApiResponse.ok("Tạo đơn đặt tiệc thành công! Vui lòng hoàn tất trong vòng 15 phút.", created));
     }
 
-    @GetMapping("/my")
+    @GetMapping({"/my", "/my-orders"})
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Xem danh sách đơn đặt tiệc của tài khoản hiện tại")
     public ResponseEntity<ApiResponse<Page<OrderResponse>>> getMyOrders(
@@ -74,6 +75,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Xem chi tiết đơn hàng theo ID")
     public ResponseEntity<ApiResponse<OrderResponse>> getOrderById(
             @PathVariable Long id,
@@ -84,7 +86,8 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.ok("Lấy chi tiết đơn hàng thành công", order));
     }
 
-    @GetMapping("/code/{orderCode}")
+    @GetMapping({"/code/{orderCode}", "/by-code/{orderCode}"})
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Xem chi tiết đơn hàng theo mã đơn")
     public ResponseEntity<ApiResponse<OrderResponse>> getOrderByCode(
             @PathVariable String orderCode,

@@ -22,6 +22,7 @@ import com.banquethub.modules.inventory.repository.StockAdjustmentRepository;
 import com.banquethub.modules.inventory.repository.StockMovementRepository;
 import com.banquethub.modules.inventory.repository.StockReceiptItemRepository;
 import com.banquethub.modules.inventory.repository.StockReceiptRepository;
+import com.banquethub.modules.reservations.repository.StockReservationRepository;
 import com.banquethub.modules.users.entity.User;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,7 @@ public class InventoryService {
     private final StockAdjustmentRepository stockAdjustmentRepository;
     private final StockReceiptRepository stockReceiptRepository;
     private final StockReceiptItemRepository stockReceiptItemRepository;
+    private final StockReservationRepository stockReservationRepository;
 
     public InventoryService(
             IngredientRepository ingredientRepository,
@@ -56,7 +58,8 @@ public class InventoryService {
             StockMovementRepository stockMovementRepository,
             StockAdjustmentRepository stockAdjustmentRepository,
             StockReceiptRepository stockReceiptRepository,
-            StockReceiptItemRepository stockReceiptItemRepository
+            StockReceiptItemRepository stockReceiptItemRepository,
+            StockReservationRepository stockReservationRepository
     ) {
         this.ingredientRepository = ingredientRepository;
         this.recipeItemRepository = recipeItemRepository;
@@ -64,6 +67,7 @@ public class InventoryService {
         this.stockAdjustmentRepository = stockAdjustmentRepository;
         this.stockReceiptRepository = stockReceiptRepository;
         this.stockReceiptItemRepository = stockReceiptItemRepository;
+        this.stockReservationRepository = stockReservationRepository;
     }
 
     @Transactional(readOnly = true)
@@ -170,7 +174,7 @@ public class InventoryService {
             throw new BusinessValidationException("Lý do điều chỉnh tồn kho bắt buộc phải nhập");
         }
 
-        Ingredient ingredient = ingredientRepository.findById(request.getIngredientId())
+        Ingredient ingredient = ingredientRepository.findByIdForUpdate(request.getIngredientId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nguyên liệu với ID: " + request.getIngredientId()));
 
         BigDecimal currentStock = ingredient.getCurrentStock();
@@ -183,6 +187,16 @@ public class InventoryService {
                     currentStock.stripTrailingZeros().toPlainString(), ingredient.getUnit(),
                     change.stripTrailingZeros().toPlainString(), ingredient.getUnit(),
                     newStock.stripTrailingZeros().toPlainString(), ingredient.getUnit()
+            ));
+        }
+
+        // Kiểm tra không được giảm tồn kho xuống dưới lượng đang giữ cho các đơn tiệc còn hiệu lực (active reservation check)
+        BigDecimal activeReserved = stockReservationRepository.getActiveReservedQuantity(ingredient.getId(), OffsetDateTime.now(VN_ZONE));
+        if (activeReserved != null && newStock.compareTo(activeReserved) < 0) {
+            throw new BusinessValidationException(String.format(
+                    "Không thể điều chỉnh tồn kho xuống dưới lượng nguyên liệu đang được giữ cho các đơn tiệc còn hiệu lực! Tồn sau điều chỉnh: %s %s, nhưng hiện đang có %s %s được giữ bởi các đơn đặt tiệc.",
+                    newStock.stripTrailingZeros().toPlainString(), ingredient.getUnit(),
+                    activeReserved.stripTrailingZeros().toPlainString(), ingredient.getUnit()
             ));
         }
 

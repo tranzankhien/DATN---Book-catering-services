@@ -53,10 +53,16 @@ public class EmployeeOrderController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime toDate,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal CustomUserDetails currentUserDetails
     ) {
+        User currentUser = resolveUser(currentUserDetails);
+        OrderStatus effectiveStatus = orderStatus;
+        if (currentUser != null && currentUser.getRole() == com.banquethub.modules.users.entity.Role.ROLE_EMPLOYEE) {
+            effectiveStatus = OrderStatus.PENDING_PAYMENT;
+        }
         Page<OrderResponse> result = orderService.searchAdminOrders(
-                keyword, orderStatus, null, fromDate, toDate, PageRequest.of(page, size, Sort.by("eventDateTime").ascending())
+                keyword, effectiveStatus, null, fromDate, toDate, PageRequest.of(page, size, Sort.by("eventDateTime").ascending())
         );
         return ResponseEntity.ok(ApiResponse.ok("Lấy danh sách đơn tiệc thành công", result));
     }

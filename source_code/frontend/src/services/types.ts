@@ -293,9 +293,9 @@ export interface InventorySummaryDto {
 // PHASE 3: MENUS, ORDERS & RESERVATIONS
 // ==========================================
 
-export type MenuStatus = 'ACTIVE' | 'INACTIVE';
-export type OrderStatus = 'PENDING_PAYMENT' | 'PAID' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED';
-export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'RELEASED';
+export type MenuStatus = 'ACTIVE' | 'HIDDEN' | 'ARCHIVED';
+export type OrderStatus = 'PENDING_PAYMENT' | 'PAID' | 'PREPARING' | 'COMPLETED' | 'CANCELLED' | 'EXPIRED';
+export type ReservationStatus = 'ACTIVE' | 'RELEASED' | 'FULFILLED' | 'EXPIRED';
 
 export interface MenuItemDto {
   id: number;
@@ -396,6 +396,8 @@ export interface OrderDto {
   eventDateTime: string;
   tableCount: number;
   note?: string | null;
+  eventLocation?: string | null;
+  guestCount?: number | null;
   menuId?: number | null;
   menuNameSnapshot?: string | null;
   totalAmount: number;
@@ -459,6 +461,8 @@ export interface CreateOrderPayload {
   eventDateTime: string;
   tableCount: number;
   note?: string;
+  eventLocation?: string;
+  guestCount?: number;
   menuId?: number;
   items: CreateOrderItemPayload[];
   idempotencyKey?: string;

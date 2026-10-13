@@ -38,7 +38,7 @@ export const orderService = {
     page?: number;
     size?: number;
   }): Promise<PageResponse<OrderDto>> {
-    const res = await apiClient.get<ApiResponse<PageResponse<OrderDto>>>('/orders/my-orders', { params });
+    const res = await apiClient.get<ApiResponse<PageResponse<OrderDto>>>('/orders/my', { params });
     return res.data.data;
   },
 
@@ -48,7 +48,7 @@ export const orderService = {
   },
 
   async getOrderByCode(code: string): Promise<OrderDto> {
-    const res = await apiClient.get<ApiResponse<OrderDto>>(`/orders/by-code/${code}`);
+    const res = await apiClient.get<ApiResponse<OrderDto>>(`/orders/code/${code}`);
     return res.data.data;
   },
 

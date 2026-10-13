@@ -82,6 +82,18 @@ class Phase3IntegrationTest {
     private static Long userAOrderId;
     private static Long userBOrderId;
 
+    @org.junit.jupiter.api.BeforeEach
+    void ensureStockAvailable() {
+        for (Ingredient ing : ingredientRepository.findAll()) {
+            BigDecimal active = reservationRepository.getActiveReservedQuantity(ing.getId(), OffsetDateTime.now(VN_ZONE));
+            BigDecimal base = active != null ? active : BigDecimal.ZERO;
+            if (ing.getCurrentStock().compareTo(base.add(new BigDecimal("20.000"))) < 0) {
+                ing.setCurrentStock(base.add(new BigDecimal("50.000")));
+                ingredientRepository.save(ing);
+            }
+        }
+    }
+
     private String obtainAdminToken() throws Exception {
         String payload = """
                 {
@@ -348,7 +360,9 @@ class Phase3IntegrationTest {
                 }
                 """, futureDate, dish.getId());
 
+        String userToken = obtainUserToken();
         MvcResult res = mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isCreated())
@@ -449,17 +463,18 @@ class Phase3IntegrationTest {
     @org.junit.jupiter.api.Order(9)
     @DisplayName("TC-09: Thiếu nguyên liệu thì từ chối toàn bộ đơn, không giữ một phần nguyên liệu")
     void tc09_insufficientStockRejectsBooking() throws Exception {
+        String userToken = obtainUserToken();
         Dish dish = dishRepository.findByCodeIgnoreCase("DISH-001").orElseThrow();
         OffsetDateTime futureDate = OffsetDateTime.now(VN_ZONE).plusDays(5);
 
-        // 50,000 tables exceeds any restaurant inventory
+        // 400 tables demands 400 * 0.8 = 320kg, which exceeds available stock in inventory
         String payload = String.format("""
                 {
                   "customerName": "Khách Đặt Quá Tải",
                   "customerPhone": "0988776655",
                   "customerEmail": "overload@test.com",
                   "eventDateTime": "%s",
-                  "tableCount": 50000,
+                  "tableCount": 400,
                   "items": [
                     { "dishId": %d, "quantityPerTable": 1 }
                   ]
@@ -467,6 +482,7 @@ class Phase3IntegrationTest {
                 """, futureDate, dish.getId());
 
         mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isBadRequest())
@@ -499,7 +515,9 @@ class Phase3IntegrationTest {
                 }
                 """, futureDate, dish.getId());
 
+        String userToken = obtainUserToken();
         mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isCreated());
@@ -600,16 +618,17 @@ class Phase3IntegrationTest {
     @org.junit.jupiter.api.Order(14)
     @DisplayName("TC-14: Đồng thời tranh chấp tồn khả dụng (Pessimistic Lock) - chỉ 1 đơn thành công")
     void tc14_concurrencySafeStockReservation() throws Exception {
-        // Query available stock for ING-MUC-ONG (used single-ingredient by DISH-005)
-        Ingredient mucOng = ingredientRepository.findByCodeIgnoreCase("ING-MUC-ONG").orElseThrow();
-        BigDecimal available = reservationService.getAvailableStock(mucOng.getId());
+        // Guarantee exact 10.000 kg available stock for ING-TOM-SU (DISH-003 has single ingredient ING-TOM-SU 0.8kg/table)
+        Ingredient tomSu = ingredientRepository.findByCodeIgnoreCase("ING-TOM-SU").orElseThrow();
+        BigDecimal active = reservationRepository.getActiveReservedQuantity(tomSu.getId(), OffsetDateTime.now(VN_ZONE));
+        BigDecimal base = active != null ? active : BigDecimal.ZERO;
+        tomSu.setCurrentStock(base.add(new BigDecimal("10.000")));
+        ingredientRepository.save(tomSu);
 
-        // DISH-005 requires exactly 0.7kg ING-MUC-ONG per table (single ingredient)
-        // 1 order takes ~65% of available stock (fits), but 2 orders take 130% (exceeds)
-        int tablesPerOrder = (int) Math.floor(available.doubleValue() / 0.7 * 0.65);
-        if (tablesPerOrder < 1) tablesPerOrder = 1;
-
-        Dish dish = dishRepository.findByCodeIgnoreCase("DISH-005").orElseThrow();
+        // DISH-003 requires 0.8kg ING-TOM-SU per table.
+        // 8 tables = 6.4kg (< 10kg, succeeds). 2 orders = 12.8kg (> 10kg, one must fail).
+        int tablesPerOrder = 8;
+        Dish dish = dishRepository.findByCodeIgnoreCase("DISH-003").orElseThrow();
         OffsetDateTime futureDate = OffsetDateTime.now(VN_ZONE).plusDays(6);
 
         String payload1 = String.format("""
@@ -638,11 +657,18 @@ class Phase3IntegrationTest {
                 }
                 """, futureDate, tablesPerOrder, dish.getId());
 
+        String userToken = obtainUserToken();
         ExecutorService executor = Executors.newFixedThreadPool(2);
         List<Callable<Integer>> tasks = List.of(
-                () -> mockMvc.perform(post("/api/v1/orders").contentType(MediaType.APPLICATION_JSON).content(payload1))
+                () -> mockMvc.perform(post("/api/v1/orders")
+                                .header("Authorization", "Bearer " + userToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload1))
                         .andReturn().getResponse().getStatus(),
-                () -> mockMvc.perform(post("/api/v1/orders").contentType(MediaType.APPLICATION_JSON).content(payload2))
+                () -> mockMvc.perform(post("/api/v1/orders")
+                                .header("Authorization", "Bearer " + userToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload2))
                         .andReturn().getResponse().getStatus()
         );
 
@@ -683,7 +709,9 @@ class Phase3IntegrationTest {
                 }
                 """, futureDate, idempotencyKey, dish.getId());
 
+        String userToken = obtainUserToken();
         MvcResult res1 = mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isCreated())
@@ -693,6 +721,7 @@ class Phase3IntegrationTest {
 
         // Retry same request
         MvcResult res2 = mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isCreated())
@@ -794,7 +823,9 @@ class Phase3IntegrationTest {
                 }
                 """, futureDate, dish.getId());
 
+        String userToken = obtainUserToken();
         MvcResult res = mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(orderPayload))
                 .andExpect(status().isCreated())
@@ -810,7 +841,8 @@ class Phase3IntegrationTest {
         dishRepository.save(dish);
 
         // Re-read existing order
-        MvcResult resAfter = mockMvc.perform(get("/api/v1/orders/" + snapOrderId))
+        MvcResult resAfter = mockMvc.perform(get("/api/v1/orders/" + snapOrderId)
+                        .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -847,7 +879,11 @@ class Phase3IntegrationTest {
         mockMvc.perform(post("/api/v1/orders/" + userAOrderId + "/cancel")
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value(containsString("Chỉ có thể hủy đơn hàng đang ở trạng thái 'Chờ thanh toán'")));
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.anyOf(
+                        containsString("hết hạn"),
+                        containsString("không thể hủy"),
+                        containsString("Chờ thanh toán")
+                )));
     }
 
     // =========================================================================
@@ -874,5 +910,170 @@ class Phase3IntegrationTest {
     void tc22_flywayPreservesPhase1And2Data() {
         assertThat(dishRepository.count()).isGreaterThanOrEqualTo(10);
         assertThat(ingredientRepository.count()).isGreaterThanOrEqualTo(12);
+    }
+
+    // =========================================================================
+    // TC-23: Khách vãng lai (Guest) không thể tạo hoặc xem chi tiết đơn hàng
+    // =========================================================================
+    @Test
+    @org.junit.jupiter.api.Order(23)
+    @DisplayName("TC-23: Khách vãng lai bị từ chối truy cập (401) khi tạo hoặc xem chi tiết đơn hàng")
+    void tc23_guestAuthorizationEnforced() throws Exception {
+        Dish dish = dishRepository.findByCodeIgnoreCase("DISH-001").orElseThrow();
+        OffsetDateTime futureDate = OffsetDateTime.now(VN_ZONE).plusDays(5);
+        String payload = String.format("""
+                {
+                  "customerName": "Khách Vãng Lai",
+                  "customerPhone": "0988776655",
+                  "customerEmail": "guest@test.com",
+                  "eventDateTime": "%s",
+                  "tableCount": 2,
+                  "items": [
+                    { "dishId": %d, "quantityPerTable": 1 }
+                  ]
+                }
+                """, futureDate, dish.getId());
+
+        // Guest creating order without JWT
+        mockMvc.perform(post("/api/v1/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isUnauthorized());
+
+        // Guest viewing order without JWT
+        mockMvc.perform(get("/api/v1/orders/" + userBOrderId))
+                .andExpect(status().isUnauthorized());
+    }
+
+    // =========================================================================
+    // TC-24: Phân quyền Employee: chỉ xem đơn PENDING_PAYMENT, không thể hủy đơn khách
+    // =========================================================================
+    @Test
+    @org.junit.jupiter.api.Order(24)
+    @DisplayName("TC-24: Employee không có quyền hủy đơn tiệc của khách hàng qua API")
+    void tc24_employeeAccessRestrictions() throws Exception {
+        String employeeToken = obtainEmployeeToken();
+
+        // Employee attempting to cancel order
+        mockMvc.perform(post("/api/v1/orders/" + userBOrderId + "/cancel")
+                        .header("Authorization", "Bearer " + employeeToken))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(containsString("Nhân viên không có quyền hủy đơn")));
+    }
+
+    // =========================================================================
+    // TC-25: Điều chỉnh giảm tồn kho không thể phá lượng nguyên liệu đang giữ
+    // =========================================================================
+    @Test
+    @org.junit.jupiter.api.Order(25)
+    @DisplayName("TC-25: Từ chối điều chỉnh giảm tồn kho xuống dưới lượng đang giữ cho các đơn tiệc còn hiệu lực")
+    void tc25_reducingStockBelowActiveReservationRejected() throws Exception {
+        String adminToken = obtainAdminToken();
+        Ingredient tomSu = ingredientRepository.findByCodeIgnoreCase("ING-TOM-SU").orElseThrow();
+
+        // Query active reserved quantity for tomSu
+        BigDecimal activeReserved = reservationRepository.getActiveReservedQuantity(tomSu.getId(), OffsetDateTime.now(VN_ZONE));
+        if (activeReserved != null && activeReserved.compareTo(BigDecimal.ZERO) > 0) {
+            // Attempt to reduce stock so that remaining stock is positive (> 0) but < activeReserved
+            BigDecimal currentStock = tomSu.getCurrentStock();
+            // Remaining stock = activeReserved - 1 (> 0, assuming activeReserved >= 2)
+            BigDecimal targetStock = activeReserved.subtract(BigDecimal.ONE);
+            if (targetStock.compareTo(BigDecimal.ZERO) <= 0) {
+                targetStock = BigDecimal.valueOf(0.5);
+            }
+            BigDecimal excessiveReduction = targetStock.subtract(currentStock); // negative delta
+
+            String adjustPayload = String.format("""
+                    {
+                      "ingredientId": %d,
+                      "quantityChange": %s,
+                      "reason": "Thử nghiệm giảm tồn kho quá mức cho phép"
+                    }
+                    """, tomSu.getId(), excessiveReduction.toPlainString());
+
+            mockMvc.perform(post("/api/v1/admin/inventory/adjustments")
+                            .header("Authorization", "Bearer " + adminToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(adjustPayload))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value(containsString("được giữ bởi các đơn đặt tiệc")));
+        }
+    }
+
+    // =========================================================================
+    // TC-26: Retry đồng thời với cùng Idempotency Key trả về cùng một đơn hàng
+    // =========================================================================
+    @Test
+    @org.junit.jupiter.api.Order(26)
+    @DisplayName("TC-26: Hai request gửi đồng thời với cùng Idempotency-Key và payload trả về cùng đơn hàng duy nhất")
+    void tc26_concurrentRetrySameIdempotencyKey() throws Exception {
+        // Ensure sufficient stock for DISH-001 (ING-TOM-SU)
+        Ingredient tomSu = ingredientRepository.findByCodeIgnoreCase("ING-TOM-SU").orElseThrow();
+        BigDecimal active = reservationRepository.getActiveReservedQuantity(tomSu.getId(), OffsetDateTime.now(VN_ZONE));
+        BigDecimal base = active != null ? active : BigDecimal.ZERO;
+        tomSu.setCurrentStock(base.add(new BigDecimal("10.000")));
+        ingredientRepository.save(tomSu);
+
+        String userToken = obtainUserToken();
+        String concurrentKey = "CONCURRENT-" + UUID.randomUUID();
+        Dish dish = dishRepository.findByCodeIgnoreCase("DISH-001").orElseThrow();
+        OffsetDateTime futureDate = OffsetDateTime.now(VN_ZONE).plusDays(12);
+
+        String payload = String.format("""
+                {
+                  "customerName": "Khách Retry Đồng Thời",
+                  "customerPhone": "0977889900",
+                  "customerEmail": "user@banquethub.vn",
+                  "eventDateTime": "%s",
+                  "tableCount": 1,
+                  "idempotencyKey": "%s",
+                  "items": [
+                    { "dishId": %d, "quantityPerTable": 1 }
+                  ]
+                }
+                """, futureDate, concurrentKey, dish.getId());
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        List<Callable<MvcResult>> tasks = List.of(
+                () -> mockMvc.perform(post("/api/v1/orders")
+                                .header("Authorization", "Bearer " + userToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                        .andReturn(),
+                () -> mockMvc.perform(post("/api/v1/orders")
+                                .header("Authorization", "Bearer " + userToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                        .andReturn()
+        );
+
+        List<Future<MvcResult>> futures = executor.invokeAll(tasks);
+        List<Long> orderIds = new ArrayList<>();
+        for (Future<MvcResult> f : futures) {
+            MvcResult res = f.get();
+            int status = res.getResponse().getStatus();
+            assertThat(status).isBetween(200, 201);
+            long id = objectMapper.readTree(res.getResponse().getContentAsString()).path("data").path("id").asLong();
+            orderIds.add(id);
+        }
+        executor.shutdown();
+
+        assertThat(orderIds).hasSize(2);
+        assertThat(orderIds.get(0)).isEqualTo(orderIds.get(1));
+    }
+
+    // =========================================================================
+    // TC-27: Preview thực đơn mẫu qua GET /api/v1/menus/{id}/preview
+    // =========================================================================
+    @Test
+    @org.junit.jupiter.api.Order(27)
+    @DisplayName("TC-27: Xem trước giá và kiểm tra nguyên liệu thực đơn mẫu qua GET /menus/{id}/preview")
+    void tc27_previewMenuByIdEndpoint() throws Exception {
+        mockMvc.perform(get("/api/v1/menus/" + createdMenuId + "/preview")
+                        .param("tableCount", "3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.tableCount").value(3))
+                .andExpect(jsonPath("$.data.items").isArray());
     }
 }

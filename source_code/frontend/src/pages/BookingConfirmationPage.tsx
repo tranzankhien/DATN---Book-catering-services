@@ -66,13 +66,16 @@ export const BookingConfirmationPage: React.FC = () => {
       setSecondsRemaining((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
+          if (id) {
+            orderService.getOrderById(Number(id)).then(setOrder).catch(() => {});
+          }
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [secondsRemaining]);
+  }, [secondsRemaining, id]);
 
   const copyOrderCode = () => {
     if (order?.orderCode) {
@@ -178,8 +181,32 @@ export const BookingConfirmationPage: React.FC = () => {
             </h2>
           </div>
 
-          <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
-            {order.orderStatus === 'PENDING_PAYMENT' ? 'Chờ thanh toán (15 phút)' : order.orderStatus}
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold border ${
+              order.orderStatus === 'PENDING_PAYMENT'
+                ? isExpired
+                  ? 'bg-stone-100 text-stone-500 border-stone-300'
+                  : 'bg-amber-50 text-amber-800 border-amber-200'
+                : order.orderStatus === 'PAID'
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                : order.orderStatus === 'PREPARING'
+                ? 'bg-blue-50 text-blue-800 border-blue-200'
+                : order.orderStatus === 'EXPIRED'
+                ? 'bg-stone-100 text-stone-500 border-stone-300'
+                : 'bg-rose-50 text-rose-800 border-rose-200'
+            }`}
+          >
+            {order.orderStatus === 'PENDING_PAYMENT'
+              ? isExpired
+                ? 'Hết hạn giữ chỗ'
+                : 'Chờ thanh toán (15 phút)'
+              : order.orderStatus === 'PAID'
+              ? 'Đã thanh toán'
+              : order.orderStatus === 'PREPARING'
+              ? 'Đang chuẩn bị tiệc'
+              : order.orderStatus === 'EXPIRED'
+              ? 'Hết hạn giữ chỗ'
+              : order.orderStatus}
           </span>
         </div>
 
@@ -198,6 +225,10 @@ export const BookingConfirmationPage: React.FC = () => {
               <span className="block text-[11px] text-stone-400 font-medium">Email liên hệ:</span>
               <span className="font-medium text-stone-900">{order.customerEmail}</span>
             </div>
+            <div>
+              <span className="block text-[11px] text-stone-400 font-medium">Địa điểm tổ chức:</span>
+              <span className="font-semibold text-stone-900">{order.eventLocation || 'Tại sảnh tiệc BanquetHub'}</span>
+            </div>
           </div>
 
           <div className="space-y-3 rounded-xl bg-stone-50 p-4 border border-stone-100">
@@ -210,7 +241,7 @@ export const BookingConfirmationPage: React.FC = () => {
             <div>
               <span className="block text-[11px] text-stone-400 font-medium">Quy mô bàn tiệc:</span>
               <span className="font-semibold text-stone-900">
-                {order.tableCount} bàn (~{order.tableCount * 10} khách)
+                {order.tableCount} bàn {order.guestCount ? `(~${order.guestCount} khách)` : `(~${order.tableCount * 10} khách)`}
               </span>
             </div>
             <div>
@@ -219,6 +250,12 @@ export const BookingConfirmationPage: React.FC = () => {
                 {order.menuNameSnapshot || 'Thực đơn tự chọn'}
               </span>
             </div>
+            {order.note && (
+              <div>
+                <span className="block text-[11px] text-stone-400 font-medium">Ghi chú:</span>
+                <span className="text-stone-700 italic">{order.note}</span>
+              </div>
+            )}
           </div>
         </div>
 

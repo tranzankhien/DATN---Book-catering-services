@@ -48,7 +48,16 @@ public class ReservationExpiryScheduler {
         }
 
         log.info("Phát hiện {} đơn hàng quá hạn thanh toán 15 phút. Tiến hành giải phóng giữ kho...", expiredOrders.size());
-        for (Order order : expiredOrders) {
+        for (Order candidate : expiredOrders) {
+            java.util.Optional<Order> lockedOpt = orderRepository.findByIdForUpdate(candidate.getId());
+            if (lockedOpt.isEmpty()) {
+                continue;
+            }
+            Order order = lockedOpt.get();
+            if (order.getOrderStatus() != OrderStatus.PENDING_PAYMENT) {
+                continue;
+            }
+
             order.setOrderStatus(OrderStatus.EXPIRED);
             orderRepository.save(order);
 

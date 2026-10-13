@@ -67,7 +67,7 @@ export const MyOrdersPage: React.FC = () => {
             <span>Đã thanh toán</span>
           </span>
         );
-      case 'PROCESSING':
+      case 'PREPARING':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">
             <RefreshCw className="h-3.5 w-3.5 text-blue-600 animate-spin" />
@@ -86,6 +86,13 @@ export const MyOrdersPage: React.FC = () => {
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200">
             <XCircle className="h-3.5 w-3.5 text-rose-600" />
             <span>Đã hủy</span>
+          </span>
+        );
+      case 'EXPIRED':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-stone-100 text-stone-500 border border-stone-300">
+            <AlertCircle className="h-3.5 w-3.5 text-stone-400" />
+            <span>Hết hạn giữ chỗ</span>
           </span>
         );
       default:
@@ -132,8 +139,9 @@ export const MyOrdersPage: React.FC = () => {
             { label: 'Tất cả', value: '' },
             { label: 'Chờ thanh toán', value: 'PENDING_PAYMENT' },
             { label: 'Đã thanh toán', value: 'PAID' },
-            { label: 'Đang chuẩn bị', value: 'PROCESSING' },
+            { label: 'Đang chuẩn bị', value: 'PREPARING' },
             { label: 'Hoàn thành', value: 'COMPLETED' },
+            { label: 'Hết hạn', value: 'EXPIRED' },
             { label: 'Đã hủy', value: 'CANCELLED' },
           ].map((f) => (
             <button
@@ -212,8 +220,13 @@ export const MyOrdersPage: React.FC = () => {
                   <div className="rounded-xl bg-stone-50 p-2.5 border border-stone-100">
                     <span className="block text-[11px] text-stone-400">Quy mô tiệc:</span>
                     <span className="font-bold text-stone-900">
-                      {ord.tableCount} bàn ({ord.items.length} món ăn)
+                      {ord.tableCount} bàn {ord.guestCount ? `(~${ord.guestCount} khách)` : `(~${ord.tableCount * 10} khách)`}
                     </span>
+                    {ord.eventLocation && (
+                      <span className="block text-[10px] text-stone-500 truncate mt-0.5" title={ord.eventLocation}>
+                        📍 {ord.eventLocation}
+                      </span>
+                    )}
                   </div>
                   <div className="rounded-xl bg-stone-50 p-2.5 border border-stone-100">
                     <span className="block text-[11px] text-stone-400">Thực đơn:</span>

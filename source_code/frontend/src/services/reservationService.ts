@@ -22,7 +22,7 @@ export const reservationService = {
 
   async getAvailability(): Promise<StockAvailabilityDto[]> {
     const res = await apiClient.get<ApiResponse<StockAvailabilityDto[]>>(
-      '/admin/inventory/reservations/availability'
+      '/admin/inventory/availability'
     );
     return res.data.data;
   },

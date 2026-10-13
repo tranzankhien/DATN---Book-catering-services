@@ -39,6 +39,12 @@ public class CreateOrderRequest {
     @Size(max = 1000, message = "Ghi chú không được vượt quá 1000 ký tự")
     private String note;
 
+    @Size(max = 255, message = "Địa điểm tổ chức không được vượt quá 255 ký tự")
+    private String eventLocation;
+
+    @Min(value = 1, message = "Số lượng khách tham dự phải từ 1 người trở lên")
+    private Integer guestCount;
+
     private Long menuId;
 
     @NotEmpty(message = "Đơn đặt tiệc phải có ít nhất 1 món ăn")
@@ -95,6 +101,22 @@ public class CreateOrderRequest {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getEventLocation() {
+        return eventLocation;
+    }
+
+    public void setEventLocation(String eventLocation) {
+        this.eventLocation = eventLocation;
+    }
+
+    public Integer getGuestCount() {
+        return guestCount;
+    }
+
+    public void setGuestCount(Integer guestCount) {
+        this.guestCount = guestCount;
     }
 
     public Long getMenuId() {

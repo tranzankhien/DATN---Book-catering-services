@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import {
   Calendar,
@@ -50,17 +50,26 @@ export const CheckoutPage: React.FC = () => {
   const [tableCount, setTableCount] = useState<number>(
     tablesParam ? Math.max(1, parseInt(tablesParam) || 1) : 6
   );
+  const [guestCount, setGuestCount] = useState<number>(
+    tablesParam ? Math.max(1, parseInt(tablesParam) || 1) * 10 : 60
+  );
+  const [eventLocation, setEventLocation] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [menuId, setMenuId] = useState<number | undefined>(
     menuIdParam ? Number(menuIdParam) : undefined
   );
   const [items, setItems] = useState<CreateOrderItemPayload[]>([]);
 
+  // Stable Idempotency Key across retries of the same booking form
+  const idempotencyKeyRef = useRef<string>(crypto.randomUUID());
+
   // Preview & Submit State
   const [preview, setPreview] = useState<OrderPreviewResponseDto | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [previewLoading, setPreviewLoading] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const previewSeqRef = useRef<number>(0);
 
   // Auto-fill user information if logged in
   useEffect(() => {
@@ -141,19 +150,31 @@ export const CheckoutPage: React.FC = () => {
   const handleTableCountChange = async (newCount: number) => {
     const validCount = Math.max(1, newCount);
     setTableCount(validCount);
+    setGuestCount(validCount * 10);
+    const seq = ++previewSeqRef.current;
     try {
+      setPreviewLoading(true);
+      setError(null);
+      let prev: OrderPreviewResponseDto;
       if (menuId) {
-        const prev = await orderService.previewMenu(menuId, validCount);
-        setPreview(prev);
-      } else if (items.length > 0) {
-        const prev = await orderService.previewOrder({
+        prev = await orderService.previewMenu(menuId, validCount);
+      } else {
+        prev = await orderService.previewOrder({
           tableCount: validCount,
           items,
         });
+      }
+      if (seq === previewSeqRef.current) {
         setPreview(prev);
       }
     } catch (err) {
-      setError(extractErrorMessage(err));
+      if (seq === previewSeqRef.current) {
+        setError(extractErrorMessage(err));
+      }
+    } finally {
+      if (seq === previewSeqRef.current) {
+        setPreviewLoading(false);
+      }
     }
   };
 
@@ -175,7 +196,10 @@ export const CheckoutPage: React.FC = () => {
       showToast('Vui lòng chọn ngày tổ chức tiệc', 'error');
       return;
     }
-
+    if (previewLoading) {
+      showToast('Hệ thống đang kiểm tra tồn kho, vui lòng đợi trong giây lát...', 'info');
+      return;
+    }
     if (preview && !preview.canProceed) {
       showToast('Nguyên liệu trong kho không đủ để đáp ứng quy mô tiệc này', 'error');
       return;
@@ -186,21 +210,21 @@ export const CheckoutPage: React.FC = () => {
       setError(null);
 
       const eventDateTimeIso = `${eventDate}T${eventTime || '18:00'}:00+07:00`;
-      const idempotencyKey = crypto.randomUUID();
-
       const payload: CreateOrderPayload = {
         customerName: customerName.trim(),
         customerPhone: customerPhone.trim(),
         customerEmail: customerEmail.trim(),
         eventDateTime: eventDateTimeIso,
         tableCount,
+        guestCount: guestCount ? Number(guestCount) : tableCount * 10,
+        eventLocation: eventLocation.trim() || undefined,
         note: note.trim() || undefined,
         menuId,
         items,
-        idempotencyKey,
+        idempotencyKey: idempotencyKeyRef.current,
       };
 
-      const createdOrder = await orderService.createOrder(payload, idempotencyKey);
+      const createdOrder = await orderService.createOrder(payload, idempotencyKeyRef.current);
 
       sessionStorage.removeItem(STORAGE_KEY);
       showToast('Đặt tiệc thành công! Hệ thống đang khóa giữ nguyên liệu 15 phút.', 'success');
@@ -403,6 +427,35 @@ export const CheckoutPage: React.FC = () => {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-stone-700">
+                    Số lượng khách dự kiến
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="Ví dụ: 60"
+                    value={guestCount}
+                    onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
+                    className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-stone-700">
+                    Địa điểm / Sảnh tổ chức tiệc
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ví dụ: Sảnh Hoàng Gia / Nhà riêng số 12..."
+                    value={eventLocation}
+                    onChange={(e) => setEventLocation(e.target.value)}
+                    className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-stone-700">
                   Ghi chú hoặc yêu cầu đặc biệt
@@ -517,16 +570,20 @@ export const CheckoutPage: React.FC = () => {
               {/* Confirm Button */}
               <button
                 type="submit"
-                disabled={submitting || (preview !== null && !preview.canProceed)}
+                disabled={submitting || previewLoading || (preview !== null && !preview.canProceed)}
                 className={`w-full inline-flex items-center justify-center gap-2 rounded-xl text-xs font-semibold py-3.5 shadow-xs transition-all ${
-                  submitting || (preview !== null && !preview.canProceed)
+                  submitting || previewLoading || (preview !== null && !preview.canProceed)
                     ? 'bg-stone-300 text-stone-500 cursor-not-allowed shadow-none'
                     : 'bg-amber-800 hover:bg-amber-900 text-white cursor-pointer'
                 }`}
               >
                 <Lock className="h-4 w-4" />
                 <span>
-                  {submitting ? 'Đang tạo đơn & giữ kho...' : 'Xác nhận đặt tiệc'}
+                  {submitting
+                    ? 'Đang tạo đơn & giữ kho...'
+                    : previewLoading
+                    ? 'Đang kiểm tra tồn kho...'
+                    : 'Xác nhận đặt tiệc'}
                 </span>
               </button>
 

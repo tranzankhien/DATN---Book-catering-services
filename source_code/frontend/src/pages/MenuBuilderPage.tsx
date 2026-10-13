@@ -54,6 +54,7 @@ export const MenuBuilderPage: React.FC = () => {
   // Basket State
   const [selectedItems, setSelectedItems] = useState<SelectedDishItem[]>([]);
   const [tableCount, setTableCount] = useState<number>(6);
+  const [isRestored, setIsRestored] = useState<boolean>(false);
 
   // Preview & Validation State
   const [preview, setPreview] = useState<OrderPreviewResponseDto | null>(null);
@@ -91,6 +92,10 @@ export const MenuBuilderPage: React.FC = () => {
               }
               if (loadedItems.length > 0) {
                 setSelectedItems(loadedItems);
+                if (mounted) {
+                  setCatalogLoading(false);
+                  setIsRestored(true);
+                }
                 return;
               }
             }
@@ -127,7 +132,10 @@ export const MenuBuilderPage: React.FC = () => {
       } catch (err) {
         console.error('Error fetching catalog', err);
       } finally {
-        if (mounted) setCatalogLoading(false);
+        if (mounted) {
+          setCatalogLoading(false);
+          setIsRestored(true);
+        }
       }
     })();
     return () => {
@@ -135,8 +143,9 @@ export const MenuBuilderPage: React.FC = () => {
     };
   }, [menuIdParam]);
 
-  // Persist draft to sessionStorage
+  // Persist draft to sessionStorage only after initial load finishes
   useEffect(() => {
+    if (!isRestored) return;
     const dataToSave = {
       tableCount,
       items: selectedItems.map((it) => ({
@@ -145,10 +154,12 @@ export const MenuBuilderPage: React.FC = () => {
       })),
     };
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-  }, [selectedItems, tableCount]);
+  }, [isRestored, selectedItems, tableCount]);
 
-  // Real-time Preview API Debounced
+  // Real-time Preview API Debounced with Stale Response Suppression
   const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previewSeqRef = useRef<number>(0);
+
   useEffect(() => {
     if (selectedItems.length === 0) {
       setPreview(null);
@@ -160,6 +171,7 @@ export const MenuBuilderPage: React.FC = () => {
       clearTimeout(previewTimerRef.current);
     }
 
+    const seq = ++previewSeqRef.current;
     previewTimerRef.current = setTimeout(async () => {
       try {
         setPreviewLoading(true);
@@ -172,11 +184,17 @@ export const MenuBuilderPage: React.FC = () => {
           tableCount,
           items: payloadItems,
         });
-        setPreview(res);
+        if (seq === previewSeqRef.current) {
+          setPreview(res);
+        }
       } catch (err) {
-        setPreviewError(extractErrorMessage(err));
+        if (seq === previewSeqRef.current) {
+          setPreviewError(extractErrorMessage(err));
+        }
       } finally {
-        setPreviewLoading(false);
+        if (seq === previewSeqRef.current) {
+          setPreviewLoading(false);
+        }
       }
     }, 350);
 
@@ -185,14 +203,16 @@ export const MenuBuilderPage: React.FC = () => {
     };
   }, [selectedItems, tableCount]);
 
-  // Helpers to add, update, remove
+  // Helpers to add, update, remove (Immutable updates)
   const handleAddDish = (dish: DishSummaryDto) => {
     setSelectedItems((prev) => {
-      const idx = prev.findIndex((it) => it.dish.id === dish.id);
-      if (idx >= 0) {
-        const copy = [...prev];
-        copy[idx].quantityPerTable += 1;
-        return copy;
+      const exists = prev.some((it) => it.dish.id === dish.id);
+      if (exists) {
+        return prev.map((it) =>
+          it.dish.id === dish.id
+            ? { ...it, quantityPerTable: it.quantityPerTable + 1 }
+            : it
+        );
       }
       return [...prev, { dish, quantityPerTable: 1 }];
     });

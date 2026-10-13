@@ -23,7 +23,7 @@ export const EmployeeOrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<OrderDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | ''>('');
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | ''>('PENDING_PAYMENT');
   const [fromDate, setFromDate] = useState<string>('');
   const [toDate, setToDate] = useState<string>('');
   const [page, setPage] = useState<number>(0);
@@ -94,11 +94,13 @@ export const EmployeeOrdersPage: React.FC = () => {
           }}
           className="px-3.5 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
         >
-          <option value="">Tất cả trạng thái</option>
+          <option value="PENDING_PAYMENT">Chờ xử lý (PENDING_PAYMENT)</option>
           <option value="PAID">Đã thanh toán (PAID)</option>
-          <option value="PROCESSING">Đang chuẩn bị (PROCESSING)</option>
-          <option value="PENDING_PAYMENT">Chờ thanh toán (PENDING_PAYMENT)</option>
+          <option value="PREPARING">Đang chuẩn bị (PREPARING)</option>
           <option value="COMPLETED">Hoàn thành (COMPLETED)</option>
+          <option value="CANCELLED">Đã hủy (CANCELLED)</option>
+          <option value="EXPIRED">Hết hạn (EXPIRED)</option>
+          <option value="">Tất cả trạng thái</option>
         </select>
 
         <input
@@ -177,6 +179,11 @@ export const EmployeeOrdersPage: React.FC = () => {
                     </td>
                     <td className="py-3.5 px-4 text-center font-bold text-stone-800 whitespace-nowrap">
                       {ord.tableCount} bàn
+                      {ord.guestCount && (
+                        <span className="block text-[10px] text-stone-400 font-normal">
+                          ~{ord.guestCount} khách
+                        </span>
+                      )}
                     </td>
                     <td className="py-3.5 px-4 text-stone-700 truncate max-w-xs">
                       {ord.menuNameSnapshot || 'Thực đơn tự chọn'} ({ord.items.length} món)
@@ -186,14 +193,26 @@ export const EmployeeOrdersPage: React.FC = () => {
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
                           ord.orderStatus === 'PAID'
                             ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                            : ord.orderStatus === 'PROCESSING'
+                            : ord.orderStatus === 'PREPARING'
                             ? 'bg-blue-50 text-blue-800 border-blue-200'
                             : ord.orderStatus === 'PENDING_PAYMENT'
                             ? 'bg-amber-50 text-amber-800 border-amber-200'
+                            : ord.orderStatus === 'EXPIRED'
+                            ? 'bg-stone-100 text-stone-500 border-stone-300'
                             : 'bg-stone-100 text-stone-700 border-stone-200'
                         }`}
                       >
-                        {ord.orderStatus}
+                        {ord.orderStatus === 'PENDING_PAYMENT'
+                          ? 'Chờ thanh toán (15p)'
+                          : ord.orderStatus === 'PAID'
+                          ? 'Đã thanh toán'
+                          : ord.orderStatus === 'PREPARING'
+                          ? 'Đang chuẩn bị tiệc'
+                          : ord.orderStatus === 'COMPLETED'
+                          ? 'Hoàn thành'
+                          : ord.orderStatus === 'EXPIRED'
+                          ? 'Hết hạn giữ chỗ'
+                          : 'Đã hủy'}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
