@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -97,7 +98,29 @@ public class OrderService {
         if (currentUser == null) {
             throw new BusinessValidationException("Vui lòng đăng nhập để đặt tiệc.");
         }
+        if (currentUser.getRole() != Role.ROLE_USER) {
+            throw new BusinessValidationException("Chỉ có tài khoản Khách hàng (ROLE_USER) mới có quyền tạo đơn đặt tiệc.");
+        }
+        if (request.getEventLocation() == null || request.getEventLocation().trim().isEmpty()) {
+            throw new BusinessValidationException("Địa điểm tổ chức tiệc không được để trống.");
+        }
+        if (request.getGuestCount() == null || request.getGuestCount() <= 0) {
+            throw new BusinessValidationException("Số lượng khách tham dự phải từ 1 người trở lên.");
+        }
+
         OffsetDateTime now = OffsetDateTime.now(VN_ZONE);
+
+        // Load selected menu early if specified
+        Menu selectedMenu = null;
+        String menuNameSnapshot = null;
+        if (request.getMenuId() != null) {
+            selectedMenu = menuRepository.findById(request.getMenuId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thực đơn ID: " + request.getMenuId()));
+            if (selectedMenu.getStatus() != MenuStatus.ACTIVE) {
+                throw new BusinessValidationException("Thực đơn '" + selectedMenu.getName() + "' hiện đang tạm ẩn hoặc ngừng phục vụ.");
+            }
+            menuNameSnapshot = selectedMenu.getName();
+        }
 
         // 1. Idempotency Check (BR-13)
         if (request.getIdempotencyKey() != null && !request.getIdempotencyKey().trim().isEmpty()) {
@@ -108,11 +131,8 @@ public class OrderService {
                 if (existingOrder.getUser() != null && !existingOrder.getUser().getId().equals(currentUser.getId())) {
                     throw new BusinessValidationException("Idempotency key không thuộc về tài khoản hiện tại.");
                 }
-                // Trả lỗi nếu cùng key nhưng nội dung khác
-                boolean sameMenu = (existingOrder.getMenu() == null && request.getMenuId() == null) ||
-                        (existingOrder.getMenu() != null && existingOrder.getMenu().getId().equals(request.getMenuId()));
-                boolean sameTableCount = existingOrder.getTableCount() != null && existingOrder.getTableCount().equals(request.getTableCount());
-                if (!sameMenu || !sameTableCount) {
+                // Trả lỗi nếu cùng key nhưng nội dung khác (so sánh toàn diện mọi trường chuẩn hóa)
+                if (!isSameOrderPayload(existingOrder, request, selectedMenu)) {
                     throw new BusinessValidationException("Idempotency-Key đã được sử dụng với nội dung đặt tiệc khác.");
                 }
 
@@ -134,22 +154,11 @@ public class OrderService {
         }
 
         List<CreateOrderItemRequest> itemRequests = request.getItems();
-        Menu selectedMenu = null;
-        String menuNameSnapshot = null;
 
-        if (request.getMenuId() != null) {
-            selectedMenu = menuRepository.findById(request.getMenuId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thực đơn ID: " + request.getMenuId()));
-            if (selectedMenu.getStatus() != MenuStatus.ACTIVE) {
-                throw new BusinessValidationException("Thực đơn '" + selectedMenu.getName() + "' hiện đang tạm ẩn hoặc ngừng phục vụ.");
-            }
-            menuNameSnapshot = selectedMenu.getName();
-
-            if (itemRequests == null || itemRequests.isEmpty()) {
-                itemRequests = selectedMenu.getMenuItems().stream()
-                        .map(mi -> new CreateOrderItemRequest(mi.getDish().getId(), mi.getQuantityPerTable()))
-                        .toList();
-            }
+        if (selectedMenu != null && (itemRequests == null || itemRequests.isEmpty())) {
+            itemRequests = selectedMenu.getMenuItems().stream()
+                    .map(mi -> new CreateOrderItemRequest(mi.getDish().getId(), mi.getQuantityPerTable()))
+                    .toList();
         }
 
         if (itemRequests == null || itemRequests.isEmpty()) {
@@ -350,7 +359,6 @@ public class OrderService {
         return resp;
     }
 
-    @Transactional
     public OrderResponse cancelOrder(Long id, CancelOrderRequest request, User currentUser) {
         if (currentUser == null) {
             throw new BusinessValidationException("Vui lòng đăng nhập để thực hiện thao tác hủy đơn.");
@@ -359,64 +367,147 @@ public class OrderService {
             throw new BusinessValidationException("Nhân viên không có quyền hủy đơn hàng của khách hàng.");
         }
 
-        // Lock order row to synchronize concurrent cancel and expiry scheduler
-        Order order = orderRepository.findByIdForUpdate(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng với ID: " + id));
+        // Phase 1: Lock row and if expired, commit the EXPIRED transition and status history permanently
+        Boolean isExpired = transactionTemplate.execute(status -> {
+            Order order = orderRepository.findByIdForUpdate(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng với ID: " + id));
 
-        // Check ownership for customer
-        if (currentUser.getRole() == Role.ROLE_USER) {
-            if (order.getUser() == null || !order.getUser().getId().equals(currentUser.getId())) {
-                throw new BusinessValidationException("Bạn không có quyền hủy đơn hàng của người khác.");
+            // Check ownership for customer
+            if (currentUser.getRole() == Role.ROLE_USER) {
+                if (order.getUser() == null || !order.getUser().getId().equals(currentUser.getId())) {
+                    throw new BusinessValidationException("Bạn không có quyền hủy đơn hàng của người khác.");
+                }
             }
-        }
 
-        OffsetDateTime now = OffsetDateTime.now(VN_ZONE);
-        // Expiry check: if past paymentExpiresAt or already EXPIRED
-        if (order.getOrderStatus() == OrderStatus.EXPIRED || (order.getPaymentExpiresAt() != null && order.getPaymentExpiresAt().isBefore(now))) {
-            if (order.getOrderStatus() == OrderStatus.PENDING_PAYMENT) {
-                order.setOrderStatus(OrderStatus.EXPIRED);
-                orderRepository.save(order);
-                reservationService.expireReservationForOrder(order.getId());
+            OffsetDateTime now = OffsetDateTime.now(VN_ZONE);
+            if (order.getOrderStatus() == OrderStatus.EXPIRED) {
+                return true;
             }
+            if (order.getPaymentExpiresAt() != null && order.getPaymentExpiresAt().isBefore(now)) {
+                if (order.getOrderStatus() == OrderStatus.PENDING_PAYMENT) {
+                    OrderStatus fromStatus = order.getOrderStatus();
+                    order.setOrderStatus(OrderStatus.EXPIRED);
+                    orderRepository.save(order);
+                    OrderStatusHistory history = new OrderStatusHistory(
+                            order,
+                            fromStatus,
+                            OrderStatus.EXPIRED,
+                            currentUser,
+                            currentUser.getFullName(),
+                            "Hết hạn thời gian thanh toán 15 phút khi người dùng thao tác hủy đơn"
+                    );
+                    statusHistoryRepository.save(history);
+                    reservationService.expireReservationForOrder(order.getId());
+                }
+                return true;
+            }
+            return false;
+        });
+
+        if (Boolean.TRUE.equals(isExpired)) {
             throw new BusinessValidationException("Đơn hàng đã hết hạn giữ chỗ và không thể hủy.");
         }
 
-        if (order.getOrderStatus() == OrderStatus.CANCELLED) {
-            throw new BusinessValidationException("Đơn hàng đã ở trạng thái hủy trước đó.");
+        // Phase 2: Perform actual cancellation under transaction
+        return transactionTemplate.execute(status -> {
+            Order order = orderRepository.findByIdForUpdate(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng với ID: " + id));
+
+            if (order.getOrderStatus() == OrderStatus.CANCELLED) {
+                throw new BusinessValidationException("Đơn hàng đã ở trạng thái hủy trước đó.");
+            }
+            if (order.getOrderStatus() == OrderStatus.COMPLETED) {
+                throw new BusinessValidationException("Đơn hàng đã hoàn thành, không thể hủy.");
+            }
+            if (order.getOrderStatus() != OrderStatus.PENDING_PAYMENT) {
+                throw new BusinessValidationException("Chỉ có thể hủy đơn hàng đang ở trạng thái 'Chờ thanh toán'. Trạng thái hiện tại: " + order.getOrderStatus());
+            }
+
+            OrderStatus fromStatus = order.getOrderStatus();
+            order.setOrderStatus(OrderStatus.CANCELLED);
+
+            String reason = (request != null && request.getReason() != null && !request.getReason().trim().isEmpty())
+                    ? request.getReason().trim() : "Khách hàng yêu cầu hủy đơn trước khi thanh toán";
+            String changedByName = currentUser.getFullName();
+
+            OrderStatusHistory history = new OrderStatusHistory(
+                    order,
+                    fromStatus,
+                    OrderStatus.CANCELLED,
+                    currentUser,
+                    changedByName,
+                    reason
+            );
+            statusHistoryRepository.save(history);
+
+            // Immediately release reserved stock (BR-08)
+            reservationService.releaseReservationForOrder(order.getId());
+
+            Order saved = orderRepository.save(order);
+            OrderResponse resp = OrderResponse.fromEntity(saved);
+            reservationService.getReservationByOrderId(saved.getId()).ifPresent(resp::setReservation);
+            return resp;
+        });
+    }
+
+    private boolean isSameOrderPayload(Order existing, CreateOrderRequest request, Menu selectedMenu) {
+        if (!Objects.equals(trim(existing.getCustomerName()), trim(request.getCustomerName()))) {
+            return false;
         }
-        if (order.getOrderStatus() == OrderStatus.COMPLETED) {
-            throw new BusinessValidationException("Đơn hàng đã hoàn thành, không thể hủy.");
+        if (!Objects.equals(trim(existing.getCustomerPhone()), trim(request.getCustomerPhone()))) {
+            return false;
+        }
+        if (!Objects.equals(trimLower(existing.getCustomerEmail()), trimLower(request.getCustomerEmail()))) {
+            return false;
+        }
+        if (!Objects.equals(existing.getTableCount(), request.getTableCount())) {
+            return false;
+        }
+        if (!Objects.equals(existing.getGuestCount(), request.getGuestCount())) {
+            return false;
+        }
+        if (!Objects.equals(trim(existing.getEventLocation()), trim(request.getEventLocation()))) {
+            return false;
+        }
+        if (existing.getEventDateTime() == null || request.getEventDateTime() == null
+                || Math.abs(existing.getEventDateTime().toInstant().toEpochMilli() - request.getEventDateTime().toInstant().toEpochMilli()) > 1000) {
+            return false;
+        }
+        boolean sameMenu = (existing.getMenu() == null && request.getMenuId() == null) ||
+                (existing.getMenu() != null && existing.getMenu().getId().equals(request.getMenuId()));
+        if (!sameMenu) {
+            return false;
         }
 
-        // Only PENDING_PAYMENT orders can be cancelled in Phase 3
-        if (order.getOrderStatus() != OrderStatus.PENDING_PAYMENT) {
-            throw new BusinessValidationException("Chỉ có thể hủy đơn hàng đang ở trạng thái 'Chờ thanh toán'. Trạng thái hiện tại: " + order.getOrderStatus());
+        // Compare items
+        Map<Long, Integer> existingItems = new HashMap<>();
+        if (existing.getItems() != null) {
+            for (OrderItem it : existing.getItems()) {
+                existingItems.merge(it.getDish().getId(), it.getQuantityPerTable(), Integer::sum);
+            }
         }
 
-        OrderStatus fromStatus = order.getOrderStatus();
-        order.setOrderStatus(OrderStatus.CANCELLED);
+        Map<Long, Integer> requestItems = new HashMap<>();
+        List<CreateOrderItemRequest> reqItems = request.getItems();
+        if ((reqItems == null || reqItems.isEmpty()) && selectedMenu != null) {
+            for (com.banquethub.modules.menus.entity.MenuItem mi : selectedMenu.getMenuItems()) {
+                requestItems.merge(mi.getDish().getId(), mi.getQuantityPerTable(), Integer::sum);
+            }
+        } else if (reqItems != null) {
+            for (CreateOrderItemRequest it : reqItems) {
+                requestItems.merge(it.getDishId(), it.getQuantityPerTable(), Integer::sum);
+            }
+        }
 
-        String reason = (request != null && request.getReason() != null && !request.getReason().trim().isEmpty())
-                ? request.getReason().trim() : "Khách hàng yêu cầu hủy đơn trước khi thanh toán";
-        String changedByName = currentUser.getFullName();
+        return existingItems.equals(requestItems);
+    }
 
-        OrderStatusHistory history = new OrderStatusHistory(
-                order,
-                fromStatus,
-                OrderStatus.CANCELLED,
-                currentUser,
-                changedByName,
-                reason
-        );
-        statusHistoryRepository.save(history);
+    private String trim(String val) {
+        return val == null ? null : val.trim();
+    }
 
-        // Immediately release reserved stock (BR-08)
-        reservationService.releaseReservationForOrder(order.getId());
-
-        Order saved = orderRepository.save(order);
-        OrderResponse resp = OrderResponse.fromEntity(saved);
-        reservationService.getReservationByOrderId(saved.getId()).ifPresent(resp::setReservation);
-        return resp;
+    private String trimLower(String val) {
+        return val == null ? null : val.trim().toLowerCase();
     }
 
     @Transactional(readOnly = true)

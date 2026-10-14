@@ -48,7 +48,7 @@ public class OrderController {
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('USER')")
     @Operation(summary = "Tạo mới đơn đặt tiệc và giữ nguyên liệu trong 15 phút")
     public ResponseEntity<ApiResponse<OrderResponse>> createOrder(
             @Valid @RequestBody CreateOrderRequest request,

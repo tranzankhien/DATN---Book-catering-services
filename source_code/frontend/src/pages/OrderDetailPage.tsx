@@ -266,10 +266,12 @@ export const OrderDetailPage: React.FC = () => {
               Địa điểm tổ chức:
             </span>
             <div className="font-bold text-stone-800">
-              {order.eventLocation || 'Tại sảnh tiệc BanquetHub'}
+              {order.eventLocation || 'Chưa cung cấp'}
             </div>
-            {order.guestCount && (
+            {order.guestCount ? (
               <div className="text-stone-500">Quy mô: {order.guestCount} khách ({order.tableCount} bàn)</div>
+            ) : (
+              <div className="text-stone-400 italic">Chưa cung cấp số khách</div>
             )}
           </div>
 

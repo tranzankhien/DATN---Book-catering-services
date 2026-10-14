@@ -50,6 +50,7 @@ export const MenuBuilderPage: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>(undefined);
   const [keyword, setKeyword] = useState<string>('');
   const [catalogLoading, setCatalogLoading] = useState<boolean>(true);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
 
   // Basket State
   const [selectedItems, setSelectedItems] = useState<SelectedDishItem[]>([]);
@@ -61,83 +62,94 @@ export const MenuBuilderPage: React.FC = () => {
   const [previewLoading, setPreviewLoading] = useState<boolean>(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
 
+  const loadCatalogAndDraft = async (mounted: boolean) => {
+    try {
+      setCatalogLoading(true);
+      setCatalogError(null);
+      const [cats, dishList] = await Promise.all([
+        catalogService.getPublicCategories(),
+        catalogService.getPublicDishes(),
+      ]);
+      if (!mounted) return;
+      setCategories(cats);
+      setDishes(dishList);
+
+      if (menuIdParam) {
+        // Load template menu
+        try {
+          const menu = await menuService.getMenuById(Number(menuIdParam));
+          if (menu && menu.items) {
+            const loadedItems: SelectedDishItem[] = [];
+            for (const it of menu.items) {
+              const matchedDish = dishList.find((d) => d.id === it.dishId);
+              if (matchedDish) {
+                loadedItems.push({
+                  dish: matchedDish,
+                  quantityPerTable: it.quantityPerTable || 1,
+                });
+              }
+            }
+            if (loadedItems.length > 0) {
+              setSelectedItems(loadedItems);
+              if (mounted) {
+                setCatalogLoading(false);
+                setIsRestored(true);
+              }
+              return;
+            }
+          }
+        } catch (e) {
+          console.error('Failed to load menu template', e);
+        }
+      }
+
+      // Check sessionStorage
+      const saved = sessionStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.items && Array.isArray(parsed.items)) {
+            const restored: SelectedDishItem[] = [];
+            for (const it of parsed.items) {
+              const matchedDish = dishList.find((d) => d.id === it.dishId);
+              if (matchedDish) {
+                restored.push({
+                  dish: matchedDish,
+                  quantityPerTable: it.quantityPerTable,
+                });
+              }
+            }
+            setSelectedItems(restored);
+          }
+          if (parsed.tableCount) {
+            setTableCount(parsed.tableCount);
+          }
+        } catch (e) {
+          console.error('Failed to restore draft', e);
+        }
+      }
+
+      // Catalog & draft restored successfully
+      if (mounted) {
+        setIsRestored(true);
+      }
+    } catch (err) {
+      console.error('Error fetching catalog', err);
+      if (mounted) {
+        setCatalogError(extractErrorMessage(err));
+        // Keep isRestored = false so effect never overwrites saved draft on network failure!
+      }
+    } finally {
+      if (mounted) {
+        setCatalogLoading(false);
+      }
+    }
+  };
+
   // Initial Load from Menu or Storage
   useEffect(() => {
     let mounted = true;
-    (async () => {
-      try {
-        setCatalogLoading(true);
-        const [cats, dishList] = await Promise.all([
-          catalogService.getPublicCategories(),
-          catalogService.getPublicDishes(),
-        ]);
-        if (!mounted) return;
-        setCategories(cats);
-        setDishes(dishList);
-
-        if (menuIdParam) {
-          // Load template menu
-          try {
-            const menu = await menuService.getMenuById(Number(menuIdParam));
-            if (menu && menu.items) {
-              const loadedItems: SelectedDishItem[] = [];
-              for (const it of menu.items) {
-                const matchedDish = dishList.find((d) => d.id === it.dishId);
-                if (matchedDish) {
-                  loadedItems.push({
-                    dish: matchedDish,
-                    quantityPerTable: it.quantityPerTable || 1,
-                  });
-                }
-              }
-              if (loadedItems.length > 0) {
-                setSelectedItems(loadedItems);
-                if (mounted) {
-                  setCatalogLoading(false);
-                  setIsRestored(true);
-                }
-                return;
-              }
-            }
-          } catch (e) {
-            console.error('Failed to load menu template', e);
-          }
-        }
-
-        // Check sessionStorage
-        const saved = sessionStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            if (parsed.items && Array.isArray(parsed.items)) {
-              const restored: SelectedDishItem[] = [];
-              for (const it of parsed.items) {
-                const matchedDish = dishList.find((d) => d.id === it.dishId);
-                if (matchedDish) {
-                  restored.push({
-                    dish: matchedDish,
-                    quantityPerTable: it.quantityPerTable,
-                  });
-                }
-              }
-              setSelectedItems(restored);
-            }
-            if (parsed.tableCount) {
-              setTableCount(parsed.tableCount);
-            }
-          } catch (e) {
-            console.error('Failed to restore draft', e);
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching catalog', err);
-      } finally {
-        if (mounted) {
-          setCatalogLoading(false);
-          setIsRestored(true);
-        }
-      }
-    })();
+    loadCatalogAndDraft(mounted);
     return () => {
       mounted = false;
     };
@@ -161,17 +173,19 @@ export const MenuBuilderPage: React.FC = () => {
   const previewSeqRef = useRef<number>(0);
 
   useEffect(() => {
-    if (selectedItems.length === 0) {
-      setPreview(null);
-      setPreviewError(null);
-      return;
-    }
-
     if (previewTimerRef.current) {
       clearTimeout(previewTimerRef.current);
     }
 
     const seq = ++previewSeqRef.current;
+
+    if (selectedItems.length === 0) {
+      setPreview(null);
+      setPreviewError(null);
+      setPreviewLoading(false);
+      return;
+    }
+
     previewTimerRef.current = setTimeout(async () => {
       try {
         setPreviewLoading(true);
@@ -351,6 +365,13 @@ export const MenuBuilderPage: React.FC = () => {
           {/* Dish Listings Grid */}
           {catalogLoading ? (
             <LoadingState label="Đang tải danh mục món ăn..." />
+          ) : catalogError ? (
+            <div className="py-8">
+              <ErrorState
+                message={`Không thể kết nối danh mục món: ${catalogError}`}
+                onRetry={() => loadCatalogAndDraft(true)}
+              />
+            </div>
           ) : filteredDishes.length === 0 ? (
             <div className="rounded-2xl border border-stone-200 bg-white p-8 text-center text-stone-500 text-xs sm:text-sm">
               Không tìm thấy món ăn nào phù hợp với bộ lọc.

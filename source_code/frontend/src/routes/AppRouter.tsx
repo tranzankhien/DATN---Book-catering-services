@@ -54,7 +54,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/checkout"
             element={
-              <ProtectedRoute allowedRoles={['ROLE_USER', 'ROLE_EMPLOYEE', 'ROLE_ADMIN']}>
+              <ProtectedRoute allowedRoles={['ROLE_USER']}>
                 <CheckoutPage />
               </ProtectedRoute>
             }
@@ -62,7 +62,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/orders/confirmation/:id"
             element={
-              <ProtectedRoute allowedRoles={['ROLE_USER', 'ROLE_EMPLOYEE', 'ROLE_ADMIN']}>
+              <ProtectedRoute allowedRoles={['ROLE_USER']}>
                 <BookingConfirmationPage />
               </ProtectedRoute>
             }

@@ -39,9 +39,11 @@ public class CreateOrderRequest {
     @Size(max = 1000, message = "Ghi chú không được vượt quá 1000 ký tự")
     private String note;
 
+    @NotBlank(message = "Địa điểm tổ chức tiệc không được để trống")
     @Size(max = 255, message = "Địa điểm tổ chức không được vượt quá 255 ký tự")
     private String eventLocation;
 
+    @NotNull(message = "Số lượng khách dự kiến không được để trống")
     @Min(value = 1, message = "Số lượng khách tham dự phải từ 1 người trở lên")
     private Integer guestCount;
 

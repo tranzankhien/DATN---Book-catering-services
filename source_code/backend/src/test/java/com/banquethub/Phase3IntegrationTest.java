@@ -6,7 +6,9 @@ import com.banquethub.modules.catalog.repository.DishRepository;
 import com.banquethub.modules.catalog.repository.IngredientRepository;
 import com.banquethub.modules.orders.entity.Order;
 import com.banquethub.modules.orders.entity.OrderStatus;
+import com.banquethub.modules.orders.entity.OrderStatusHistory;
 import com.banquethub.modules.orders.repository.OrderRepository;
+import com.banquethub.modules.orders.repository.OrderStatusHistoryRepository;
 import com.banquethub.modules.reservations.entity.ReservationStatus;
 import com.banquethub.modules.reservations.entity.StockReservation;
 import com.banquethub.modules.reservations.repository.StockReservationRepository;
@@ -68,6 +70,9 @@ class Phase3IntegrationTest {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderStatusHistoryRepository orderStatusHistoryRepository;
 
     @Autowired
     private StockReservationRepository reservationRepository;
@@ -353,6 +358,8 @@ class Phase3IntegrationTest {
                   "customerEmail": "hacker@test.com",
                   "eventDateTime": "%s",
                   "tableCount": 2,
+                  "guestCount": 20,
+                  "eventLocation": "Sảnh Tiệc Hoàng Gia",
                   "totalAmount": 1000,
                   "items": [
                     { "dishId": %d, "quantityPerTable": 1, "unitPrice": 1000 }
@@ -433,6 +440,8 @@ class Phase3IntegrationTest {
                   "customerEmail": "user@banquethub.vn",
                   "eventDateTime": "%s",
                   "tableCount": 2,
+                  "guestCount": 20,
+                  "eventLocation": "Sảnh Tiệc Hoàng Gia",
                   "note": "Kê bàn gần cửa sổ",
                   "items": [
                     { "dishId": %d, "quantityPerTable": 1 }
@@ -475,6 +484,8 @@ class Phase3IntegrationTest {
                   "customerEmail": "overload@test.com",
                   "eventDateTime": "%s",
                   "tableCount": 400,
+                  "guestCount": 4000,
+                  "eventLocation": "Sảnh Tiệc Hoàng Gia",
                   "items": [
                     { "dishId": %d, "quantityPerTable": 1 }
                   ]
@@ -509,6 +520,8 @@ class Phase3IntegrationTest {
                   "customerEmail": "checkstock@test.com",
                   "eventDateTime": "%s",
                   "tableCount": 1,
+                  "guestCount": 10,
+                  "eventLocation": "Sảnh Tiệc Hoàng Gia",
                   "items": [
                     { "dishId": %d, "quantityPerTable": 1 }
                   ]
@@ -583,6 +596,8 @@ class Phase3IntegrationTest {
                   "customerEmail": "user@banquethub.vn",
                   "eventDateTime": "%s",
                   "tableCount": 1,
+                  "guestCount": 10,
+                  "eventLocation": "Sảnh Tiệc Hoàng Gia",
                   "items": [
                     { "dishId": %d, "quantityPerTable": 1 }
                   ]
@@ -638,11 +653,13 @@ class Phase3IntegrationTest {
                   "customerEmail": "race1@test.com",
                   "eventDateTime": "%s",
                   "tableCount": %d,
+                  "guestCount": %d,
+                  "eventLocation": "Sảnh Tiệc Hoàng Gia",
                   "items": [
                     { "dishId": %d, "quantityPerTable": 1 }
                   ]
                 }
-                """, futureDate, tablesPerOrder, dish.getId());
+                """, futureDate, tablesPerOrder, tablesPerOrder * 10, dish.getId());
 
         String payload2 = String.format("""
                 {
@@ -651,11 +668,13 @@ class Phase3IntegrationTest {
                   "customerEmail": "race2@test.com",
                   "eventDateTime": "%s",
                   "tableCount": %d,
+                  "guestCount": %d,
+                  "eventLocation": "Sảnh Tiệc Hoàng Gia",
                   "items": [
                     { "dishId": %d, "quantityPerTable": 1 }
                   ]
                 }
-                """, futureDate, tablesPerOrder, dish.getId());
+                """, futureDate, tablesPerOrder, tablesPerOrder * 10, dish.getId());
 
         String userToken = obtainUserToken();
         ExecutorService executor = Executors.newFixedThreadPool(2);
@@ -702,6 +721,8 @@ class Phase3IntegrationTest {
                   "customerEmail": "idem@test.com",
                   "eventDateTime": "%s",
                   "tableCount": 1,
+                  "guestCount": 10,
+                  "eventLocation": "Sảnh Tiệc Hoàng Gia",
                   "idempotencyKey": "%s",
                   "items": [
                     { "dishId": %d, "quantityPerTable": 1 }
@@ -751,6 +772,8 @@ class Phase3IntegrationTest {
                   "customerEmail": "userb@banquethub.vn",
                   "eventDateTime": "%s",
                   "tableCount": 1,
+                  "guestCount": 10,
+                  "eventLocation": "Sảnh Tiệc Hoàng Gia",
                   "items": [
                     { "dishId": %d, "quantityPerTable": 1 }
                   ]
@@ -817,6 +840,8 @@ class Phase3IntegrationTest {
                   "customerEmail": "snapshot@test.com",
                   "eventDateTime": "%s",
                   "tableCount": 2,
+                  "guestCount": 20,
+                  "eventLocation": "Sảnh Tiệc Hoàng Gia",
                   "items": [
                     { "dishId": %d, "quantityPerTable": 1 }
                   ]
@@ -928,6 +953,8 @@ class Phase3IntegrationTest {
                   "customerEmail": "guest@test.com",
                   "eventDateTime": "%s",
                   "tableCount": 2,
+                  "guestCount": 20,
+                  "eventLocation": "Sảnh Tiệc Hoàng Gia",
                   "items": [
                     { "dishId": %d, "quantityPerTable": 1 }
                   ]
@@ -1026,6 +1053,8 @@ class Phase3IntegrationTest {
                   "customerEmail": "user@banquethub.vn",
                   "eventDateTime": "%s",
                   "tableCount": 1,
+                  "guestCount": 10,
+                  "eventLocation": "Sảnh Tiệc Hoàng Gia",
                   "idempotencyKey": "%s",
                   "items": [
                     { "dishId": %d, "quantityPerTable": 1 }
@@ -1075,5 +1104,222 @@ class Phase3IntegrationTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.tableCount").value(3))
                 .andExpect(jsonPath("$.data.items").isArray());
+    }
+
+    // =========================================================================
+    // TC-28: Chỉ ROLE_USER mới được tạo đơn hàng (Admin & Employee bị 403)
+    // =========================================================================
+    @Test
+    @org.junit.jupiter.api.Order(28)
+    @DisplayName("TC-28: Chỉ ROLE_USER mới được tạo đơn hàng, Admin và Employee bị 403 Forbidden")
+    void tc28_createOrderRequiresUserRole() throws Exception {
+        String adminToken = obtainAdminToken();
+        String employeeToken = obtainEmployeeToken();
+        Dish dish = dishRepository.findByCodeIgnoreCase("DISH-001").orElseThrow();
+        String futureDate = OffsetDateTime.now(VN_ZONE).plusDays(7).toString();
+
+        String payload = String.format("""
+                {
+                  "customerName": "Admin User",
+                  "customerPhone": "0988776655",
+                  "customerEmail": "admin@banquethub.vn",
+                  "eventDateTime": "%s",
+                  "tableCount": 2,
+                  "guestCount": 20,
+                  "eventLocation": "Sảnh Khách VIP",
+                  "items": [
+                    { "dishId": %d, "quantityPerTable": 1 }
+                  ]
+                }
+                """, futureDate, dish.getId());
+
+        mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + employeeToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isForbidden());
+    }
+
+    // =========================================================================
+    // TC-29: Bắt buộc phải có eventLocation và guestCount khi tạo đơn hàng
+    // =========================================================================
+    @Test
+    @org.junit.jupiter.api.Order(29)
+    @DisplayName("TC-29: Thiếu eventLocation hoặc guestCount sẽ bị từ chối với HTTP 400")
+    void tc29_missingLocationOrGuestCountRejected() throws Exception {
+        String userToken = obtainUserToken();
+        Dish dish = dishRepository.findByCodeIgnoreCase("DISH-001").orElseThrow();
+        String futureDate = OffsetDateTime.now(VN_ZONE).plusDays(7).toString();
+
+        // Thiếu eventLocation
+        String noLocationPayload = String.format("""
+                {
+                  "customerName": "Khách Không Địa Điểm",
+                  "customerPhone": "0912345678",
+                  "customerEmail": "user@banquethub.vn",
+                  "eventDateTime": "%s",
+                  "tableCount": 2,
+                  "guestCount": 20,
+                  "eventLocation": "   ",
+                  "items": [
+                    { "dishId": %d, "quantityPerTable": 1 }
+                  ]
+                }
+                """, futureDate, dish.getId());
+
+        mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(noLocationPayload))
+                .andExpect(status().isBadRequest());
+
+        // Thiếu guestCount
+        String noGuestCountPayload = String.format("""
+                {
+                  "customerName": "Khách Không Số Khách",
+                  "customerPhone": "0912345678",
+                  "customerEmail": "user@banquethub.vn",
+                  "eventDateTime": "%s",
+                  "tableCount": 2,
+                  "eventLocation": "Sảnh White Palace",
+                  "items": [
+                    { "dishId": %d, "quantityPerTable": 1 }
+                  ]
+                }
+                """, futureDate, dish.getId());
+
+        mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(noGuestCountPayload))
+                .andExpect(status().isBadRequest());
+    }
+
+    // =========================================================================
+    // TC-30: Idempotency-Key trùng lặp nhưng đổi nội dung sẽ bị từ chối với HTTP 400
+    // =========================================================================
+    @Test
+    @org.junit.jupiter.api.Order(30)
+    @DisplayName("TC-30: Retry với cùng Idempotency-Key nhưng thay đổi nội dung sẽ bị báo lỗi HTTP 400")
+    void tc30_idempotencyDifferentPayloadRejected() throws Exception {
+        String userToken = obtainUserToken();
+        Dish dish = dishRepository.findByCodeIgnoreCase("DISH-001").orElseThrow();
+        String futureDate = OffsetDateTime.now(VN_ZONE).plusDays(7).toString();
+        String idempotencyKey = UUID.randomUUID().toString();
+
+        String originalPayload = String.format("""
+                {
+                  "customerName": "Khách Gốc",
+                  "customerPhone": "0912345678",
+                  "customerEmail": "user@banquethub.vn",
+                  "eventDateTime": "%s",
+                  "tableCount": 2,
+                  "guestCount": 20,
+                  "eventLocation": "Sảnh Crystal",
+                  "idempotencyKey": "%s",
+                  "items": [
+                    { "dishId": %d, "quantityPerTable": 1 }
+                  ]
+                }
+                """, futureDate, idempotencyKey, dish.getId());
+
+        mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(originalPayload))
+                .andExpect(status().isCreated());
+
+        // Cùng idempotencyKey nhưng đổi tableCount thành 3
+        String modifiedPayload = String.format("""
+                {
+                  "customerName": "Khách Gốc",
+                  "customerPhone": "0912345678",
+                  "customerEmail": "user@banquethub.vn",
+                  "eventDateTime": "%s",
+                  "tableCount": 3,
+                  "guestCount": 30,
+                  "eventLocation": "Sảnh Diamond",
+                  "idempotencyKey": "%s",
+                  "items": [
+                    { "dishId": %d, "quantityPerTable": 1 }
+                  ]
+                }
+                """, futureDate, idempotencyKey, dish.getId());
+
+        mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(modifiedPayload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", containsString("Idempotency-Key đã được sử dụng với nội dung đặt tiệc khác")));
+    }
+
+    // =========================================================================
+    // TC-31: Hủy đơn quá hạn thanh toán sẽ commit trạng thái EXPIRED và ghi lịch sử
+    // =========================================================================
+    @Test
+    @org.junit.jupiter.api.Order(31)
+    @DisplayName("TC-31: Hủy đơn hàng đã quá hạn thanh toán sẽ commit trạng thái EXPIRED, ghi lịch sử và giải phóng giữ tồn")
+    void tc31_cancellingExpiredOrderPersistsExpiredAndHistory() throws Exception {
+        String userToken = obtainUserToken();
+        Dish dish = dishRepository.findByCodeIgnoreCase("DISH-001").orElseThrow();
+        String futureDate = OffsetDateTime.now(VN_ZONE).plusDays(7).toString();
+
+        String payload = String.format("""
+                {
+                  "customerName": "Khách Sắp Hết Hạn",
+                  "customerPhone": "0912345678",
+                  "customerEmail": "user@banquethub.vn",
+                  "eventDateTime": "%s",
+                  "tableCount": 2,
+                  "guestCount": 20,
+                  "eventLocation": "Sảnh Thượng Uyển",
+                  "items": [
+                    { "dishId": %d, "quantityPerTable": 1 }
+                  ]
+                }
+                """, futureDate, dish.getId());
+
+        MvcResult result = mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        long orderId = objectMapper.readTree(result.getResponse().getContentAsString()).path("data").path("id").asLong();
+
+        // Giảm paymentExpiresAt xuống quá khứ để giả lập quá hạn
+        Order order = orderRepository.findById(orderId).orElseThrow();
+        order.setPaymentExpiresAt(OffsetDateTime.now(VN_ZONE).minusMinutes(5));
+        orderRepository.save(order);
+
+        // Khách thực hiện yêu cầu hủy -> sẽ trả về HTTP 400 do đơn đã hết hạn
+        mockMvc.perform(post("/api/v1/orders/" + orderId + "/cancel")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"reason\":\"Tôi muốn hủy\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", containsString("Đơn hàng đã hết hạn giữ chỗ")));
+
+        // Kiểm tra CSDL: order vẫn phải được commit EXPIRED
+        Order updatedOrder = orderRepository.findById(orderId).orElseThrow();
+        assertThat(updatedOrder.getOrderStatus()).isEqualTo(OrderStatus.EXPIRED);
+
+        // Kiểm tra Lịch sử trạng thái: phải có bản ghi EXPIRED
+        List<OrderStatusHistory> history = orderStatusHistoryRepository.findByOrderIdOrderByCreatedAtAsc(orderId);
+        assertThat(history).isNotEmpty();
+        boolean hasExpiredHistory = history.stream().anyMatch(h -> h.getToStatus() == OrderStatus.EXPIRED);
+        assertThat(hasExpiredHistory).isTrue();
+
+        // Kiểm tra Giữ tồn: phải là EXPIRED
+        StockReservation res = reservationRepository.findByOrderId(orderId).orElseThrow();
+        assertThat(res.getStatus()).isEqualTo(ReservationStatus.EXPIRED);
     }
 }

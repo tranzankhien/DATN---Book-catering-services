@@ -230,7 +230,7 @@ export const AdminOrderDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div className="rounded-xl bg-stone-50 p-3.5 border border-stone-200">
             <strong className="text-stone-900 font-semibold block mb-0.5">Địa điểm tổ chức:</strong>
-            <span className="text-stone-700">{order.eventLocation || 'Tại sảnh tiệc BanquetHub'}</span>
+            <span className="text-stone-700">{order.eventLocation || 'Chưa cung cấp'}</span>
           </div>
 
           {order.note ? (

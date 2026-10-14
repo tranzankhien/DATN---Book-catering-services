@@ -120,7 +120,7 @@ export const EmployeeOrderDetailPage: React.FC = () => {
           <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
             <span className="block text-[11px] text-stone-400 font-medium">Địa điểm tổ chức:</span>
             <span className="font-bold text-stone-900 text-sm mt-0.5 block">
-              {order.eventLocation || 'Tại sảnh tiệc BanquetHub'}
+              {order.eventLocation || 'Chưa cung cấp'}
             </span>
           </div>
 

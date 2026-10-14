@@ -25,6 +25,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     boolean existsByOrderCodeIgnoreCase(String orderCode);
 
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"items", "items.dish"})
     Optional<Order> findByIdempotencyKey(String idempotencyKey);
 
     @Query(value = "SELECT nextval('order_code_seq')", nativeQuery = true)

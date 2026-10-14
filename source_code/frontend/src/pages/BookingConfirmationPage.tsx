@@ -29,6 +29,12 @@ export const BookingConfirmationPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [secondsRemaining, setSecondsRemaining] = useState<number>(900); // 15 mins default
 
+  const calcRemaining = (expiresAt?: string | null) => {
+    if (!expiresAt) return 0;
+    const diff = Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000);
+    return Math.max(0, diff);
+  };
+
   useEffect(() => {
     if (!id) return;
     let mounted = true;
@@ -39,13 +45,10 @@ export const BookingConfirmationPage: React.FC = () => {
         const data = await orderService.getOrderById(Number(id));
         if (mounted) {
           setOrder(data);
-          if (data.secondsRemaining !== undefined && data.secondsRemaining !== null) {
+          if (data.paymentExpiresAt) {
+            setSecondsRemaining(calcRemaining(data.paymentExpiresAt));
+          } else if (data.secondsRemaining !== undefined && data.secondsRemaining !== null) {
             setSecondsRemaining(Math.max(0, data.secondsRemaining));
-          } else if (data.paymentExpiresAt) {
-            const diff = Math.floor(
-              (new Date(data.paymentExpiresAt).getTime() - Date.now()) / 1000
-            );
-            setSecondsRemaining(Math.max(0, diff));
           }
         }
       } catch (err) {
@@ -59,23 +62,36 @@ export const BookingConfirmationPage: React.FC = () => {
     };
   }, [id]);
 
-  // Live countdown timer
+  // Live countdown timer synced to real wall-clock time and tab focus
   useEffect(() => {
-    if (secondsRemaining <= 0) return;
-    const interval = setInterval(() => {
-      setSecondsRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          if (id) {
-            orderService.getOrderById(Number(id)).then(setOrder).catch(() => {});
-          }
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [secondsRemaining, id]);
+    if (!order?.paymentExpiresAt || order.orderStatus !== 'PENDING_PAYMENT') return;
+
+    const updateTimer = () => {
+      const remaining = calcRemaining(order.paymentExpiresAt);
+      setSecondsRemaining(remaining);
+      if (remaining <= 0 && id) {
+        orderService.getOrderById(Number(id)).then(setOrder).catch(() => {});
+      }
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        updateTimer();
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, [order?.paymentExpiresAt, order?.orderStatus, id]);
 
   const copyOrderCode = () => {
     if (order?.orderCode) {
@@ -112,7 +128,11 @@ export const BookingConfirmationPage: React.FC = () => {
     );
   }
 
-  const isExpired = secondsRemaining === 0 && order.orderStatus === 'PENDING_PAYMENT';
+  const isExpired =
+    order.orderStatus === 'EXPIRED' ||
+    (order.orderStatus === 'PENDING_PAYMENT' &&
+      (secondsRemaining === 0 ||
+        (order.paymentExpiresAt && new Date(order.paymentExpiresAt).getTime() <= Date.now())));
 
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
@@ -227,7 +247,7 @@ export const BookingConfirmationPage: React.FC = () => {
             </div>
             <div>
               <span className="block text-[11px] text-stone-400 font-medium">Địa điểm tổ chức:</span>
-              <span className="font-semibold text-stone-900">{order.eventLocation || 'Tại sảnh tiệc BanquetHub'}</span>
+              <span className="font-semibold text-stone-900">{order.eventLocation || 'Chưa cung cấp'}</span>
             </div>
           </div>
 
@@ -241,7 +261,7 @@ export const BookingConfirmationPage: React.FC = () => {
             <div>
               <span className="block text-[11px] text-stone-400 font-medium">Quy mô bàn tiệc:</span>
               <span className="font-semibold text-stone-900">
-                {order.tableCount} bàn {order.guestCount ? `(~${order.guestCount} khách)` : `(~${order.tableCount * 10} khách)`}
+                {order.tableCount} bàn {order.guestCount ? `(~${order.guestCount} khách)` : '(Chưa cung cấp số khách)'}
               </span>
             </div>
             <div>

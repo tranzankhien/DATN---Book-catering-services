@@ -31,6 +31,31 @@ import { LoadingState, ErrorState } from '../components/StatusStates';
 import { extractErrorMessage } from '../services/apiClient';
 
 const STORAGE_KEY = 'banquethub_builder_draft';
+const IDEMPOTENCY_STORAGE_KEY = 'banquethub_checkout_idempotency';
+
+const getOrGenerateIdempotencyKey = (currentPayloadSignature: string): string => {
+  try {
+    const savedStr = sessionStorage.getItem(IDEMPOTENCY_STORAGE_KEY);
+    if (savedStr) {
+      const saved = JSON.parse(savedStr);
+      if (saved.signature === currentPayloadSignature && saved.key) {
+        return saved.key;
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+  const newKey = crypto.randomUUID();
+  try {
+    sessionStorage.setItem(
+      IDEMPOTENCY_STORAGE_KEY,
+      JSON.stringify({ signature: currentPayloadSignature, key: newKey })
+    );
+  } catch (e) {
+    // ignore
+  }
+  return newKey;
+};
 
 export const CheckoutPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -196,6 +221,14 @@ export const CheckoutPage: React.FC = () => {
       showToast('Vui lòng chọn ngày tổ chức tiệc', 'error');
       return;
     }
+    if (!eventLocation.trim()) {
+      showToast('Vui lòng nhập địa điểm tổ chức tiệc', 'error');
+      return;
+    }
+    if (!guestCount || Number(guestCount) <= 0) {
+      showToast('Vui lòng nhập số lượng khách dự kiến hợp lệ (từ 1 người)', 'error');
+      return;
+    }
     if (previewLoading) {
       showToast('Hệ thống đang kiểm tra tồn kho, vui lòng đợi trong giây lát...', 'info');
       return;
@@ -210,23 +243,35 @@ export const CheckoutPage: React.FC = () => {
       setError(null);
 
       const eventDateTimeIso = `${eventDate}T${eventTime || '18:00'}:00+07:00`;
-      const payload: CreateOrderPayload = {
+      const normalizedPayload = {
         customerName: customerName.trim(),
         customerPhone: customerPhone.trim(),
-        customerEmail: customerEmail.trim(),
+        customerEmail: customerEmail.trim().toLowerCase(),
         eventDateTime: eventDateTimeIso,
         tableCount,
-        guestCount: guestCount ? Number(guestCount) : tableCount * 10,
-        eventLocation: eventLocation.trim() || undefined,
+        guestCount: Number(guestCount),
+        eventLocation: eventLocation.trim(),
         note: note.trim() || undefined,
         menuId,
-        items,
-        idempotencyKey: idempotencyKeyRef.current,
+        items: items
+          .map((it) => ({ dishId: it.dishId, quantityPerTable: it.quantityPerTable }))
+          .sort((a, b) => a.dishId - b.dishId),
       };
 
-      const createdOrder = await orderService.createOrder(payload, idempotencyKeyRef.current);
+      const signature = JSON.stringify(normalizedPayload);
+      const effectiveKey = getOrGenerateIdempotencyKey(signature);
+
+      const payload: CreateOrderPayload = {
+        ...normalizedPayload,
+        guestCount: Number(guestCount),
+        eventLocation: eventLocation.trim(),
+        idempotencyKey: effectiveKey,
+      };
+
+      const createdOrder = await orderService.createOrder(payload, effectiveKey);
 
       sessionStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(IDEMPOTENCY_STORAGE_KEY);
       showToast('Đặt tiệc thành công! Hệ thống đang khóa giữ nguyên liệu 15 phút.', 'success');
       navigate(`/orders/confirmation/${createdOrder.id}`);
     } catch (err) {
@@ -430,11 +475,13 @@ export const CheckoutPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="block text-xs font-semibold text-stone-700">
-                    Số lượng khách dự kiến
+                    Số lượng khách dự kiến <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="number"
                     min="1"
+                    max="5000"
+                    required
                     placeholder="Ví dụ: 60"
                     value={guestCount}
                     onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
@@ -444,10 +491,11 @@ export const CheckoutPage: React.FC = () => {
 
                 <div className="space-y-1.5">
                   <label className="block text-xs font-semibold text-stone-700">
-                    Địa điểm / Sảnh tổ chức tiệc
+                    Địa điểm / Sảnh tổ chức tiệc <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
+                    required
                     placeholder="Ví dụ: Sảnh Hoàng Gia / Nhà riêng số 12..."
                     value={eventLocation}
                     onChange={(e) => setEventLocation(e.target.value)}
