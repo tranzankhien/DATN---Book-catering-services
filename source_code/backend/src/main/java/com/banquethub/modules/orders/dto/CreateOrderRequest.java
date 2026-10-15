@@ -49,7 +49,6 @@ public class CreateOrderRequest {
 
     private Long menuId;
 
-    @NotEmpty(message = "Đơn đặt tiệc phải có ít nhất 1 món ăn")
     @Valid
     private List<CreateOrderItemRequest> items;
 

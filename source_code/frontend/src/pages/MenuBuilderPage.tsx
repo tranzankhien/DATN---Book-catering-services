@@ -62,7 +62,11 @@ export const MenuBuilderPage: React.FC = () => {
   const [previewLoading, setPreviewLoading] = useState<boolean>(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
 
-  const loadCatalogAndDraft = async (mounted: boolean) => {
+  // Request sequence counter to discard stale out-of-order catalog/menu template responses
+  const loadSeqRef = useRef<number>(0);
+
+  const loadCatalogAndDraft = async () => {
+    const seq = ++loadSeqRef.current;
     try {
       setCatalogLoading(true);
       setCatalogError(null);
@@ -70,7 +74,7 @@ export const MenuBuilderPage: React.FC = () => {
         catalogService.getPublicCategories(),
         catalogService.getPublicDishes(),
       ]);
-      if (!mounted) return;
+      if (loadSeqRef.current !== seq) return;
       setCategories(cats);
       setDishes(dishList);
 
@@ -78,6 +82,7 @@ export const MenuBuilderPage: React.FC = () => {
         // Load template menu
         try {
           const menu = await menuService.getMenuById(Number(menuIdParam));
+          if (loadSeqRef.current !== seq) return;
           if (menu && menu.items) {
             const loadedItems: SelectedDishItem[] = [];
             for (const it of menu.items) {
@@ -91,10 +96,8 @@ export const MenuBuilderPage: React.FC = () => {
             }
             if (loadedItems.length > 0) {
               setSelectedItems(loadedItems);
-              if (mounted) {
-                setCatalogLoading(false);
-                setIsRestored(true);
-              }
+              setCatalogLoading(false);
+              setIsRestored(true);
               return;
             }
           }
@@ -102,6 +105,8 @@ export const MenuBuilderPage: React.FC = () => {
           console.error('Failed to load menu template', e);
         }
       }
+
+      if (loadSeqRef.current !== seq) return;
 
       // Check sessionStorage
       const saved = sessionStorage.getItem(STORAGE_KEY);
@@ -129,18 +134,18 @@ export const MenuBuilderPage: React.FC = () => {
         }
       }
 
+      if (loadSeqRef.current !== seq) return;
+
       // Catalog & draft restored successfully
-      if (mounted) {
-        setIsRestored(true);
-      }
+      setIsRestored(true);
     } catch (err) {
       console.error('Error fetching catalog', err);
-      if (mounted) {
+      if (loadSeqRef.current === seq) {
         setCatalogError(extractErrorMessage(err));
         // Keep isRestored = false so effect never overwrites saved draft on network failure!
       }
     } finally {
-      if (mounted) {
+      if (loadSeqRef.current === seq) {
         setCatalogLoading(false);
       }
     }
@@ -148,10 +153,10 @@ export const MenuBuilderPage: React.FC = () => {
 
   // Initial Load from Menu or Storage
   useEffect(() => {
-    let mounted = true;
-    loadCatalogAndDraft(mounted);
+    loadCatalogAndDraft();
     return () => {
-      mounted = false;
+      // Invalidate in-flight requests on unmount or param change
+      loadSeqRef.current += 1;
     };
   }, [menuIdParam]);
 
@@ -369,7 +374,7 @@ export const MenuBuilderPage: React.FC = () => {
             <div className="py-8">
               <ErrorState
                 message={`Không thể kết nối danh mục món: ${catalogError}`}
-                onRetry={() => loadCatalogAndDraft(true)}
+                onRetry={() => loadCatalogAndDraft()}
               />
             </div>
           ) : filteredDishes.length === 0 ? (

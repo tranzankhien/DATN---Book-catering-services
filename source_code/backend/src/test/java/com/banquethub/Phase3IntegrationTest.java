@@ -4,6 +4,9 @@ import com.banquethub.modules.catalog.entity.Dish;
 import com.banquethub.modules.catalog.entity.Ingredient;
 import com.banquethub.modules.catalog.repository.DishRepository;
 import com.banquethub.modules.catalog.repository.IngredientRepository;
+import com.banquethub.modules.menus.entity.Menu;
+import com.banquethub.modules.menus.entity.MenuStatus;
+import com.banquethub.modules.menus.repository.MenuRepository;
 import com.banquethub.modules.orders.entity.Order;
 import com.banquethub.modules.orders.entity.OrderStatus;
 import com.banquethub.modules.orders.entity.OrderStatusHistory;
@@ -64,6 +67,9 @@ class Phase3IntegrationTest {
 
     @Autowired
     private DishRepository dishRepository;
+
+    @Autowired
+    private MenuRepository menuRepository;
 
     @Autowired
     private IngredientRepository ingredientRepository;
@@ -1321,5 +1327,125 @@ class Phase3IntegrationTest {
         // Kiểm tra Giữ tồn: phải là EXPIRED
         StockReservation res = reservationRepository.findByOrderId(orderId).orElseThrow();
         assertThat(res.getStatus()).isEqualTo(ReservationStatus.EXPIRED);
+    }
+
+    // =========================================================================
+    // TC-32: Idempotency-Key trùng lặp nhưng đổi note sẽ bị từ chối với HTTP 400
+    // =========================================================================
+    @Test
+    @org.junit.jupiter.api.Order(32)
+    @DisplayName("TC-32: Retry với cùng Idempotency-Key nhưng thay đổi note sẽ bị báo lỗi HTTP 400")
+    void tc32_idempotencyDifferentNoteRejected() throws Exception {
+        String userToken = obtainUserToken();
+        Dish dish = dishRepository.findByCodeIgnoreCase("DISH-001").orElseThrow();
+        String futureDate = OffsetDateTime.now(VN_ZONE).plusDays(7).toString();
+        String idempotencyKey = UUID.randomUUID().toString();
+
+        String originalPayload = String.format("""
+                {
+                  "customerName": "Khách Gốc Có Note",
+                  "customerPhone": "0912345678",
+                  "customerEmail": "user@banquethub.vn",
+                  "eventDateTime": "%s",
+                  "tableCount": 2,
+                  "guestCount": 20,
+                  "eventLocation": "Sảnh Sen Vàng",
+                  "note": "Yêu cầu set bàn tone màu trắng",
+                  "idempotencyKey": "%s",
+                  "items": [
+                    { "dishId": %d, "quantityPerTable": 1 }
+                  ]
+                }
+                """, futureDate, idempotencyKey, dish.getId());
+
+        mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(originalPayload))
+                .andExpect(status().isCreated());
+
+        // Cùng idempotencyKey nhưng đổi note thành "Yêu cầu set bàn tone màu vàng gold"
+        String modifiedPayload = String.format("""
+                {
+                  "customerName": "Khách Gốc Có Note",
+                  "customerPhone": "0912345678",
+                  "customerEmail": "user@banquethub.vn",
+                  "eventDateTime": "%s",
+                  "tableCount": 2,
+                  "guestCount": 20,
+                  "eventLocation": "Sảnh Sen Vàng",
+                  "note": "Yêu cầu set bàn tone màu vàng gold",
+                  "idempotencyKey": "%s",
+                  "items": [
+                    { "dishId": %d, "quantityPerTable": 1 }
+                  ]
+                }
+                """, futureDate, idempotencyKey, dish.getId());
+
+        mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(modifiedPayload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", containsString("Idempotency-Key đã được sử dụng với nội dung đặt tiệc khác")));
+    }
+
+    // =========================================================================
+    // TC-33: Gửi lại yêu cầu đã tạo thành công vẫn trả về đơn cũ dù menu bị ẩn sau đó
+    // =========================================================================
+    @Test
+    @org.junit.jupiter.api.Order(33)
+    @DisplayName("TC-33: Gửi lại đơn đặt từ thực đơn mẫu vẫn trả về thành công kể cả khi Admin đã ẩn thực đơn đó")
+    void tc33_retrySucceedsEvenIfMenuHiddenAfterwards() throws Exception {
+        String userToken = obtainUserToken();
+        String futureDate = OffsetDateTime.now(VN_ZONE).plusDays(8).toString();
+        String idempotencyKey = UUID.randomUUID().toString();
+
+        // 1. Tạo đơn theo menuId mẫu
+        String orderPayload = String.format("""
+                {
+                  "customerName": "Khách Đặt Thực Đơn Mẫu",
+                  "customerPhone": "0912345678",
+                  "customerEmail": "user@banquethub.vn",
+                  "eventDateTime": "%s",
+                  "tableCount": 2,
+                  "guestCount": 20,
+                  "eventLocation": "Sảnh Grand Ballroom",
+                  "menuId": %d,
+                  "idempotencyKey": "%s"
+                }
+                """, futureDate, createdMenuId, idempotencyKey);
+
+        MvcResult firstRes = mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(orderPayload))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        long firstOrderId = objectMapper.readTree(firstRes.getResponse().getContentAsString()).path("data").path("id").asLong();
+
+        // 2. Admin ẩn thực đơn này đi (status = HIDDEN)
+        Menu menu = menuRepository.findById(createdMenuId).orElseThrow();
+        MenuStatus prevStatus = menu.getStatus();
+        menu.setStatus(MenuStatus.HIDDEN);
+        menuRepository.save(menu);
+
+        try {
+            // 3. Khách retry cùng idempotencyKey và cùng payload -> Phải trả về đơn cũ thành công (không bị lỗi thực đơn tạm ẩn)
+            MvcResult retryRes = mockMvc.perform(post("/api/v1/orders")
+                            .header("Authorization", "Bearer " + userToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(orderPayload))
+                    .andExpect(status().isCreated())
+                    .andReturn();
+
+            long retryOrderId = objectMapper.readTree(retryRes.getResponse().getContentAsString()).path("data").path("id").asLong();
+            assertThat(retryOrderId).isEqualTo(firstOrderId);
+        } finally {
+            // Phục hồi trạng thái menu để không ảnh hưởng test khác
+            menu.setStatus(prevStatus);
+            menuRepository.save(menu);
+        }
     }
 }
