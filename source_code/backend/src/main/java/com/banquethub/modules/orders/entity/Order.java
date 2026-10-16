@@ -90,6 +90,12 @@ public class Order {
     @Column(name = "idempotency_key", unique = true, length = 100)
     private String idempotencyKey;
 
+    @Column(name = "payload_hash", length = 64)
+    private String payloadHash;
+
+    @Column(name = "is_custom_items", nullable = false)
+    private Boolean isCustomItems = false;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 
@@ -316,5 +322,21 @@ public class Order {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getPayloadHash() {
+        return payloadHash;
+    }
+
+    public void setPayloadHash(String payloadHash) {
+        this.payloadHash = payloadHash;
+    }
+
+    public Boolean getIsCustomItems() {
+        return isCustomItems;
+    }
+
+    public void setIsCustomItems(Boolean isCustomItems) {
+        this.isCustomItems = isCustomItems;
     }
 }

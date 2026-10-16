@@ -101,8 +101,15 @@ export const MenuBuilderPage: React.FC = () => {
               return;
             }
           }
+          throw new Error('Thực đơn mẫu không có món ăn khả dụng hoặc đã ngừng phục vụ.');
         } catch (e) {
           console.error('Failed to load menu template', e);
+          if (loadSeqRef.current === seq) {
+            setCatalogError(`Không thể tải thực đơn mẫu (ID: ${menuIdParam}): ${extractErrorMessage(e)}`);
+            setCatalogLoading(false);
+          }
+          // Dừng lại khi tải thực đơn thất bại, KHÔNG tự ý khôi phục giỏ hàng cũ từ sessionStorage!
+          return;
         }
       }
 

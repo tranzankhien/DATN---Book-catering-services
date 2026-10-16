@@ -135,7 +135,17 @@ export const CheckoutPage: React.FC = () => {
 
           // Get preview
           const prev = await orderService.previewMenu(menu.id, tableCount);
-          if (mounted) setPreview(prev);
+          if (mounted) {
+            setPreview(prev);
+            if (prev.items && prev.items.length > 0) {
+              setItems(
+                prev.items.map((it) => ({
+                  dishId: it.dishId,
+                  quantityPerTable: it.quantityPerTable,
+                }))
+              );
+            }
+          }
           return;
         }
 
@@ -191,6 +201,14 @@ export const CheckoutPage: React.FC = () => {
       }
       if (seq === previewSeqRef.current) {
         setPreview(prev);
+        if (prev.items && prev.items.length > 0) {
+          setItems(
+            prev.items.map((it) => ({
+              dishId: it.dishId,
+              quantityPerTable: it.quantityPerTable,
+            }))
+          );
+        }
       }
     } catch (err) {
       if (seq === previewSeqRef.current) {
@@ -242,6 +260,15 @@ export const CheckoutPage: React.FC = () => {
       setSubmitting(true);
       setError(null);
 
+      // Đảm bảo xem trước (preview) và tạo đơn (createOrder) đồng bộ 100% cùng danh sách món ăn
+      const currentItems: CreateOrderItemPayload[] =
+        preview?.items && preview.items.length > 0
+          ? preview.items.map((it) => ({
+              dishId: it.dishId,
+              quantityPerTable: it.quantityPerTable,
+            }))
+          : items;
+
       const eventDateTimeIso = `${eventDate}T${eventTime || '18:00'}:00+07:00`;
       const normalizedPayload = {
         customerName: customerName.trim(),
@@ -253,7 +280,7 @@ export const CheckoutPage: React.FC = () => {
         eventLocation: eventLocation.trim(),
         note: note.trim() || undefined,
         menuId,
-        items: items
+        items: currentItems
           .map((it) => ({ dishId: it.dishId, quantityPerTable: it.quantityPerTable }))
           .sort((a, b) => a.dishId - b.dishId),
       };

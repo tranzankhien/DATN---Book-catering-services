@@ -33,6 +33,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -45,6 +48,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -250,6 +254,9 @@ public class OrderService {
         order.setOrderStatus(OrderStatus.PENDING_PAYMENT);
         order.setPaymentStatus(PaymentStatus.UNPAID);
         order.setPaymentExpiresAt(now.plusMinutes(15)); // BR-07
+        boolean isCustom = (request.getItems() != null && !request.getItems().isEmpty());
+        order.setIsCustomItems(isCustom);
+        order.setPayloadHash(computePayloadHash(request));
         if (request.getIdempotencyKey() != null && !request.getIdempotencyKey().trim().isEmpty()) {
             order.setIdempotencyKey(request.getIdempotencyKey().trim());
         }
@@ -459,6 +466,21 @@ public class OrderService {
     }
 
     private boolean isSameOrderPayload(Order existing, CreateOrderRequest request) {
+        // 1. Phân biệt rõ đặt thực đơn mặc định với đặt món tùy chỉnh
+        boolean requestIsCustom = (request.getItems() != null && !request.getItems().isEmpty());
+        if (existing.getIsCustomItems() != null && !existing.getIsCustomItems().equals(requestIsCustom)) {
+            return false;
+        }
+
+        // 2. So sánh dấu vân tay payload nếu đã được lưu trữ (SHA-256 fingerprint)
+        if (existing.getPayloadHash() != null) {
+            String requestHash = computePayloadHash(request);
+            if (!Objects.equals(existing.getPayloadHash(), requestHash)) {
+                return false;
+            }
+        }
+
+        // 3. So sánh chuẩn hóa các trường thông tin hợp đồng
         if (!Objects.equals(trim(existing.getCustomerName()), trim(request.getCustomerName()))) {
             return false;
         }
@@ -489,12 +511,12 @@ public class OrderService {
             return false;
         }
 
-        // Compare items
+        // 4. So sánh danh sách món ăn
         List<CreateOrderItemRequest> reqItems = request.getItems();
         if (reqItems == null || reqItems.isEmpty()) {
             // Khách đặt tiệc theo thực đơn mẫu (không gửi danh sách món tùy biến)
-            // Khớp nếu đơn hàng đã lưu cũng được tạo từ cùng thực đơn mẫu đó
-            return request.getMenuId() != null && request.getMenuId().equals(existingMenuId);
+            // Khớp nếu đơn hàng đã lưu cũng được tạo từ cùng thực đơn mẫu đó và không phải đơn tùy biến món
+            return Boolean.FALSE.equals(existing.getIsCustomItems()) && request.getMenuId() != null && request.getMenuId().equals(existingMenuId);
         }
 
         Map<Long, Integer> existingItems = new HashMap<>();
@@ -512,6 +534,50 @@ public class OrderService {
         }
 
         return existingItems.equals(requestItems);
+    }
+
+    public String computePayloadHash(CreateOrderRequest request) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("name:").append(trim(request.getCustomerName())).append("|");
+        sb.append("phone:").append(trim(request.getCustomerPhone())).append("|");
+        sb.append("email:").append(trimLower(request.getCustomerEmail())).append("|");
+        sb.append("time:").append(request.getEventDateTime() != null ? request.getEventDateTime().toInstant().getEpochSecond() : "").append("|");
+        sb.append("tables:").append(request.getTableCount()).append("|");
+        sb.append("guests:").append(request.getGuestCount()).append("|");
+        sb.append("loc:").append(trim(request.getEventLocation())).append("|");
+        sb.append("note:").append(trimToNull(request.getNote())).append("|");
+        sb.append("menu:").append(request.getMenuId()).append("|");
+
+        List<CreateOrderItemRequest> items = request.getItems();
+        if (items == null || items.isEmpty()) {
+            sb.append("items:DEFAULT_MENU");
+        } else {
+            sb.append("items:CUSTOM[");
+            Map<Long, Integer> dishMap = new TreeMap<>();
+            for (CreateOrderItemRequest it : items) {
+                if (it.getDishId() != null && it.getQuantityPerTable() != null) {
+                    dishMap.merge(it.getDishId(), it.getQuantityPerTable(), Integer::sum);
+                }
+            }
+            for (Map.Entry<Long, Integer> entry : dishMap.entrySet()) {
+                sb.append(entry.getKey()).append("x").append(entry.getValue()).append(",");
+            }
+            sb.append("]");
+        }
+
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(sb.toString().getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : digest) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not available", e);
+        }
     }
 
     private String trimToNull(String val) {

@@ -1448,4 +1448,63 @@ class Phase3IntegrationTest {
             menuRepository.save(menu);
         }
     }
+
+    // =========================================================================
+    // TC-34: Cùng Idempotency-Key nhưng đổi từ món tùy chỉnh sang món mặc định bị từ chối với HTTP 400
+    // =========================================================================
+    @Test
+    @org.junit.jupiter.api.Order(34)
+    @DisplayName("TC-34: Cùng Idempotency-Key nhưng đổi từ món tùy chỉnh sang món mặc định bị báo lỗi HTTP 400 xung đột")
+    void tc34_switchingFromCustomToDefaultItemsWithSameKeyFailsWithConflict() throws Exception {
+        String userToken = obtainUserToken();
+        Dish dish = dishRepository.findByCodeIgnoreCase("DISH-001").orElseThrow();
+        String futureDate = OffsetDateTime.now(VN_ZONE).plusDays(8).toString();
+        String idempotencyKey = UUID.randomUUID().toString();
+
+        // 1. Gửi lần đầu: menuId kèm items tùy chỉnh
+        String customPayload = String.format("""
+                {
+                  "customerName": "Khách Đổi Cách Chọn Món",
+                  "customerPhone": "0912345678",
+                  "customerEmail": "user@banquethub.vn",
+                  "eventDateTime": "%s",
+                  "tableCount": 2,
+                  "guestCount": 20,
+                  "eventLocation": "Sảnh Hoàng Kim",
+                  "menuId": %d,
+                  "idempotencyKey": "%s",
+                  "items": [
+                    { "dishId": %d, "quantityPerTable": 2 }
+                  ]
+                }
+                """, futureDate, createdMenuId, idempotencyKey, dish.getId());
+
+        mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(customPayload))
+                .andExpect(status().isCreated());
+
+        // 2. Gửi lần sau: cùng idempotencyKey và cùng menuId nhưng BỎ items (nghĩa là lấy món mặc định của menu)
+        String defaultPayload = String.format("""
+                {
+                  "customerName": "Khách Đổi Cách Chọn Món",
+                  "customerPhone": "0912345678",
+                  "customerEmail": "user@banquethub.vn",
+                  "eventDateTime": "%s",
+                  "tableCount": 2,
+                  "guestCount": 20,
+                  "eventLocation": "Sảnh Hoàng Kim",
+                  "menuId": %d,
+                  "idempotencyKey": "%s"
+                }
+                """, futureDate, createdMenuId, idempotencyKey);
+
+        mockMvc.perform(post("/api/v1/orders")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(defaultPayload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", containsString("Idempotency-Key đã được sử dụng với nội dung đặt tiệc khác")));
+    }
 }
