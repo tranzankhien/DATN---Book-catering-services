@@ -15,6 +15,8 @@ import {
   CreditCard,
   ShoppingBag,
   Info,
+  RotateCw,
+  Loader2,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
@@ -92,9 +94,24 @@ export const CheckoutPage: React.FC = () => {
   const [preview, setPreview] = useState<OrderPreviewResponseDto | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [previewLoading, setPreviewLoading] = useState<boolean>(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const previewSeqRef = useRef<number>(0);
+
+  // Preview chỉ được coi là hợp lệ khi thành công, khớp chính xác số bàn hiện tại và không có lỗi
+  const isPreviewSynchronized = Boolean(
+    preview &&
+    preview.tableCount === tableCount &&
+    !previewLoading &&
+    !previewError
+  );
+
+  const canSubmit = Boolean(
+    !submitting &&
+    isPreviewSynchronized &&
+    preview?.canProceed
+  );
 
   // Auto-fill user information if logged in
   useEffect(() => {
@@ -186,6 +203,9 @@ export const CheckoutPage: React.FC = () => {
     const validCount = Math.max(1, newCount);
     setTableCount(validCount);
     setGuestCount(validCount * 10);
+    // Đánh dấu xem trước cũ không còn hợp lệ ngay khi thay đổi số bàn
+    setPreview(null);
+    setPreviewError(null);
     const seq = ++previewSeqRef.current;
     try {
       setPreviewLoading(true);
@@ -212,7 +232,7 @@ export const CheckoutPage: React.FC = () => {
       }
     } catch (err) {
       if (seq === previewSeqRef.current) {
-        setError(extractErrorMessage(err));
+        setPreviewError(extractErrorMessage(err));
       }
     } finally {
       if (seq === previewSeqRef.current) {
@@ -248,10 +268,18 @@ export const CheckoutPage: React.FC = () => {
       return;
     }
     if (previewLoading) {
-      showToast('Hệ thống đang kiểm tra tồn kho, vui lòng đợi trong giây lát...', 'info');
+      showToast('Hệ thống đang kiểm tra tồn kho và tính lại giá, vui lòng đợi trong giây lát...', 'info');
       return;
     }
-    if (preview && !preview.canProceed) {
+    if (previewError) {
+      showToast(`Không thể đặt tiệc do lỗi tính giá xem trước: ${previewError}. Vui lòng thử lại.`, 'error');
+      return;
+    }
+    if (!preview || preview.tableCount !== tableCount) {
+      showToast('Thông tin xem trước chưa được đồng bộ với số bàn hiện tại. Vui lòng bấm Thử lại tính giá.', 'error');
+      return;
+    }
+    if (!preview.canProceed) {
       showToast('Nguyên liệu trong kho không đủ để đáp ứng quy mô tiệc này', 'error');
       return;
     }
@@ -567,15 +595,47 @@ export const CheckoutPage: React.FC = () => {
                     Tóm tắt đơn đặt tiệc
                   </h3>
                 </div>
-                {preview && (
+                {isPreviewSynchronized && preview && (
                   <span className="font-mono text-xs font-semibold text-stone-500">
                     {preview.tableCount} bàn
                   </span>
                 )}
               </div>
 
+              {/* Preview Loading State */}
+              {previewLoading && (
+                <div className="rounded-xl bg-amber-50/70 border border-amber-200/80 p-5 text-center space-y-2">
+                  <Loader2 className="h-5 w-5 animate-spin mx-auto text-amber-700" />
+                  <div className="text-xs font-semibold text-amber-900">
+                    Đang tính lại giá và kiểm tra tồn kho cho {tableCount} bàn...
+                  </div>
+                  <div className="text-[11px] text-amber-700">Vui lòng đợi trong giây lát</div>
+                </div>
+              )}
+
+              {/* Preview Error Alert & Retry */}
+              {previewError && !previewLoading && (
+                <div className="rounded-xl bg-rose-50 border border-rose-200 p-4 text-xs space-y-3">
+                  <div className="font-bold flex items-center gap-1.5 text-rose-900">
+                    <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0" />
+                    <span>Lỗi tính giá xem trước ({tableCount} bàn):</span>
+                  </div>
+                  <div className="text-rose-700 text-[11px] leading-relaxed">
+                    {previewError}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleTableCountChange(tableCount)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-700 hover:bg-rose-800 text-white font-semibold text-xs cursor-pointer transition-colors shadow-xs"
+                  >
+                    <RotateCw className="h-3.5 w-3.5" />
+                    <span>Thử lại tính giá</span>
+                  </button>
+                </div>
+              )}
+
               {/* Items Breakdown */}
-              {preview && (
+              {isPreviewSynchronized && preview && (
                 <div className="space-y-2">
                   <div className="flex justify-between text-[11px] font-bold text-stone-400 uppercase tracking-wider">
                     <span>Món ăn mỗi bàn</span>
@@ -608,7 +668,7 @@ export const CheckoutPage: React.FC = () => {
               )}
 
               {/* Stock Warning Alert */}
-              {preview && !preview.canProceed && (
+              {isPreviewSynchronized && preview && !preview.canProceed && (
                 <div className="rounded-xl bg-rose-50 border border-rose-200 p-3.5 text-xs text-rose-800 space-y-1">
                   <div className="font-bold flex items-center gap-1.5 text-rose-900">
                     <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0" />
@@ -623,7 +683,7 @@ export const CheckoutPage: React.FC = () => {
               )}
 
               {/* Price Calculation Box */}
-              {preview && (
+              {isPreviewSynchronized && preview && (
                 <div className="rounded-xl bg-stone-50 p-4 border border-stone-100 space-y-2.5 text-xs">
                   <div className="flex justify-between text-stone-600">
                     <span>Đơn giá 01 bàn:</span>
@@ -645,9 +705,9 @@ export const CheckoutPage: React.FC = () => {
               {/* Confirm Button */}
               <button
                 type="submit"
-                disabled={submitting || previewLoading || (preview !== null && !preview.canProceed)}
+                disabled={!canSubmit}
                 className={`w-full inline-flex items-center justify-center gap-2 rounded-xl text-xs font-semibold py-3.5 shadow-xs transition-all ${
-                  submitting || previewLoading || (preview !== null && !preview.canProceed)
+                  !canSubmit
                     ? 'bg-stone-300 text-stone-500 cursor-not-allowed shadow-none'
                     : 'bg-amber-800 hover:bg-amber-900 text-white cursor-pointer'
                 }`}
@@ -658,6 +718,12 @@ export const CheckoutPage: React.FC = () => {
                     ? 'Đang tạo đơn & giữ kho...'
                     : previewLoading
                     ? 'Đang kiểm tra tồn kho...'
+                    : previewError
+                    ? 'Xem trước lỗi - Vui lòng thử lại'
+                    : preview && !preview.canProceed
+                    ? 'Kho không đủ nguyên liệu'
+                    : !isPreviewSynchronized
+                    ? 'Đang cập nhật xem trước...'
                     : 'Xác nhận đặt tiệc'}
                 </span>
               </button>
