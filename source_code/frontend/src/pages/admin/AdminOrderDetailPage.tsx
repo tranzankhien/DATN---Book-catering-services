@@ -1,3 +1,5 @@
+import { OrderProgress } from '../../components/OrderProgress';
+import { OrderPaymentPanel } from '../../components/OrderPaymentPanel';
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
@@ -23,8 +25,9 @@ import {
   ClipboardList,
 } from 'lucide-react';
 import { orderService } from '../../services/orderService';
+import type { PaymentState } from '../../services/paymentService';
 import type { OrderDto } from '../../services/types';
-import { formatVnd, formatDateTimeVn } from '../../hooks/useFormatters';
+import { formatVnd, formatDateTimeVn, formatQuantity } from '../../hooks/useFormatters';
 import { LoadingState, ErrorState } from '../../components/StatusStates';
 import { useToast } from '../../hooks/useToast';
 import { extractErrorMessage } from '../../services/apiClient';
@@ -41,9 +44,22 @@ export const AdminOrderDetailPage: React.FC = () => {
   const [cancelModalOpen, setCancelModalOpen] = useState<boolean>(false);
   const [cancelReason, setCancelReason] = useState<string>('');
   const [cancelling, setCancelling] = useState<boolean>(false);
+  const [paymentSnapshot, setPaymentSnapshot] = useState<PaymentState>();
+  const [now, setNow] = useState(Date.now);
+
+  const currentPayment = paymentSnapshot?.orderId === order?.id ? paymentSnapshot : undefined;
+  const eligibleToCancel = order?.orderStatus === 'PENDING_PAYMENT' && order.paymentStatus === 'UNPAID'
+    && Boolean(order.paymentExpiresAt && Date.parse(order.paymentExpiresAt) > now);
+  const hasOpenAttempt = currentPayment?.transactions.some(attempt =>
+    attempt.status === 'PENDING' && Date.parse(attempt.expiresAt) > now
+  );
+  const cancelHint = !currentPayment ? 'Cập nhật trạng thái thanh toán để kiểm tra khả năng hủy đơn.'
+    : hasOpenAttempt ? 'Phiên SePay đang mở. Hãy đợi kết quả từ SePay hoặc đợi phiên hết hạn.' : '';
+  const canCancel = eligibleToCancel && !cancelHint;
 
   const fetchOrderDetail = async () => {
     if (!id) return;
+    setPaymentSnapshot(undefined);
     try {
       setLoading(true);
       setError(null);
@@ -60,9 +76,19 @@ export const AdminOrderDetailPage: React.FC = () => {
     fetchOrderDetail();
   }, [id]);
 
+  useEffect(() => {
+    if (order?.orderStatus !== 'PENDING_PAYMENT') return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [order?.orderStatus]);
+
+  useEffect(() => {
+    if (!canCancel) setCancelModalOpen(false);
+  }, [canCancel]);
+
   const handleAdminCancelOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!order) return;
+    if (!order || !canCancel || cancelling) return;
     if (!cancelReason.trim()) {
       showToast('Vui lòng nhập lý do hủy đơn tiệc', 'error');
       return;
@@ -121,7 +147,7 @@ export const AdminOrderDetailPage: React.FC = () => {
             <button
               type="button"
               onClick={copyOrderCode}
-              className="p-1 rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-700"
+              className="p-1.5 rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
               title="Sao chép mã đơn"
             >
               <Copy className="h-4 w-4" />
@@ -142,11 +168,13 @@ export const AdminOrderDetailPage: React.FC = () => {
             <span>Làm mới</span>
           </button>
 
-          {(order.orderStatus === 'PENDING_PAYMENT' || order.orderStatus === 'PAID') && (
+          {eligibleToCancel && (
             <button
               type="button"
+              disabled={!canCancel}
+              aria-describedby={cancelHint ? 'admin-cancel-hint' : undefined}
               onClick={() => setCancelModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border border-rose-300 bg-white text-rose-700 hover:bg-rose-50 transition-colors shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border border-rose-300 bg-white text-rose-700 hover:bg-rose-50 transition-colors shadow-xs cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Ban className="h-3.5 w-3.5" />
               <span>Admin hủy đơn</span>
@@ -154,6 +182,30 @@ export const AdminOrderDetailPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {eligibleToCancel && cancelHint && <p id="admin-cancel-hint" className="text-sm text-stone-600">{cancelHint}</p>}
+
+      {/* Progress & Payment Panels */}
+      <OrderProgress order={order} role="admin" onUpdate={setOrder} />
+      <OrderPaymentPanel
+        key={order.id}
+        order={order}
+        onStatus={(status) => {
+          setPaymentSnapshot(status);
+          setNow(Date.now());
+          setOrder((current) =>
+            current?.id === status.orderId
+              ? {
+                  ...current,
+                  orderStatus: status.orderStatus,
+                  paymentStatus: status.paymentStatus,
+                  reservation: status.reservation,
+                  statusHistories: status.statusHistories,
+                }
+              : current
+          );
+        }}
+      />
 
       {/* Main Fact Card */}
       <div className="bg-white rounded-2xl p-6 border border-stone-200/80 shadow-xs space-y-5">
@@ -230,7 +282,13 @@ export const AdminOrderDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div className="rounded-xl bg-stone-50 p-3.5 border border-stone-200">
             <strong className="text-stone-900 font-semibold block mb-0.5">Địa điểm tổ chức:</strong>
-            <span className="text-stone-700">{order.eventLocation || 'Chưa cung cấp'}</span>
+            <span className="text-stone-700">{order.eventLocation || 'Chưa cung cấp'}
+              {order.eventLatitude != null && order.eventLongitude != null && (
+                <a className="ml-2 text-amber-800 underline" target="_blank" rel="noreferrer"
+                  href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}>
+                  Xem bản đồ
+                </a>
+              )}</span>
           </div>
 
           {order.note ? (
@@ -328,12 +386,12 @@ export const AdminOrderDetailPage: React.FC = () => {
                 )}
               </div>
 
-              <div className="max-h-48 overflow-y-auto divide-y divide-stone-100 rounded-xl border border-stone-200 p-2.5 bg-stone-50 text-xs">
+              <div className="max-h-56 overflow-y-auto divide-y divide-stone-100 rounded-xl border border-stone-200 p-2 bg-stone-50/70 text-xs scrollbar-thin">
                 {order.reservation.items.map((resItem) => (
-                  <div key={resItem.id} className="py-1.5 flex justify-between">
-                    <span className="text-stone-800 font-medium">{resItem.ingredientName}</span>
-                    <span className="font-mono font-bold text-stone-900">
-                      {resItem.quantity} {resItem.unit}
+                  <div key={resItem.id} className="py-2 px-2 flex items-center justify-between hover:bg-white rounded-lg transition-colors">
+                    <span className="text-stone-800 font-medium truncate pr-2">{resItem.ingredientName}</span>
+                    <span className="font-mono font-bold text-amber-900 bg-white border border-stone-200/90 px-2 py-0.5 rounded-md shrink-0 shadow-2xs">
+                      {formatQuantity(resItem.quantity)} {resItem.unit}
                     </span>
                   </div>
                 ))}
@@ -346,7 +404,7 @@ export const AdminOrderDetailPage: React.FC = () => {
             <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
               <History className="h-4 w-4 text-amber-700" />
               <h3 className="font-bold text-sm text-stone-900 tracking-tight">
-                Lịch sử trạng thái (Audit Log)
+                Nhật ký thay đổi trạng thái (Audit Trail)
               </h3>
             </div>
 
@@ -356,18 +414,22 @@ export const AdminOrderDetailPage: React.FC = () => {
                   key={hist.id}
                   className="relative pl-5 pb-2 text-xs border-l-2 border-amber-300 last:border-transparent"
                 >
-                  <div className="absolute -left-[5px] top-0 h-2 w-2 rounded-full bg-amber-600" />
+                  <div className="absolute -left-[5px] top-0 h-2.5 w-2.5 rounded-full bg-amber-600 ring-2 ring-amber-100" />
                   <div className="font-bold text-stone-900">
-                    {hist.fromStatus ? `${hist.fromStatus} → ` : ''}{hist.toStatus}
+                    {hist.fromStatus ? `${hist.fromStatus} → ` : ''}
+                    <span className="text-amber-900">{hist.toStatus}</span>
                   </div>
-                  <div className="text-[11px] text-stone-400 font-mono">
+                  <div className="text-[11px] text-stone-400 font-mono mt-0.5">
                     {formatDateTimeVn(hist.createdAt)}
                   </div>
                   {hist.reason && (
-                    <div className="text-stone-600 mt-1 italic">"{hist.reason}"</div>
+                    <div className="text-stone-700 bg-stone-50 border border-stone-200/80 rounded-lg p-2 mt-1.5 text-[11px] leading-relaxed">
+                      "{hist.reason}"
+                    </div>
                   )}
-                  <div className="text-[10px] text-stone-400 mt-0.5">
-                    Thực hiện: {hist.changedByName}
+                  <div className="text-[10px] text-stone-400 mt-1 flex items-center gap-1">
+                    <span>Thực hiện bởi:</span>
+                    <strong className="text-stone-600 font-medium">{hist.changedByName}</strong>
                   </div>
                 </div>
               ))}
@@ -377,7 +439,7 @@ export const AdminOrderDetailPage: React.FC = () => {
       </div>
 
       {/* Admin Cancel Modal */}
-      {cancelModalOpen && (
+      {cancelModalOpen && canCancel && (
         <div className="fixed inset-0 z-50 bg-stone-950/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-stone-100">

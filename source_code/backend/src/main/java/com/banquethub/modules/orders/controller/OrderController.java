@@ -49,7 +49,7 @@ public class OrderController {
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    @Operation(summary = "Tạo mới đơn đặt tiệc và giữ nguyên liệu trong 15 phút")
+    @Operation(summary = "Tạo mới đơn đặt tiệc và giữ nguyên liệu tối đa 15 phút")
     public ResponseEntity<ApiResponse<OrderResponse>> createOrder(
             @Valid @RequestBody CreateOrderRequest request,
             @AuthenticationPrincipal CustomUserDetails currentUserDetails
@@ -57,7 +57,7 @@ public class OrderController {
         User currentUser = resolveUser(currentUserDetails);
         OrderResponse created = orderService.createOrder(request, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Tạo đơn đặt tiệc thành công! Vui lòng hoàn tất trong vòng 15 phút.", created));
+                .body(ApiResponse.ok("Tạo đơn đặt tiệc thành công! Vui lòng thanh toán trước thời hạn trên đơn.", created));
     }
 
     @GetMapping({"/my", "/my-orders"})

@@ -21,6 +21,9 @@ import {
   Package,
   CalendarDays,
   Utensils,
+  LayoutDashboard,
+  CreditCard,
+  PackageCheck,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
@@ -73,7 +76,6 @@ export const AdminLayout: React.FC = () => {
   };
 
   const upcomingModules = [
-    { label: 'Thanh toán trực tuyến VNPAY', phase: 'Phase 4', icon: BarChart3 },
     { label: 'Nhân sự & phục vụ tiệc', phase: 'Phase 6', icon: Users },
     { label: 'Báo cáo doanh thu & lãi gộp', phase: 'Phase 7', icon: BarChart3 },
   ];
@@ -314,7 +316,7 @@ export const AdminLayout: React.FC = () => {
                 </nav>
               </div>
 
-              {/* Phase 3: Quản lý tiệc & đơn hàng */}
+              {/* Phase 3 & 4: Quản lý tiệc & đơn hàng */}
               <div>
                 {isOpen && (
                   <p className="px-2.5 mb-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-400 whitespace-nowrap">
@@ -322,6 +324,31 @@ export const AdminLayout: React.FC = () => {
                   </p>
                 )}
                 <nav className="space-y-1">
+                  <NavLink
+                    to="/admin"
+                    end
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Tổng quan vận hành' : undefined}
+                  >
+                    <LayoutDashboard className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Tổng quan vận hành</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Tổng quan vận hành
+                      </div>
+                    )}
+                  </NavLink>
+
                   <NavLink
                     to="/admin/menus"
                     className={({ isActive }) =>
@@ -359,13 +386,37 @@ export const AdminLayout: React.FC = () => {
                     }
                     title={!isOpen ? 'Đơn đặt tiệc' : undefined}
                   >
-                    <ClipboardList className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    <CalendarDays className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
                     {isOpen && (
                       <span className="whitespace-nowrap truncate">Đơn đặt tiệc</span>
                     )}
                     {!isOpen && (
                       <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Đơn đặt tiệc
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/payments"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Thanh toán & đối soát' : undefined}
+                  >
+                    <CreditCard className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Thanh toán & đối soát</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Thanh toán & đối soát
                       </div>
                     )}
                   </NavLink>
@@ -383,7 +434,7 @@ export const AdminLayout: React.FC = () => {
                     }
                     title={!isOpen ? 'Theo dõi giữ kho' : undefined}
                   >
-                    <Package className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    <PackageCheck className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
                     {isOpen && (
                       <span className="whitespace-nowrap truncate">Theo dõi giữ kho</span>
                     )}

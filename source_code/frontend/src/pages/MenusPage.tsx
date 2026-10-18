@@ -20,6 +20,7 @@ import type { MenuDto } from '../services/types';
 import { formatVnd } from '../hooks/useFormatters';
 import { LoadingState, ErrorState, EmptyState } from '../components/StatusStates';
 import { extractErrorMessage } from '../services/apiClient';
+import { DEFAULT_MENU_IMAGE, handleImageError } from '../lib/imageConstants';
 
 export const MenusPage: React.FC = () => {
   const navigate = useNavigate();
@@ -76,7 +77,7 @@ export const MenusPage: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
-      {/* Header Banner - Đồng bộ phong cách trang trọng của Catalog & Home */}
+      {/* Header Banner - Sang trọng đồng bộ với Phase 1/2 */}
       <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
@@ -95,7 +96,7 @@ export const MenusPage: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link
               to="/menu-builder"
-              className="inline-flex items-center gap-2 rounded-xl bg-amber-800 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-amber-900 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-amber-700 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-amber-800 transition-all cursor-pointer"
             >
               <Sliders className="h-4 w-4" />
               <span>Tự phối thực đơn mới</span>
@@ -165,7 +166,7 @@ export const MenusPage: React.FC = () => {
           action={
             <Link
               to="/menu-builder"
-              className="inline-flex items-center gap-2 rounded-xl bg-amber-800 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-amber-900 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl bg-amber-700 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-amber-800 transition-colors"
             >
               <Sliders className="h-4 w-4" />
               <span>Chuyển sang Tự phối món</span>
@@ -180,32 +181,32 @@ export const MenusPage: React.FC = () => {
           {filteredMenus.map((menu) => (
             <div
               key={menu.id}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-xs hover:border-amber-300 hover:shadow-md transition-all duration-300"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-xs hover:border-amber-400 hover:shadow-lg transition-all duration-300"
             >
-              {/* Image banner */}
-              <div className="relative h-52 bg-stone-100 overflow-hidden">
+              {/* Image banner with robust fallback */}
+              <div className="relative h-52 bg-stone-900 overflow-hidden select-none">
                 <img
-                  src={
-                    menu.imageUrl ||
-                    'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&auto=format&fit=crop&q=80'
-                  }
-                  alt={menu.name}
-                  className="h-full w-full object-cover group-hover:scale-103 transition-transform duration-500"
+                  src={menu.imageUrl || DEFAULT_MENU_IMAGE}
+                  alt=""
+                  onError={handleImageError}
+                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-950/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/30 to-stone-950/10 pointer-events-none" />
 
-                <div className="absolute top-3 left-3 flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-white bg-stone-900/85 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/20 shadow-xs">
+                {/* Floating Top Badges */}
+                <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
+                  <span className="font-mono text-xs font-bold text-amber-200 bg-stone-950/85 backdrop-blur-md px-2.5 py-1 rounded-lg border border-amber-500/30 shadow-xs">
                     {menu.code}
                   </span>
-                  <span className="text-[11px] font-semibold text-amber-200 bg-amber-950/80 backdrop-blur-xs px-2 py-0.5 rounded-md border border-amber-500/30">
+                  <span className="text-[11px] font-semibold text-stone-100 bg-stone-900/80 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/20">
                     Set {menu.itemsCount} món
                   </span>
                 </div>
 
-                <div className="absolute bottom-3 left-4 right-4 text-white">
-                  <h3 className="font-bold text-lg text-white group-hover:text-amber-200 transition-colors line-clamp-1">
+                {/* Title over banner */}
+                <div className="absolute bottom-3 left-4 right-4 z-10 text-white">
+                  <h3 className="font-bold text-lg text-white group-hover:text-amber-300 transition-colors line-clamp-1 drop-shadow-sm">
                     {menu.name}
                   </h3>
                 </div>
@@ -213,9 +214,13 @@ export const MenusPage: React.FC = () => {
 
               {/* Card Body */}
               <div className="flex flex-1 flex-col p-5 space-y-4">
-                {menu.description && (
-                  <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed">
+                {menu.description ? (
+                  <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed min-h-[32px]">
                     {menu.description}
+                  </p>
+                ) : (
+                  <p className="text-xs text-stone-400 italic min-h-[32px]">
+                    Bộ thực đơn thiết kế chuẩn yến tiệc sang trọng
                   </p>
                 )}
 
@@ -253,7 +258,7 @@ export const MenusPage: React.FC = () => {
                       <span className="block text-[10px] text-stone-400 uppercase tracking-wider font-semibold">
                         Đơn giá bàn (10 khách)
                       </span>
-                      <span className="text-xl font-bold text-stone-900 tracking-tight">
+                      <span className="text-xl font-bold text-amber-900 tracking-tight">
                         {formatVnd(menu.pricePerTable)}
                       </span>
                     </div>
@@ -270,7 +275,7 @@ export const MenusPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => navigate(`/checkout?menuId=${menu.id}`)}
-                      className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-semibold text-xs py-2.5 shadow-xs transition-all cursor-pointer"
+                      className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-semibold text-xs py-2.5 shadow-xs transition-all cursor-pointer"
                     >
                       <Calendar className="h-3.5 w-3.5" />
                       <span>Đặt tiệc ngay</span>
@@ -278,9 +283,9 @@ export const MenusPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => navigate(`/menu-builder?menuId=${menu.id}`)}
-                      className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 font-semibold text-xs py-2.5 shadow-xs transition-colors cursor-pointer"
+                      className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-700/30 bg-amber-50/60 hover:bg-amber-100/80 text-amber-900 font-semibold text-xs py-2.5 shadow-xs transition-colors cursor-pointer"
                     >
-                      <Sliders className="h-3.5 w-3.5 text-stone-500" />
+                      <Sliders className="h-3.5 w-3.5 text-amber-700" />
                       <span>Tùy chỉnh món</span>
                     </button>
                   </div>

@@ -24,22 +24,24 @@ public class ReservationExpiryScheduler {
     private final OrderRepository orderRepository;
     private final OrderStatusHistoryRepository statusHistoryRepository;
     private final StockReservationService reservationService;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     public ReservationExpiryScheduler(
             OrderRepository orderRepository,
             OrderStatusHistoryRepository statusHistoryRepository,
-            StockReservationService reservationService
+            StockReservationService reservationService, org.springframework.jdbc.core.JdbcTemplate jdbc
     ) {
         this.orderRepository = orderRepository;
         this.statusHistoryRepository = statusHistoryRepository;
         this.reservationService = reservationService;
+        this.jdbc = jdbc;
     }
 
     @Scheduled(fixedDelay = 60000) // Every 1 minute
     @Transactional
     public void cleanupExpiredReservations() {
         OffsetDateTime now = OffsetDateTime.now(VN_ZONE);
-        List<Order> expiredOrders = orderRepository.findByOrderStatusAndPaymentExpiresAtBefore(
+        List<Long> expiredOrders = orderRepository.findExpiryCandidateIds(
                 OrderStatus.PENDING_PAYMENT, now
         );
 
@@ -48,13 +50,13 @@ public class ReservationExpiryScheduler {
         }
 
         log.info("Phát hiện {} đơn hàng quá hạn thanh toán 15 phút. Tiến hành giải phóng giữ kho...", expiredOrders.size());
-        for (Order candidate : expiredOrders) {
-            java.util.Optional<Order> lockedOpt = orderRepository.findByIdForUpdate(candidate.getId());
+        for (Long candidate : expiredOrders) {
+            java.util.Optional<Order> lockedOpt = orderRepository.findByIdForUpdate(candidate);
             if (lockedOpt.isEmpty()) {
                 continue;
             }
             Order order = lockedOpt.get();
-            if (order.getOrderStatus() != OrderStatus.PENDING_PAYMENT) {
+            if (order.getOrderStatus() != OrderStatus.PENDING_PAYMENT || !order.getPaymentExpiresAt().isBefore(now)) {
                 continue;
             }
 
@@ -74,6 +76,7 @@ public class ReservationExpiryScheduler {
 
             // Expire reservation
             reservationService.expireReservationForOrder(order.getId());
+            jdbc.update("UPDATE payment_transactions SET status='EXPIRED', updated_at=now() WHERE order_id=? AND status='PENDING'", order.getId());
             log.info("Đã hủy và giải phóng tồn kho cho đơn hàng {} ({})", order.getOrderCode(), order.getId());
         }
     }

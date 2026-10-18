@@ -1,3 +1,6 @@
+import { PaymentResultPage } from '../pages/PaymentResultPage';
+import { AdminPaymentsPage } from '../pages/admin/AdminPaymentsPage';
+import { AdminOverviewPage } from '../pages/admin/AdminOverviewPage';
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { PublicLayout } from '../layouts/PublicLayout';
@@ -67,6 +70,7 @@ export const AppRouter: React.FC = () => {
               </ProtectedRoute>
             }
           />
+          <Route path="/payment/result" element={<PaymentResultPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
@@ -116,7 +120,7 @@ export const AppRouter: React.FC = () => {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/admin/catalog" replace />} />
+          <Route index element={<AdminOverviewPage />} />
           <Route path="catalog" element={<AdminCatalogPage />} />
           <Route path="inventory/overview" element={<AdminInventoryOverviewPage />} />
           <Route path="inventory/ingredients" element={<AdminIngredientsInventoryPage />} />
@@ -129,6 +133,7 @@ export const AppRouter: React.FC = () => {
           <Route path="menus" element={<AdminMenusPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="orders/:id" element={<AdminOrderDetailPage />} />
+          <Route path="payments" element={<AdminPaymentsPage />} />
         </Route>
 
         {/* Fallback */}

@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
+import com.banquethub.modules.payments.config.SePayConfig;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -66,6 +67,8 @@ public class OrderService {
     private final MenuRepository menuRepository;
     private final StockReservationService reservationService;
     private final TransactionTemplate transactionTemplate;
+    private final SePayConfig sePayConfig;
+    private final com.banquethub.modules.payments.repository.PaymentTransactionRepository paymentTransactions;
 
     public OrderService(
             OrderRepository orderRepository,
@@ -73,7 +76,8 @@ public class OrderService {
             DishRepository dishRepository,
             MenuRepository menuRepository,
             StockReservationService reservationService,
-            PlatformTransactionManager transactionManager
+            PlatformTransactionManager transactionManager, SePayConfig sePayConfig,
+            com.banquethub.modules.payments.repository.PaymentTransactionRepository paymentTransactions
     ) {
         this.orderRepository = orderRepository;
         this.statusHistoryRepository = statusHistoryRepository;
@@ -81,6 +85,8 @@ public class OrderService {
         this.menuRepository = menuRepository;
         this.reservationService = reservationService;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
+        this.sePayConfig = sePayConfig;
+        this.paymentTransactions = paymentTransactions;
     }
 
     public OrderResponse createOrder(CreateOrderRequest request, User currentUser) {
@@ -110,6 +116,10 @@ public class OrderService {
         }
         if (request.getGuestCount() == null || request.getGuestCount() <= 0) {
             throw new BusinessValidationException("Số lượng khách tham dự phải từ 1 người trở lên.");
+        }
+
+        if ((request.getEventLatitude() == null) != (request.getEventLongitude() == null)) {
+            throw new BusinessValidationException("Vị trí trên bản đồ phải có đủ kinh độ và vĩ độ.");
         }
 
         // 1. Idempotency Check (BR-13) - Kiểm tra đơn gửi lại trước tiên dựa trên nội dung đã lưu, KHÔNG phụ thuộc menu còn active hay không
@@ -231,6 +241,8 @@ public class OrderService {
             }
         }
 
+        sePayConfig.validateAmount(totalAmount);
+
         // 3. Generate Order Code
         Long seq = orderRepository.getNextOrderCodeSeq();
         String datePart = LocalDate.now(VN_ZONE).format(DATE_FORMATTER);
@@ -247,13 +259,19 @@ public class OrderService {
         order.setTableCount(tableCount);
         order.setNote(request.getNote());
         order.setEventLocation(request.getEventLocation() != null ? request.getEventLocation().trim() : null);
+        order.setEventLatitude(request.getEventLatitude());
+        order.setEventLongitude(request.getEventLongitude());
         order.setGuestCount(request.getGuestCount());
         order.setMenu(selectedMenu);
         order.setMenuNameSnapshot(menuNameSnapshot);
         order.setTotalAmount(totalAmount);
         order.setOrderStatus(OrderStatus.PENDING_PAYMENT);
         order.setPaymentStatus(PaymentStatus.UNPAID);
-        order.setPaymentExpiresAt(now.plusMinutes(15)); // BR-07
+        OffsetDateTime paymentDeadline = now.plusMinutes(15);
+        if (request.getEventDateTime().isBefore(paymentDeadline)) paymentDeadline = request.getEventDateTime();
+        if (!paymentDeadline.isAfter(now) || java.time.Duration.between(now, paymentDeadline).getSeconds() < sePayConfig.minRemainingSeconds)
+            throw new BusinessValidationException("Giờ tổ chức quá gần để thanh toán. Vui lòng chọn giờ muộn hơn.");
+        order.setPaymentExpiresAt(paymentDeadline);
         boolean isCustom = (request.getItems() != null && !request.getItems().isEmpty());
         order.setIsCustomItems(isCustom);
         order.setPayloadHash(computePayloadHash(request));
@@ -333,8 +351,8 @@ public class OrderService {
                 throw new BusinessValidationException("Bạn không có quyền truy cập đơn hàng của người khác.");
             }
         } else if (currentUser.getRole() == Role.ROLE_EMPLOYEE) {
-            if (order.getOrderStatus() != OrderStatus.PENDING_PAYMENT) {
-                throw new BusinessValidationException("Nhân viên chỉ có quyền xem đơn tiệc ở trạng thái chờ xử lý (PENDING_PAYMENT).");
+            if (order.getPaymentStatus() != PaymentStatus.PAID) {
+                throw new BusinessValidationException("Nhân viên chỉ có quyền xem đơn tiệc đã thanh toán.");
             }
         }
 
@@ -356,8 +374,8 @@ public class OrderService {
                 throw new BusinessValidationException("Bạn không có quyền truy cập đơn hàng của người khác.");
             }
         } else if (currentUser.getRole() == Role.ROLE_EMPLOYEE) {
-            if (order.getOrderStatus() != OrderStatus.PENDING_PAYMENT) {
-                throw new BusinessValidationException("Nhân viên chỉ có quyền xem đơn tiệc ở trạng thái chờ xử lý (PENDING_PAYMENT).");
+            if (order.getPaymentStatus() != PaymentStatus.PAID) {
+                throw new BusinessValidationException("Nhân viên chỉ có quyền xem đơn tiệc đã thanh toán.");
             }
         }
 
@@ -403,7 +421,15 @@ public class OrderService {
                 throw new BusinessValidationException("Đơn hàng đã hoàn thành, không thể hủy.");
             }
 
+            if (order.getPaymentStatus() == PaymentStatus.PAYMENT_REVIEW) {
+                throw new BusinessValidationException("Đơn đang đối soát thanh toán.");
+            }
             OffsetDateTime now = OffsetDateTime.now(VN_ZONE);
+            // Payment creation and cancellation use the same order lock.
+            if (order.getOrderStatus() == OrderStatus.PENDING_PAYMENT
+                    && paymentTransactions.existsByOrderIdAndStatusAndExpiresAtAfter(id, "PENDING", now)) {
+                throw new BusinessValidationException("Phiên thanh toán SePay vẫn còn hiệu lực. Vui lòng chờ kết quả hoặc đợi phiên hết hạn trước khi hủy đơn.");
+            }
             boolean isOverdue = order.getOrderStatus() == OrderStatus.EXPIRED ||
                     (order.getPaymentExpiresAt() != null && order.getPaymentExpiresAt().isBefore(now));
 
@@ -499,6 +525,10 @@ public class OrderService {
         if (!Objects.equals(existing.getGuestCount(), request.getGuestCount())) {
             return false;
         }
+        if (!Objects.equals(coordinate(existing.getEventLatitude()), coordinate(request.getEventLatitude()))
+                || !Objects.equals(coordinate(existing.getEventLongitude()), coordinate(request.getEventLongitude()))) {
+            return false;
+        }
         if (!Objects.equals(trim(existing.getEventLocation()), trim(request.getEventLocation()))) {
             return false;
         }
@@ -536,6 +566,10 @@ public class OrderService {
         return existingItems.equals(requestItems);
     }
 
+    private String coordinate(BigDecimal value) {
+        return value == null ? null : value.stripTrailingZeros().toPlainString();
+    }
+
     public String computePayloadHash(CreateOrderRequest request) {
         StringBuilder sb = new StringBuilder();
         sb.append("name:").append(trim(request.getCustomerName())).append("|");
@@ -545,6 +579,10 @@ public class OrderService {
         sb.append("tables:").append(request.getTableCount()).append("|");
         sb.append("guests:").append(request.getGuestCount()).append("|");
         sb.append("loc:").append(trim(request.getEventLocation())).append("|");
+        if (request.getEventLatitude() != null && request.getEventLongitude() != null) {
+            sb.append("pin:").append(coordinate(request.getEventLatitude())).append(",")
+                .append(coordinate(request.getEventLongitude())).append("|");
+        }
         sb.append("note:").append(trimToNull(request.getNote())).append("|");
         sb.append("menu:").append(request.getMenuId()).append("|");
 
@@ -601,6 +639,7 @@ public class OrderService {
             PaymentStatus paymentStatus,
             OffsetDateTime fromDate,
             OffsetDateTime toDate,
+            boolean awaitingPayment,
             Pageable pageable
     ) {
         org.springframework.data.jpa.domain.Specification<Order> spec = (root, query, cb) -> {
@@ -618,6 +657,11 @@ public class OrderService {
             }
             if (paymentStatus != null) {
                 predicates.add(cb.equal(root.get("paymentStatus"), paymentStatus));
+            }
+            if (awaitingPayment) {
+                predicates.add(cb.equal(root.get("orderStatus"), OrderStatus.PENDING_PAYMENT));
+                predicates.add(cb.equal(root.get("paymentStatus"), PaymentStatus.UNPAID));
+                predicates.add(cb.greaterThan(root.<OffsetDateTime>get("paymentExpiresAt"), OffsetDateTime.now(VN_ZONE)));
             }
             if (fromDate != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), fromDate));

@@ -191,3 +191,10 @@
 | `GET` | `/api/v1/admin/inventory/reservations?status=&page=&size=` | `ROLE_ADMIN` | Danh sách lệnh khóa giữ tồn kho 15 phút (ReservationStatus: `ACTIVE`, `RELEASED`, `FULFILLED`, `EXPIRED`) |
 | `GET` | `/api/v1/admin/inventory/availability` hoặc `/reservations/availability` | `ROLE_ADMIN` | Báo cáo đối chiếu tồn kho vật lý (`physicalStock`), tồn đang giữ (`reservedStock`) và tồn khả dụng thực tế (`availableStock`) |
 
+
+
+## Phase 4
+`GET /api/v1/admin/overview` trả sáu bộ đếm vận hành cho Admin. Các bộ đếm đơn hàng phân theo giai đoạn hiện tại.
+Admin gọi `POST /api/v1/admin/payments/{id}/resolve` với `action` là `RETRY_SETTLEMENT` hoặc `CLOSE_MANUALLY` và `reason` dài tối đa 300 ký tự. Thao tác thử lại yêu cầu kết quả thanh toán thành công đã xác thực. Thao tác đóng yêu cầu kết quả SePay dứt điểm và `resolutionReference` dài tối đa 80 ký tự để lưu mã chứng từ hoặc mã đối soát.
+
+POST /api/v1/payments/sepay/create, POST /payments/sepay/ipn, GET /orders/{id}/payment-status, GET /payments/reference/{reference}, GET /admin/payments và /review, GET /admin/payments/{id}, POST /admin/payments/{id}/query, GET /admin/notifications, POST /admin/notifications/{id}/retry và PATCH /{admin|employee}/orders/{id}/status. Các đường dẫn viết tắt dùng tiền tố /api/v1. Xem [luồng thanh toán](PAYMENT_FLOW.md).

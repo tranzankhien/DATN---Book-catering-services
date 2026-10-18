@@ -57,6 +57,7 @@ public class AdminOrderController {
             @RequestParam(required = false) PaymentStatus paymentStatus,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime toDate,
+            @RequestParam(defaultValue = "false") boolean awaitingPayment,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -64,7 +65,7 @@ public class AdminOrderController {
     ) {
         Sort sort = "asc".equalsIgnoreCase(direction) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Page<OrderResponse> result = orderService.searchAdminOrders(
-                keyword, orderStatus, paymentStatus, fromDate, toDate, PageRequest.of(page, size, sort)
+                keyword, orderStatus, paymentStatus, fromDate, toDate, awaitingPayment, PageRequest.of(page, size, sort)
         );
         return ResponseEntity.ok(ApiResponse.ok("Lấy danh sách đơn hàng thành công", result));
     }

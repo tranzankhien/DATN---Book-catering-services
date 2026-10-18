@@ -35,6 +35,9 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     List<Order> findByOrderStatusAndPaymentExpiresAtBefore(OrderStatus status, OffsetDateTime time);
 
+    @Query("select o.id from Order o where o.orderStatus=:status and o.paymentExpiresAt<:time order by o.id")
+    List<Long> findExpiryCandidateIds(@Param("status") OrderStatus status, @Param("time") OffsetDateTime time);
+
     @Query("SELECT o FROM Order o WHERE " +
            "(:userId IS NULL OR o.user.id = :userId) " +
            "AND (:status IS NULL OR o.orderStatus = :status) " +

@@ -158,7 +158,7 @@ export interface SupplierUpsertPayload {
 }
 
 export type StockReceiptStatus = 'DRAFT' | 'CONFIRMED';
-export type PaymentStatus = 'UNPAID' | 'PARTIALLY_PAID' | 'PAID' | 'REFUNDED';
+export type PaymentStatus = 'UNPAID' | 'PAYMENT_REVIEW' | 'PARTIALLY_PAID' | 'PAID' | 'REFUNDED';
 export type MovementType = 'IMPORT' | 'EXPORT' | 'ADJUSTMENT';
 export type ReferenceType = 'STOCK_RECEIPT' | 'STOCK_ADJUSTMENT' | 'ORDER' | 'MANUAL';
 
@@ -295,7 +295,7 @@ export interface InventorySummaryDto {
 
 export type MenuStatus = 'ACTIVE' | 'HIDDEN' | 'ARCHIVED';
 export type OrderStatus = 'PENDING_PAYMENT' | 'PAID' | 'PREPARING' | 'COMPLETED' | 'CANCELLED' | 'EXPIRED';
-export type ReservationStatus = 'ACTIVE' | 'RELEASED' | 'FULFILLED' | 'EXPIRED';
+export type ReservationStatus = 'ACTIVE' | 'RELEASED' | 'CONSUMED' | 'FULFILLED' | 'EXPIRED';
 
 export interface MenuItemDto {
   id: number;
@@ -397,6 +397,8 @@ export interface OrderDto {
   tableCount: number;
   note?: string | null;
   eventLocation?: string | null;
+  eventLatitude?: number | null;
+  eventLongitude?: number | null;
   guestCount?: number | null;
   menuId?: number | null;
   menuNameSnapshot?: string | null;
@@ -462,6 +464,8 @@ export interface CreateOrderPayload {
   tableCount: number;
   note?: string;
   eventLocation?: string;
+  eventLatitude?: number;
+  eventLongitude?: number;
   guestCount?: number;
   menuId?: number;
   items: CreateOrderItemPayload[];

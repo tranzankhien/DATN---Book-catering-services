@@ -1,3 +1,4 @@
+import { OrderProgress } from '../../components/OrderProgress';
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
@@ -77,6 +78,9 @@ export const EmployeeOrderDetailPage: React.FC = () => {
         <span>/</span>
         <span className="font-mono font-bold text-stone-900">{order.orderCode}</span>
       </nav>
+
+      {/* Progress Action Stepper for Kitchen Staff */}
+      <OrderProgress order={order} role="employee" onUpdate={setOrder} />
 
       {/* Summary Card */}
       <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-5">

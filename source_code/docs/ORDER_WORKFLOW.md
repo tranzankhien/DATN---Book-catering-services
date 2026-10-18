@@ -73,9 +73,9 @@ Trong đó:
 - Khi thực hiện kiểm tra và giữ kho, Backend sử dụng khóa `PESSIMISTIC_WRITE` (tương đương `SELECT ... FOR UPDATE` trong PostgreSQL) trên các dòng nguyên liệu liên quan.
 - Để ngăn ngừa Deadlock tuyệt đối, các `ingredientId` được sắp xếp theo thứ tự tăng dần (`sortedIds = requiredIngredients.keySet().stream().sorted().toList()`) trước khi tiến hành khóa dòng.
 
-### BR-15 & BR-16: Điểm chạm tích hợp VNPAY (Phase 4)
-- Trong Phase 3, chưa tích hợp cổng VNPAY. Mọi đơn tiệc mới tạo sẽ có `order_status = PENDING_PAYMENT` và `payment_status = UNPAID`.
-- Giao diện có thông báo rõ ràng cho khách hàng về thời gian giữ chỗ 15 phút và lộ trình tích hợp VNPAY tại Phase 4.
+### BR-15 & BR-16: Điểm chạm tích hợp SePay (Phase 4)
+- Trong Phase 3, chưa tích hợp cổng SePay. Mọi đơn tiệc mới tạo sẽ có `order_status = PENDING_PAYMENT` và `payment_status = UNPAID`.
+- Giao diện có thông báo rõ ràng cho khách hàng về thời gian giữ chỗ 15 phút và lộ trình tích hợp SePay tại Phase 4.
 
 ---
 
@@ -106,3 +106,7 @@ Trong đó:
 ### 3.3. Nhân viên điều phối & Bếp (Employee)
 - `GET /api/v1/employee/orders`: Lịch phục vụ tiệc sắp xếp theo ngày giờ tổ chức.
 - `GET /api/v1/employee/orders/{id}`: Phiếu chế biến bếp, danh sách món ăn, số lượng phần cần nấu và tổng nguyên liệu xuất kho.
+
+
+## Phase 4
+Sau khi backend xác thực thanh toán và trừ kho, đơn chuyển PAID. Admin hoặc nhân viên cập nhật PREPARING rồi COMPLETED. Thanh toán cần đối soát được giữ riêng. Xem [luồng thanh toán](PAYMENT_FLOW.md).

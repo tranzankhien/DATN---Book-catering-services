@@ -27,6 +27,7 @@ import { formatVnd } from '../../hooks/useFormatters';
 import { useToast } from '../../hooks/useToast';
 import { LoadingState, ErrorState } from '../../components/StatusStates';
 import { extractErrorMessage } from '../../services/apiClient';
+import { DEFAULT_MENU_IMAGE, DEFAULT_DISH_IMAGE, handleImageError } from '../../lib/imageConstants';
 
 interface ModalLineItem {
   dishId: number;
@@ -231,7 +232,7 @@ export const AdminMenusPage: React.FC = () => {
           <button
             type="button"
             onClick={openCreateModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-amber-800 text-white hover:bg-amber-900 transition-colors shadow-xs cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-amber-700 text-white hover:bg-amber-800 transition-colors shadow-xs cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             <span>Tạo thực đơn mới</span>
@@ -321,14 +322,26 @@ export const AdminMenusPage: React.FC = () => {
                       {m.code}
                     </td>
                     <td className="py-3.5 px-4">
-                      <div className="font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
-                        {m.name}
-                      </div>
-                      {m.description && (
-                        <div className="text-[11px] text-stone-400 line-clamp-1 mt-0.5">
-                          {m.description}
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl overflow-hidden bg-stone-900 shrink-0 border border-stone-200">
+                          <img
+                            src={m.imageUrl || DEFAULT_MENU_IMAGE}
+                            alt=""
+                            onError={handleImageError}
+                            className="h-full w-full object-cover"
+                          />
                         </div>
-                      )}
+                        <div>
+                          <div className="font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
+                            {m.name}
+                          </div>
+                          {m.description && (
+                            <div className="text-[11px] text-stone-400 line-clamp-1 mt-0.5 max-w-md">
+                              {m.description}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </td>
                     <td className="py-3.5 px-4 text-center font-bold text-stone-700 whitespace-nowrap">
                       {m.itemsCount} món
@@ -414,23 +427,28 @@ export const AdminMenusPage: React.FC = () => {
 
       {/* Upsert Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-stone-950/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-stone-200 max-h-[90vh] flex flex-col space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <h3 className="font-bold text-base text-stone-900">
-                {editingMenu ? `Chỉnh sửa thực đơn (${editingMenu.code})` : 'Tạo thực đơn tiệc mẫu mới'}
-              </h3>
+        <div className="fixed inset-0 z-50 bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-stone-200 max-h-[90vh] flex flex-col space-y-5">
+            <div className="flex items-center justify-between pb-3.5 border-b border-stone-100">
+              <div>
+                <h3 className="font-bold text-base text-stone-900 tracking-tight">
+                  {editingMenu ? `Chỉnh sửa thực đơn (${editingMenu.code})` : 'Tạo thực đơn tiệc mẫu mới'}
+                </h3>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  Thiết lập tên bộ menu, định mức món ăn và tự động tính đơn giá chuẩn cho 1 bàn (10 khách)
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-700 transition-colors"
+                className="p-1.5 rounded-xl hover:bg-stone-100 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveMenu} className="flex-1 overflow-y-auto space-y-4 pr-1">
-              <div className="space-y-1">
+            <form onSubmit={handleSaveMenu} className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-thin">
+              <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-stone-700">
                   Tên thực đơn <span className="text-rose-500">*</span>
                 </label>
@@ -440,41 +458,42 @@ export const AdminMenusPage: React.FC = () => {
                   placeholder="Ví dụ: Set Menu Hỷ Sự Hoàng Gia"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs sm:text-sm focus:border-amber-600 focus:outline-none shadow-xs"
+                  className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
                 />
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-stone-700">Mô tả thực đơn</label>
                 <textarea
                   rows={2}
-                  placeholder="Mô tả phong vị, ý nghĩa món ăn..."
+                  placeholder="Mô tả phong vị, ý nghĩa món ăn hoặc gợi ý dịp tiệc phù hợp..."
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
-                  className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs sm:text-sm focus:border-amber-600 focus:outline-none shadow-xs"
+                  className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="block text-xs font-semibold text-stone-700">Ảnh minh họa (URL)</label>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-stone-700">Ảnh minh họa thực đơn (URL)</label>
                 <input
                   type="url"
                   placeholder="https://images.unsplash.com/..."
                   value={formImageUrl}
                   onChange={(e) => setFormImageUrl(e.target.value)}
-                  className="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs sm:text-sm focus:border-amber-600 focus:outline-none shadow-xs"
+                  className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
                 />
               </div>
 
               {/* Dish Items Selector */}
-              <div className="pt-2 border-t border-stone-100 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                    Danh sách món trong bàn ({formItems.length} món)
+              <div className="pt-3 border-t border-stone-100 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <Utensils className="h-3.5 w-3.5 text-amber-700" />
+                    <span>Món trong bàn tiệc ({formItems.length} món)</span>
                   </label>
-                  <span className="text-xs font-bold text-amber-900 font-mono">
-                    Đơn giá tính toán: {formatVnd(calculatedModalPrice)}
-                  </span>
+                  <div className="rounded-xl bg-amber-50 border border-amber-200/80 px-3 py-1 text-xs font-bold text-amber-900">
+                    Đơn giá 1 bàn: <span className="font-mono text-sm">{formatVnd(calculatedModalPrice)}</span>
+                  </div>
                 </div>
 
                 <div className="flex gap-2">
@@ -486,7 +505,7 @@ export const AdminMenusPage: React.FC = () => {
                         e.target.value = '';
                       }
                     }}
-                    className="flex-1 rounded-xl border border-stone-300 px-3 py-2 text-xs bg-white focus:border-amber-600 focus:outline-none shadow-xs"
+                    className="flex-1 rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:outline-none shadow-xs cursor-pointer"
                   >
                     <option value="" disabled>
                       -- Chọn món ăn từ danh mục để thêm vào thực đơn --
@@ -499,24 +518,37 @@ export const AdminMenusPage: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="max-h-48 overflow-y-auto divide-y divide-stone-100 border border-stone-200 rounded-xl p-2 bg-stone-50">
+                <div className="max-h-56 overflow-y-auto divide-y divide-stone-100 border border-stone-200 rounded-xl p-2 bg-stone-50/70 scrollbar-thin">
                   {formItems.length === 0 ? (
-                    <div className="py-6 text-center text-stone-400 text-xs">
-                      Chưa chọn món nào cho thực đơn.
+                    <div className="py-8 text-center text-stone-400 text-xs space-y-1">
+                      <Utensils className="h-6 w-6 mx-auto text-stone-300" />
+                      <p className="font-medium text-stone-500">Chưa có món nào được chọn</p>
+                      <p className="text-[11px] text-stone-400">Chọn món ở thanh menu phía trên để thêm vào bàn tiệc.</p>
                     </div>
                   ) : (
                     formItems.map((it) => (
-                      <div key={it.dishId} className="py-2 flex items-center justify-between text-xs">
-                        <div className="flex-1 min-w-0 pr-2">
-                          <span className="font-bold text-stone-900 truncate block">
-                            {it.dish?.name || `Món #${it.dishId}`}
-                          </span>
-                          <span className="text-[11px] text-stone-400">
-                            {formatVnd(it.dish?.price || 0)} / phần
-                          </span>
+                      <div key={it.dishId} className="py-2.5 px-2 flex items-center justify-between text-xs hover:bg-white rounded-lg transition-colors">
+                        <div className="flex items-center gap-2.5 flex-1 min-w-0 pr-2">
+                          <div className="h-9 w-9 rounded-lg overflow-hidden bg-stone-900 shrink-0 border border-stone-200">
+                            <img
+                              src={it.dish?.imageUrl || DEFAULT_DISH_IMAGE}
+                              alt=""
+                              onError={handleImageError}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="font-bold text-stone-900 truncate block">
+                              {it.dish?.name || `Món #${it.dishId}`}
+                            </span>
+                            <span className="text-[11px] text-stone-500 font-mono">
+                              {formatVnd(it.dish?.price || 0)} / phần
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] text-stone-500">Số phần/bàn:</span>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[11px] text-stone-500">Số lượng:</span>
                           <input
                             type="number"
                             min="1"
@@ -524,14 +556,15 @@ export const AdminMenusPage: React.FC = () => {
                             onChange={(e) =>
                               handleUpdateModalItemQty(it.dishId, parseInt(e.target.value) || 1)
                             }
-                            className="w-12 text-center border border-stone-300 rounded p-1 font-bold text-xs"
+                            className="w-14 text-center border border-stone-300 rounded-lg p-1 font-bold text-xs bg-white focus:border-amber-600 focus:outline-none shadow-xs"
                           />
                           <button
                             type="button"
                             onClick={() => handleRemoveModalItem(it.dishId)}
-                            className="p-1 text-stone-400 hover:text-rose-600 rounded"
+                            className="p-1.5 text-stone-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+                            title="Xóa món khỏi thực đơn"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       </div>
@@ -544,16 +577,16 @@ export const AdminMenusPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="rounded-xl border border-stone-300 bg-white hover:bg-stone-50 px-4 py-2 text-xs font-semibold text-stone-700 shadow-xs"
+                  className="rounded-xl border border-stone-300 bg-white hover:bg-stone-50 px-4 py-2.5 text-xs font-semibold text-stone-700 shadow-xs transition-colors cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-xl bg-amber-800 hover:bg-amber-900 text-white px-4 py-2 text-xs font-semibold shadow-xs"
+                  className="rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-5 py-2.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  {saving ? 'Đang lưu...' : editingMenu ? 'Cập nhật' : 'Tạo thực đơn'}
+                  {saving ? 'Đang lưu...' : editingMenu ? 'Cập nhật thực đơn' : 'Tạo thực đơn mẫu'}
                 </button>
               </div>
             </form>

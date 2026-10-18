@@ -181,3 +181,11 @@ CÃ¡c tÃ i khoáº£n demo Ä‘Æ°á»£c cáº¥u hÃ¬nh thÃ´ng qua bi�
    - Äáº£m báº£o giÃ¡ trá»‹ `POSTGRES_PASSWORD` trong `infra/.env` trÃ¹ng khá»›p vá»›i `SPRING_DATASOURCE_PASSWORD` trong `.env`.
 3. **Lá»—i `release version 21 not supported` náº¿u cháº¡y `mvn` toÃ n cá»¥c**:
    - MÃ¡y Ä‘ang trá» biáº¿n `JAVA_HOME` há»‡ thá»‘ng vÃ o `jdk-17`. LuÃ´n dÃ¹ng `.\mvnw.cmd` trong thÆ° má»¥c `backend/` vÃ¬ `mvnw.cmd` Ä‘Ã£ Ä‘Æ°á»£c cáº¥u hÃ¬nh tá»± Ä‘á»™ng nháº­n diá»‡n JDK 21/24 trong `C:\Program Files\Java\`.
+
+
+## Phase 4
+Xem [cấu hình SePay Sandbox](docs/SEPAY_SETUP.md), [SMTP](docs/EMAIL_SETUP.md) và [luồng thanh toán](docs/PAYMENT_FLOW.md). Flyway cập nhật dữ liệu hiện có khi khởi động backend.
+
+
+### Chọn địa điểm đặt tiệc
+Checkout dùng Photon để gợi ý địa chỉ Việt Nam và OpenLayers với bản đồ OpenFreeMap. Có thể nhập tay, chọn gợi ý hoặc ghim. Tọa độ là tùy chọn và được lưu qua Flyway V13. Photon công cộng và OpenFreeMap phù hợp demo/lưu lượng nhỏ, không có cam kết dịch vụ. Có thể đặt VITE_PHOTON_URL và VITE_MAP_STYLE_URL trong frontend/.env để đổi máy chủ.

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ClipboardList,
   Search,
@@ -23,14 +23,19 @@ import { extractErrorMessage } from '../../services/apiClient';
 
 export const AdminOrdersPage: React.FC = () => {
   const navigate = useNavigate();
+  const [search, setSearch] = useSearchParams();
+  const requestSequence = useRef(0);
   const [orders, setOrders] = useState<OrderDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   // Filters
   const [keyword, setKeyword] = useState<string>('');
-  const [orderStatus, setOrderStatus] = useState<OrderStatus | ''>('');
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | ''>('');
+  const requestedOrderStatus = search.get('orderStatus');
+  const orderStatus = ['PENDING_PAYMENT', 'PAID', 'PREPARING', 'COMPLETED', 'CANCELLED', 'EXPIRED'].includes(requestedOrderStatus ?? '')
+    ? requestedOrderStatus as OrderStatus : '';
+  const awaitingPayment = search.get('awaitingPayment') === 'true';
+  const paymentStatus: PaymentStatus | undefined = search.get('paymentStatus') === 'UNPAID' ? 'UNPAID' : undefined;
   const [fromDate, setFromDate] = useState<string>('');
   const [toDate, setToDate] = useState<string>('');
   const [page, setPage] = useState<number>(0);
@@ -38,31 +43,35 @@ export const AdminOrdersPage: React.FC = () => {
   const [totalElements, setTotalElements] = useState<number>(0);
 
   const fetchOrders = async () => {
+    const request = ++requestSequence.current;
     try {
       setLoading(true);
       setError(null);
       const res = await orderService.getAdminOrders({
         keyword: keyword.trim() || undefined,
         orderStatus: orderStatus || undefined,
-        paymentStatus: paymentStatus || undefined,
+        paymentStatus,
+        awaitingPayment: awaitingPayment || undefined,
         fromDate: fromDate ? `${fromDate}T00:00:00+07:00` : undefined,
         toDate: toDate ? `${toDate}T23:59:59+07:00` : undefined,
         page,
         size: 10,
       });
+      if (request !== requestSequence.current) return;
       setOrders(res.content);
       setTotalPages(res.totalPages);
       setTotalElements(res.totalElements);
     } catch (err) {
-      setError(extractErrorMessage(err));
+      if (request === requestSequence.current) setError(extractErrorMessage(err));
     } finally {
-      setLoading(false);
+      if (request === requestSequence.current) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, [keyword, orderStatus, paymentStatus, fromDate, toDate, page]);
+    void fetchOrders();
+    return () => { requestSequence.current++; };
+  }, [keyword, orderStatus, paymentStatus, awaitingPayment, fromDate, toDate, page]);
 
   const getOrderStatusBadge = (st: OrderStatus) => {
     switch (st) {
@@ -177,7 +186,7 @@ export const AdminOrdersPage: React.FC = () => {
           <select
             value={orderStatus}
             onChange={(e) => {
-              setOrderStatus(e.target.value as OrderStatus | '');
+              setSearch(e.target.value ? { orderStatus: e.target.value } : {});
               setPage(0);
             }}
             className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"

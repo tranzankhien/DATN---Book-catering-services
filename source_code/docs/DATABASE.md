@@ -322,3 +322,13 @@ Lưu thông tin chính của đơn đặt tiệc.
 - `reason`: `TEXT NULL`.
 - `created_at`: `TIMESTAMPTZ NOT NULL`.
 
+
+
+## Phase 4
+V9 thêm payment_transactions, payment_notification_logs, order_ingredient_consumptions và khóa duy nhất cho xuất kho theo đơn. V10 thêm email_outbox. Xem [luồng thanh toán](PAYMENT_FLOW.md).
+
+V11 bổ sung trạng thái `REVIEW_CLOSED` và đưa các giao dịch cũ mang mã đảo hoặc nghi ngờ vào hàng chờ đối soát.
+
+V12 sửa đường dẫn email chưa gửi, chuẩn hóa thông báo đối soát từng hiển thị cho khách và cập nhật các payment attempt đã hết hạn.
+
+V14 chuyển cổng thanh toán mới sang SePay, giữ giao dịch lịch sử và kết thúc các phiên cũ còn chờ trong ứng dụng.

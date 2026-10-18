@@ -23,7 +23,7 @@ export const EmployeeOrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<OrderDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | ''>('PENDING_PAYMENT');
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | ''>('');
   const [fromDate, setFromDate] = useState<string>('');
   const [toDate, setToDate] = useState<string>('');
   const [page, setPage] = useState<number>(0);
@@ -94,12 +94,9 @@ export const EmployeeOrdersPage: React.FC = () => {
           }}
           className="px-3.5 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
         >
-          <option value="PENDING_PAYMENT">Chờ xử lý (PENDING_PAYMENT)</option>
           <option value="PAID">Đã thanh toán (PAID)</option>
           <option value="PREPARING">Đang chuẩn bị (PREPARING)</option>
           <option value="COMPLETED">Hoàn thành (COMPLETED)</option>
-          <option value="CANCELLED">Đã hủy (CANCELLED)</option>
-          <option value="EXPIRED">Hết hạn (EXPIRED)</option>
           <option value="">Tất cả trạng thái</option>
         </select>
 

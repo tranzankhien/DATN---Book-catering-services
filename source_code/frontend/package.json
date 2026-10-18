@@ -14,6 +14,8 @@
     "framer-motion": "^14.11.1",
     "lucide-react": "^0.511.0",
     "motion": "^14.11.1",
+    "ol": "^10.11.0",
+    "ol-mapbox-style": "^13.9.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.0",

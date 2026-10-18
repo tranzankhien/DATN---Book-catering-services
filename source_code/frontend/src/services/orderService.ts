@@ -62,6 +62,7 @@ export const orderService = {
     keyword?: string;
     orderStatus?: OrderStatus;
     paymentStatus?: PaymentStatus;
+    awaitingPayment?: boolean;
     fromDate?: string;
     toDate?: string;
     page?: number;
@@ -78,6 +79,11 @@ export const orderService = {
 
   async adminCancelOrder(id: number, reason: string): Promise<OrderDto> {
     const res = await apiClient.post<ApiResponse<OrderDto>>(`/admin/orders/${id}/cancel`, { reason });
+    return res.data.data;
+  },
+
+  async updateStatus(role: 'admin' | 'employee', id: number, status: 'PREPARING' | 'COMPLETED'): Promise<OrderDto> {
+    const res = await apiClient.patch<ApiResponse<OrderDto>>(`/${role}/orders/${id}/status`, { status });
     return res.data.data;
   },
 

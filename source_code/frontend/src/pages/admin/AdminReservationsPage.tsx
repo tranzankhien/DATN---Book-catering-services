@@ -266,6 +266,7 @@ export const AdminReservationsPage: React.FC = () => {
                 <option value="">Tất cả trạng thái</option>
                 <option value="ACTIVE">Đang giữ chỗ (ACTIVE)</option>
                 <option value="RELEASED">Đã giải phóng (RELEASED)</option>
+                <option value="CONSUMED">Đã xuất dùng tiệc</option>
                 <option value="FULFILLED">Đã xuất dùng tiệc (FULFILLED)</option>
                 <option value="EXPIRED">Đã hết hạn giữ (EXPIRED)</option>
               </select>
@@ -318,7 +319,7 @@ export const AdminReservationsPage: React.FC = () => {
                             className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
                               res.status === 'ACTIVE'
                                 ? 'bg-amber-50 text-amber-800 border-amber-200'
-                                : res.status === 'FULFILLED'
+                                : (res.status === 'FULFILLED' || res.status === 'CONSUMED')
                                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                                 : res.status === 'EXPIRED'
                                 ? 'bg-rose-50 text-rose-800 border-rose-200'
@@ -327,7 +328,7 @@ export const AdminReservationsPage: React.FC = () => {
                           >
                             {res.status === 'ACTIVE'
                               ? 'Đang giữ chỗ'
-                              : res.status === 'FULFILLED'
+                              : (res.status === 'FULFILLED' || res.status === 'CONSUMED')
                               ? 'Đã xuất dùng'
                               : res.status === 'EXPIRED'
                               ? 'Đã hết hạn'

@@ -56,14 +56,9 @@ public class EmployeeOrderController {
             @RequestParam(defaultValue = "10") int size,
             @AuthenticationPrincipal CustomUserDetails currentUserDetails
     ) {
-        User currentUser = resolveUser(currentUserDetails);
-        OrderStatus effectiveStatus = orderStatus;
-        if (currentUser != null && currentUser.getRole() == com.banquethub.modules.users.entity.Role.ROLE_EMPLOYEE) {
-            effectiveStatus = OrderStatus.PENDING_PAYMENT;
-        }
         Page<OrderResponse> result = orderService.searchAdminOrders(
-                keyword, effectiveStatus, null, fromDate, toDate, PageRequest.of(page, size, Sort.by("eventDateTime").ascending())
-        );
+                keyword, orderStatus, com.banquethub.modules.orders.entity.PaymentStatus.PAID,
+                fromDate, toDate, false, PageRequest.of(page, size, Sort.by("eventDateTime").ascending()));
         return ResponseEntity.ok(ApiResponse.ok("Lấy danh sách đơn tiệc thành công", result));
     }
 

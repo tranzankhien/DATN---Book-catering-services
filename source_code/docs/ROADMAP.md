@@ -11,7 +11,7 @@ Tài liệu này theo dõi tiến độ triển khai dự án **BanquetHub (MVP)
 | **Phase 1** | Thiết lập nền tảng, PostgreSQL 17, Auth (JWT/RBAC), Danh mục món & Định lượng công thức | **Đã hoàn thành** | `FR-AUT-01`, `FR-AUT-03`, `FR-CAT-01`, `FR-CAT-02`, `FR-REC-01`, `FR-REC-02`, `FR-INV-01`, `BR-01`–`BR-03` |
 | **Phase 2** | Quản lý kho, nhà cung cấp, nhập hàng, giá vốn bình quân di động và xuất PDF phiếu nhập | **Đã hoàn thành** | `FR-SUP-01`–`FR-SUP-03`, `FR-INV-02`, `FR-INV-03`, `FR-INV-05`, `FR-INV-06`, `BR-06`, `BR-07`, `BR-11` |
 | **Phase 3** | Thực đơn mẫu, tạo thực đơn, đặt tiệc, giữ tồn 15 phút và quản lý đơn hàng | **Đã hoàn thành** | `FR-CAT-03`, `FR-CAT-04`, `FR-REC-03`, `FR-ORD-01`–`FR-ORD-05`, `FR-PAY-04`, `BR-01`–`BR-16` |
-| **Phase 4** | Tích hợp VNPAY Sandbox, trừ kho một lần khi thanh toán, gửi email xác nhận | Kế hoạch tiếp theo | `FR-PAY-01`–`FR-PAY-03`, `FR-INV-04`, `FR-NOT-01`, `FR-NOT-02`, `BR-05`, `BR-08`, `BR-12` |
+| **Phase 4** | Tích hợp SePay Sandbox, trừ kho một lần khi thanh toán, gửi email xác nhận | Kế hoạch tiếp theo | `FR-PAY-01`–`FR-PAY-03`, `FR-INV-04`, `FR-NOT-01`, `FR-NOT-02`, `BR-05`, `BR-08`, `BR-12` |
 | **Phase 5** | Tích hợp Gemini API gợi ý tối đa 03 phương án thực đơn từ catalog | Chờ triển khai | `FR-AI-01`–`FR-AI-04`, `NFR-07` |
 | **Phase 6** | Quản lý nhân viên, chấm công theo ngày, phụ cấp/khấu trừ và bảng lương tháng | Chờ triển khai | `FR-EMP-01`, `FR-HR-01`–`FR-HR-05`, `BR-10`, `BR-11` |
 | **Phase 7** | Dashboard doanh thu, giá vốn, chi phí vận hành, lợi nhuận tạm tính, dòng tiền & nghiệm thu AT-01..AT-20 | Chờ triển khai | `FR-RPT-01`–`FR-RPT-07`, `BR-09`, `AT-01`–`AT-20` |
@@ -54,8 +54,12 @@ Tài liệu này theo dõi tiến độ triển khai dự án **BanquetHub (MVP)
 
 ---
 
-### Phase 4: Tích hợp VNPAY Sandbox, trừ kho một lần khi thanh toán, gửi email xác nhận (Kế hoạch tiếp theo)
-- Tích hợp cổng thanh toán trực tuyến VNPAY Sandbox (`FR-PAY-01`–`FR-PAY-03`).
-- Webhook IPN xử lý kết quả thanh toán từ VNPAY an toàn, xác thực chữ ký HMAC-SHA512.
+### Phase 4: Tích hợp SePay Sandbox, trừ kho một lần khi thanh toán, gửi email xác nhận (Kế hoạch tiếp theo)
+- Tích hợp cổng thanh toán trực tuyến SePay Sandbox (`FR-PAY-01`–`FR-PAY-03`).
+- Webhook IPN xử lý kết quả thanh toán từ SePay an toàn, xác thực chữ ký Secret Key IPN.
 - Trừ kho vật lý thực tế (`current_stock = current_stock - quantity`) và ghi nhận `StockMovement` loại `EXPORT` sau khi thanh toán thành công (`FR-INV-04`, `BR-05`).
 - Gửi email hóa đơn điện tử xác nhận đặt tiệc qua SMTP/SendGrid (`FR-NOT-01`, `FR-NOT-02`).
+
+
+## Phase 4
+Phase 4 triển khai SePay Sandbox, xuất kho, email và tiến độ phục vụ. Xác nhận giao dịch trực tiếp cần cấu hình merchant Sandbox và HTTPS IPN. Xem [luồng thanh toán](PAYMENT_FLOW.md).

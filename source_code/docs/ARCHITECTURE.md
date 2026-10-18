@@ -82,7 +82,7 @@ flowchart LR
     - `service/OrderPreviewService`: Tính thử realtime giá mỗi bàn, tổng tiền và nhu cầu nguyên liệu cho client.
     - `service/OrderService`: Tạo đơn đặt tiệc với Idempotency Key, chụp ảnh bất biến giá món (`dish_name_snapshot`, `unit_price_snapshot`), tích hợp giữ kho, hủy đơn và ghi audit log.
     - `controller/`: `OrderPreviewController`, `OrderController`, `AdminOrderController`, `EmployeeOrderController`.
-  - **Dự kiến mở rộng ở Phase 4–7**: `payments (VNPAY)`, `ai`, `notifications`, `employees (ca làm & chấm công)`, `payroll`, `reports`.
+  - **Dự kiến mở rộng ở Phase 4–7**: `payments (SePay)`, `ai`, `notifications`, `employees (ca làm & chấm công)`, `payroll`, `reports`.
 
 ---
 
@@ -112,3 +112,7 @@ $$
   - Tổng tiền bằng số, số tiền đã trả, số tiền còn nợ.
   - Khối chữ ký xác nhận của Người lập phiếu và Người giao hàng.
 - **Header truyền tải**: `Content-Type: application/pdf`, `Content-Disposition: attachment; filename="phieu-nhap-PN-xxxxxx.pdf"`.
+
+
+## Phase 4
+Module payments xác thực SePay và thực hiện settlement trong một transaction. Module notifications gửi email từ outbox sau commit. Xem [luồng thanh toán](PAYMENT_FLOW.md).

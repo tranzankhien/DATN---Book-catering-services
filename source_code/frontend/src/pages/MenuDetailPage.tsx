@@ -12,12 +12,14 @@ import {
   Info,
   Check,
   ShieldCheck,
+  ArrowRight,
 } from 'lucide-react';
 import { menuService } from '../services/menuService';
 import type { MenuDto } from '../services/types';
 import { formatVnd } from '../hooks/useFormatters';
 import { LoadingState, ErrorState } from '../components/StatusStates';
 import { extractErrorMessage } from '../services/apiClient';
+import { DEFAULT_MENU_IMAGE, DEFAULT_DISH_IMAGE, handleImageError } from '../lib/imageConstants';
 
 export const MenuDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -117,9 +119,13 @@ export const MenuDetailPage: React.FC = () => {
               {menu.name}
             </h1>
 
-            {menu.description && (
+            {menu.description ? (
               <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
                 {menu.description}
+              </p>
+            ) : (
+              <p className="text-xs sm:text-sm text-stone-400 italic">
+                Bộ thực đơn thiết kế chuẩn yến tiệc sang trọng
               </p>
             )}
 
@@ -135,15 +141,14 @@ export const MenuDetailPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="md:col-span-5 relative rounded-xl overflow-hidden bg-stone-100 aspect-video sm:aspect-4/3 shadow-sm border border-stone-200">
+          <div className="md:col-span-5 relative rounded-xl overflow-hidden bg-stone-900 aspect-video sm:aspect-4/3 shadow-sm border border-stone-200">
             <img
-              src={
-                menu.imageUrl ||
-                'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&auto=format&fit=crop&q=80'
-              }
+              src={menu.imageUrl || DEFAULT_MENU_IMAGE}
               alt={menu.name}
+              onError={handleImageError}
               className="h-full w-full object-cover"
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-stone-950/60 via-transparent to-transparent pointer-events-none" />
           </div>
         </div>
       </div>
@@ -175,14 +180,13 @@ export const MenuDetailPage: React.FC = () => {
                     {idx + 1}
                   </span>
 
-                  <div className="h-16 w-16 rounded-xl overflow-hidden bg-stone-100 shrink-0 border border-stone-200">
+                  <div className="h-16 w-16 rounded-xl overflow-hidden bg-stone-900 shrink-0 border border-stone-200">
                     <img
-                      src={
-                        item.dishImageUrl ||
-                        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=80'
-                      }
+                      src={item.dishImageUrl || DEFAULT_DISH_IMAGE}
                       alt={item.dishName}
+                      onError={handleImageError}
                       className="h-full w-full object-cover"
+                      loading="lazy"
                     />
                   </div>
 
@@ -267,18 +271,19 @@ export const MenuDetailPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate(`/checkout?menuId=${menu.id}&tables=${tableCount}`)}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-semibold text-xs py-3 shadow-xs transition-all cursor-pointer"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-semibold text-xs py-3 shadow-xs transition-all cursor-pointer"
               >
                 <Calendar className="h-4 w-4" />
                 <span>Tiến hành đặt tiệc</span>
+                <ArrowRight className="h-4 w-4" />
               </button>
 
               <button
                 type="button"
                 onClick={() => navigate(`/menu-builder?menuId=${menu.id}`)}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 font-semibold text-xs py-2.5 shadow-xs transition-colors cursor-pointer"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-amber-700/30 bg-amber-50/60 hover:bg-amber-100/80 text-amber-900 font-semibold text-xs py-2.5 shadow-xs transition-colors cursor-pointer"
               >
-                <Sliders className="h-3.5 w-3.5 text-stone-500" />
+                <Sliders className="h-3.5 w-3.5 text-amber-700" />
                 <span>Tùy biến thêm/bớt món</span>
               </button>
             </div>

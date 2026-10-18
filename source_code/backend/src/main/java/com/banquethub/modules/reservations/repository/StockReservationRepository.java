@@ -19,6 +19,10 @@ public interface StockReservationRepository extends JpaRepository<StockReservati
     @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"items", "items.ingredient"})
     Optional<StockReservation> findByOrderId(Long orderId);
 
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"items"})
+    @Query("select r from StockReservation r where r.order.id=:id")
+    Optional<StockReservation> findSnapshotByOrderId(@Param("id") Long id);
+
     List<StockReservation> findByStatusAndExpiresAtBefore(ReservationStatus status, OffsetDateTime time);
 
     @Query("SELECT COALESCE(SUM(sri.reservedQuantity), 0) FROM StockReservationItem sri " +

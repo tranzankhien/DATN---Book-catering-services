@@ -1,3 +1,5 @@
+import { OrderProgress } from '../components/OrderProgress';
+import { OrderPaymentPanel } from '../components/OrderPaymentPanel';
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
@@ -22,6 +24,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { orderService } from '../services/orderService';
+import type { PaymentState } from '../services/paymentService';
 import type { OrderDto } from '../services/types';
 import { formatVnd, formatDateTimeVn } from '../hooks/useFormatters';
 import { LoadingState, ErrorState } from '../components/StatusStates';
@@ -40,6 +43,8 @@ export const OrderDetailPage: React.FC = () => {
   // Cancellation Modal
   const [cancelModalOpen, setCancelModalOpen] = useState<boolean>(false);
   const [cancelReason, setCancelReason] = useState<string>('');
+  const [paymentSnapshot, setPaymentSnapshot] = useState<PaymentState>();
+  const [now, setNow] = useState(Date.now());
   const [cancelling, setCancelling] = useState<boolean>(false);
 
   const fetchOrderDetail = async () => {
@@ -60,9 +65,14 @@ export const OrderDetailPage: React.FC = () => {
     fetchOrderDetail();
   }, [id]);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   const handleCancelOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!order) return;
+    if (!order || !canCancel) return;
     try {
       setCancelling(true);
       const updated = await orderService.cancelOrder(order.id, cancelReason.trim() || 'Khách hàng yêu cầu hủy đơn');
@@ -97,12 +107,16 @@ export const OrderDetailPage: React.FC = () => {
     navigate('/menu-builder');
   };
 
-  const isExpired =
-    order?.orderStatus === 'EXPIRED' ||
-    (order?.paymentExpiresAt && new Date(order.paymentExpiresAt).getTime() < Date.now());
-
-  const canCancel =
-    order?.orderStatus === 'PENDING_PAYMENT' && !isExpired;
+  const isExpired = order?.orderStatus === 'EXPIRED' ||
+    Boolean(order?.paymentExpiresAt && Date.parse(order.paymentExpiresAt) <= now);
+  const eligibleToCancel = order?.orderStatus === 'PENDING_PAYMENT' && order.paymentStatus === 'UNPAID' && !isExpired;
+  const currentPayment = paymentSnapshot?.orderId === order?.id ? paymentSnapshot : undefined;
+  const hasOpenAttempt = currentPayment?.transactions.some(attempt =>
+    attempt.status === 'PENDING' && Date.parse(attempt.expiresAt) > now
+  );
+  const cancellationHint = !currentPayment ? 'Cập nhật trạng thái thanh toán để kiểm tra quyền hủy đơn.'
+    : hasOpenAttempt ? 'Phiên SePay đang mở. Bạn có thể hủy đơn sau khi cổng trả kết quả dứt điểm hoặc phiên hết hạn.' : '';
+  const canCancel = eligibleToCancel && !cancellationHint;
 
   if (loading) {
     return (
@@ -206,17 +220,21 @@ export const OrderDetailPage: React.FC = () => {
               <span>Đặt lại đơn này</span>
             </button>
 
-            {canCancel && (
+            {eligibleToCancel && (
               <button
                 type="button"
+                disabled={!canCancel}
+                aria-describedby={cancellationHint ? 'cancel-order-hint' : undefined}
                 onClick={() => setCancelModalOpen(true)}
-                className="rounded-xl border border-rose-300 bg-white hover:bg-rose-50 text-rose-700 px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                className="rounded-xl border border-rose-300 bg-white hover:bg-rose-50 text-rose-700 px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Hủy đơn tiệc
               </button>
             )}
           </div>
         </div>
+
+        {eligibleToCancel && cancellationHint && <p id="cancel-order-hint" className="text-sm text-stone-600">{cancellationHint}</p>}
 
         {/* Fact Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
@@ -267,6 +285,12 @@ export const OrderDetailPage: React.FC = () => {
             </span>
             <div className="font-bold text-stone-800">
               {order.eventLocation || 'Chưa cung cấp'}
+              {order.eventLatitude != null && order.eventLongitude != null && (
+                <a className="ml-2 text-amber-800 underline" target="_blank" rel="noreferrer"
+                  href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}>
+                  Xem bản đồ
+                </a>
+              )}
             </div>
             {order.guestCount ? (
               <div className="text-stone-500">Quy mô: {order.guestCount} khách ({order.tableCount} bàn)</div>
@@ -294,6 +318,28 @@ export const OrderDetailPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Progress & Payment Sections */}
+      <OrderProgress order={order} />
+      <OrderPaymentPanel
+        key={order.id}
+        order={order}
+        allowPayment
+        onStatus={(status) => {
+          setPaymentSnapshot(status);
+          setOrder((current) =>
+            current?.id === status.orderId
+              ? {
+                  ...current,
+                  paymentStatus: status.paymentStatus,
+                  orderStatus: status.orderStatus,
+                  reservation: status.reservation,
+                  statusHistories: status.statusHistories,
+                }
+              : current
+          );
+        }}
+      />
 
       {/* Main Grid: Dishes Breakdown & Reservation/History */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -407,7 +453,7 @@ export const OrderDetailPage: React.FC = () => {
       </div>
 
       {/* Cancellation Modal */}
-      {cancelModalOpen && (
+      {cancelModalOpen && canCancel && (
         <div className="fixed inset-0 z-50 bg-stone-950/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-stone-100">

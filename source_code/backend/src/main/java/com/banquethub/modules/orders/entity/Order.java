@@ -63,6 +63,12 @@ public class Order {
     @Column(name = "event_location", length = 255)
     private String eventLocation;
 
+    @Column(precision=9, scale=6)
+    private BigDecimal eventLatitude;
+
+    @Column(precision=9, scale=6)
+    private BigDecimal eventLongitude;
+
     @Column(name = "guest_count")
     private Integer guestCount;
 
@@ -219,6 +225,14 @@ public class Order {
     public void setNote(String note) {
         this.note = note;
     }
+
+    public BigDecimal getEventLatitude() { return eventLatitude; }
+
+    public void setEventLatitude(BigDecimal value) { this.eventLatitude = value; }
+
+    public BigDecimal getEventLongitude() { return eventLongitude; }
+
+    public void setEventLongitude(BigDecimal value) { this.eventLongitude = value; }
 
     public String getEventLocation() {
         return eventLocation;

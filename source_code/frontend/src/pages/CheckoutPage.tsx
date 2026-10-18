@@ -1,3 +1,4 @@
+import { EventLocationField, type MapPoint } from '../components/EventLocationField';
 import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import {
@@ -81,6 +82,7 @@ export const CheckoutPage: React.FC = () => {
     tablesParam ? Math.max(1, parseInt(tablesParam) || 1) * 10 : 60
   );
   const [eventLocation, setEventLocation] = useState<string>('');
+  const [eventPoint, setEventPoint] = useState<MapPoint>();
   const [note, setNote] = useState<string>('');
   const [menuId, setMenuId] = useState<number | undefined>(
     menuIdParam ? Number(menuIdParam) : undefined
@@ -199,10 +201,10 @@ export const CheckoutPage: React.FC = () => {
     };
   }, [menuIdParam]);
 
-  const handleTableCountChange = async (newCount: number) => {
+  const handleTableCountChange = async (newCount: number, retry = false) => {
     const validCount = Math.max(1, newCount);
     setTableCount(validCount);
-    setGuestCount(validCount * 10);
+    if (!retry) setGuestCount(validCount * 10);
     // Đánh dấu xem trước cũ không còn hợp lệ ngay khi thay đổi số bàn
     setPreview(null);
     setPreviewError(null);
@@ -306,6 +308,8 @@ export const CheckoutPage: React.FC = () => {
         tableCount,
         guestCount: Number(guestCount),
         eventLocation: eventLocation.trim(),
+        eventLatitude: eventPoint ? Number(eventPoint.lat.toFixed(6)) : undefined,
+        eventLongitude: eventPoint ? Number(eventPoint.lon.toFixed(6)) : undefined,
         note: note.trim() || undefined,
         menuId,
         items: currentItems
@@ -327,7 +331,7 @@ export const CheckoutPage: React.FC = () => {
 
       sessionStorage.removeItem(STORAGE_KEY);
       sessionStorage.removeItem(IDEMPOTENCY_STORAGE_KEY);
-      showToast('Đặt tiệc thành công! Hệ thống đang khóa giữ nguyên liệu 15 phút.', 'success');
+      showToast('Đặt tiệc thành công! Xem thời hạn giữ kho ở trang xác nhận.', 'success');
       navigate(`/orders/confirmation/${createdOrder.id}`);
     } catch (err) {
       const errMsg = extractErrorMessage(err);
@@ -395,13 +399,13 @@ export const CheckoutPage: React.FC = () => {
               Xác nhận thông tin & Đặt tiệc
             </h1>
             <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-              Vui lòng kiểm tra lại thông tin liên hệ và lịch tổ chức. Sau khi xác nhận, hệ thống sẽ kích hoạt lệnh khóa giữ nguyên liệu tồn kho cho tiệc của bạn trong 15 phút.
+              Vui lòng kiểm tra lại thông tin liên hệ và lịch tổ chức. Sau khi xác nhận, hệ thống sẽ kích hoạt lệnh khóa giữ nguyên liệu tồn kho cho tiệc của bạn tối đa 15 phút và không quá giờ tổ chức.
             </p>
           </div>
 
           <Link
             to="/menu-builder"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 hover:text-amber-900 transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-xs font-semibold text-stone-700 shadow-xs transition-colors shrink-0"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>Quay lại chỉnh sửa thực đơn</span>
@@ -544,19 +548,10 @@ export const CheckoutPage: React.FC = () => {
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold text-stone-700">
-                    Địa điểm / Sảnh tổ chức tiệc <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ví dụ: Sảnh Hoàng Gia / Nhà riêng số 12..."
-                    value={eventLocation}
-                    onChange={(e) => setEventLocation(e.target.value)}
-                    className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
-                  />
-                </div>
+                <EventLocationField value={eventLocation} point={eventPoint} onChange={(address, point) => {
+                  setEventLocation(address);
+                  setEventPoint(point);
+                }} />
               </div>
 
               <div className="space-y-1.5">
@@ -577,10 +572,10 @@ export const CheckoutPage: React.FC = () => {
             <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 text-amber-950 space-y-2">
               <div className="flex items-center gap-2 font-bold text-xs sm:text-sm text-amber-900">
                 <CreditCard className="h-4 w-4 text-amber-700" />
-                <span>Phương thức thanh toán trực tuyến (Kế hoạch Phase 4)</span>
+                <span>Thanh toán qua SePay Sandbox</span>
               </div>
               <p className="text-xs leading-relaxed text-amber-800">
-                Cổng thanh toán điện tử trực tuyến VNPAY sẽ chính thức được kích hoạt tại <strong>Phase 4</strong>. Hiện tại, sau khi quý khách bấm <strong>Xác nhận đặt tiệc</strong>, đơn sẽ được ghi nhận ở trạng thái <strong>CHỜ THANH TOÁN (PENDING_PAYMENT)</strong> và hệ thống tự động khóa giữ toàn bộ nguyên liệu tồn kho độc quyền trong vòng <strong>15 phút</strong>.
+                Sau khi xác nhận đặt tiệc, bạn có thể thanh toán qua SePay trong thời hạn giữ kho hiển thị trên đơn.
               </p>
             </div>
           </div>
@@ -625,7 +620,7 @@ export const CheckoutPage: React.FC = () => {
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleTableCountChange(tableCount)}
+                    onClick={() => handleTableCountChange(tableCount, true)}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-700 hover:bg-rose-800 text-white font-semibold text-xs cursor-pointer transition-colors shadow-xs"
                   >
                     <RotateCw className="h-3.5 w-3.5" />
@@ -709,7 +704,7 @@ export const CheckoutPage: React.FC = () => {
                 className={`w-full inline-flex items-center justify-center gap-2 rounded-xl text-xs font-semibold py-3.5 shadow-xs transition-all ${
                   !canSubmit
                     ? 'bg-stone-300 text-stone-500 cursor-not-allowed shadow-none'
-                    : 'bg-amber-800 hover:bg-amber-900 text-white cursor-pointer'
+                    : 'bg-amber-700 hover:bg-amber-800 text-white cursor-pointer shadow-sm'
                 }`}
               >
                 <Lock className="h-4 w-4" />

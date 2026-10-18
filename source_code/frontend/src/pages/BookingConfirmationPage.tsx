@@ -1,3 +1,5 @@
+import { OrderProgress } from '../components/OrderProgress';
+import { OrderPaymentPanel } from '../components/OrderPaymentPanel';
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
@@ -134,6 +136,10 @@ export const BookingConfirmationPage: React.FC = () => {
       (secondsRemaining === 0 ||
         (order.paymentExpiresAt && new Date(order.paymentExpiresAt).getTime() <= Date.now())));
 
+  const holdingStock = order.orderStatus === 'PENDING_PAYMENT' && !isExpired
+    && order.reservation?.status === 'ACTIVE';
+  const canPay = holdingStock && order.paymentStatus === 'UNPAID';
+
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
       {/* Success Celebration Card */}
@@ -149,7 +155,13 @@ export const BookingConfirmationPage: React.FC = () => {
             Đơn đặt tiệc đã được ghi nhận thành công!
           </h1>
           <p className="text-xs sm:text-sm text-stone-600 max-w-lg mx-auto leading-relaxed">
-            Cảm ơn quý khách đã tin chọn dịch vụ tiệc BanquetHub. Hệ thống đã tiếp nhận hợp đồng và tự động giữ nguyên liệu cho buổi tiệc.
+            {order.paymentStatus === 'PAID'
+              ? 'Đơn đã thanh toán thành công. Nhà hàng đang chuẩn bị phục vụ quý khách theo đúng tiến độ.'
+              : order.paymentStatus === 'PAYMENT_REVIEW'
+              ? 'Giao dịch đang được kế toán đối soát xác nhận.'
+              : holdingStock
+              ? 'Kho nguyên liệu đã được khóa giữ an toàn. Quý khách vui lòng hoàn tất thanh toán qua VietQR bên dưới.'
+              : 'Quý khách có thể xem thông tin chi tiết và theo dõi tiến độ phục vụ bên dưới.'}
           </p>
         </div>
 
@@ -166,30 +178,30 @@ export const BookingConfirmationPage: React.FC = () => {
             <Copy className="h-4 w-4" />
           </button>
         </div>
-
-        {/* 15-Minute Countdown Box */}
-        <div className="max-w-md mx-auto rounded-2xl border border-amber-200 bg-amber-50/70 p-5 space-y-2 text-center">
-          <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-amber-900 uppercase tracking-wider">
-            <Clock className="h-4 w-4 text-amber-700" />
-            <span>Thời gian giữ chỗ nguyên liệu tồn kho</span>
-          </div>
-
-          {isExpired ? (
-            <div className="text-rose-700 font-bold text-base flex items-center justify-center gap-2 pt-1">
-              <AlertCircle className="h-5 w-5" />
-              <span>Đã hết thời hạn 15 phút giữ chỗ</span>
-            </div>
-          ) : (
-            <div className="font-mono text-3xl sm:text-4xl font-extrabold text-amber-900 tracking-wider py-1">
-              {timeFormatted}
-            </div>
-          )}
-
-          <p className="text-[11px] text-amber-800 leading-relaxed">
-            Nguyên liệu cho đơn tiệc này đang được khóa giữ độc quyền. Ở Phase 4, quý khách sẽ quét thanh toán VNPAY trong thời gian này để hoàn tất hợp đồng.
-          </p>
-        </div>
       </div>
+
+      {/* Payment Action Panel */}
+      <OrderPaymentPanel
+        key={order.id}
+        order={order}
+        allowPayment
+        onStatus={(status) =>
+          setOrder((current) =>
+            current?.id === status.orderId
+              ? {
+                  ...current,
+                  paymentStatus: status.paymentStatus,
+                  orderStatus: status.orderStatus,
+                  reservation: status.reservation,
+                  statusHistories: status.statusHistories,
+                }
+              : current
+          )
+        }
+      />
+
+      {/* Service Progress Stepper */}
+      <OrderProgress order={order} />
 
       {/* Order Contract Details Card */}
       <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
@@ -247,7 +259,13 @@ export const BookingConfirmationPage: React.FC = () => {
             </div>
             <div>
               <span className="block text-[11px] text-stone-400 font-medium">Địa điểm tổ chức:</span>
-              <span className="font-semibold text-stone-900">{order.eventLocation || 'Chưa cung cấp'}</span>
+              <span className="font-semibold text-stone-900">{order.eventLocation || 'Chưa cung cấp'}
+              {order.eventLatitude != null && order.eventLongitude != null && (
+                <a className="ml-2 text-amber-800 underline" target="_blank" rel="noreferrer"
+                  href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}>
+                  Xem bản đồ
+                </a>
+              )}</span>
             </div>
           </div>
 
@@ -316,32 +334,7 @@ export const BookingConfirmationPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Phase 4 Payment Note */}
-        <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 flex items-start gap-3">
-          <CreditCard className="h-5 w-5 text-amber-700 shrink-0 mt-0.5" />
-          <div className="text-xs text-amber-900 leading-relaxed">
-            <span className="font-bold block mb-0.5">Kế hoạch tích hợp cổng VNPAY (Phase 4):</span>
-            Ở Phase 3, đơn hàng đã hoàn tất việc xác thực nghiệp vụ, chụp ảnh bảo toàn giá và khóa giữ nguyên liệu kho. Trong Phase 4, cổng thanh toán VNPAY sẽ xuất hiện trực tiếp tại đây cho phép quét mã QR hoặc thẻ ngân hàng để thanh toán tức thì.
-          </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-          <Link
-            to="/my-orders"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white px-5 py-2.5 text-xs font-semibold shadow-xs transition-all cursor-pointer"
-          >
-            <span>Xem danh sách đơn đặt tiệc của tôi</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-
-          <Link
-            to="/"
-            className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-stone-300 bg-white hover:bg-stone-50 px-4 py-2.5 text-xs font-semibold text-stone-700 transition-colors shadow-xs"
-          >
-            ← Quay về trang chủ
-          </Link>
-        </div>
       </div>
     </div>
   );
