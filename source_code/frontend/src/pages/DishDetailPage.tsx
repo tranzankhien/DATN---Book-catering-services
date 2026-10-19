@@ -16,6 +16,7 @@ import { extractErrorMessage } from '../services/apiClient';
 import type { DishDetailDto } from '../services/types';
 import { formatDateTimeVn, formatQuantity, formatVnd } from '../hooks/useFormatters';
 import { DishStatusBadge, ErrorState, LoadingState } from '../components/StatusStates';
+import { DEFAULT_DISH_IMAGE, handleImageError } from '../lib/imageConstants';
 
 export const DishDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -111,17 +112,12 @@ export const DishDetailPage: React.FC = () => {
       <div className="overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-xs grid grid-cols-1 lg:grid-cols-12 items-stretch">
         {/* Left: Fixed Dimension Culinary Showcase - Khung ảnh cố định chuẩn mực, chống vỡ layout */}
         <div className="lg:col-span-5 xl:col-span-5 relative h-[320px] sm:h-[380px] lg:h-[420px] w-full bg-stone-100 overflow-hidden shrink-0 border-b lg:border-b-0 lg:border-r border-stone-200/70">
-          {dish.imageUrl ? (
-            <img
-              src={dish.imageUrl}
-              alt={dish.name}
-              className="h-full w-full object-cover object-center block transition-transform duration-500 hover:scale-102"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-stone-400 bg-stone-100">
-              <Utensils className="h-16 w-16" />
-            </div>
-          )}
+          <img
+            src={dish.imageUrl || DEFAULT_DISH_IMAGE}
+            alt={dish.name}
+            onError={handleImageError}
+            className="h-full w-full object-cover object-center block transition-transform duration-500 hover:scale-102"
+          />
         </div>
 
         {/* Right: Dish Specs & Story */}

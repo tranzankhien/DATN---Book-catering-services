@@ -1,5 +1,5 @@
 import { EventLocationField, type MapPoint } from '../components/EventLocationField';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import {
   Calendar,
@@ -91,6 +91,15 @@ export const CheckoutPage: React.FC = () => {
 
   // Stable Idempotency Key across retries of the same booking form
   const idempotencyKeyRef = useRef<string>(crypto.randomUUID());
+
+  // Minimum booking date (today onwards - prevents booking in the past)
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }, []);
 
   // Preview & Submit State
   const [preview, setPreview] = useState<OrderPreviewResponseDto | null>(null);
@@ -259,6 +268,10 @@ export const CheckoutPage: React.FC = () => {
     }
     if (!eventDate) {
       showToast('Vui lòng chọn ngày tổ chức tiệc', 'error');
+      return;
+    }
+    if (eventDate < todayStr) {
+      showToast('Ngày diễn ra tiệc không được ở trong quá khứ. Vui lòng chọn từ hôm nay trở đi.', 'error');
       return;
     }
     if (!eventLocation.trim()) {
@@ -492,6 +505,7 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="date"
                     required
+                    min={todayStr}
                     value={eventDate}
                     onChange={(e) => setEventDate(e.target.value)}
                     className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"

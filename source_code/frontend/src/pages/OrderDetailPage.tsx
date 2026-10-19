@@ -22,6 +22,10 @@ import {
   X,
   FileCheck,
   RotateCcw,
+  PhoneCall,
+  Utensils,
+  MapPin,
+  Users,
 } from 'lucide-react';
 import { orderService } from '../services/orderService';
 import type { PaymentState } from '../services/paymentService';
@@ -30,6 +34,7 @@ import { formatVnd, formatDateTimeVn } from '../hooks/useFormatters';
 import { LoadingState, ErrorState } from '../components/StatusStates';
 import { useToast } from '../hooks/useToast';
 import { extractErrorMessage } from '../services/apiClient';
+import { DEFAULT_DISH_IMAGE, handleImageError } from '../lib/imageConstants';
 
 export const OrderDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -75,7 +80,10 @@ export const OrderDetailPage: React.FC = () => {
     if (!order || !canCancel) return;
     try {
       setCancelling(true);
-      const updated = await orderService.cancelOrder(order.id, cancelReason.trim() || 'Khách hàng yêu cầu hủy đơn');
+      const updated = await orderService.cancelOrder(
+        order.id,
+        cancelReason.trim() || 'Khách hàng yêu cầu hủy đơn'
+      );
       setOrder(updated);
       setCancelModalOpen(false);
       showToast('Đơn đặt tiệc đã được hủy thành công và giải phóng nguyên liệu kho.', 'success');
@@ -101,22 +109,12 @@ export const OrderDetailPage: React.FC = () => {
         quantityPerTable: it.quantityPerTable,
       })),
       tableCount: order.tableCount,
+      menuId: order.menuId,
     };
-    sessionStorage.setItem('banquethub_builder_draft', JSON.stringify(draft));
-    showToast('Đã tải lại danh sách món vào bộ phối thực đơn!', 'success');
+    sessionStorage.setItem('banquet_menu_builder_draft', JSON.stringify(draft));
+    showToast('Đã khôi phục thực đơn vào Bàn Phối Món! Bạn có thể chỉnh sửa tiếp.', 'success');
     navigate('/menu-builder');
   };
-
-  const isExpired = order?.orderStatus === 'EXPIRED' ||
-    Boolean(order?.paymentExpiresAt && Date.parse(order.paymentExpiresAt) <= now);
-  const eligibleToCancel = order?.orderStatus === 'PENDING_PAYMENT' && order.paymentStatus === 'UNPAID' && !isExpired;
-  const currentPayment = paymentSnapshot?.orderId === order?.id ? paymentSnapshot : undefined;
-  const hasOpenAttempt = currentPayment?.transactions.some(attempt =>
-    attempt.status === 'PENDING' && Date.parse(attempt.expiresAt) > now
-  );
-  const cancellationHint = !currentPayment ? 'Cập nhật trạng thái thanh toán để kiểm tra quyền hủy đơn.'
-    : hasOpenAttempt ? 'Phiên SePay đang mở. Bạn có thể hủy đơn sau khi cổng trả kết quả dứt điểm hoặc phiên hết hạn.' : '';
-  const canCancel = eligibleToCancel && !cancellationHint;
 
   if (loading) {
     return (
@@ -129,23 +127,44 @@ export const OrderDetailPage: React.FC = () => {
   if (error || !order) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 space-y-4">
-        <ErrorState message={error || 'Không tìm thấy đơn hàng.'} onRetry={fetchOrderDetail} />
+        <ErrorState message={error || 'Không tìm thấy đơn hàng.'} />
         <div className="text-center">
           <Link
             to="/my-orders"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 hover:text-amber-900"
           >
-            ← Quay lại danh sách đơn hàng
+            ← Quay về danh sách đơn tiệc
           </Link>
         </div>
       </div>
     );
   }
 
+  const isExpired =
+    order.orderStatus === 'EXPIRED' ||
+    (order.orderStatus === 'PENDING_PAYMENT' &&
+      order.paymentExpiresAt &&
+      new Date(order.paymentExpiresAt).getTime() <= Date.now());
+
+  const currentPayment = paymentSnapshot?.orderId === order.id ? paymentSnapshot : undefined;
+  const eligibleToCancel =
+    order.orderStatus === 'PENDING_PAYMENT' &&
+    order.paymentStatus === 'UNPAID' &&
+    Boolean(order.paymentExpiresAt && Date.parse(order.paymentExpiresAt) > now);
+  const hasOpenAttempt = currentPayment?.transactions.some(
+    (attempt) => attempt.status === 'PENDING' && Date.parse(attempt.expiresAt) > now
+  );
+  const cancellationHint = !currentPayment
+    ? 'Cập nhật trạng thái thanh toán để kiểm tra khả năng hủy đơn.'
+    : hasOpenAttempt
+    ? 'Phiên SePay đang mở. Hãy đợi kết quả từ SePay hoặc đợi phiên hết hạn.'
+    : '';
+  const canCancel = eligibleToCancel && !cancellationHint;
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-2 text-xs text-stone-500 font-medium">
+      {/* Top Breadcrumb Navigation */}
+      <nav className="flex items-center gap-2 text-xs text-stone-500">
         <Link to="/" className="hover:text-stone-900 transition-colors">
           Trang chủ
         </Link>
@@ -157,7 +176,7 @@ export const OrderDetailPage: React.FC = () => {
         <span className="font-mono font-bold text-stone-900">{order.orderCode}</span>
       </nav>
 
-      {/* Header Summary Card */}
+      {/* Header Summary Banner (Spans Full Width 7xl) */}
       <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-100 pb-5">
           <div>
@@ -234,7 +253,11 @@ export const OrderDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {eligibleToCancel && cancellationHint && <p id="cancel-order-hint" className="text-sm text-stone-600">{cancellationHint}</p>}
+        {eligibleToCancel && cancellationHint && (
+          <p id="cancel-order-hint" className="text-sm text-stone-600">
+            {cancellationHint}
+          </p>
+        )}
 
         {/* Fact Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
@@ -286,8 +309,12 @@ export const OrderDetailPage: React.FC = () => {
             <div className="font-bold text-stone-800">
               {order.eventLocation || 'Chưa cung cấp'}
               {order.eventLatitude != null && order.eventLongitude != null && (
-                <a className="ml-2 text-amber-800 underline" target="_blank" rel="noreferrer"
-                  href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}>
+                <a
+                  className="ml-2 text-amber-800 underline font-normal"
+                  target="_blank"
+                  rel="noreferrer"
+                  href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}
+                >
                   Xem bản đồ
                 </a>
               )}
@@ -319,37 +346,25 @@ export const OrderDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Progress & Payment Sections */}
-      <OrderProgress order={order} />
-      <OrderPaymentPanel
-        key={order.id}
-        order={order}
-        allowPayment
-        onStatus={(status) => {
-          setPaymentSnapshot(status);
-          setOrder((current) =>
-            current?.id === status.orderId
-              ? {
-                  ...current,
-                  paymentStatus: status.paymentStatus,
-                  orderStatus: status.orderStatus,
-                  reservation: status.reservation,
-                  statusHistories: status.statusHistories,
-                }
-              : current
-          );
-        }}
-      />
-
-      {/* Main Grid: Dishes Breakdown & Reservation/History */}
+      {/* Main 12-Column Responsive Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Dishes Breakdown (7 Cols) */}
+        {/* Left Column (7 Cols): Progress, Dishes Breakdown, Audit Log */}
         <div className="lg:col-span-7 space-y-6">
-          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-4">
+          {/* Progress Timeline */}
+          <OrderProgress order={order} />
+
+          {/* Dishes Breakdown Card */}
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-              <h2 className="font-bold text-base text-stone-900 tracking-tight">
-                Chi tiết món ăn bàn tiệc ({order.items.length} món)
-              </h2>
+              <div className="flex items-center gap-2.5">
+                <Utensils className="h-5 w-5 text-amber-700" />
+                <h2 className="font-bold text-base text-stone-900 tracking-tight">
+                  Chi tiết món ăn bàn tiệc ({order.items.length} món)
+                </h2>
+              </div>
+              <span className="text-xs text-stone-500 font-medium">
+                {order.tableCount} bàn x {order.items.length} món
+              </span>
             </div>
 
             <div className="divide-y divide-stone-100">
@@ -359,65 +374,45 @@ export const OrderDetailPage: React.FC = () => {
                     <span className="w-5 text-center font-mono font-bold text-stone-400">
                       {idx + 1}
                     </span>
-                    {it.dishImageUrl && (
-                      <div className="h-10 w-10 rounded-lg overflow-hidden bg-stone-100 shrink-0 border border-stone-200">
-                        <img
-                          src={it.dishImageUrl}
-                          alt={it.dishNameSnapshot}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    )}
+                    <div className="h-10 w-10 rounded-lg overflow-hidden bg-stone-100 shrink-0 border border-stone-200">
+                      <img
+                        src={it.dishImageUrl || DEFAULT_DISH_IMAGE}
+                        alt={it.dishNameSnapshot}
+                        onError={handleImageError}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
                     <div>
-                      <div className="font-bold text-stone-900">{it.dishNameSnapshot}</div>
-                      <div className="text-[11px] text-stone-500">
+                      <div className="font-bold text-stone-900 text-xs sm:text-sm">
+                        {it.dishNameSnapshot}
+                      </div>
+                      <div className="text-[11px] text-stone-500 mt-0.5">
                         {formatVnd(it.unitPriceSnapshot)} x {it.quantityPerTable} phần/bàn
                       </div>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <div className="font-bold text-stone-900">{formatVnd(it.lineTotal)}</div>
-                    <div className="text-[10px] text-stone-400 font-mono">Tổng {it.totalQuantity} phần</div>
+                    <div className="font-bold text-stone-900 text-xs sm:text-sm font-mono">
+                      {formatVnd(it.lineTotal)}
+                    </div>
+                    <div className="text-[10px] text-stone-400 font-mono">
+                      Tổng {it.totalQuantity} phần
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
 
             <div className="border-t border-stone-200 pt-3 flex justify-between items-baseline text-sm font-bold text-stone-900">
-              <span>Tổng cộng:</span>
+              <span>Tổng cộng thanh toán:</span>
               <span className="text-xl font-bold text-amber-900">
                 {formatVnd(order.totalAmount)}
               </span>
             </div>
           </div>
-        </div>
 
-        {/* Reservation & Audit Log (5 Cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Stock Reservation Card */}
-          {order.reservation && (
-            <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-3">
-              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                  <h3 className="font-bold text-sm text-stone-900 tracking-tight">
-                    Khóa giữ kho nguyên liệu
-                  </h3>
-                </div>
-                <span className="font-mono text-[11px] font-bold text-stone-700 bg-stone-100 px-2 py-0.5 rounded">
-                  {order.reservation.status}
-                </span>
-              </div>
-
-              <p className="text-xs text-stone-600 leading-relaxed">
-                Đã khóa giữ <strong>{order.reservation.items.length}</strong> loại nguyên liệu trong kho. Thời hạn giữ chỗ:{' '}
-                <strong className="text-stone-900">{formatDateTimeVn(order.reservation.expiresAt)}</strong>.
-              </p>
-            </div>
-          )}
-
-          {/* Status History Timeline */}
+          {/* Status History Audit Trail */}
           <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-4">
             <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
               <History className="h-4 w-4 text-amber-700" />
@@ -447,6 +442,69 @@ export const OrderDetailPage: React.FC = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column (5 Cols, Sticky): VietQR Payment Panel & Reservation Card */}
+        <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+          {/* VietQR SePay Payment Panel */}
+          <OrderPaymentPanel
+            key={order.id}
+            order={order}
+            allowPayment
+            onStatus={(status) => {
+              setPaymentSnapshot(status);
+              setOrder((current) =>
+                current?.id === status.orderId
+                  ? {
+                      ...current,
+                      paymentStatus: status.paymentStatus,
+                      orderStatus: status.orderStatus,
+                      reservation: status.reservation,
+                      statusHistories: status.statusHistories,
+                    }
+                  : current
+              );
+            }}
+          />
+
+          {/* Stock Reservation Card */}
+          {order.reservation && (
+            <div className="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-xs space-y-3">
+              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-stone-900">
+                    Khóa giữ kho nguyên liệu
+                  </h3>
+                </div>
+                <span className="font-mono text-[11px] font-bold text-stone-700 bg-stone-100 px-2 py-0.5 rounded">
+                  {order.reservation.status}
+                </span>
+              </div>
+
+              <p className="text-xs text-stone-600 leading-relaxed">
+                Đã khóa giữ <strong>{order.reservation.items.length}</strong> loại nguyên liệu trong kho. Thời hạn giữ chỗ:{' '}
+                <strong className="text-stone-900">{formatDateTimeVn(order.reservation.expiresAt)}</strong>.
+              </p>
+            </div>
+          )}
+
+          {/* Hotline Card */}
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-xs space-y-3">
+            <div className="flex items-center gap-2">
+              <PhoneCall className="h-4 w-4 text-amber-700" />
+              <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                Hỗ trợ điều phối tiệc
+              </h4>
+            </div>
+            <p className="text-xs text-stone-600">
+              Cần thay đổi danh sách món hoặc dời giờ đón khách? Liên hệ ngay:
+            </p>
+            <div className="rounded-xl bg-stone-50 p-3 border border-stone-200 text-xs flex justify-between items-center">
+              <span className="text-stone-500">Hotline phục vụ:</span>
+              <span className="font-mono font-bold text-amber-900 text-sm">1900 8899</span>
             </div>
           </div>
         </div>
@@ -500,7 +558,7 @@ export const OrderDetailPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={cancelling}
-                  className="rounded-xl bg-rose-700 hover:bg-rose-800 text-white px-4 py-2 text-xs font-semibold shadow-xs"
+                  className="rounded-xl bg-rose-700 hover:bg-rose-800 text-white px-4 py-2 text-xs font-semibold shadow-xs disabled:opacity-50"
                 >
                   {cancelling ? 'Đang hủy...' : 'Xác nhận hủy đơn'}
                 </button>

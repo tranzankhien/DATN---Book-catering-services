@@ -25,6 +25,7 @@ import { useToast } from '../hooks/useToast';
 import { DishFormModal } from '../features/admin/DishFormModal';
 import { RecipeConfigModal } from '../features/admin/RecipeConfigModal';
 import { IngredientFormModal } from '../features/admin/IngredientFormModal';
+import { DEFAULT_DISH_IMAGE, handleImageError } from '../lib/imageConstants';
 
 export const AdminCatalogPage: React.FC = () => {
   const { showToast } = useToast();
@@ -320,17 +321,12 @@ export const AdminCatalogPage: React.FC = () => {
                         <td className="py-3.5 px-4">
                           <div className="flex items-start gap-3">
                             <div className="h-10 w-12 shrink-0 overflow-hidden rounded-lg bg-stone-100 border border-stone-200">
-                              {dish.imageUrl ? (
-                                <img
-                                  src={dish.imageUrl}
-                                  alt={dish.name}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center text-stone-400">
-                                  <Utensils className="h-4 w-4" />
-                                </div>
-                              )}
+                              <img
+                                src={dish.imageUrl || DEFAULT_DISH_IMAGE}
+                                alt={dish.name}
+                                onError={handleImageError}
+                                className="h-full w-full object-cover"
+                              />
                             </div>
                             <div>
                               <span className="font-mono text-[10px] text-stone-500 font-semibold">

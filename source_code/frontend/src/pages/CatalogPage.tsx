@@ -21,6 +21,7 @@ import { extractErrorMessage } from '../services/apiClient';
 import type { CategoryDto, DishSummaryDto } from '../services/types';
 import { formatVnd } from '../hooks/useFormatters';
 import { EmptyState, ErrorState, LoadingState } from '../components/StatusStates';
+import { DEFAULT_DISH_IMAGE, handleImageError } from '../lib/imageConstants';
 
 interface DraftMenuLine {
   dish: DishSummaryDto;
@@ -308,18 +309,13 @@ export const CatalogPage: React.FC = () => {
                     className="group flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-white hover:border-amber-300 hover:shadow-md transition-all shadow-sm"
                   >
                     <div className="relative h-48 bg-stone-100 overflow-hidden">
-                      {dish.imageUrl ? (
-                        <img
-                          src={dish.imageUrl}
-                          alt={dish.name}
-                          className="h-full w-full object-cover group-hover:scale-103 transition-transform duration-500"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-stone-400">
-                          <Utensils className="h-10 w-10" />
-                        </div>
-                      )}
+                      <img
+                        src={dish.imageUrl || DEFAULT_DISH_IMAGE}
+                        alt={dish.name}
+                        onError={handleImageError}
+                        className="h-full w-full object-cover group-hover:scale-103 transition-transform duration-500"
+                        loading="lazy"
+                      />
                     </div>
 
                     <div className="flex flex-1 flex-col p-5 space-y-2.5">
@@ -397,17 +393,12 @@ export const CatalogPage: React.FC = () => {
                     className="flex flex-col sm:flex-row items-center gap-4 rounded-xl border border-stone-200 bg-white p-3.5 hover:border-amber-300 hover:shadow-sm transition-all shadow-sm"
                   >
                     <div className="h-20 w-24 shrink-0 rounded-lg overflow-hidden bg-stone-100">
-                      {dish.imageUrl ? (
-                        <img
-                          src={dish.imageUrl}
-                          alt={dish.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-stone-400">
-                          <Utensils className="h-6 w-6" />
-                        </div>
-                      )}
+                      <img
+                        src={dish.imageUrl || DEFAULT_DISH_IMAGE}
+                        alt={dish.name}
+                        onError={handleImageError}
+                        className="h-full w-full object-cover"
+                      />
                     </div>
 
                     <div className="flex-1 min-w-0 space-y-1 text-center sm:text-left">
