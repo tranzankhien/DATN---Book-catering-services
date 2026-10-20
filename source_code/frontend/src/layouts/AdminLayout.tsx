@@ -188,7 +188,7 @@ export const AdminLayout: React.FC = () => {
                       <span className="whitespace-nowrap truncate">Tổng quan kho & giá vốn</span>
                     )}
                     {!isOpen && (
-                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Tổng quan kho & giá vốn
                       </div>
                     )}
@@ -212,7 +212,7 @@ export const AdminLayout: React.FC = () => {
                       <span className="whitespace-nowrap truncate">Thực đơn & công thức</span>
                     )}
                     {!isOpen && (
-                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Thực đơn & công thức
                       </div>
                     )}
@@ -236,7 +236,7 @@ export const AdminLayout: React.FC = () => {
                       <span className="whitespace-nowrap truncate">Nguyên liệu & tồn kho</span>
                     )}
                     {!isOpen && (
-                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Nguyên liệu & tồn kho
                       </div>
                     )}
@@ -260,7 +260,7 @@ export const AdminLayout: React.FC = () => {
                       <span className="whitespace-nowrap truncate">Nhập hàng (phiếu nhập)</span>
                     )}
                     {!isOpen && (
-                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Nhập hàng (phiếu nhập)
                       </div>
                     )}
@@ -284,7 +284,7 @@ export const AdminLayout: React.FC = () => {
                       <span className="whitespace-nowrap truncate">Sổ biến động kho</span>
                     )}
                     {!isOpen && (
-                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Sổ biến động kho
                       </div>
                     )}
@@ -308,7 +308,7 @@ export const AdminLayout: React.FC = () => {
                       <span className="whitespace-nowrap truncate">Nhà cung cấp</span>
                     )}
                     {!isOpen && (
-                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Nhà cung cấp
                       </div>
                     )}
@@ -343,7 +343,7 @@ export const AdminLayout: React.FC = () => {
                       <span className="whitespace-nowrap truncate">Tổng quan vận hành</span>
                     )}
                     {!isOpen && (
-                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Tổng quan vận hành
                       </div>
                     )}
@@ -367,7 +367,7 @@ export const AdminLayout: React.FC = () => {
                       <span className="whitespace-nowrap truncate">Thực đơn mẫu</span>
                     )}
                     {!isOpen && (
-                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Thực đơn mẫu
                       </div>
                     )}
@@ -391,7 +391,7 @@ export const AdminLayout: React.FC = () => {
                       <span className="whitespace-nowrap truncate">Đơn đặt tiệc</span>
                     )}
                     {!isOpen && (
-                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Đơn đặt tiệc
                       </div>
                     )}
@@ -415,7 +415,7 @@ export const AdminLayout: React.FC = () => {
                       <span className="whitespace-nowrap truncate">Thanh toán & đối soát</span>
                     )}
                     {!isOpen && (
-                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Thanh toán & đối soát
                       </div>
                     )}
@@ -439,7 +439,7 @@ export const AdminLayout: React.FC = () => {
                       <span className="whitespace-nowrap truncate">Theo dõi giữ kho</span>
                     )}
                     {!isOpen && (
-                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Theo dõi giữ kho
                       </div>
                     )}
@@ -480,7 +480,7 @@ export const AdminLayout: React.FC = () => {
 
                         {/* Flyout Tooltip when Rail is collapsed */}
                         {!isOpen && (
-                          <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-md bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                          <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                             {mod.label} ({mod.phase})
                           </div>
                         )}

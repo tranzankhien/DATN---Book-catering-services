@@ -292,7 +292,7 @@ export function OrderPaymentPanel({
                       {formatVnd(tx.amount)}
                     </span>
                     {tx.bankCode && (
-                      <span className="text-[10px] text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] text-stone-600 bg-stone-100 border border-stone-200/70 px-2 py-0.5 rounded-lg font-mono">
                         {tx.bankCode}
                       </span>
                     )}

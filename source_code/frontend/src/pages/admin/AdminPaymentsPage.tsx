@@ -277,7 +277,7 @@ export function AdminPaymentsPage() {
                             type="button"
                             disabled={busy}
                             onClick={() => void perform(() => paymentService.retry(row.id))}
-                            className="inline-flex items-center gap-1 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 px-3 py-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                            className="inline-flex items-center gap-1 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 px-3 py-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
                           >
                             <Send className="h-3 w-3" />
                             <span>Gửi lại</span>

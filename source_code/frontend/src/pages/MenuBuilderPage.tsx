@@ -406,10 +406,10 @@ export const MenuBuilderPage: React.FC = () => {
 
                       <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-mono text-[10px] text-stone-500 font-semibold uppercase bg-stone-100 px-1.5 py-0.5 rounded">
+                          <span className="font-mono text-[10px] text-stone-500 font-semibold uppercase bg-stone-100 px-2 py-0.5 rounded-lg border border-stone-200/60">
                             {dish.code}
                           </span>
-                          <span className="text-[10px] font-semibold text-amber-900 bg-amber-50 border border-amber-200/60 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] font-semibold text-amber-900 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-lg">
                             {dish.categoryName}
                           </span>
                         </div>
@@ -563,7 +563,7 @@ export const MenuBuilderPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleUpdateQuantity(item.dish.id, -1)}
-                        className="h-6 w-6 rounded-md bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 text-xs font-bold transition-colors cursor-pointer"
+                        className="h-6 w-6 rounded-lg bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 text-xs font-bold transition-colors cursor-pointer"
                         title="Giảm 1 phần"
                       >
                         <Minus className="h-3 w-3" />
@@ -574,7 +574,7 @@ export const MenuBuilderPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleUpdateQuantity(item.dish.id, 1)}
-                        className="h-6 w-6 rounded-md bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 text-xs font-bold transition-colors cursor-pointer"
+                        className="h-6 w-6 rounded-lg bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 text-xs font-bold transition-colors cursor-pointer"
                         title="Tăng 1 phần"
                       >
                         <Plus className="h-3 w-3" />
@@ -582,7 +582,7 @@ export const MenuBuilderPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleRemoveDish(item.dish.id)}
-                        className="h-6 w-6 rounded-md hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center ml-1 transition-colors cursor-pointer"
+                        className="h-6 w-6 rounded-lg hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center ml-1 transition-colors cursor-pointer"
                         title="Xóa món"
                       >
                         <Trash2 className="h-3 w-3" />

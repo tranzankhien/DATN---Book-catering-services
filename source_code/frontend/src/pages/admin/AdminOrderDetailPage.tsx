@@ -390,7 +390,7 @@ export const AdminOrderDetailPage: React.FC = () => {
                 {order.reservation.items.map((resItem) => (
                   <div key={resItem.id} className="py-2 px-2 flex items-center justify-between hover:bg-white rounded-lg transition-colors">
                     <span className="text-stone-800 font-medium truncate pr-2">{resItem.ingredientName}</span>
-                    <span className="font-mono font-bold text-amber-900 bg-white border border-stone-200/90 px-2 py-0.5 rounded-md shrink-0 shadow-2xs">
+                    <span className="font-mono font-bold text-amber-900 bg-white border border-stone-200/90 px-2.5 py-0.5 rounded-lg shrink-0 shadow-2xs">
                       {formatQuantity(resItem.quantity)} {resItem.unit}
                     </span>
                   </div>

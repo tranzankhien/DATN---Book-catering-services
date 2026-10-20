@@ -199,7 +199,7 @@ export const MenusPage: React.FC = () => {
                   <span className="font-mono text-xs font-bold text-amber-200 bg-stone-950/85 backdrop-blur-md px-2.5 py-1 rounded-lg border border-amber-500/30 shadow-xs">
                     {menu.code}
                   </span>
-                  <span className="text-[11px] font-semibold text-stone-100 bg-stone-900/80 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/20">
+                  <span className="text-[11px] font-semibold text-stone-100 bg-stone-900/80 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/20">
                     Set {menu.itemsCount} món
                   </span>
                 </div>

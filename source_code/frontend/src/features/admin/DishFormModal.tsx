@@ -326,7 +326,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                       onChange={(e) =>
                         updateRecipeRow(idx, 'ingredientId', Number(e.target.value))
                       }
-                      className="flex-1 rounded-md border border-stone-300 bg-white px-2 py-1 text-xs font-medium text-stone-800 focus:outline-none focus:border-amber-600 cursor-pointer"
+                      className="flex-1 rounded-lg border border-stone-300 bg-white px-2 py-1 text-xs font-medium text-stone-800 focus:outline-none focus:border-amber-600 cursor-pointer shadow-2xs"
                     >
                       {ingredients.map((ing) => (
                         <option key={ing.id} value={ing.id}>
@@ -345,7 +345,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                         onChange={(e) =>
                           updateRecipeRow(idx, 'quantity', Number(e.target.value))
                         }
-                        className="w-full rounded-md border border-stone-300 bg-white px-2 py-1 text-xs text-right font-bold text-amber-700 focus:outline-none focus:border-amber-600"
+                        className="w-full rounded-lg border border-stone-300 bg-white px-2 py-1 text-xs text-right font-bold text-amber-700 focus:outline-none focus:border-amber-600 shadow-2xs"
                       />
                       <span className="text-[11px] font-semibold text-stone-500 w-8">
                         {selectedIng?.unit || ''}
@@ -357,7 +357,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                       value={row.note || ''}
                       onChange={(e) => updateRecipeRow(idx, 'note', e.target.value)}
                       placeholder="Ghi chú chế biến..."
-                      className="w-36 rounded-md border border-stone-300 bg-white px-2 py-1 text-xs text-stone-700 focus:outline-none focus:border-amber-600 hidden sm:block"
+                      className="w-36 rounded-lg border border-stone-300 bg-white px-2 py-1 text-xs text-stone-700 focus:outline-none focus:border-amber-600 hidden sm:block shadow-2xs"
                     />
 
                     <button

@@ -500,7 +500,7 @@ export const CatalogPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => updatePortion(line.dish.id, -1)}
-                        className="flex h-6 w-6 items-center justify-center rounded border border-stone-300 bg-white text-stone-700 hover:bg-stone-100 cursor-pointer"
+                        className="flex h-6 w-6 items-center justify-center rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-100 cursor-pointer shadow-2xs"
                       >
                         <Minus className="h-3 w-3" />
                       </button>
@@ -510,7 +510,7 @@ export const CatalogPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => updatePortion(line.dish.id, 1)}
-                        className="flex h-6 w-6 items-center justify-center rounded border border-stone-300 bg-white text-stone-700 hover:bg-stone-100 cursor-pointer"
+                        className="flex h-6 w-6 items-center justify-center rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-100 cursor-pointer shadow-2xs"
                       >
                         <Plus className="h-3 w-3" />
                       </button>

@@ -124,7 +124,7 @@ export const DishDetailPage: React.FC = () => {
         <div className="lg:col-span-7 xl:col-span-7 p-6 sm:p-8 lg:p-9 flex flex-col justify-between space-y-6">
           <div className="space-y-3.5">
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="font-semibold text-amber-800 bg-amber-50 border border-amber-200/80 rounded-md px-2.5 py-0.5">
+              <span className="font-semibold text-amber-800 bg-amber-50 border border-amber-200/80 rounded-lg px-2.5 py-0.5">
                 {dish.categoryName}
               </span>
               <DishStatusBadge status={dish.status} />
@@ -264,7 +264,7 @@ export const DishDetailPage: React.FC = () => {
                       {item.ingredientName}
                     </td>
                     <td className="py-3 px-5">
-                      <span className="rounded bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-700">
+                      <span className="rounded-lg bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-700 border border-stone-200/60">
                         {item.unit}
                       </span>
                     </td>

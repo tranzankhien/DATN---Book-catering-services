@@ -196,7 +196,7 @@ export const MenuDetailPage: React.FC = () => {
                         {item.dishCode}
                       </span>
                       {item.categoryName && (
-                        <span className="rounded-md bg-stone-100 text-stone-600 px-2 py-0.5 text-[10px] font-semibold">
+                        <span className="rounded-lg bg-stone-100 text-stone-600 px-2 py-0.5 text-[10px] font-semibold border border-stone-200/60">
                           {item.categoryName}
                         </span>
                       )}

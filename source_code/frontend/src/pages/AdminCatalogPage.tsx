@@ -341,7 +341,7 @@ export const AdminCatalogPage: React.FC = () => {
                         </td>
 
                         <td className="py-3.5 px-4">
-                          <span className="inline-block rounded bg-stone-100 px-2 py-0.5 font-medium text-stone-700 text-[11px]">
+                          <span className="inline-block rounded-lg bg-stone-100 px-2 py-0.5 font-medium text-stone-700 text-[11px] border border-stone-200/60">
                             {dish.categoryName}
                           </span>
                         </td>
@@ -355,7 +355,7 @@ export const AdminCatalogPage: React.FC = () => {
                             {dish.recipeItems.map((item) => (
                               <span
                                 key={item.id}
-                                className="inline-flex items-center gap-1 rounded bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-700"
+                                className="inline-flex items-center gap-1 rounded-lg bg-stone-100 px-2 py-0.5 text-[10px] font-medium text-stone-700 border border-stone-200/60"
                               >
                                 <span>{item.ingredientName}:</span>
                                 <strong className="text-stone-900">
@@ -457,7 +457,7 @@ export const AdminCatalogPage: React.FC = () => {
                       {ing.name}
                     </td>
                     <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                      <span className="inline-block rounded-md bg-stone-100 px-2.5 py-0.5 font-medium text-stone-700 border border-stone-200/80">
+                      <span className="inline-block rounded-lg bg-stone-100 px-2.5 py-0.5 font-medium text-stone-700 border border-stone-200/80">
                         {ing.unit}
                       </span>
                     </td>
