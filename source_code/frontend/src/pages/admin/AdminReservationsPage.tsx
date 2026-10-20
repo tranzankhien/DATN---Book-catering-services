@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Package,
   Clock,
@@ -13,6 +14,7 @@ import {
   XCircle,
   X,
   Layers,
+  ArrowRight,
 } from 'lucide-react';
 import { reservationService } from '../../services/reservationService';
 import type {
@@ -187,26 +189,29 @@ export const AdminReservationsPage: React.FC = () => {
                     <th className="py-3.5 px-4 text-right">Tồn vật lý</th>
                     <th className="py-3.5 px-4 text-right">Đang giữ chỗ</th>
                     <th className="py-3.5 px-4 text-right">Khả dụng thực tế</th>
+                    <th className="py-3.5 px-4 text-center">Tỷ lệ khóa giữ</th>
                     <th className="py-3.5 px-4 text-center">Tình trạng</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100">
                   {loadingAvail ? (
                     <tr>
-                      <td colSpan={7} className="py-16 text-center text-stone-400">
+                      <td colSpan={8} className="py-16 text-center text-stone-400">
                         <RefreshCw className="h-6 w-6 animate-spin mx-auto text-amber-600 mb-2" />
                         <span className="font-medium">Đang tải dữ liệu khả dụng kho...</span>
                       </td>
                     </tr>
                   ) : filteredAvailabilities.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-16 text-center text-stone-400">
+                      <td colSpan={8} className="py-16 text-center text-stone-400">
                         <Package className="h-8 w-8 mx-auto text-stone-300 mb-2" />
                         <p className="font-semibold text-stone-600 text-sm">Không tìm thấy nguyên liệu nào</p>
                       </td>
                     </tr>
                   ) : (
-                    filteredAvailabilities.map((it) => (
+                    filteredAvailabilities.map((it) => {
+                      const reservedRatio = it.physicalStock > 0 ? Math.min(100, Math.round((it.reservedStock / it.physicalStock) * 100)) : 0;
+                      return (
                       <tr key={it.ingredientId} className="hover:bg-amber-50/30 transition-colors">
                         <td className="py-3.5 px-4 font-mono font-bold text-stone-900 bg-stone-50/40 whitespace-nowrap">
                           {it.ingredientCode}
@@ -224,6 +229,22 @@ export const AdminReservationsPage: React.FC = () => {
                         <td className="py-3.5 px-4 text-right font-mono font-bold text-emerald-800 text-sm whitespace-nowrap">
                           {formatQuantity(it.availableStock)}
                         </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <div className="w-24 mx-auto">
+                            <div className="flex items-center justify-between text-[10px] text-stone-500 mb-1 font-mono">
+                              <span>{reservedRatio}%</span>
+                              <span className="text-[9px] text-stone-400">đang giữ</span>
+                            </div>
+                            <div className="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all ${
+                                  reservedRatio > 80 ? 'bg-rose-500' : reservedRatio > 40 ? 'bg-amber-500' : 'bg-emerald-500'
+                                }`}
+                                style={{ width: `${Math.min(100, reservedRatio)}%` }}
+                              />
+                            </div>
+                          </div>
+                        </td>
                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
                           {it.availableStock <= 0 ? (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
@@ -240,7 +261,7 @@ export const AdminReservationsPage: React.FC = () => {
                           )}
                         </td>
                       </tr>
-                    ))
+                    );})
                   )}
                 </tbody>
               </table>
@@ -308,8 +329,19 @@ export const AdminReservationsPage: React.FC = () => {
                         <td className="py-3.5 px-4 font-mono font-bold text-stone-900 bg-stone-50/40 whitespace-nowrap">
                           #{res.id}
                         </td>
-                        <td className="py-3.5 px-4 font-mono font-bold text-amber-800 whitespace-nowrap">
-                          {res.orderCode || '—'}
+                        <td className="py-3.5 px-4 font-mono font-bold whitespace-nowrap">
+                          {res.orderId && res.orderCode ? (
+                            <Link
+                              to={`/admin/orders/${res.orderId}`}
+                              className="text-amber-800 hover:text-amber-950 hover:underline inline-flex items-center gap-1 group"
+                              title="Xem chi tiết đơn tiệc"
+                            >
+                              <span>{res.orderCode}</span>
+                              <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </Link>
+                          ) : (
+                            <span className="text-stone-400">{res.orderCode || '—'}</span>
+                          )}
                         </td>
                         <td className="py-3.5 px-4 font-bold text-stone-900">
                           {res.customerName || '—'}

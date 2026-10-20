@@ -30,7 +30,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
   const [ingredients, setIngredients] = useState<IngredientDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchKeyword, setSearchKeyword] = useState<string>('');
-  const [activeFilter, setActiveFilter] = useState<string>('ALL');
+  const [activeFilter, setActiveFilter] = useState<string>('ACTIVE');
   const [lowStockOnly, setLowStockOnly] = useState<boolean>(false);
 
   // Detail Modal
@@ -311,8 +311,8 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
             onChange={(e) => setActiveFilter(e.target.value)}
             className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
           >
-            <option value="ALL">Tất cả trạng thái ({ingredients.length})</option>
             <option value="ACTIVE">Đang sử dụng ({activeIngredientsCount})</option>
+            <option value="ALL">Tất cả trạng thái ({ingredients.length})</option>
             <option value="INACTIVE">Tạm ngừng / Ẩn ({ingredients.length - activeIngredientsCount})</option>
           </select>
 

@@ -42,7 +42,7 @@ export const AdminMenusPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [keyword, setKeyword] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<MenuStatus | ''>('');
+  const [statusFilter, setStatusFilter] = useState<MenuStatus | ''>('ACTIVE');
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
 
@@ -276,8 +276,8 @@ export const AdminMenusPage: React.FC = () => {
               }}
               className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
             >
-              <option value="">Tất cả trạng thái</option>
               <option value="ACTIVE">Đang hiển thị (ACTIVE)</option>
+              <option value="">Tất cả trạng thái</option>
               <option value="HIDDEN">Đã ẩn (HIDDEN)</option>
               <option value="ARCHIVED">Lưu trữ (ARCHIVED)</option>
             </select>

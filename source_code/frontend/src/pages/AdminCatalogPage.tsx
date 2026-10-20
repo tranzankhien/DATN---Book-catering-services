@@ -36,7 +36,7 @@ export const AdminCatalogPage: React.FC = () => {
   const [dishes, setDishes] = useState<DishDetailDto[]>([]);
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>(undefined);
-  const [selectedStatus, setSelectedStatus] = useState<DishStatus | ''>('');
+  const [selectedStatus, setSelectedStatus] = useState<DishStatus | ''>('ACTIVE');
   const [keyword, setKeyword] = useState<string>('');
 
   const [loading, setLoading] = useState<boolean>(true);
@@ -284,8 +284,8 @@ export const AdminCatalogPage: React.FC = () => {
                 onChange={(e) => setSelectedStatus(e.target.value as DishStatus | '')}
                 className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs font-medium text-stone-800 focus:border-amber-600 focus:outline-none cursor-pointer"
               >
-                <option value="">Tất cả trạng thái</option>
                 <option value="ACTIVE">Đang phục vụ (ACTIVE)</option>
+                <option value="">Tất cả trạng thái</option>
                 <option value="HIDDEN">Đang ẩn (HIDDEN)</option>
               </select>
             </div>
