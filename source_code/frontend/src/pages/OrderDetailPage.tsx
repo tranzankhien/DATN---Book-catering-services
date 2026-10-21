@@ -479,7 +479,7 @@ export const OrderDetailPage: React.FC = () => {
                     Khóa giữ kho nguyên liệu
                   </h3>
                 </div>
-                <span className="font-mono text-[11px] font-bold text-stone-700 bg-stone-100 px-2 py-0.5 rounded">
+                <span className="font-mono text-[11px] font-bold text-stone-700 bg-stone-100 px-2 py-0.5 rounded-lg border border-stone-200">
                   {order.reservation.status}
                 </span>
               </div>

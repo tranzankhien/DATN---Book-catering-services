@@ -341,7 +341,7 @@ export const MenuBuilderPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedCategoryId(undefined)}
-                className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   selectedCategoryId === undefined
                     ? 'bg-amber-700 text-white shadow-xs'
                     : 'bg-stone-100 hover:bg-stone-200/80 text-stone-700'
@@ -354,7 +354,7 @@ export const MenuBuilderPage: React.FC = () => {
                   key={cat.id}
                   type="button"
                   onClick={() => setSelectedCategoryId(cat.id)}
-                  className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                  className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                     selectedCategoryId === cat.id
                       ? 'bg-amber-700 text-white shadow-xs'
                       : 'bg-stone-100 hover:bg-stone-200/80 text-stone-700'
@@ -377,7 +377,7 @@ export const MenuBuilderPage: React.FC = () => {
               />
             </div>
           ) : filteredDishes.length === 0 ? (
-            <div className="rounded-2xl border border-stone-200 bg-white p-8 text-center text-stone-500 text-xs sm:text-sm">
+            <div className="rounded-xl border border-stone-200 bg-white p-8 text-center text-stone-500 text-xs sm:text-sm">
               Không tìm thấy món ăn nào phù hợp với bộ lọc.
             </div>
           ) : (
@@ -387,14 +387,14 @@ export const MenuBuilderPage: React.FC = () => {
                 return (
                   <article
                     key={dish.id}
-                    className={`group flex flex-col justify-between overflow-hidden rounded-2xl border p-4 shadow-xs transition-all duration-200 ${
+                    className={`group flex flex-col justify-between overflow-hidden rounded-xl border p-3.5 shadow-xs transition-all duration-200 ${
                       inBasket
                         ? 'border-amber-400 bg-amber-50/20 ring-1 ring-amber-400/30'
-                        : 'border-stone-200/90 bg-white hover:border-amber-300 hover:shadow-md'
+                        : 'border-stone-200/90 bg-white hover:border-amber-300 hover:shadow-sm'
                     }`}
                   >
-                    <div className="flex gap-3.5">
-                      <div className="h-20 w-20 rounded-xl overflow-hidden bg-stone-900 shrink-0 border border-stone-200 shadow-2xs relative">
+                    <div className="flex gap-3">
+                      <div className="h-20 w-20 rounded-lg overflow-hidden bg-stone-900 shrink-0 border border-stone-200 shadow-2xs relative">
                         <img
                           src={dish.imageUrl || DEFAULT_DISH_IMAGE}
                           alt={dish.name}
@@ -406,14 +406,14 @@ export const MenuBuilderPage: React.FC = () => {
 
                       <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-mono text-[10px] text-stone-500 font-semibold uppercase bg-stone-100 px-2 py-0.5 rounded-lg border border-stone-200/60">
+                          <span className="font-mono text-[10px] text-stone-500 font-semibold uppercase bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200/60">
                             {dish.code}
                           </span>
-                          <span className="text-[10px] font-semibold text-amber-900 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-lg">
+                          <span className="text-[10px] font-semibold text-amber-900 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md">
                             {dish.categoryName}
                           </span>
                         </div>
-                        <h4 className="font-bold text-stone-900 text-sm truncate" title={dish.name}>
+                        <h4 className="font-bold text-stone-900 text-xs sm:text-sm truncate" title={dish.name}>
                           {dish.name}
                         </h4>
                         <div className="text-xs font-bold text-amber-900">
@@ -424,7 +424,7 @@ export const MenuBuilderPage: React.FC = () => {
                     </div>
 
                     {/* Bottom Action Bar */}
-                    <div className="mt-3.5 pt-3 border-t border-stone-100 flex items-center justify-between">
+                    <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between">
                       {inBasket ? (
                         <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-semibold">
                           <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
@@ -436,11 +436,11 @@ export const MenuBuilderPage: React.FC = () => {
 
                       {inBasket ? (
                         /* Card Stepper for selected dish */
-                        <div className="flex items-center gap-1 bg-white border border-amber-300 rounded-xl p-0.5 shadow-2xs">
+                        <div className="flex items-center gap-1 bg-white border border-amber-300 rounded-lg p-0.5 shadow-2xs">
                           <button
                             type="button"
                             onClick={() => handleUpdateQuantity(dish.id, -1)}
-                            className="h-7 w-7 rounded-lg hover:bg-stone-100 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
+                            className="h-7 w-7 rounded-md hover:bg-stone-100 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
                             title="Giảm 1 phần"
                           >
                             <Minus className="h-3 w-3" />
@@ -451,7 +451,7 @@ export const MenuBuilderPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleUpdateQuantity(dish.id, 1)}
-                            className="h-7 w-7 rounded-lg hover:bg-stone-100 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
+                            className="h-7 w-7 rounded-md hover:bg-stone-100 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
                             title="Tăng 1 phần"
                           >
                             <Plus className="h-3 w-3" />
@@ -461,7 +461,7 @@ export const MenuBuilderPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleAddDish(dish)}
-                          className="inline-flex items-center gap-1 rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-3 py-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 rounded-lg bg-amber-700 hover:bg-amber-800 text-white px-3 py-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                         >
                           <Plus className="h-3.5 w-3.5" />
                           <span>Thêm món</span>

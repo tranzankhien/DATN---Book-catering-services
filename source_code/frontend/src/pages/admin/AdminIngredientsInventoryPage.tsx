@@ -557,7 +557,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                           </div>
                           <div className="flex items-center gap-3">
                             <span className="font-mono font-bold text-amber-800">{dish.quantityFormatted}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-stone-100 text-stone-600">
+                            <span className="text-[10px] px-2 py-0.5 rounded-lg bg-stone-100 text-stone-600 border border-stone-200">
                               {dish.dishStatus}
                             </span>
                           </div>

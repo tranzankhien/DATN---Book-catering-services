@@ -165,18 +165,26 @@ export const DishDetailPage: React.FC = () => {
               <span className="text-xs font-medium text-stone-500">
                 Đơn giá niêm yết / 01 phần món
               </span>
-              <p className="text-2xl sm:text-3xl font-bold text-amber-700 tracking-tight mt-0.5">
+              <p className="text-2xl sm:text-3xl font-bold text-amber-900 tracking-tight mt-0.5 font-mono">
                 {formatVnd(dish.price)}
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                to={`/menu-builder`}
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-5 py-2.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              >
+                <Utensils className="h-4 w-4" />
+                <span>Đưa vào bàn tiệc tự phối</span>
+              </Link>
+
               <a
                 href="#recipe-section"
-                className="inline-flex items-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-5 py-2.5 text-xs font-semibold shadow-xs transition-colors"
+                className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 px-4 py-2.5 text-xs font-semibold shadow-xs transition-colors"
               >
-                <Scale className="h-4 w-4" />
-                <span>Xem định lượng tiêu hao</span>
+                <Scale className="h-4 w-4 text-stone-500" />
+                <span>Xem định lượng tiêu hao ↓</span>
               </a>
             </div>
           </div>
@@ -203,40 +211,70 @@ export const DishDetailPage: React.FC = () => {
           {/* Interactive Steppers */}
           <div className="flex flex-wrap items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 p-2.5">
             <div className="flex items-center gap-2 text-xs">
-              <label htmlFor="portionStepp" className="font-medium text-stone-700">
-                Phần/bàn:
-              </label>
-              <input
-                id="portionStepp"
-                type="number"
-                min={1}
-                max={20}
-                value={portionsPerTable}
-                onChange={(e) => setPortionsPerTable(Math.max(1, Number(e.target.value) || 1))}
-                className="w-16 rounded-lg border border-stone-300 bg-white px-2 py-1 text-center font-bold text-stone-800 focus:outline-none focus:border-amber-600 shadow-xs"
-              />
+              <span className="font-medium text-stone-700">Phần/bàn:</span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setPortionsPerTable((p) => Math.max(1, p - 1))}
+                  className="h-7 w-7 rounded-md border border-stone-300 bg-white hover:bg-stone-100 font-bold text-stone-700 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+                >
+                  -
+                </button>
+                <input
+                  id="portionStepp"
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={portionsPerTable}
+                  onChange={(e) => setPortionsPerTable(Math.max(1, Number(e.target.value) || 1))}
+                  className="w-12 rounded-md border border-stone-300 bg-white py-1 text-center font-bold text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => setPortionsPerTable((p) => p + 1)}
+                  className="h-7 w-7 rounded-md border border-stone-300 bg-white hover:bg-stone-100 font-bold text-stone-700 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+                >
+                  +
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center gap-2 text-xs">
-              <label htmlFor="tablesStepp" className="font-medium text-stone-700 flex items-center gap-1">
+              <span className="font-medium text-stone-700 flex items-center gap-1">
                 <Users className="h-3.5 w-3.5 text-amber-700" />
-                <span>Số bàn tiệc:</span>
-              </label>
-              <input
-                id="tablesStepp"
-                type="number"
-                min={1}
-                max={100}
-                value={tableCount}
-                onChange={(e) => setTableCount(Math.max(1, Number(e.target.value) || 1))}
-                className="w-20 rounded-lg border border-stone-300 bg-white px-2 py-1 text-center font-bold text-stone-800 focus:outline-none focus:border-amber-600 shadow-xs"
-              />
+                <span>Số bàn:</span>
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setTableCount((t) => Math.max(1, t - 1))}
+                  className="h-7 w-7 rounded-md border border-stone-300 bg-white hover:bg-stone-100 font-bold text-stone-700 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+                >
+                  -
+                </button>
+                <input
+                  id="tablesStepp"
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={tableCount}
+                  onChange={(e) => setTableCount(Math.max(1, Number(e.target.value) || 1))}
+                  className="w-14 rounded-md border border-stone-300 bg-white py-1 text-center font-bold text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => setTableCount((t) => t + 1)}
+                  className="h-7 w-7 rounded-md border border-stone-300 bg-white hover:bg-stone-100 font-bold text-stone-700 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+                >
+                  +
+                </button>
+              </div>
               <span className="text-[11px] text-stone-500 font-medium">(~{estimatedGuests} khách)</span>
             </div>
 
-            <div className="rounded-lg bg-amber-100/70 border border-amber-200 px-3 py-1 text-xs text-amber-900 font-medium">
+            <div className="rounded-lg bg-amber-100/70 border border-amber-200 px-3 py-1.5 text-xs text-amber-900 font-medium">
               <span>Thành tiền ({totalPortions} phần): </span>
-              <strong className="font-bold text-amber-800 font-mono text-sm">{formatVnd(totalDishCost)}</strong>
+              <strong className="font-bold text-amber-900 font-mono text-sm">{formatVnd(totalDishCost)}</strong>
             </div>
           </div>
         </div>

@@ -199,68 +199,85 @@ export function OrderProgress({
       )}
 
       {/* Modern Stepped Timeline */}
-      {!isTerminalNegative && (
-        <div className="py-2">
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-2 relative">
-            {stepConfig.map((step, idx) => {
-              const Icon = step.icon;
-              const isPast = currentIndex > idx;
-              const isCurrent = currentIndex === idx;
-              const isUpcoming = currentIndex < idx;
+      <div className="py-2">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-2 relative">
+          {stepConfig.map((step, idx) => {
+            const Icon = step.icon;
+            const isFirstStepDone = isTerminalNegative && idx === 0;
+            const isTerminalStep = isTerminalNegative && idx === 1;
+            const isPast = isFirstStepDone || (!isTerminalNegative && currentIndex > idx);
+            const isCurrent = !isTerminalNegative && currentIndex === idx;
 
-              return (
-                <div key={step.status} className="flex flex-col relative group">
-                  {/* Connecting Line for desktop */}
-                  {idx < stepConfig.length - 1 && (
-                    <div
-                      className={`hidden sm:block absolute top-5 left-1/2 w-full h-0.5 z-0 ${
-                        isPast ? 'bg-emerald-500' : 'bg-stone-200'
-                      }`}
-                    />
-                  )}
+            return (
+              <div key={step.status} className="flex flex-col relative group">
+                {/* Connecting Line for desktop */}
+                {idx < stepConfig.length - 1 && (
+                  <div
+                    className={`hidden sm:block absolute top-5 left-1/2 w-full h-0.5 z-0 ${
+                      isPast && !isTerminalStep ? 'bg-emerald-500' : 'bg-stone-200'
+                    }`}
+                  />
+                )}
 
-                  <div className="flex items-center sm:flex-col sm:items-center text-left sm:text-center gap-3 sm:gap-2 z-10">
-                    {/* Circle Node */}
+                <div className="flex items-center sm:flex-col sm:items-center text-left sm:text-center gap-3 sm:gap-2 z-10">
+                  {/* Circle Node */}
+                  <div
+                    className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                      isTerminalStep
+                        ? isCancelled
+                          ? 'bg-rose-100 text-rose-700 border border-rose-300'
+                          : 'bg-stone-200 text-stone-600 border border-stone-300'
+                        : isPast
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : isCurrent
+                        ? 'bg-amber-700 text-white ring-4 ring-amber-100 shadow-sm'
+                        : 'bg-stone-100 text-stone-400 border border-stone-200'
+                    }`}
+                  >
+                    {isTerminalStep ? (
+                      isCancelled ? <XCircle className="h-5 w-5" /> : <Clock4 className="h-5 w-5" />
+                    ) : isPast ? (
+                      <CheckCircle2 className="h-5 w-5 text-white" />
+                    ) : (
+                      <Icon className="h-5 w-5" />
+                    )}
+                  </div>
+
+                  {/* Step Content */}
+                  <div className="min-w-0">
                     <div
-                      className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
-                        isPast
-                          ? 'bg-emerald-600 text-white shadow-xs'
+                      className={`text-xs font-bold ${
+                        isTerminalStep
+                          ? isCancelled
+                            ? 'text-rose-700'
+                            : 'text-stone-600'
+                          : isPast
+                          ? 'text-emerald-800'
                           : isCurrent
-                          ? 'bg-amber-700 text-white ring-4 ring-amber-100 shadow-sm'
-                          : 'bg-stone-100 text-stone-400 border border-stone-200'
+                          ? 'text-stone-900 font-extrabold'
+                          : 'text-stone-400'
                       }`}
                     >
-                      {isPast ? (
-                        <CheckCircle2 className="h-5 w-5 text-white" />
-                      ) : (
-                        <Icon className="h-5 w-5" />
-                      )}
+                      {isTerminalStep
+                        ? isCancelled
+                          ? 'Đã hủy giao dịch'
+                          : 'Hết hạn giữ chỗ'
+                        : step.label}
                     </div>
-
-                    {/* Step Content */}
-                    <div className="min-w-0">
-                      <div
-                        className={`text-xs font-bold ${
-                          isPast
-                            ? 'text-emerald-800'
-                            : isCurrent
-                            ? 'text-stone-900 font-extrabold'
-                            : 'text-stone-400'
-                        }`}
-                      >
-                        {step.label}
-                      </div>
-                      <div className="text-[11px] text-stone-500 mt-0.5 leading-snug">
-                        {step.desc}
-                      </div>
+                    <div className="text-[11px] text-stone-500 mt-0.5 leading-snug">
+                      {isTerminalStep
+                        ? isCancelled
+                          ? 'Đã hoàn lại kho'
+                          : 'Đã hoàn lại kho'
+                        : step.desc}
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
     </section>
   );
 }

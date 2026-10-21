@@ -102,9 +102,9 @@ export const MenuDetailPage: React.FC = () => {
       </nav>
 
       {/* Hero Showcase Card */}
-      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-          <div className="md:col-span-7 space-y-4">
+      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 lg:p-10 shadow-xs overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-7 space-y-5">
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="font-mono text-xs font-bold text-amber-900 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-lg">
                 {menu.code}
@@ -113,14 +113,18 @@ export const MenuDetailPage: React.FC = () => {
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 <span>Thực đơn chuẩn ({menu.itemsCount} món)</span>
               </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-stone-50 px-3 py-1 text-xs font-medium text-stone-600">
+                <Users className="h-3.5 w-3.5 text-stone-500" />
+                <span>10 khách / bàn</span>
+              </span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-bold text-stone-900 tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-bold text-stone-900 tracking-tight leading-tight">
               {menu.name}
             </h1>
 
             {menu.description ? (
-              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-normal">
                 {menu.description}
               </p>
             ) : (
@@ -129,26 +133,50 @@ export const MenuDetailPage: React.FC = () => {
               </p>
             )}
 
-            <div className="pt-2 flex flex-wrap items-baseline gap-4">
-              <div>
-                <span className="block text-[11px] text-stone-400 font-semibold uppercase tracking-wider">
+            {/* Price & Highlight Highlights */}
+            <div className="pt-2 flex flex-wrap items-center gap-4">
+              <div className="rounded-xl bg-amber-50/70 border border-amber-200/80 px-5 py-3">
+                <span className="block text-[11px] text-stone-500 font-semibold uppercase tracking-wider">
                   Đơn giá bàn tiêu chuẩn (10 khách)
                 </span>
                 <span className="text-2xl sm:text-3xl font-bold text-amber-900 tracking-tight">
                   {formatVnd(menu.pricePerTable)}
                 </span>
               </div>
+
+              <div className="space-y-1.5 text-xs text-stone-600">
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Định lượng chuẩn xác cho 10 khách ăn no</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Chế biến nóng sốt ngay trước giờ khai tiệc</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Có thể tùy biến thêm / bớt món tự do</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="md:col-span-5 relative rounded-xl overflow-hidden bg-stone-900 aspect-video sm:aspect-4/3 shadow-sm border border-stone-200">
+          <div className="lg:col-span-5 relative rounded-2xl overflow-hidden bg-stone-900 aspect-video sm:aspect-4/3 shadow-sm border border-stone-200 group">
             <img
               src={menu.imageUrl || DEFAULT_MENU_IMAGE}
               alt={menu.name}
               onError={handleImageError}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover group-hover:scale-102 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-stone-950/60 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white text-xs font-medium">
+              <span className="bg-stone-900/80 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/20">
+                Set {menu.itemsCount} món tiệc chuẩn
+              </span>
+              <span className="text-[11px] text-stone-200">
+                BanquetHub Cuisine
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -175,17 +203,17 @@ export const MenuDetailPage: React.FC = () => {
 
             <div className="divide-y divide-stone-100">
               {menu.items.map((item, idx) => (
-                <div key={item.id} className="py-4 flex items-center gap-4 hover:bg-stone-50/50 rounded-xl px-2 transition-colors">
+                <div key={item.id} className="py-4 flex items-center gap-4 hover:bg-stone-50/60 rounded-xl px-2.5 transition-colors group">
                   <span className="w-6 text-center font-mono text-xs font-bold text-stone-400">
                     {idx + 1}
                   </span>
 
-                  <div className="h-16 w-16 rounded-xl overflow-hidden bg-stone-900 shrink-0 border border-stone-200">
+                  <div className="h-16 w-16 rounded-xl overflow-hidden bg-stone-900 shrink-0 border border-stone-200 shadow-2xs">
                     <img
                       src={item.dishImageUrl || DEFAULT_DISH_IMAGE}
                       alt={item.dishName}
                       onError={handleImageError}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
                     />
                   </div>
@@ -196,16 +224,26 @@ export const MenuDetailPage: React.FC = () => {
                         {item.dishCode}
                       </span>
                       {item.categoryName && (
-                        <span className="rounded-lg bg-stone-100 text-stone-600 px-2 py-0.5 text-[10px] font-semibold border border-stone-200/60">
+                        <span className="rounded-md bg-stone-100 text-stone-600 px-2 py-0.5 text-[10px] font-semibold border border-stone-200/60">
                           {item.categoryName}
                         </span>
                       )}
                     </div>
-                    <h3 className="font-bold text-stone-900 text-sm truncate">
+                    <Link
+                      to={`/dishes/${item.dishId}`}
+                      className="font-bold text-stone-900 text-sm truncate block hover:text-amber-800 transition-colors"
+                      title="Bấm để xem công thức và định lượng nguyên liệu"
+                    >
                       {item.dishName}
-                    </h3>
+                    </Link>
                     <p className="text-xs text-stone-500">
                       Đơn giá món lẻ: <span className="font-semibold text-stone-700">{formatVnd(item.dishPrice)}</span>
+                      <Link
+                        to={`/dishes/${item.dishId}`}
+                        className="ml-2 text-amber-700 hover:underline text-[11px] font-medium"
+                      >
+                        (Xem định lượng nguyên liệu →)
+                      </Link>
                     </p>
                   </div>
 
@@ -213,7 +251,7 @@ export const MenuDetailPage: React.FC = () => {
                     <div className="text-xs font-semibold text-stone-500">
                       {item.quantityPerTable} phần/bàn
                     </div>
-                    <div className="font-bold text-sm text-stone-900">
+                    <div className="font-bold text-sm text-stone-900 font-mono">
                       {formatVnd(item.lineTotalPerTable)}
                     </div>
                   </div>
@@ -235,25 +273,43 @@ export const MenuDetailPage: React.FC = () => {
               <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider">
                 Quy mô bàn tiệc:
               </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  min="1"
-                  max="500"
-                  value={tableCount}
-                  onChange={(e) => setTableCount(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-24 rounded-xl border border-stone-300 py-2 text-center font-bold text-lg text-stone-900 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none shadow-xs"
-                />
-                <span className="text-xs text-stone-500">
-                  Bàn tiệc (khoảng <strong className="text-stone-800">{estimatedGuests}</strong> khách)
+              <div className="flex items-center justify-between bg-stone-50 p-2.5 rounded-xl border border-stone-200">
+                <span className="text-xs text-stone-600">
+                  <strong className="text-stone-900 text-sm">{tableCount}</strong> bàn (~{estimatedGuests} khách)
                 </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setTableCount((prev) => Math.max(1, prev - 1))}
+                    className="h-8 w-8 rounded-lg border border-stone-300 bg-white hover:bg-stone-100 font-bold text-stone-700 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+                    title="Giảm 1 bàn"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    max="500"
+                    value={tableCount}
+                    onChange={(e) => setTableCount(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-14 rounded-lg border border-stone-300 bg-white py-1 text-center font-bold text-sm text-stone-900 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none shadow-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setTableCount((prev) => prev + 1)}
+                    className="h-8 w-8 rounded-lg border border-stone-300 bg-white hover:bg-stone-100 font-bold text-stone-700 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+                    title="Tăng 1 bàn"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </div>
 
             <div className="rounded-xl bg-stone-50 p-4 border border-stone-100 space-y-2.5 text-xs">
               <div className="flex justify-between text-stone-600">
                 <span>Đơn giá 01 bàn:</span>
-                <span className="font-semibold text-stone-900">{formatVnd(menu.pricePerTable)}</span>
+                <span className="font-semibold text-stone-900 font-mono">{formatVnd(menu.pricePerTable)}</span>
               </div>
               <div className="flex justify-between text-stone-600">
                 <span>Số lượng bàn tiệc:</span>
@@ -261,7 +317,7 @@ export const MenuDetailPage: React.FC = () => {
               </div>
               <div className="border-t border-stone-200 pt-2.5 flex justify-between items-baseline text-sm font-bold text-stone-900">
                 <span>Tổng chi phí dự tính:</span>
-                <span className="text-lg font-bold text-amber-900">
+                <span className="text-xl font-bold text-amber-900 font-mono">
                   {formatVnd(totalEstimate)}
                 </span>
               </div>

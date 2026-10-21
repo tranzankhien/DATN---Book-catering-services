@@ -12,6 +12,8 @@ import {
   ExternalLink,
   ChevronRight,
   Loader2,
+  Clock4,
+  XCircle,
 } from 'lucide-react';
 import { paymentService, transactionLabels, type PaymentState } from '../services/paymentService';
 import { extractErrorMessage } from '../services/apiClient';
@@ -181,6 +183,30 @@ export function OrderPaymentPanel({
             </h3>
             <p className="text-xs text-purple-800 leading-relaxed">
               Giao dịch đã được ghi nhận trên hệ thống nhưng cần bộ phận đối soát xác nhận thủ công. Quý khách vui lòng không thanh toán lại để tránh trừ tiền trùng lặp.
+            </p>
+          </div>
+        </div>
+      ) : order.orderStatus === 'EXPIRED' || (!payable && remainingSec <= 0) ? (
+        <div className="rounded-xl bg-stone-100 border border-stone-200 p-4 flex items-start gap-3.5 text-stone-800">
+          <Clock4 className="h-5 w-5 text-stone-500 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h3 className="font-bold text-sm text-stone-900">
+              Đơn tiệc đã hết thời hạn thanh toán
+            </h3>
+            <p className="text-xs text-stone-600 leading-relaxed">
+              Thời hạn khóa giữ kho 15 phút đã kết thúc mà chưa nhận được thanh toán. Toàn bộ nguyên liệu đã được tự động hoàn lại kho. Quý khách có thể bấm nút <strong>"Đặt lại đơn này"</strong> ở phía trên để tái tạo đơn tiệc mới với các món đã chọn.
+            </p>
+          </div>
+        </div>
+      ) : order.orderStatus === 'CANCELLED' ? (
+        <div className="rounded-xl bg-rose-50 border border-rose-200 p-4 flex items-start gap-3.5 text-rose-900">
+          <XCircle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h3 className="font-bold text-sm text-rose-900">
+              Đơn tiệc đã bị hủy
+            </h3>
+            <p className="text-xs text-rose-700 leading-relaxed">
+              Đơn đặt tiệc này đã được hủy và giải phóng nguyên liệu kho an toàn. Quý khách có thể chọn thực đơn khác để lên kế hoạch tiệc mới.
             </p>
           </div>
         </div>

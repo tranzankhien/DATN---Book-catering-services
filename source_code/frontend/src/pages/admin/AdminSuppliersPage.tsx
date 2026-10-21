@@ -525,7 +525,7 @@ export const AdminSuppliersPage: React.FC = () => {
                   id="supActive"
                   checked={form.active ?? true}
                   onChange={(e) => setForm({ ...form, active: e.target.checked })}
-                  className="rounded text-amber-600 focus:ring-amber-500"
+                  className="rounded-md border-stone-300 text-amber-600 focus:ring-amber-500"
                 />
                 <label htmlFor="supActive" className="text-xs font-medium text-stone-700 cursor-pointer">
                   Đang hợp tác và cho phép lập phiếu nhập hàng

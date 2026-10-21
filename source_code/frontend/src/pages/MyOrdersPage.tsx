@@ -223,7 +223,7 @@ export const MyOrdersPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={(e) => copyCode(ord.orderCode, e)}
-                    className="p-1 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-md transition-colors"
+                    className="p-1 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
                     title="Sao chép mã đơn"
                   >
                     <Copy className="h-3.5 w-3.5" />
@@ -248,10 +248,10 @@ export const MyOrdersPage: React.FC = () => {
                 <div className="grid grid-cols-3 gap-2.5 text-xs">
                   <div className="rounded-xl bg-stone-50/80 p-2.5 border border-stone-100">
                     <span className="text-[10px] text-stone-400 font-medium uppercase tracking-wider block">
-                      Ngày tiệc
+                      Thời gian tiệc
                     </span>
-                    <span className="font-bold text-stone-800 truncate block mt-0.5">
-                      {formatDateTimeVn(ord.eventDateTime).split(' ')[1] || formatDateTimeVn(ord.eventDateTime)}
+                    <span className="font-bold text-stone-800 truncate block mt-0.5" title={formatDateTimeVn(ord.eventDateTime)}>
+                      {formatDateTimeVn(ord.eventDateTime)}
                     </span>
                   </div>
 
@@ -260,7 +260,7 @@ export const MyOrdersPage: React.FC = () => {
                       Quy mô
                     </span>
                     <span className="font-bold text-stone-800 truncate block mt-0.5">
-                      {ord.tableCount} bàn {ord.guestCount ? `(~${ord.guestCount}k)` : ''}
+                      {ord.tableCount} bàn {ord.guestCount ? `(~${ord.guestCount} khách)` : `(~${ord.tableCount * 10} khách)`}
                     </span>
                   </div>
 
