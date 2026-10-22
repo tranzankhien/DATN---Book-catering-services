@@ -217,7 +217,7 @@ export const RecipeConfigModal: React.FC<RecipeConfigModalProps> = ({
                         className="w-full rounded-lg border border-stone-300 bg-white pl-3 pr-14 py-2 text-xs text-right font-bold text-amber-700 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 shadow-xs"
                         placeholder="0.00"
                       />
-                      <span className="absolute right-2 px-1.5 py-0.5 rounded bg-stone-100 text-[11px] font-bold text-stone-600 pointer-events-none">
+                      <span className="absolute right-2 px-1.5 py-0.5 rounded-md bg-stone-100 text-[11px] font-bold text-stone-600 pointer-events-none">
                         {currentIng?.unit || ''}
                       </span>
                     </div>
