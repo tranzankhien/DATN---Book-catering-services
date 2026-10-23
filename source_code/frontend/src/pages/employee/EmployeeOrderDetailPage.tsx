@@ -76,7 +76,7 @@ export const EmployeeOrderDetailPage: React.FC = () => {
           Lịch đặt tiệc bếp
         </Link>
         <span>/</span>
-        <span className="font-mono font-bold text-stone-900">{order.orderCode}</span>
+        <span className="font-semibold text-stone-900 tabular-nums">{order.orderCode}</span>
       </nav>
 
       {/* Progress Action Stepper for Kitchen Staff */}
@@ -92,7 +92,7 @@ export const EmployeeOrderDetailPage: React.FC = () => {
                 Phiếu chuẩn bị & Chế biến bếp
               </h1>
             </div>
-            <p className="text-xs text-stone-400 font-mono mt-1">
+            <p className="text-xs text-stone-400 mt-1 tabular-nums">
               Đơn hàng: {order.orderCode} • Trạng thái: {order.orderStatus}
             </p>
           </div>
@@ -101,7 +101,7 @@ export const EmployeeOrderDetailPage: React.FC = () => {
             <span className="block text-[10px] text-stone-400 uppercase tracking-wider font-semibold">
               Quy mô chế biến:
             </span>
-            <span className="font-bold text-stone-900 text-lg">
+            <span className="font-bold text-stone-900 text-lg tabular-nums">
               {order.tableCount} bàn {order.guestCount ? `(~${order.guestCount} khách)` : `(~${order.tableCount * 10} khách)`}
             </span>
           </div>
@@ -110,7 +110,7 @@ export const EmployeeOrderDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
           <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
             <span className="block text-[11px] text-stone-400 font-medium">Thời gian diễn ra tiệc:</span>
-            <span className="font-bold text-stone-900 text-sm mt-0.5 block">
+            <span className="font-bold text-stone-900 text-sm mt-0.5 block tabular-nums">
               {formatDateTimeVn(order.eventDateTime)}
             </span>
           </div>
@@ -118,7 +118,7 @@ export const EmployeeOrderDetailPage: React.FC = () => {
           <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
             <span className="block text-[11px] text-stone-400 font-medium">Khách hàng liên hệ:</span>
             <span className="font-bold text-stone-900 text-sm mt-0.5 block">{order.customerName}</span>
-            <span className="text-stone-500 font-mono">{order.customerPhone}</span>
+            <span className="text-stone-500 tabular-nums">{order.customerPhone}</span>
           </div>
 
           <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
@@ -160,21 +160,21 @@ export const EmployeeOrderDetailPage: React.FC = () => {
             {order.items.map((it, idx) => (
               <div key={it.id} className="py-3.5 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-3">
-                  <span className="w-5 text-center font-mono font-bold text-stone-400">
+                  <span className="w-5 text-center font-bold text-stone-400 tabular-nums">
                     {idx + 1}
                   </span>
                   <div>
                     <h3 className="font-bold text-stone-900 text-sm">
                       {it.dishNameSnapshot}
                     </h3>
-                    <span className="text-[11px] text-stone-500">
+                    <span className="text-[11px] text-stone-500 tabular-nums">
                       Định mức: {it.quantityPerTable} phần/bàn
                     </span>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <span className="font-mono text-lg font-bold text-amber-900 block">
+                  <span className="text-lg font-bold text-amber-900 block tabular-nums">
                     {it.totalQuantity}
                   </span>
                   <span className="text-[10px] text-stone-400 uppercase tracking-wider font-semibold">
@@ -201,11 +201,11 @@ export const EmployeeOrderDetailPage: React.FC = () => {
                 <div key={resItem.id} className="py-2.5 flex items-center justify-between text-xs">
                   <div>
                     <div className="font-bold text-stone-900">{resItem.ingredientName}</div>
-                    <div className="text-[11px] text-stone-400 font-mono">
+                    <div className="text-[11px] text-stone-400 tabular-nums">
                       {resItem.ingredientCode}
                     </div>
                   </div>
-                  <div className="font-mono font-bold text-stone-900 text-sm">
+                  <div className="font-bold text-stone-900 text-sm tabular-nums">
                     {resItem.quantity} {resItem.unit}
                   </div>
                 </div>

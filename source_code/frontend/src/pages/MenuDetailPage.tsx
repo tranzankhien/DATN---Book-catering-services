@@ -106,7 +106,7 @@ export const MenuDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-7 space-y-5">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="font-mono text-xs font-bold text-amber-900 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-lg">
+              <span className="text-xs font-bold text-amber-900 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-lg tabular-nums">
                 {menu.code}
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
@@ -204,7 +204,7 @@ export const MenuDetailPage: React.FC = () => {
             <div className="divide-y divide-stone-100">
               {menu.items.map((item, idx) => (
                 <div key={item.id} className="py-4 flex items-center gap-4 hover:bg-stone-50/60 rounded-xl px-2.5 transition-colors group">
-                  <span className="w-6 text-center font-mono text-xs font-bold text-stone-400">
+                  <span className="w-6 text-center text-xs font-bold text-stone-400 tabular-nums">
                     {idx + 1}
                   </span>
 
@@ -220,7 +220,7 @@ export const MenuDetailPage: React.FC = () => {
 
                   <div className="flex-1 min-w-0 space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-[10px] text-stone-400 font-semibold uppercase">
+                      <span className="text-[10px] text-stone-400 font-semibold uppercase tabular-nums">
                         {item.dishCode}
                       </span>
                       {item.categoryName && (
@@ -237,7 +237,7 @@ export const MenuDetailPage: React.FC = () => {
                       {item.dishName}
                     </Link>
                     <p className="text-xs text-stone-500">
-                      Đơn giá món lẻ: <span className="font-semibold text-stone-700">{formatVnd(item.dishPrice)}</span>
+                      Đơn giá món lẻ: <span className="font-semibold text-stone-700 tabular-nums">{formatVnd(item.dishPrice)}</span>
                       <Link
                         to={`/dishes/${item.dishId}`}
                         className="ml-2 text-amber-700 hover:underline text-[11px] font-medium"
@@ -248,10 +248,10 @@ export const MenuDetailPage: React.FC = () => {
                   </div>
 
                   <div className="text-right shrink-0">
-                    <div className="text-xs font-semibold text-stone-500">
+                    <div className="text-xs font-semibold text-stone-500 tabular-nums">
                       {item.quantityPerTable} phần/bàn
                     </div>
-                    <div className="font-bold text-sm text-stone-900 font-mono">
+                    <div className="font-bold text-sm text-stone-900 tabular-nums">
                       {formatVnd(item.lineTotalPerTable)}
                     </div>
                   </div>
@@ -309,15 +309,15 @@ export const MenuDetailPage: React.FC = () => {
             <div className="rounded-xl bg-stone-50 p-4 border border-stone-100 space-y-2.5 text-xs">
               <div className="flex justify-between text-stone-600">
                 <span>Đơn giá 01 bàn:</span>
-                <span className="font-semibold text-stone-900 font-mono">{formatVnd(menu.pricePerTable)}</span>
+                <span className="font-semibold text-stone-900 tabular-nums">{formatVnd(menu.pricePerTable)}</span>
               </div>
               <div className="flex justify-between text-stone-600">
                 <span>Số lượng bàn tiệc:</span>
-                <span className="font-semibold text-stone-900">{tableCount} bàn</span>
+                <span className="font-semibold text-stone-900 tabular-nums">{tableCount} bàn</span>
               </div>
               <div className="border-t border-stone-200 pt-2.5 flex justify-between items-baseline text-sm font-bold text-stone-900">
                 <span>Tổng chi phí dự tính:</span>
-                <span className="text-xl font-bold text-amber-900 font-mono">
+                <span className="text-xl font-bold text-amber-900 tabular-nums">
                   {formatVnd(totalEstimate)}
                 </span>
               </div>

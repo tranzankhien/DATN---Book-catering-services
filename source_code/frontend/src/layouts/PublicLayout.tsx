@@ -349,8 +349,8 @@ export const PublicLayout: React.FC = () => {
               {/* Thông tin pháp lý & Giấy phép */}
               <div className="pt-2 space-y-1.5 text-[11px] text-stone-500 border-t border-stone-200/70">
                 <p><strong>Công ty Cổ phần Công nghệ Yến tiệc BanquetHub</strong></p>
-                <p>Mã số doanh nghiệp: <span className="font-mono text-stone-700">0318999888</span> do Sở KH&ĐT TP.HCM cấp</p>
-                <p>Giấy phép ATTP: <span className="font-mono text-stone-700">2468/2026/ATTP-HCM</span></p>
+                <p>Mã số doanh nghiệp: <span className="font-semibold text-stone-700 tabular-nums">0318999888</span> do Sở KH&ĐT TP.HCM cấp</p>
+                <p>Giấy phép ATTP: <span className="font-semibold text-stone-700 tabular-nums">2468/2026/ATTP-HCM</span></p>
               </div>
 
               {/* Huy hiệu bảo đảm & tin cậy (Light Elegant Badges) */}

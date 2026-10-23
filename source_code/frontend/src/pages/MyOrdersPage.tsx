@@ -217,7 +217,7 @@ export const MyOrdersPage: React.FC = () => {
               {/* Card Header: Code & Status */}
               <div className="flex items-center justify-between gap-3 border-b border-stone-100 pb-3.5">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm font-bold text-stone-900 bg-stone-50 border border-stone-200 px-2.5 py-1 rounded-lg group-hover:border-amber-300 transition-colors">
+                  <span className="text-sm font-bold text-stone-900 bg-stone-50 border border-stone-200 px-2.5 py-1 rounded-lg group-hover:border-amber-300 transition-colors tabular-nums">
                     {ord.orderCode}
                   </span>
                   <button
@@ -239,7 +239,7 @@ export const MyOrdersPage: React.FC = () => {
                   <h3 className="text-base font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
                     {ord.menuNameSnapshot || 'Thực đơn tiệc tự chọn'}
                   </h3>
-                  <p className="text-[11px] text-stone-400 font-mono mt-0.5">
+                  <p className="text-[11px] text-stone-400 mt-0.5 tabular-nums">
                     Khởi tạo lúc: {formatDateTimeVn(ord.createdAt)}
                   </p>
                 </div>
@@ -250,7 +250,7 @@ export const MyOrdersPage: React.FC = () => {
                     <span className="text-[10px] text-stone-400 font-medium uppercase tracking-wider block">
                       Thời gian tiệc
                     </span>
-                    <span className="font-bold text-stone-800 truncate block mt-0.5" title={formatDateTimeVn(ord.eventDateTime)}>
+                    <span className="font-bold text-stone-800 truncate block mt-0.5 tabular-nums" title={formatDateTimeVn(ord.eventDateTime)}>
                       {formatDateTimeVn(ord.eventDateTime)}
                     </span>
                   </div>
@@ -259,7 +259,7 @@ export const MyOrdersPage: React.FC = () => {
                     <span className="text-[10px] text-stone-400 font-medium uppercase tracking-wider block">
                       Quy mô
                     </span>
-                    <span className="font-bold text-stone-800 truncate block mt-0.5">
+                    <span className="font-bold text-stone-800 truncate block mt-0.5 tabular-nums">
                       {ord.tableCount} bàn {ord.guestCount ? `(~${ord.guestCount} khách)` : `(~${ord.tableCount * 10} khách)`}
                     </span>
                   </div>
@@ -268,7 +268,7 @@ export const MyOrdersPage: React.FC = () => {
                     <span className="text-[10px] text-stone-400 font-medium uppercase tracking-wider block">
                       Số món
                     </span>
-                    <span className="font-bold text-stone-800 truncate block mt-0.5">
+                    <span className="font-bold text-stone-800 truncate block mt-0.5 tabular-nums">
                       {ord.items?.length || 0} món tiệc
                     </span>
                   </div>
@@ -289,7 +289,7 @@ export const MyOrdersPage: React.FC = () => {
                   <span className="block text-[10px] uppercase font-bold tracking-wider text-stone-400">
                     Tổng giá trị tiệc
                   </span>
-                  <span className="text-base sm:text-lg font-bold text-amber-900 font-mono">
+                  <span className="text-base sm:text-lg font-bold text-amber-900 tabular-nums">
                     {formatVnd(ord.totalAmount)}
                   </span>
                 </div>

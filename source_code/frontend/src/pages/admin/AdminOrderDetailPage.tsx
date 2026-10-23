@@ -139,7 +139,7 @@ export const AdminOrderDetailPage: React.FC = () => {
               <span>Danh sách đơn đặt tiệc</span>
             </Link>
             <span>/</span>
-            <span className="font-mono text-stone-900">{order.orderCode}</span>
+            <span className="font-semibold text-stone-900 tabular-nums">{order.orderCode}</span>
           </div>
 
           <h1 className="text-2xl md:text-3xl font-bold text-stone-900 tracking-tight mt-1 flex items-center gap-3">
@@ -153,7 +153,7 @@ export const AdminOrderDetailPage: React.FC = () => {
               <Copy className="h-4 w-4" />
             </button>
           </h1>
-          <p className="text-sm text-stone-500 mt-1 font-mono">
+          <p className="text-sm text-stone-500 mt-1 tabular-nums">
             Tạo lúc: {formatDateTimeVn(order.createdAt)} • Cập nhật lúc: {formatDateTimeVn(order.updatedAt)}
           </p>
         </div>
@@ -249,15 +249,15 @@ export const AdminOrderDetailPage: React.FC = () => {
           <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
             <span className="block text-[11px] text-stone-400 font-medium">Khách hàng:</span>
             <span className="font-bold text-stone-900 text-sm mt-0.5 block">{order.customerName}</span>
-            <span className="font-mono text-stone-500">{order.customerPhone}</span>
+            <span className="text-stone-500 tabular-nums">{order.customerPhone}</span>
           </div>
 
           <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
             <span className="block text-[11px] text-stone-400 font-medium">Thời gian diễn ra:</span>
-            <span className="font-bold text-stone-900 text-sm mt-0.5 block">
+            <span className="font-bold text-stone-900 text-sm mt-0.5 block tabular-nums">
               {formatDateTimeVn(order.eventDateTime)}
             </span>
-            <span className="text-stone-500">
+            <span className="text-stone-500 tabular-nums">
               {order.tableCount} bàn {order.guestCount ? `(~${order.guestCount} khách)` : `(~${order.tableCount * 10} người)`}
             </span>
           </div>
@@ -267,12 +267,12 @@ export const AdminOrderDetailPage: React.FC = () => {
             <span className="font-bold text-stone-900 text-sm mt-0.5 truncate block">
               {order.menuNameSnapshot || 'Thực đơn tự chọn'}
             </span>
-            <span className="text-stone-500">{order.items.length} món ăn</span>
+            <span className="text-stone-500 tabular-nums">{order.items.length} món ăn</span>
           </div>
 
           <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
             <span className="block text-[11px] text-stone-400 font-medium">Tổng giá trị tiệc:</span>
-            <span className="font-mono font-bold text-amber-900 text-lg mt-0.5 block">
+            <span className="font-bold text-amber-900 text-lg mt-0.5 block tabular-nums">
               {formatVnd(order.totalAmount)}
             </span>
           </div>
@@ -317,20 +317,20 @@ export const AdminOrderDetailPage: React.FC = () => {
             {order.items.map((it, idx) => (
               <div key={it.id} className="py-3 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-3">
-                  <span className="w-5 text-center font-mono font-bold text-stone-400">
+                  <span className="w-5 text-center font-bold text-stone-400 tabular-nums">
                     {idx + 1}
                   </span>
                   <div>
                     <div className="font-bold text-stone-900">{it.dishNameSnapshot}</div>
-                    <div className="text-[11px] text-stone-500">
+                    <div className="text-[11px] text-stone-500 tabular-nums">
                       {formatVnd(it.unitPriceSnapshot)} x {it.quantityPerTable} phần/bàn
                     </div>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <div className="font-bold text-stone-900">{formatVnd(it.lineTotal)}</div>
-                  <div className="text-[10px] text-stone-400 font-mono">Tổng: {it.totalQuantity} phần</div>
+                  <div className="font-bold text-stone-900 tabular-nums">{formatVnd(it.lineTotal)}</div>
+                  <div className="text-[10px] text-stone-400 tabular-nums">Tổng: {it.totalQuantity} phần</div>
                 </div>
               </div>
             ))}
@@ -338,7 +338,7 @@ export const AdminOrderDetailPage: React.FC = () => {
 
           <div className="border-t border-stone-200 pt-3 flex justify-between items-baseline text-sm font-bold text-stone-900">
             <span>Tổng cộng:</span>
-            <span className="text-xl font-bold text-amber-900">
+            <span className="text-xl font-bold text-amber-900 tabular-nums">
               {formatVnd(order.totalAmount)}
             </span>
           </div>
@@ -390,7 +390,7 @@ export const AdminOrderDetailPage: React.FC = () => {
                 {order.reservation.items.map((resItem) => (
                   <div key={resItem.id} className="py-2 px-2 flex items-center justify-between hover:bg-white rounded-lg transition-colors">
                     <span className="text-stone-800 font-medium truncate pr-2">{resItem.ingredientName}</span>
-                    <span className="font-mono font-bold text-amber-900 bg-white border border-stone-200/90 px-2.5 py-0.5 rounded-lg shrink-0 shadow-2xs">
+                    <span className="font-bold text-amber-900 bg-white border border-stone-200/90 px-2.5 py-0.5 rounded-lg shrink-0 shadow-2xs tabular-nums">
                       {formatQuantity(resItem.quantity)} {resItem.unit}
                     </span>
                   </div>
@@ -419,7 +419,7 @@ export const AdminOrderDetailPage: React.FC = () => {
                     {hist.fromStatus ? `${hist.fromStatus} → ` : ''}
                     <span className="text-amber-900">{hist.toStatus}</span>
                   </div>
-                  <div className="text-[11px] text-stone-400 font-mono mt-0.5">
+                  <div className="text-[11px] text-stone-400 mt-0.5 tabular-nums">
                     {formatDateTimeVn(hist.createdAt)}
                   </div>
                   {hist.reason && (

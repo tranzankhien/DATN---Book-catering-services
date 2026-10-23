@@ -129,7 +129,7 @@ export const RecipeConfigModal: React.FC<RecipeConfigModalProps> = ({
                 Định lượng công thức: {dish.name}
               </h2>
               <p className="text-xs text-stone-500">
-                Mã món: <span className="font-mono text-stone-700 font-semibold">{dish.code}</span> •
+                Mã món: <span className="text-stone-700 font-semibold tabular-nums">{dish.code}</span> •
                 Tính chuẩn cho 01 phần phục vụ (Tự động nhân cấp theo số bàn)
               </p>
             </div>

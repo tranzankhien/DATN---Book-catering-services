@@ -635,7 +635,7 @@ export const HomePage: React.FC = () => {
                   <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center font-bold">
                     <Utensils className="h-5 w-5" />
                   </div>
-                  <span className="font-mono text-2xl font-black text-amber-900/20">01</span>
+                  <span className="text-2xl font-black text-amber-900/20 tabular-nums">01</span>
                 </div>
                 <h3 className="text-base font-bold text-stone-900">
                   Khám phá & chọn món
@@ -655,7 +655,7 @@ export const HomePage: React.FC = () => {
                   <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center font-bold">
                     <Scale className="h-5 w-5" />
                   </div>
-                  <span className="font-mono text-2xl font-black text-amber-900/20">02</span>
+                  <span className="text-2xl font-black text-amber-900/20 tabular-nums">02</span>
                 </div>
                 <h3 className="text-base font-bold text-stone-900">
                   Tự tính giá thời gian thực
@@ -675,7 +675,7 @@ export const HomePage: React.FC = () => {
                   <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center font-bold">
                     <Clock className="h-5 w-5" />
                   </div>
-                  <span className="font-mono text-2xl font-black text-amber-900/20">03</span>
+                  <span className="text-2xl font-black text-amber-900/20 tabular-nums">03</span>
                 </div>
                 <h3 className="text-base font-bold text-stone-900">
                   Khóa giữ chỗ 15 phút
@@ -695,7 +695,7 @@ export const HomePage: React.FC = () => {
                   <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center font-bold">
                     <ChefHat className="h-5 w-5" />
                   </div>
-                  <span className="font-mono text-2xl font-black text-amber-900/20">04</span>
+                  <span className="text-2xl font-black text-amber-900/20 tabular-nums">04</span>
                 </div>
                 <h3 className="text-base font-bold text-stone-900">
                   Chế biến & phục vụ tiệc

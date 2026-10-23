@@ -154,7 +154,7 @@ export const BookingConfirmationPage: React.FC = () => {
           Đơn tiệc của tôi
         </Link>
         <span>/</span>
-        <span className="font-mono font-bold text-stone-900">Xác nhận {order.orderCode}</span>
+        <span className="font-bold text-stone-900 tabular-nums">Xác nhận {order.orderCode}</span>
       </nav>
 
       {/* Success Celebration Banner (Spans Full Width 7xl) */}
@@ -216,7 +216,7 @@ export const BookingConfirmationPage: React.FC = () => {
               <span className="block text-[10px] uppercase font-bold tracking-wider text-stone-400">
                 Mã hợp đồng tiệc
               </span>
-              <span className="font-mono text-base sm:text-lg font-bold text-stone-900">
+              <span className="text-base sm:text-lg font-bold text-stone-900 tabular-nums">
                 {order.orderCode}
               </span>
             </div>
@@ -249,14 +249,14 @@ export const BookingConfirmationPage: React.FC = () => {
                     Thực đơn bàn tiệc ({order.items.length} món)
                   </h2>
                   <p className="text-xs text-stone-500">
-                    Áp dụng: <strong className="text-stone-800">{order.menuNameSnapshot || 'Thực đơn tự chọn'}</strong> • Quy mô: <strong className="text-stone-800">{order.tableCount} bàn</strong>
+                    Áp dụng: <strong className="text-stone-800">{order.menuNameSnapshot || 'Thực đơn tự chọn'}</strong> • Quy mô: <strong className="text-stone-800 tabular-nums">{order.tableCount} bàn</strong>
                   </p>
                 </div>
               </div>
 
               <div className="text-right">
                 <span className="block text-[11px] text-stone-400 font-medium">Tổng giá trị</span>
-                <span className="font-mono font-bold text-amber-900 text-base sm:text-lg">
+                <span className="font-bold text-amber-900 text-base sm:text-lg tabular-nums">
                   {formatVnd(order.totalAmount)}
                 </span>
               </div>
@@ -267,24 +267,24 @@ export const BookingConfirmationPage: React.FC = () => {
               {order.items.map((it, idx) => (
                 <div key={it.id} className="py-3 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-lg bg-stone-100 flex items-center justify-center font-mono font-bold text-stone-500 text-[11px] shrink-0">
+                    <span className="w-6 h-6 rounded-lg bg-stone-100 flex items-center justify-center font-bold text-stone-500 text-[11px] shrink-0 tabular-nums">
                       {idx + 1}
                     </span>
                     <div>
                       <div className="font-bold text-stone-900 text-xs sm:text-sm">
                         {it.dishNameSnapshot}
                       </div>
-                      <div className="text-[11px] text-stone-500 mt-0.5">
+                      <div className="text-[11px] text-stone-500 mt-0.5 tabular-nums">
                         {formatVnd(it.unitPriceSnapshot)} / phần • {it.quantityPerTable} phần/bàn
                       </div>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <div className="font-bold text-stone-900 text-xs sm:text-sm font-mono">
+                    <div className="font-bold text-stone-900 text-xs sm:text-sm tabular-nums">
                       {formatVnd(it.lineTotal)}
                     </div>
-                    <div className="text-[10px] text-stone-400 font-mono">
+                    <div className="text-[10px] text-stone-400 tabular-nums">
                       Tổng {it.totalQuantity} phần ({order.tableCount} bàn)
                     </div>
                   </div>
@@ -294,7 +294,7 @@ export const BookingConfirmationPage: React.FC = () => {
 
             <div className="pt-4 border-t border-stone-200 flex justify-between items-center text-xs sm:text-sm">
               <span className="font-semibold text-stone-600">Tổng cộng thanh toán (Đã gồm phí dịch vụ):</span>
-              <span className="font-mono text-lg sm:text-xl font-bold text-amber-900">
+              <span className="text-lg sm:text-xl font-bold text-amber-900 tabular-nums">
                 {formatVnd(order.totalAmount)}
               </span>
             </div>
@@ -317,7 +317,7 @@ export const BookingConfirmationPage: React.FC = () => {
                 </div>
                 <div>
                   <span className="block text-[11px] text-stone-400 font-medium">Số điện thoại:</span>
-                  <span className="font-mono font-semibold text-stone-900">{order.customerPhone}</span>
+                  <span className="font-semibold text-stone-900 tabular-nums">{order.customerPhone}</span>
                 </div>
                 <div>
                   <span className="block text-[11px] text-stone-400 font-medium">Hộp thư nhận biên nhận:</span>
@@ -398,7 +398,7 @@ export const BookingConfirmationPage: React.FC = () => {
             <div className="rounded-xl bg-stone-50 p-3.5 border border-stone-200/70 text-xs space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-stone-500">Hotline đặt tiệc:</span>
-                <span className="font-mono font-bold text-amber-900 text-sm">1900 8899</span>
+                <span className="font-bold text-amber-900 text-sm tabular-nums">1900 8899</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-stone-500">Cam kết chất lượng:</span>

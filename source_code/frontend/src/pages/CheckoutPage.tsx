@@ -605,7 +605,7 @@ export const CheckoutPage: React.FC = () => {
                   </h3>
                 </div>
                 {isPreviewSynchronized && preview && (
-                  <span className="font-mono text-xs font-semibold text-stone-500">
+                  <span className="text-xs font-semibold text-stone-500 tabular-nums">
                     {preview.tableCount} bàn
                   </span>
                 )}
@@ -666,7 +666,7 @@ export const CheckoutPage: React.FC = () => {
                           <div className="font-bold text-stone-900">
                             {formatVnd(it.lineTotal)}
                           </div>
-                          <div className="text-[10px] text-stone-400 font-mono">
+                          <div className="text-[10px] text-stone-400 tabular-nums">
                             Tổng {it.totalQuantity} phần
                           </div>
                         </div>

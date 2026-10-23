@@ -173,7 +173,7 @@ export const OrderDetailPage: React.FC = () => {
           Đơn tiệc của tôi
         </Link>
         <span>/</span>
-        <span className="font-mono font-bold text-stone-900">{order.orderCode}</span>
+        <span className="font-semibold text-stone-900 tracking-wider tabular-nums">{order.orderCode}</span>
       </nav>
 
       {/* Header Summary Banner (Spans Full Width 7xl) */}
@@ -181,7 +181,7 @@ export const OrderDetailPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-100 pb-5">
           <div>
             <div className="flex items-center gap-3">
-              <span className="font-mono text-2xl font-bold text-stone-900">{order.orderCode}</span>
+              <h1 className="text-2xl font-bold tracking-tight text-stone-900 tabular-nums">{order.orderCode}</h1>
               <button
                 type="button"
                 onClick={copyOrderCode}
@@ -191,8 +191,8 @@ export const OrderDetailPage: React.FC = () => {
                 <Copy className="h-4 w-4" />
               </button>
             </div>
-            <p className="text-xs text-stone-400 font-mono mt-1">
-              Tạo lúc: {formatDateTimeVn(order.createdAt)} • Cập nhật: {formatDateTimeVn(order.updatedAt)}
+            <p className="text-xs text-stone-500 mt-1">
+              Khởi tạo lúc: {formatDateTimeVn(order.createdAt)} • Cập nhật: {formatDateTimeVn(order.updatedAt)}
             </p>
           </div>
 
@@ -233,10 +233,10 @@ export const OrderDetailPage: React.FC = () => {
               type="button"
               onClick={handleReorder}
               className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-              title="Khôi phục lại danh sách món và số bàn vào Menu Builder"
+              title="Khôi phục lại danh sách món và số bàn vào Bàn Phối Món"
             >
               <RotateCcw className="h-3.5 w-3.5 text-amber-700" />
-              <span>Đặt lại đơn này</span>
+              <span>Tái tạo đơn tiệc này</span>
             </button>
 
             {eligibleToCancel && (
@@ -259,58 +259,38 @@ export const OrderDetailPage: React.FC = () => {
           </p>
         )}
 
-        {/* Fact Grid */}
+        {/* Fact Grid: Balanced, non-redundant 4-card overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-          <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
-            <span className="block text-[11px] text-stone-400 font-medium">Thời gian tiệc:</span>
-            <span className="font-bold text-stone-900 text-sm mt-0.5 block">
+          <div className="rounded-xl bg-stone-50 p-4 border border-stone-100 space-y-1">
+            <div className="flex items-center gap-1.5 text-[11px] text-stone-500 font-medium">
+              <Calendar className="h-3.5 w-3.5 text-amber-700" />
+              <span>Thời gian diễn ra</span>
+            </div>
+            <span className="font-bold text-stone-900 text-sm block">
               {formatDateTimeVn(order.eventDateTime)}
             </span>
           </div>
 
-          <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
-            <span className="block text-[11px] text-stone-400 font-medium">Quy mô bàn tiệc:</span>
-            <span className="font-bold text-stone-900 text-sm mt-0.5 block">
+          <div className="rounded-xl bg-stone-50 p-4 border border-stone-100 space-y-1">
+            <div className="flex items-center gap-1.5 text-[11px] text-stone-500 font-medium">
+              <Users className="h-3.5 w-3.5 text-amber-700" />
+              <span>Quy mô bàn tiệc</span>
+            </div>
+            <span className="font-bold text-stone-900 text-sm block">
               {order.tableCount} bàn {order.guestCount ? `(~${order.guestCount} khách)` : `(~${order.tableCount * 10} khách)`}
             </span>
           </div>
 
-          <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
-            <span className="block text-[11px] text-stone-400 font-medium">Thực đơn áp dụng:</span>
-            <span className="font-bold text-stone-900 text-sm mt-0.5 truncate block">
-              {order.menuNameSnapshot || 'Thực đơn tự chọn'}
-            </span>
-          </div>
-
-          <div className="rounded-xl bg-stone-50 p-4 border border-stone-100">
-            <span className="block text-[11px] text-stone-400 font-medium">Tổng giá trị đơn:</span>
-            <span className="font-bold text-amber-900 text-base mt-0.5 block">
-              {formatVnd(order.totalAmount)}
-            </span>
-          </div>
-        </div>
-
-        {/* Customer, Location & Note */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs pt-1">
-          <div className="space-y-1">
-            <span className="font-semibold text-stone-500 uppercase tracking-wider text-[11px]">
-              Người liên hệ:
-            </span>
-            <div className="font-bold text-stone-800">
-              {order.customerName} • {order.customerPhone}
+          <div className="rounded-xl bg-stone-50 p-4 border border-stone-100 space-y-1">
+            <div className="flex items-center gap-1.5 text-[11px] text-stone-500 font-medium">
+              <MapPin className="h-3.5 w-3.5 text-amber-700" />
+              <span>Địa điểm tổ chức</span>
             </div>
-            <div className="text-stone-500">{order.customerEmail}</div>
-          </div>
-
-          <div className="space-y-1">
-            <span className="font-semibold text-stone-500 uppercase tracking-wider text-[11px]">
-              Địa điểm tổ chức:
-            </span>
-            <div className="font-bold text-stone-800">
+            <div className="font-bold text-stone-900 text-sm truncate">
               {order.eventLocation || 'Chưa cung cấp'}
               {order.eventLatitude != null && order.eventLongitude != null && (
                 <a
-                  className="ml-2 text-amber-800 underline font-normal"
+                  className="ml-2 text-amber-800 underline font-normal text-xs"
                   target="_blank"
                   rel="noreferrer"
                   href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}
@@ -319,30 +299,36 @@ export const OrderDetailPage: React.FC = () => {
                 </a>
               )}
             </div>
-            {order.guestCount ? (
-              <div className="text-stone-500">Quy mô: {order.guestCount} khách ({order.tableCount} bàn)</div>
-            ) : (
-              <div className="text-stone-400 italic">Chưa cung cấp số khách</div>
-            )}
           </div>
 
-          {order.note ? (
-            <div className="space-y-1">
-              <span className="font-semibold text-stone-500 uppercase tracking-wider text-[11px]">
-                Ghi chú của khách:
-              </span>
-              <p className="rounded-xl bg-stone-50 p-2.5 text-stone-700 border border-stone-200 text-xs">
-                {order.note}
-              </p>
+          <div className="rounded-xl bg-amber-50/60 p-4 border border-amber-200/80 space-y-1">
+            <div className="flex items-center gap-1.5 text-[11px] text-amber-800 font-medium">
+              <CreditCard className="h-3.5 w-3.5 text-amber-700" />
+              <span>Tổng giá trị đơn</span>
             </div>
-          ) : (
-            <div className="space-y-1">
-              <span className="font-semibold text-stone-500 uppercase tracking-wider text-[11px]">
-                Ghi chú:
-              </span>
-              <p className="text-stone-400 italic">Không có ghi chú thêm</p>
-            </div>
-          )}
+            <span className="font-bold text-amber-900 text-lg tabular-nums block">
+              {formatVnd(order.totalAmount)}
+            </span>
+          </div>
+        </div>
+
+        {/* Customer contact strip and notes (Integrated cleanly, NO duplicate quy mô) */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-2 border-t border-stone-100 text-xs text-stone-600">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span className="font-semibold text-stone-700">Khách hàng:</span>
+            <span className="text-stone-900 font-bold">{order.customerName}</span>
+            <span>•</span>
+            <span className="text-stone-800 tabular-nums">{order.customerPhone}</span>
+            <span>•</span>
+            <span className="text-stone-500">{order.customerEmail}</span>
+          </div>
+
+          <div className="flex items-center gap-2 max-w-md">
+            <span className="font-semibold text-stone-700 shrink-0">Ghi chú:</span>
+            <span className="text-stone-600 truncate italic">
+              {order.note ? `"${order.note}"` : 'Không có ghi chú thêm'}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -369,9 +355,9 @@ export const OrderDetailPage: React.FC = () => {
 
             <div className="divide-y divide-stone-100">
               {order.items.map((it, idx) => (
-                <div key={it.id} className="py-3 flex items-center justify-between text-xs">
+                <div key={it.id} className="py-3.5 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-3">
-                    <span className="w-5 text-center font-mono font-bold text-stone-400">
+                    <span className="w-5 text-center font-bold text-stone-400 tabular-nums">
                       {idx + 1}
                     </span>
                     <div className="h-10 w-10 rounded-lg overflow-hidden bg-stone-100 shrink-0 border border-stone-200">
@@ -386,17 +372,17 @@ export const OrderDetailPage: React.FC = () => {
                       <div className="font-bold text-stone-900 text-xs sm:text-sm">
                         {it.dishNameSnapshot}
                       </div>
-                      <div className="text-[11px] text-stone-500 mt-0.5">
+                      <div className="text-[11px] text-stone-500 mt-0.5 tabular-nums">
                         {formatVnd(it.unitPriceSnapshot)} x {it.quantityPerTable} phần/bàn
                       </div>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <div className="font-bold text-stone-900 text-xs sm:text-sm font-mono">
+                    <div className="font-bold text-stone-900 text-xs sm:text-sm tabular-nums">
                       {formatVnd(it.lineTotal)}
                     </div>
-                    <div className="text-[10px] text-stone-400 font-mono">
+                    <div className="text-[10px] text-stone-400 tabular-nums">
                       Tổng {it.totalQuantity} phần
                     </div>
                   </div>
@@ -406,7 +392,7 @@ export const OrderDetailPage: React.FC = () => {
 
             <div className="border-t border-stone-200 pt-3 flex justify-between items-baseline text-sm font-bold text-stone-900">
               <span>Tổng cộng thanh toán:</span>
-              <span className="text-xl font-bold text-amber-900">
+              <span className="text-xl font-bold text-amber-900 tabular-nums">
                 {formatVnd(order.totalAmount)}
               </span>
             </div>
@@ -431,7 +417,7 @@ export const OrderDetailPage: React.FC = () => {
                   <div className="font-bold text-stone-900">
                     {hist.fromStatus ? `${hist.fromStatus} → ` : ''}{hist.toStatus}
                   </div>
-                  <div className="text-[11px] text-stone-400 font-mono">
+                  <div className="text-[11px] text-stone-400 tabular-nums">
                     {formatDateTimeVn(hist.createdAt)}
                   </div>
                   {hist.reason && (
@@ -474,20 +460,48 @@ export const OrderDetailPage: React.FC = () => {
             <div className="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-xs space-y-3">
               <div className="flex items-center justify-between border-b border-stone-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                  <ShieldCheck className={`h-4 w-4 ${
+                    order.reservation.status === 'ACTIVE'
+                      ? 'text-emerald-600'
+                      : order.reservation.status === 'CONSUMED'
+                      ? 'text-blue-600'
+                      : 'text-stone-400'
+                  }`} />
                   <h3 className="font-bold text-xs uppercase tracking-wider text-stone-900">
                     Khóa giữ kho nguyên liệu
                   </h3>
                 </div>
-                <span className="font-mono text-[11px] font-bold text-stone-700 bg-stone-100 px-2 py-0.5 rounded-lg border border-stone-200">
-                  {order.reservation.status}
+                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+                  order.reservation.status === 'ACTIVE'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                    : order.reservation.status === 'CONSUMED'
+                    ? 'bg-blue-50 text-blue-800 border-blue-200'
+                    : 'bg-stone-100 text-stone-600 border-stone-200'
+                }`}>
+                  {order.reservation.status === 'ACTIVE'
+                    ? 'Đang giữ chỗ'
+                    : order.reservation.status === 'CONSUMED'
+                    ? 'Đã xuất kho'
+                    : order.reservation.status === 'EXPIRED'
+                    ? 'Đã hoàn kho'
+                    : 'Đã giải phóng'}
                 </span>
               </div>
 
-              <p className="text-xs text-stone-600 leading-relaxed">
-                Đã khóa giữ <strong>{order.reservation.items.length}</strong> loại nguyên liệu trong kho. Thời hạn giữ chỗ:{' '}
-                <strong className="text-stone-900">{formatDateTimeVn(order.reservation.expiresAt)}</strong>.
-              </p>
+              {order.reservation.status === 'ACTIVE' ? (
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  Đang khóa giữ an toàn <strong>{order.reservation.items?.length || 0}</strong> loại nguyên liệu trong kho. Thời hạn giữ chỗ: {' '}
+                  <strong className="text-stone-900 tabular-nums">{formatDateTimeVn(order.reservation.expiresAt)}</strong>.
+                </p>
+              ) : order.reservation.status === 'CONSUMED' ? (
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  Đã chuyển giao <strong>{order.reservation.items?.length || 0}</strong> loại nguyên liệu an toàn từ kho sang bộ phận bếp để chuẩn bị tiệc.
+                </p>
+              ) : (
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  Thời hạn giữ kho 15 phút đã kết thúc lúc <strong className="text-stone-900 tabular-nums">{formatDateTimeVn(order.reservation.expiresAt)}</strong>. Toàn bộ <strong>{order.reservation.items?.length || 0}</strong> loại nguyên liệu đã được tự động hoàn lại kho khả dụng.
+                </p>
+              )}
             </div>
           )}
 
@@ -504,7 +518,7 @@ export const OrderDetailPage: React.FC = () => {
             </p>
             <div className="rounded-xl bg-stone-50 p-3 border border-stone-200 text-xs flex justify-between items-center">
               <span className="text-stone-500">Hotline phục vụ:</span>
-              <span className="font-mono font-bold text-amber-900 text-sm">1900 8899</span>
+              <span className="font-bold text-amber-900 text-sm tabular-nums">1900 8899</span>
             </div>
           </div>
         </div>

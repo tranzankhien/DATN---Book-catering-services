@@ -329,7 +329,7 @@ export const AdminCatalogPage: React.FC = () => {
                               />
                             </div>
                             <div>
-                              <span className="font-mono text-[10px] text-stone-500 font-semibold">
+                              <span className="text-[10px] text-stone-500 font-semibold tabular-nums">
                                 {dish.code}
                               </span>
                               <p className="font-bold text-stone-900 text-xs sm:text-sm">{dish.name}</p>
@@ -450,7 +450,7 @@ export const AdminCatalogPage: React.FC = () => {
               <tbody className="divide-y divide-stone-100 text-xs">
                 {ingredients.map((ing) => (
                   <tr key={ing.id} className="hover:bg-amber-50/20 transition-colors group">
-                    <td className="py-3.5 px-4 font-mono font-bold text-stone-800 whitespace-nowrap bg-stone-50/40">
+                    <td className="py-3.5 px-4 font-bold text-stone-800 whitespace-nowrap bg-stone-50/40 tabular-nums">
                       {ing.code}
                     </td>
                     <td className="py-3.5 px-4 font-bold text-stone-900 group-hover:text-amber-800 transition-colors text-sm">
@@ -461,13 +461,13 @@ export const AdminCatalogPage: React.FC = () => {
                         {ing.unit}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-right font-medium text-stone-600 font-mono whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-right font-medium text-stone-600 whitespace-nowrap tabular-nums">
                       {formatQuantity(ing.minStockThreshold)} <span className="text-[11px] text-stone-400 font-normal">{ing.unit}</span>
                     </td>
-                    <td className="py-3.5 px-4 text-right font-mono font-bold text-emerald-700 whitespace-nowrap text-sm">
+                    <td className="py-3.5 px-4 text-right font-bold text-emerald-700 whitespace-nowrap text-sm tabular-nums">
                       {formatQuantity(ing.currentStock)} <span className="text-[11px] text-stone-400 font-normal">{ing.unit}</span>
                     </td>
-                    <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 whitespace-nowrap text-sm">
+                    <td className="py-3.5 px-4 text-right font-bold text-amber-900 whitespace-nowrap text-sm tabular-nums">
                       {formatVnd(ing.avgUnitCost)}
                     </td>
                     <td className="py-3 px-4 text-right">

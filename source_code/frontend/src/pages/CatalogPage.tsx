@@ -529,7 +529,7 @@ export const CatalogPage: React.FC = () => {
                     <Users className="h-3.5 w-3.5 text-amber-700" />
                     <span>Quy mô bàn tiệc:</span>
                   </label>
-                  <span className="text-xs font-bold text-amber-800 font-mono">
+                  <span className="text-xs font-bold text-amber-800 tabular-nums">
                     {tableCount} bàn (~{estimatedGuests} khách)
                   </span>
                 </div>

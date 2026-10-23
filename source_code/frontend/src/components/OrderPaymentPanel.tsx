@@ -133,7 +133,7 @@ export function OrderPaymentPanel({
               <h2 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                 Thanh toán trực tuyến VietQR
               </h2>
-              <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200">
                 SePay Sandbox
               </span>
             </div>
@@ -194,7 +194,7 @@ export function OrderPaymentPanel({
               Đơn tiệc đã hết thời hạn thanh toán
             </h3>
             <p className="text-xs text-stone-600 leading-relaxed">
-              Thời hạn khóa giữ kho 15 phút đã kết thúc mà chưa nhận được thanh toán. Toàn bộ nguyên liệu đã được tự động hoàn lại kho. Quý khách có thể bấm nút <strong>"Đặt lại đơn này"</strong> ở phía trên để tái tạo đơn tiệc mới với các món đã chọn.
+              Thời hạn khóa giữ kho 15 phút đã kết thúc mà chưa nhận được thanh toán. Toàn bộ nguyên liệu đã được tự động hoàn lại kho. Quý khách có thể bấm nút <strong>"Tái tạo đơn tiệc này"</strong> ở thanh thông tin phía trên để mở lại thực đơn và chọn ngày giờ mới.
             </p>
           </div>
         </div>
@@ -231,7 +231,7 @@ export function OrderPaymentPanel({
               <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
                 Còn lại:
               </span>
-              <span className="font-mono text-sm font-bold text-amber-900">
+              <span className="text-sm font-bold text-amber-900 tabular-nums">
                 {String(remainingMin).padStart(2, '0')}:{String(remainingSecRem).padStart(2, '0')}
               </span>
             </div>
@@ -278,22 +278,12 @@ export function OrderPaymentPanel({
         </div>
       )}
 
-      {allowPayment && status === 'UNPAID' && !payable && (
-        <div className="text-xs text-stone-500 flex items-center gap-1.5 pt-1">
-          <span>Thời hạn thanh toán đã qua. Quý khách vui lòng</span>
-          <Link to="/menus" className="font-semibold text-amber-800 hover:underline">
-            chọn mẫu thực đơn mới
-          </Link>
-          <span>hoặc liên hệ hotline để được phục vụ.</span>
-        </div>
-      )}
-
       {/* Transactions List */}
       {state?.transactions && state.transactions.length > 0 && (
         <div className="pt-3 border-t border-stone-100 space-y-3">
           <div className="flex items-center justify-between text-xs font-bold text-stone-700 uppercase tracking-wider">
             <span>Lịch sử giao dịch ({state.transactions.length})</span>
-            <span className="font-normal font-mono text-stone-400">VietQR Gateway</span>
+            <span className="font-normal text-stone-400 text-[11px]">VietQR Gateway</span>
           </div>
 
           <div className="divide-y divide-stone-100 rounded-xl border border-stone-200 overflow-hidden bg-stone-50/50">
@@ -314,11 +304,11 @@ export function OrderPaymentPanel({
                     >
                       {transactionLabels[tx.status] || tx.status}
                     </span>
-                    <span className="font-mono font-bold text-stone-900">
+                    <span className="font-bold text-stone-900 tabular-nums">
                       {formatVnd(tx.amount)}
                     </span>
                     {tx.bankCode && (
-                      <span className="text-[10px] text-stone-600 bg-stone-100 border border-stone-200/70 px-2 py-0.5 rounded-lg font-mono">
+                      <span className="text-[10px] text-stone-600 bg-stone-100 border border-stone-200/70 px-2 py-0.5 rounded-lg font-semibold tabular-nums">
                         {tx.bankCode}
                       </span>
                     )}
@@ -326,7 +316,7 @@ export function OrderPaymentPanel({
 
                   <div className="flex items-center gap-2 text-stone-500 text-[11px]">
                     <span>Mã tham chiếu:</span>
-                    <span className="font-mono font-semibold text-stone-800">{tx.transactionReference}</span>
+                    <span className="font-semibold text-stone-800 tabular-nums">{tx.transactionReference}</span>
                     <button
                       type="button"
                       onClick={() => copyToClipboard(tx.transactionReference)}
@@ -342,7 +332,7 @@ export function OrderPaymentPanel({
 
                   {tx.providerTransactionNo && (
                     <div className="text-[11px] text-stone-500">
-                      Mã SePay: <span className="font-mono text-stone-700">{tx.providerTransactionNo}</span>
+                      Mã SePay: <span className="font-semibold text-stone-700 tabular-nums">{tx.providerTransactionNo}</span>
                     </div>
                   )}
 

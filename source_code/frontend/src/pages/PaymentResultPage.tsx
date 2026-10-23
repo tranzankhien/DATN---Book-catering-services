@@ -186,7 +186,7 @@ export function PaymentResultPage() {
                 <Receipt className="h-4 w-4 text-amber-700" />
                 <span>Biên lai xác nhận thanh toán trực tuyến</span>
               </div>
-              <span className="font-mono text-xs font-bold text-stone-500">
+              <span className="text-xs font-bold text-stone-500 tabular-nums">
                 Đơn hàng #{state.orderId}
               </span>
             </div>
@@ -194,7 +194,7 @@ export function PaymentResultPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               <div className="bg-white p-3.5 rounded-xl border border-stone-200/70 shadow-2xs">
                 <span className="block text-[11px] text-stone-400 font-medium">Số tiền thanh toán:</span>
-                <span className="font-mono font-bold text-stone-900 text-base mt-0.5 block">
+                <span className="font-bold text-stone-900 text-base mt-0.5 block tabular-nums">
                   {latestTx ? formatVnd(latestTx.amount) : 'Theo đơn tiệc'}
                 </span>
               </div>
@@ -230,7 +230,7 @@ export function PaymentResultPage() {
 
             {latestTx?.paidAt && (
               <p className="text-[11px] text-stone-500 text-right">
-                Thời gian ghi nhận giao dịch: <strong className="text-stone-700 font-mono">{formatDateTimeVn(latestTx.paidAt)}</strong>
+                Thời gian ghi nhận giao dịch: <strong className="text-stone-700 tabular-nums">{formatDateTimeVn(latestTx.paidAt)}</strong>
               </p>
             )}
           </div>

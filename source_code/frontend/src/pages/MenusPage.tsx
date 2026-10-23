@@ -196,7 +196,7 @@ export const MenusPage: React.FC = () => {
 
                 {/* Floating Top Badges */}
                 <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-amber-200 bg-stone-950/85 backdrop-blur-md px-2.5 py-1 rounded-lg border border-amber-500/30 shadow-xs">
+                  <span className="text-xs font-bold text-amber-200 bg-stone-950/85 backdrop-blur-md px-2.5 py-1 rounded-lg border border-amber-500/30 shadow-xs tabular-nums">
                     {menu.code}
                   </span>
                   <span className="text-[11px] font-semibold text-stone-100 bg-stone-900/80 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/20">
@@ -238,7 +238,7 @@ export const MenusPage: React.FC = () => {
                           <Check className="h-3 w-3 text-emerald-600 shrink-0" />
                           <span className="truncate">{it.dishName}</span>
                         </span>
-                        <span className="font-mono font-medium text-stone-500 text-[11px] ml-2 shrink-0">
+                        <span className="font-semibold text-stone-500 text-[11px] ml-2 shrink-0 tabular-nums">
                           x{it.quantityPerTable}
                         </span>
                       </div>

@@ -406,7 +406,7 @@ export const MenuBuilderPage: React.FC = () => {
 
                       <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-mono text-[10px] text-stone-500 font-semibold uppercase bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200/60">
+                          <span className="text-[10px] text-stone-500 font-semibold uppercase bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200/60 tabular-nums">
                             {dish.code}
                           </span>
                           <span className="text-[10px] font-semibold text-amber-900 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md">

@@ -165,7 +165,7 @@ export const DishDetailPage: React.FC = () => {
               <span className="text-xs font-medium text-stone-500">
                 Đơn giá niêm yết / 01 phần món
               </span>
-              <p className="text-2xl sm:text-3xl font-bold text-amber-900 tracking-tight mt-0.5 font-mono">
+              <p className="text-2xl sm:text-3xl font-bold text-amber-900 tracking-tight mt-0.5 tabular-nums">
                 {formatVnd(dish.price)}
               </p>
             </div>
@@ -274,7 +274,7 @@ export const DishDetailPage: React.FC = () => {
 
             <div className="rounded-lg bg-amber-100/70 border border-amber-200 px-3 py-1.5 text-xs text-amber-900 font-medium">
               <span>Thành tiền ({totalPortions} phần): </span>
-              <strong className="font-bold text-amber-900 font-mono text-sm">{formatVnd(totalDishCost)}</strong>
+              <strong className="font-bold text-amber-900 tabular-nums text-sm">{formatVnd(totalDishCost)}</strong>
             </div>
           </div>
         </div>
@@ -306,10 +306,10 @@ export const DishDetailPage: React.FC = () => {
                         {item.unit}
                       </span>
                     </td>
-                    <td className="py-3 px-5 text-right font-medium text-stone-700">
+                    <td className="py-3 px-5 text-right font-medium text-stone-700 tabular-nums">
                       {formatQuantity(item.quantity)} {item.unit}
                     </td>
-                    <td className="py-3 px-5 text-right font-semibold text-amber-700 font-mono">
+                    <td className="py-3 px-5 text-right font-semibold text-amber-700 tabular-nums">
                       {formatQuantity(totalNeeded)} {item.unit}
                     </td>
                     <td className="py-3 px-5 text-xs text-stone-500">
