@@ -108,7 +108,7 @@ export const EmployeeOrdersPage: React.FC = () => {
             setFromDate(e.target.value);
             setPage(0);
           }}
-          className="px-3.5 py-2 text-xs rounded-xl border border-stone-200 bg-white font-mono text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
+          className="px-3.5 py-2 text-xs rounded-xl border border-stone-200 bg-white tabular-nums text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
         />
 
         <input
@@ -119,7 +119,7 @@ export const EmployeeOrdersPage: React.FC = () => {
             setToDate(e.target.value);
             setPage(0);
           }}
-          className="px-3.5 py-2 text-xs rounded-xl border border-stone-200 bg-white font-mono text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
+          className="px-3.5 py-2 text-xs rounded-xl border border-stone-200 bg-white tabular-nums text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
         />
       </div>
 
@@ -160,17 +160,17 @@ export const EmployeeOrdersPage: React.FC = () => {
                     className="hover:bg-amber-50/30 transition-colors group cursor-pointer"
                     onClick={() => navigate(`/employee/orders/${ord.id}`)}
                   >
-                    <td className="py-3.5 px-4 font-mono font-bold text-stone-900 bg-stone-50/40 whitespace-nowrap">
+                    <td className="py-3.5 px-4 tabular-nums font-bold text-stone-900 bg-stone-50/40 whitespace-nowrap">
                       {ord.orderCode}
                     </td>
-                    <td className="py-3.5 px-4 font-mono font-bold text-stone-900 whitespace-nowrap">
+                    <td className="py-3.5 px-4 tabular-nums font-bold text-stone-900 whitespace-nowrap">
                       {formatDateTimeVn(ord.eventDateTime)}
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
                         {ord.customerName}
                       </div>
-                      <div className="text-[11px] font-mono text-stone-400">
+                      <div className="text-[11px] tabular-nums text-stone-400">
                         {ord.customerPhone}
                       </div>
                     </td>

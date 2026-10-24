@@ -224,7 +224,7 @@ export function AdminPaymentsPage() {
                       <td className="py-3.5 px-4 font-bold text-stone-900 whitespace-nowrap">
                         <Link
                           to={`/admin/orders/${row.orderId}`}
-                          className="font-mono text-amber-800 hover:underline inline-flex items-center gap-1"
+                          className="font-bold text-amber-800 hover:underline inline-flex items-center gap-1 tabular-nums"
                         >
                           <span>Đơn #{row.orderId}</span>
                           <ExternalLink className="h-3 w-3" />
@@ -258,7 +258,7 @@ export function AdminPaymentsPage() {
                           )}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-center font-mono text-stone-600 whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-center text-stone-600 whitespace-nowrap tabular-nums font-semibold">
                         {row.attempts} lần
                       </td>
                       <td className="py-3.5 px-4">
@@ -323,7 +323,7 @@ export function AdminPaymentsPage() {
                       <tr className="hover:bg-amber-50/20 transition-colors">
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-mono font-bold text-stone-900">{row.transactionReference}</span>
+                            <span className="tabular-nums font-bold text-stone-900">{row.transactionReference}</span>
                             <button
                               type="button"
                               onClick={() => copyToClipboard(row.transactionReference)}
@@ -337,7 +337,7 @@ export function AdminPaymentsPage() {
                             )}
                           </div>
                           {row.providerTransactionNo && (
-                            <div className="text-[11px] text-stone-500 font-mono mt-0.5">
+                            <div className="text-[11px] text-stone-500 tabular-nums mt-0.5">
                               ID SePay: {row.providerTransactionNo}
                             </div>
                           )}
@@ -350,13 +350,13 @@ export function AdminPaymentsPage() {
                         <td className="py-3.5 px-4 font-bold text-stone-900 whitespace-nowrap">
                           <Link
                             to={`/admin/orders/${row.orderId}`}
-                            className="font-mono text-amber-800 hover:underline inline-flex items-center gap-1"
+                            className="font-bold text-amber-800 hover:underline inline-flex items-center gap-1 tabular-nums"
                           >
                             <span>Đơn #{row.orderId}</span>
                             <ExternalLink className="h-3 w-3" />
                           </Link>
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 text-sm whitespace-nowrap">
+                        <td className="py-3.5 px-4 text-right font-bold text-amber-900 text-sm whitespace-nowrap tabular-nums">
                           {formatVnd(row.amount)}
                         </td>
                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
@@ -421,7 +421,7 @@ export function AdminPaymentsPage() {
                                   <ShieldAlert className="h-4 w-4 text-purple-700" />
                                   <span>Xử lý đối soát giao dịch {row.transactionReference}</span>
                                 </h4>
-                                <span className="font-mono text-xs font-bold text-amber-900">
+                                <span className="text-xs font-bold text-amber-900 tabular-nums">
                                   {formatVnd(row.amount)}
                                 </span>
                               </div>

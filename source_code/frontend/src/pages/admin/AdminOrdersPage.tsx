@@ -208,7 +208,7 @@ export const AdminOrdersPage: React.FC = () => {
               setFromDate(e.target.value);
               setPage(0);
             }}
-            className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-mono text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
+            className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs tabular-nums"
           />
 
           <input
@@ -219,7 +219,7 @@ export const AdminOrdersPage: React.FC = () => {
               setToDate(e.target.value);
               setPage(0);
             }}
-            className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-mono text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
+            className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs tabular-nums"
           />
         </div>
       </div>
@@ -262,29 +262,29 @@ export const AdminOrdersPage: React.FC = () => {
                     className="hover:bg-amber-50/30 transition-colors group cursor-pointer"
                     onClick={() => navigate(`/admin/orders/${ord.id}`)}
                   >
-                    <td className="py-3.5 px-4 font-mono font-bold text-stone-900 bg-stone-50/40 whitespace-nowrap">
+                    <td className="py-3.5 px-4 font-bold text-stone-900 bg-stone-50/40 whitespace-nowrap tabular-nums">
                       {ord.orderCode}
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
                         {ord.customerName}
                       </div>
-                      <div className="text-[11px] font-mono text-stone-400 font-normal">
+                      <div className="text-[11px] text-stone-400 font-normal tabular-nums">
                         {ord.customerPhone}
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-stone-700 whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-stone-700 whitespace-nowrap tabular-nums">
                       {formatDateTimeVn(ord.eventDateTime)}
                     </td>
-                    <td className="py-3.5 px-4 text-center font-bold text-stone-800 whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-center font-bold text-stone-800 whitespace-nowrap tabular-nums">
                       {ord.tableCount} bàn
                       {ord.guestCount && (
-                        <span className="block text-[10px] text-stone-400 font-normal">
+                        <span className="block text-[10px] text-stone-400 font-normal tabular-nums">
                           ~{ord.guestCount} khách
                         </span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 text-sm whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-right font-bold text-amber-900 text-sm whitespace-nowrap tabular-nums">
                       {formatVnd(ord.totalAmount)}
                     </td>
                     <td className="py-3.5 px-4 text-center whitespace-nowrap">

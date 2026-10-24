@@ -318,7 +318,7 @@ export const AdminMenusPage: React.FC = () => {
               ) : (
                 menus.map((m) => (
                   <tr key={m.id} className="hover:bg-amber-50/30 transition-colors group">
-                    <td className="py-3.5 px-4 font-mono font-bold text-stone-900 bg-stone-50/40 whitespace-nowrap">
+                    <td className="py-3.5 px-4 font-bold text-stone-900 bg-stone-50/40 whitespace-nowrap tabular-nums">
                       {m.code}
                     </td>
                     <td className="py-3.5 px-4">
@@ -343,10 +343,10 @@ export const AdminMenusPage: React.FC = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-center font-bold text-stone-700 whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-center font-bold text-stone-700 whitespace-nowrap tabular-nums">
                       {m.itemsCount} món
                     </td>
-                    <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 text-sm whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-right font-bold text-amber-900 text-sm whitespace-nowrap tabular-nums">
                       {formatVnd(m.pricePerTable)}
                     </td>
                     <td className="py-3.5 px-4 text-center whitespace-nowrap">
@@ -492,7 +492,7 @@ export const AdminMenusPage: React.FC = () => {
                     <span>Món trong bàn tiệc ({formItems.length} món)</span>
                   </label>
                   <div className="rounded-xl bg-amber-50 border border-amber-200/80 px-3 py-1 text-xs font-bold text-amber-900">
-                    Đơn giá 1 bàn: <span className="font-mono text-sm">{formatVnd(calculatedModalPrice)}</span>
+                    Đơn giá 1 bàn: <span className="text-sm tabular-nums">{formatVnd(calculatedModalPrice)}</span>
                   </div>
                 </div>
 
@@ -541,7 +541,7 @@ export const AdminMenusPage: React.FC = () => {
                             <span className="font-bold text-stone-900 truncate block">
                               {it.dish?.name || `Món #${it.dishId}`}
                             </span>
-                            <span className="text-[11px] text-stone-500 font-mono">
+                            <span className="text-[11px] text-stone-500 tabular-nums">
                               {formatVnd(it.dish?.price || 0)} / phần
                             </span>
                           </div>

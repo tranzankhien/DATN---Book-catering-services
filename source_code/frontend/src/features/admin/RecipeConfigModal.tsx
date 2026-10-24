@@ -154,7 +154,7 @@ export const RecipeConfigModal: React.FC<RecipeConfigModalProps> = ({
 
           <div className="flex items-center justify-between">
             <p className="text-xs text-stone-700 font-bold flex items-center gap-1.5">
-              <span>Danh sách nguyên liệu và định mức tiêu hao (Quy tắc BR-02)</span>
+              <span>Danh sách nguyên liệu & định mức tiêu hao tiêu chuẩn</span>
             </p>
             <button
               type="button"

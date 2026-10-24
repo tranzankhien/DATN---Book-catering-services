@@ -236,7 +236,7 @@ export const AdminSuppliersPage: React.FC = () => {
             <span className="text-xs font-medium text-amber-800">
               Tổng tiền đã nhập
             </span>
-            <p className="text-xl font-bold font-mono text-amber-800">{formatVnd(totalPurchasedSum)}</p>
+            <p className="text-xl font-bold tabular-nums text-amber-800">{formatVnd(totalPurchasedSum)}</p>
             <span className="text-[11px] text-stone-400">Lũy kế toàn bộ phiếu</span>
           </div>
           <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
@@ -327,7 +327,7 @@ export const AdminSuppliersPage: React.FC = () => {
                   const count = sup.totalReceiptsCount ?? sup.stockReceiptsCount ?? 0;
                   return (
                     <tr key={sup.id} className="hover:bg-amber-50/30 transition-colors group">
-                      <td className="py-3 px-4 font-mono font-medium text-stone-900 whitespace-nowrap">
+                      <td className="py-3 px-4 tabular-nums font-semibold text-stone-900 whitespace-nowrap">
                         {sup.code}
                       </td>
                       <td className="py-3 px-4">
@@ -341,7 +341,7 @@ export const AdminSuppliersPage: React.FC = () => {
                         )}
                       </td>
                       <td className="py-3 px-4 space-y-0.5 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5 font-mono text-stone-800 font-medium text-xs">
+                        <div className="flex items-center gap-1.5 tabular-nums text-stone-800 font-medium text-xs">
                           <Phone className="h-3.5 w-3.5 text-stone-400 shrink-0" />
                           <span>{sup.phone}</span>
                         </div>
@@ -364,7 +364,7 @@ export const AdminSuppliersPage: React.FC = () => {
                           <span className="text-stone-300 italic">—</span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-right font-mono font-semibold text-amber-900 whitespace-nowrap text-xs sm:text-sm">
+                      <td className="py-3 px-4 text-right tabular-nums font-semibold text-amber-900 whitespace-nowrap text-xs sm:text-sm">
                         {formatVnd(sup.totalPurchasedAmount)}
                       </td>
                       <td className="py-3 px-4 text-center whitespace-nowrap">
@@ -375,7 +375,7 @@ export const AdminSuppliersPage: React.FC = () => {
                           title="Bấm để xem lịch sử phiếu nhập của NCC này"
                         >
                           <Receipt className="h-3 w-3 text-stone-400" />
-                          <span className="font-mono font-semibold">{count}</span>
+                          <span className="tabular-nums font-semibold">{count}</span>
                           <span className="text-[11px] text-stone-500">phiếu</span>
                         </button>
                       </td>
@@ -481,7 +481,7 @@ export const AdminSuppliersPage: React.FC = () => {
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     required
-                    className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 font-mono"
+                    className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 tabular-nums"
                   />
                 </div>
 
@@ -562,7 +562,7 @@ export const AdminSuppliersPage: React.FC = () => {
                 <h3 className="text-base font-bold text-stone-900">
                   Lịch sử phiếu nhập: {viewingSupplierReceipts.name}
                 </h3>
-                <p className="text-xs text-stone-400 font-mono mt-0.5">
+                <p className="text-xs text-stone-400 tabular-nums mt-0.5">
                   Mã: {viewingSupplierReceipts.code} • SĐT: {viewingSupplierReceipts.phone}
                 </p>
               </div>
@@ -591,7 +591,7 @@ export const AdminSuppliersPage: React.FC = () => {
                     <div key={r.id} className="p-3 flex items-center justify-between hover:bg-stone-50">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-stone-900">{r.code}</span>
+                          <span className="tabular-nums font-bold text-stone-900">{r.code}</span>
                           <span
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                               r.status === 'CONFIRMED'
@@ -602,11 +602,11 @@ export const AdminSuppliersPage: React.FC = () => {
                             {r.status === 'CONFIRMED' ? 'Đã nhập kho' : 'Bản nháp'}
                           </span>
                         </div>
-                        <span className="text-[11px] text-stone-400 font-mono">Ngày nhập: {formatDate(r.receiptDate)}</span>
+                        <span className="text-[11px] text-stone-400 tabular-nums">Ngày nhập: {formatDate(r.receiptDate)}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <div className="font-mono font-bold text-stone-900">{formatVnd(r.totalAmount)}</div>
+                          <div className="tabular-nums font-bold text-stone-900">{formatVnd(r.totalAmount)}</div>
                           <span
                             className={`text-[10px] font-semibold ${
                               r.paymentStatus === 'PAID'

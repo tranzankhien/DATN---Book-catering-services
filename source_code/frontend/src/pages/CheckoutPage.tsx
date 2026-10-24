@@ -526,26 +526,26 @@ export const CheckoutPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-stone-700">
-                  Số lượng bàn tiệc:
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="number"
-                    min="1"
-                    max="500"
-                    value={tableCount}
-                    onChange={(e) => handleTableCountChange(parseInt(e.target.value) || 1)}
-                    className="w-24 rounded-xl border border-stone-300 py-2 text-center font-bold text-base text-stone-900 focus:border-amber-600 focus:outline-none shadow-xs"
-                  />
-                  <span className="text-xs text-stone-500">
-                    Bàn tiêu chuẩn (khoảng <strong className="text-stone-800">{tableCount * 10}</strong> khách tham dự)
-                  </span>
-                </div>
-              </div>
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-stone-700">
+                    Số lượng bàn tiệc <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="flex items-center gap-2.5">
+                    <input
+                      type="number"
+                      min="1"
+                      max="500"
+                      value={tableCount}
+                      onChange={(e) => handleTableCountChange(parseInt(e.target.value) || 1)}
+                      className="w-24 rounded-xl border border-stone-300 bg-white py-2.5 text-center font-bold text-base text-stone-900 focus:border-amber-600 focus:outline-none shadow-xs tabular-nums"
+                    />
+                    <span className="text-xs text-stone-500">
+                      Bàn chuẩn (~<strong className="text-stone-800 tabular-nums">{tableCount * 10}</strong> khách)
+                    </span>
+                  </div>
+                </div>
+
                 <div className="space-y-1.5">
                   <label className="block text-xs font-semibold text-stone-700">
                     Số lượng khách dự kiến <span className="text-rose-500">*</span>
@@ -558,14 +558,21 @@ export const CheckoutPage: React.FC = () => {
                     placeholder="Ví dụ: 60"
                     value={guestCount}
                     onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
-                    className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
+                    className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs tabular-nums"
                   />
                 </div>
+              </div>
 
-                <EventLocationField value={eventLocation} point={eventPoint} onChange={(address, point) => {
-                  setEventLocation(address);
-                  setEventPoint(point);
-                }} />
+              {/* Full Width Venue Address & Expansive OpenLayers Interactive Map */}
+              <div className="pt-1">
+                <EventLocationField
+                  value={eventLocation}
+                  point={eventPoint}
+                  onChange={(address, point) => {
+                    setEventLocation(address);
+                    setEventPoint(point);
+                  }}
+                />
               </div>
 
               <div className="space-y-1.5">
@@ -739,7 +746,7 @@ export const CheckoutPage: React.FC = () => {
 
               <div className="flex items-center justify-center gap-2 text-[11px] text-stone-500">
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                <span>Bảo vệ chống trùng lặp Idempotency</span>
+                <span>Bảo mật thông tin & Khóa giữ chỗ kho 15 phút</span>
               </div>
             </div>
           </div>

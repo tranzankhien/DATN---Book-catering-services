@@ -239,7 +239,7 @@ export const AdminInventoryOverviewPage: React.FC = () => {
                 className="bg-white p-3.5 rounded-xl border border-rose-100 shadow-xs flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-center justify-between text-[11px] font-mono text-stone-400">
+                  <div className="flex items-center justify-between text-[11px] text-stone-400 font-semibold tabular-nums">
                     <span>{item.code}</span>
                     <span className="text-rose-600 font-bold">Tồn thấp</span>
                   </div>
@@ -295,7 +295,7 @@ export const AdminInventoryOverviewPage: React.FC = () => {
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-stone-900">{r.code}</span>
+                      <span className="text-xs font-bold text-stone-900 tabular-nums">{r.code}</span>
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                           r.status === 'CONFIRMED'
@@ -307,7 +307,7 @@ export const AdminInventoryOverviewPage: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-xs text-stone-500 truncate max-w-xs">{r.supplierName}</p>
-                    <p className="text-[11px] text-stone-400 font-mono">{formatDate(r.receiptDate)}</p>
+                    <p className="text-[11px] text-stone-400 tabular-nums">{formatDate(r.receiptDate)}</p>
                   </div>
                   <div className="text-right">
                     <div className="text-xs font-extrabold text-stone-900">{formatVnd(r.totalAmount)}</div>
@@ -377,9 +377,9 @@ export const AdminInventoryOverviewPage: React.FC = () => {
                       </span>
                     </div>
                     <div className="text-[11px] text-stone-400 flex items-center gap-2">
-                      <span className="font-mono">{m.referenceCode}</span>
+                      <span className="tabular-nums font-medium">{m.referenceCode}</span>
                       <span>•</span>
-                      <span>{formatDateTime(m.createdAt)}</span>
+                      <span className="tabular-nums">{formatDateTime(m.createdAt)}</span>
                     </div>
                   </div>
 

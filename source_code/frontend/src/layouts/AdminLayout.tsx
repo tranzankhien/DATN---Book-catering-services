@@ -75,13 +75,8 @@ export const AdminLayout: React.FC = () => {
     navigate('/login');
   };
 
-  const upcomingModules = [
-    { label: 'Nhân sự & phục vụ tiệc', phase: 'Phase 6', icon: Users },
-    { label: 'Báo cáo doanh thu & lãi gộp', phase: 'Phase 7', icon: BarChart3 },
-  ];
-
   return (
-    <div className="min-h-screen flex bg-stone-50 text-stone-900">
+    <div className="min-h-screen flex bg-stone-50 text-stone-900 font-sans">
       {/* Executive Floating/Docked Sidebar with Auto/Pinned Expand */}
       <aside
         onMouseEnter={() => !isPinned && setIsHovered(true)}
@@ -140,7 +135,7 @@ export const AdminLayout: React.FC = () => {
                 className={`rounded-xl border border-stone-800 bg-stone-950/70 p-2 flex items-center transition-all ${
                   isOpen ? 'justify-between px-3' : 'justify-center px-0'
                 }`}
-                title="Hệ thống cơ sở: Phase 1 Live (PostgreSQL 17)"
+                title="Hệ thống vận hành máy chủ PostgreSQL"
               >
                 <div className="flex items-center gap-2">
                   <span className="relative flex h-2 w-2 shrink-0">
@@ -154,8 +149,8 @@ export const AdminLayout: React.FC = () => {
                   )}
                 </div>
                 {isOpen && (
-                  <span className="text-[10px] font-mono text-amber-400 whitespace-nowrap">
-                    Live
+                  <span className="text-[10px] font-bold text-amber-400 whitespace-nowrap">
+                    Trực tuyến
                   </span>
                 )}
               </div>
@@ -446,49 +441,6 @@ export const AdminLayout: React.FC = () => {
                   </NavLink>
                 </nav>
               </div>
-
-              <div>
-                {isOpen && (
-                  <p className="px-2.5 mb-1.5 text-[10px] font-bold uppercase tracking-wider text-stone-400 whitespace-nowrap">
-                    Lộ trình tiếp theo
-                  </p>
-                )}
-                <div className="space-y-1">
-                  {upcomingModules.map((mod) => {
-                    const Icon = mod.icon;
-                    return (
-                      <div
-                        key={mod.label}
-                        className={`relative flex items-center rounded-lg py-2 text-xs text-stone-400 select-none hover:bg-stone-800/50 transition-colors group ${
-                          isOpen ? 'justify-between px-3' : 'justify-center px-0'
-                        }`}
-                        title={!isOpen ? `${mod.label} (${mod.phase})` : undefined}
-                      >
-                        <span className="flex items-center gap-2.5 overflow-hidden">
-                          <Icon className="h-4 w-4 text-stone-500 shrink-0 group-hover:text-amber-400 transition-colors" />
-                          {isOpen && (
-                            <span className="font-medium text-stone-300 whitespace-nowrap truncate">
-                              {mod.label}
-                            </span>
-                          )}
-                        </span>
-                        {isOpen && (
-                          <span className="rounded bg-stone-800 px-1.5 py-0.5 text-[9px] font-mono text-stone-400 shrink-0">
-                            {mod.phase}
-                          </span>
-                        )}
-
-                        {/* Flyout Tooltip when Rail is collapsed */}
-                        {!isOpen && (
-                          <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
-                            {mod.label} ({mod.phase})
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
             </div>
           </div>
 
@@ -502,7 +454,7 @@ export const AdminLayout: React.FC = () => {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-bold text-white">{user?.fullName}</p>
-                    <p className="truncate text-[10px] text-stone-400 font-mono">{user?.email}</p>
+                    <p className="truncate text-[10px] text-stone-400">{user?.email}</p>
                   </div>
                 </div>
 

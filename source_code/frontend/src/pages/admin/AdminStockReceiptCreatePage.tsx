@@ -244,7 +244,7 @@ export const AdminStockReceiptCreatePage: React.FC = () => {
                   value={receiptDate}
                   onChange={(e) => setReceiptDate(e.target.value)}
                   required
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 font-mono"
+                  className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 tabular-nums"
                 />
               </div>
             </div>
@@ -293,7 +293,7 @@ export const AdminStockReceiptCreatePage: React.FC = () => {
                     key={row.id}
                     className="p-3.5 bg-stone-50 rounded-xl border border-stone-200/80 space-y-2 relative"
                   >
-                    <div className="flex items-center justify-between text-[11px] text-stone-400 font-mono">
+                    <div className="flex items-center justify-between text-[11px] text-stone-400 tabular-nums">
                       <span>Dòng #{index + 1}</span>
                       {items.length > 1 && (
                         <button
@@ -341,7 +341,7 @@ export const AdminStockReceiptCreatePage: React.FC = () => {
                             value={row.quantity}
                             onChange={(e) => updateItem(index, { quantity: parseFloat(e.target.value) || 0 })}
                             required
-                            className="w-full px-2.5 py-2 text-xs rounded-xl border border-stone-200 font-mono text-stone-900 focus:outline-none focus:border-amber-600"
+                            className="w-full px-2.5 py-2 text-xs rounded-xl border border-stone-200 tabular-nums text-stone-900 focus:outline-none focus:border-amber-600"
                           />
                         </div>
                       </div>
@@ -359,14 +359,14 @@ export const AdminStockReceiptCreatePage: React.FC = () => {
                           value={row.unitPrice}
                           onChange={(e) => updateItem(index, { unitPrice: parseFloat(e.target.value) || 0 })}
                           required
-                          className="w-full px-2.5 py-2 text-xs rounded-xl border border-stone-200 font-mono text-stone-900 focus:outline-none focus:border-amber-600"
+                          className="w-full px-2.5 py-2 text-xs rounded-xl border border-stone-200 tabular-nums text-stone-900 focus:outline-none focus:border-amber-600"
                         />
                       </div>
 
                       {/* Line Total (2 cols) */}
                       <div className="sm:col-span-2 text-right">
                         <span className="block text-[10px] text-stone-400 font-medium">Thành tiền</span>
-                        <span className="font-mono font-bold text-stone-900 text-xs block py-2">
+                        <span className="tabular-nums font-bold text-stone-900 text-xs block py-2">
                           {formatVnd(lineTotal)}
                         </span>
                       </div>
@@ -401,12 +401,12 @@ export const AdminStockReceiptCreatePage: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-stone-600">
                 <span>Tổng tiền hàng:</span>
-                <span className="font-mono font-bold text-sm text-stone-900">{formatVnd(totalAmount)}</span>
+                <span className="tabular-nums font-bold text-sm text-stone-900">{formatVnd(totalAmount)}</span>
               </div>
 
-              {/* Quy tắc thanh toán BR-11 */}
+              {/* Quy chuẩn thanh toán */}
               <div className="pt-2 border-t border-stone-100 text-[11px] text-stone-500 bg-stone-50 p-2.5 rounded-xl border border-stone-200/60">
-                <p className="font-semibold text-stone-700">Quy chuẩn thanh toán (SRS BR-11):</p>
+                <p className="font-semibold text-stone-700">Quy chuẩn thanh toán:</p>
                 <p className="mt-0.5 text-stone-500">
                   Phiếu nhập tạo mới mặc định ở trạng thái <strong>Chưa thanh toán (UNPAID)</strong>. Quản trị viên sẽ ghi nhận thanh toán toàn bộ cho NCC sau khi xác nhận nhập kho.
                 </p>

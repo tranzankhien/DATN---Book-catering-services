@@ -89,7 +89,7 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
                 {isEdit ? 'Cập nhật nguyên liệu' : 'Thêm nguyên liệu mới'}
               </h2>
               <p className="text-xs text-stone-500">
-                Khai báo đơn vị gốc chuẩn (BR-03) dùng chung cho kho và công thức
+                Khai báo đơn vị đo lường chuẩn dùng chung cho kho và công thức món ăn
               </p>
             </div>
           </div>
@@ -121,7 +121,7 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="VD: ING-013"
-              className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 font-mono font-semibold text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
+              className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 tabular-nums font-semibold text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
             />
           </div>
 

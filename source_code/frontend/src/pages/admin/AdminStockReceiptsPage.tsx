@@ -192,7 +192,7 @@ export const AdminStockReceiptsPage: React.FC = () => {
             <span className="text-xs font-medium text-stone-700">
               Tổng giá trị phiếu
             </span>
-            <p className="text-xl font-bold font-mono text-amber-800">{formatVnd(totalReceiptsAmount)}</p>
+            <p className="text-xl font-bold tabular-nums text-amber-800">{formatVnd(totalReceiptsAmount)}</p>
             <span className="text-[11px] text-stone-400">Theo bộ lọc hiển thị</span>
           </div>
           <div className="h-10 w-10 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
@@ -281,7 +281,7 @@ export const AdminStockReceiptsPage: React.FC = () => {
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="px-3 py-1.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-amber-600 font-mono shadow-xs"
+              className="px-3 py-1.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-amber-600 tabular-nums shadow-xs"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -290,7 +290,7 @@ export const AdminStockReceiptsPage: React.FC = () => {
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="px-3 py-1.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-amber-600 font-mono shadow-xs"
+              className="px-3 py-1.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-amber-600 tabular-nums shadow-xs"
             />
           </div>
           {(fromDate || toDate || keyword || statusFilter !== 'ALL' || paymentFilter !== 'ALL' || selectedSupplierId !== 'ALL') && (
@@ -352,10 +352,10 @@ export const AdminStockReceiptsPage: React.FC = () => {
                       className="hover:bg-amber-50/30 transition-colors cursor-pointer group"
                       onClick={() => (window.location.href = `/admin/inventory/receipts/${r.id}`)}
                     >
-                      <td className="py-3.5 px-4 font-mono font-bold text-stone-900 whitespace-nowrap bg-stone-50/40">
+                      <td className="py-3.5 px-4 tabular-nums font-bold text-stone-900 whitespace-nowrap bg-stone-50/40">
                         {r.code}
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-stone-600 whitespace-nowrap">
+                      <td className="py-3.5 px-4 tabular-nums text-stone-600 whitespace-nowrap">
                         {formatDate(r.receiptDate)}
                       </td>
                       <td className="py-3.5 px-4">
@@ -363,12 +363,12 @@ export const AdminStockReceiptsPage: React.FC = () => {
                           {r.supplierName}
                         </div>
                         {r.supplierPhone && (
-                          <span className="text-[11px] font-mono text-stone-400 font-normal">
+                          <span className="text-[11px] tabular-nums text-stone-400 font-normal">
                             {r.supplierPhone}
                           </span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 whitespace-nowrap text-sm">
+                      <td className="py-3.5 px-4 text-right tabular-nums font-bold text-amber-900 whitespace-nowrap text-sm">
                         {formatVnd(r.totalAmount)}
                       </td>
                       <td className="py-3.5 px-4 text-center whitespace-nowrap">

@@ -198,7 +198,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="VD: DISH-011"
-                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 font-mono font-semibold text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
+                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 tabular-nums font-semibold text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
               />
             </div>
 
@@ -297,7 +297,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                   Công thức định lượng nguyên liệu (01 phần)
                 </h3>
                 <p className="text-[11px] text-stone-500">
-                  Quy tắc BR-02: Định lượng bắt buộc &gt; 0, dùng đơn vị gốc của kho
+                  Quy chuẩn định mức: Định lượng bắt buộc &gt; 0, dùng đơn vị chuẩn của kho
                 </p>
               </div>
 

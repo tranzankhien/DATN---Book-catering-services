@@ -198,7 +198,7 @@ export const AdminStockMovementsPage: React.FC = () => {
               type="date"
               value={fromDate}
               onChange={(e) => handleFilterChange(() => setFromDate(e.target.value))}
-              className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-800 text-xs focus:outline-none focus:border-amber-600 font-mono shadow-xs"
+              className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-800 text-xs focus:outline-none focus:border-amber-600 tabular-nums shadow-xs"
             />
           </div>
 
@@ -208,7 +208,7 @@ export const AdminStockMovementsPage: React.FC = () => {
               type="date"
               value={toDate}
               onChange={(e) => handleFilterChange(() => setToDate(e.target.value))}
-              className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-800 text-xs focus:outline-none focus:border-amber-600 font-mono shadow-xs"
+              className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-800 text-xs focus:outline-none focus:border-amber-600 tabular-nums shadow-xs"
             />
           </div>
 
@@ -221,7 +221,7 @@ export const AdminStockMovementsPage: React.FC = () => {
                 setPageSize(Number(e.target.value));
                 setPage(0);
               }}
-              className="px-3 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs font-mono shadow-xs"
+              className="px-3 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs tabular-nums shadow-xs"
             >
               <option value={20}>20 dòng</option>
               <option value={50}>50 dòng</option>
@@ -279,14 +279,14 @@ export const AdminStockMovementsPage: React.FC = () => {
                   const isPositive = m.quantityChange > 0;
                   return (
                     <tr key={m.id} className="hover:bg-amber-50/30 transition-colors group">
-                      <td className="py-3.5 px-4 font-mono text-stone-600 whitespace-nowrap bg-stone-50/40">
+                      <td className="py-3.5 px-4 tabular-nums text-stone-600 whitespace-nowrap bg-stone-50/40">
                         {formatDateTime(m.createdAt)}
                       </td>
                       <td className="py-3.5 px-4">
                         <span className="font-bold text-stone-900 block text-sm group-hover:text-amber-800 transition-colors">
                           {m.ingredientName}
                         </span>
-                        <span className="font-mono text-[11px] text-stone-400 font-semibold">{m.ingredientCode}</span>
+                        <span className="tabular-nums text-[11px] text-stone-400 font-semibold">{m.ingredientCode}</span>
                       </td>
                       <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         <span
@@ -305,33 +305,33 @@ export const AdminStockMovementsPage: React.FC = () => {
                             : 'Xuất kho'}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono font-bold whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-right tabular-nums font-bold whitespace-nowrap">
                         <span className={`text-sm ${isPositive ? 'text-emerald-600 font-extrabold' : 'text-rose-600'}`}>
                           {isPositive ? `+${m.quantityChange}` : m.quantityChange}
                         </span>{' '}
                         <span className="text-[11px] text-stone-400 font-normal">{m.unit}</span>
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono text-[11px] text-stone-600 whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-right tabular-nums text-[11px] text-stone-600 whitespace-nowrap">
                         <span>{m.stockBefore}</span>
                         <span className="text-stone-300 mx-1">→</span>
                         <span className="font-bold text-stone-900">{m.stockAfter}</span>{' '}
                         <span className="text-stone-400">{m.unit}</span>
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-right tabular-nums font-bold text-amber-900 whitespace-nowrap">
                         {formatVnd(m.avgCostAfter)}
                       </td>
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         {m.referenceType === 'STOCK_RECEIPT' && m.referenceId ? (
                           <Link
                             to={`/admin/inventory/receipts/${m.referenceId}`}
-                            className="font-mono text-amber-700 hover:underline font-bold"
+                            className="tabular-nums text-amber-700 hover:underline font-bold"
                           >
                             {m.referenceCode}
                           </Link>
                         ) : (
-                          <span className="font-mono text-stone-700 font-medium">{m.referenceCode}</span>
+                          <span className="tabular-nums text-stone-700 font-medium">{m.referenceCode}</span>
                         )}
-                        <span className="text-[10px] text-stone-400 block font-mono">
+                        <span className="text-[10px] text-stone-400 block tabular-nums">
                           {m.referenceType}
                         </span>
                       </td>
@@ -357,7 +357,7 @@ export const AdminStockMovementsPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-stone-50/70 border-t border-stone-200 text-xs text-stone-600">
           <div>
             <span>
-              Tổng số <strong className="font-mono text-stone-900">{totalCount}</strong> bản ghi biến động kho
+              Tổng số <strong className="tabular-nums text-stone-900">{totalCount}</strong> bản ghi biến động kho
               {totalPages > 1 && ` (Trang ${page + 1} / ${totalPages})`}
             </span>
           </div>
@@ -373,7 +373,7 @@ export const AdminStockMovementsPage: React.FC = () => {
               <span>Trang trước</span>
             </button>
 
-            <span className="px-2 font-mono font-bold text-stone-800 text-xs">
+            <span className="px-2 tabular-nums font-bold text-stone-800 text-xs">
               {page + 1} / {Math.max(totalPages, 1)}
             </span>
 

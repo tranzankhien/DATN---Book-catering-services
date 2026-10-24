@@ -272,7 +272,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
             <span className="text-xs font-medium text-amber-800">
               Tổng giá trị kho
             </span>
-            <p className="text-xl font-bold font-mono text-amber-800">{formatVnd(totalStockValue)}</p>
+            <p className="text-xl font-bold tabular-nums text-amber-800">{formatVnd(totalStockValue)}</p>
             <span className="text-[11px] text-stone-400">Theo giá vốn bình quân di động</span>
           </div>
           <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
@@ -383,7 +383,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                         isLow && item.active ? 'bg-rose-50/30' : ''
                       }`}
                     >
-                      <td className="py-3.5 px-4 font-mono font-bold text-stone-800 whitespace-nowrap bg-stone-50/40">
+                      <td className="py-3.5 px-4 tabular-nums font-bold text-stone-800 whitespace-nowrap bg-stone-50/40">
                         {item.code}
                       </td>
                       <td className="py-3.5 px-4 font-semibold text-stone-900">
@@ -407,7 +407,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                           {item.unit}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono font-bold whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-right tabular-nums font-bold whitespace-nowrap">
                         <span
                           className={`text-sm ${
                             isLow && item.active ? 'text-rose-600 font-extrabold' : 'text-stone-900'
@@ -417,11 +417,11 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                         </span>{' '}
                         <span className="text-[11px] text-stone-400 font-normal">{item.unit}</span>
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono text-stone-600 whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-right tabular-nums text-stone-600 whitespace-nowrap">
                         <span>{item.minStockThreshold}</span>{' '}
                         <span className="text-[11px] text-stone-400">{item.unit}</span>
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-900 whitespace-nowrap text-sm">
+                      <td className="py-3.5 px-4 text-right tabular-nums font-bold text-amber-900 whitespace-nowrap text-sm">
                         {formatVnd(item.avgUnitCost)}
                         <span className="text-[11px] text-stone-400 font-normal"> / {item.unit}</span>
                       </td>
@@ -510,7 +510,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-stone-50 p-3.5 rounded-xl border border-stone-100">
                   <div>
                     <span className="text-[11px] text-stone-400 block">Mã nguyên liệu</span>
-                    <span className="font-mono font-bold text-stone-900">{detailData.ingredient.code}</span>
+                    <span className="tabular-nums font-bold text-stone-900">{detailData.ingredient.code}</span>
                   </div>
                   <div>
                     <span className="text-[11px] text-stone-400 block">Tên nguyên liệu</span>
@@ -518,13 +518,13 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-[11px] text-stone-400 block">Tồn hiện tại</span>
-                    <span className="font-mono font-bold text-amber-700">
+                    <span className="tabular-nums font-bold text-amber-700">
                       {detailData.ingredient.currentStock} {detailData.ingredient.unit}
                     </span>
                   </div>
                   <div>
                     <span className="text-[11px] text-stone-400 block">Giá vốn bình quân</span>
-                    <span className="font-mono font-bold text-stone-900">
+                    <span className="tabular-nums font-bold text-stone-900">
                       {formatVnd(detailData.ingredient.avgUnitCost)}
                     </span>
                   </div>
@@ -552,11 +552,11 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                       {detailData.usedInDishes.map((dish) => (
                         <div key={dish.dishId} className="p-2.5 flex items-center justify-between hover:bg-stone-50">
                           <div>
-                            <span className="font-mono text-stone-400 text-[11px] mr-2">{dish.dishCode}</span>
+                            <span className="tabular-nums text-stone-400 text-[11px] mr-2">{dish.dishCode}</span>
                             <span className="font-semibold text-stone-900">{dish.dishName}</span>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="font-mono font-bold text-amber-800">{dish.quantityFormatted}</span>
+                            <span className="tabular-nums font-bold text-amber-800">{dish.quantityFormatted}</span>
                             <span className="text-[10px] px-2 py-0.5 rounded-lg bg-stone-100 text-stone-600 border border-stone-200">
                               {dish.dishStatus}
                             </span>
@@ -581,20 +581,20 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                         <div key={mov.id} className="p-2.5 flex items-center justify-between text-[11px]">
                           <div>
                             <span className="font-bold text-stone-800 mr-2">[{mov.movementType}]</span>
-                            <span className="font-mono text-stone-500 mr-2">{mov.referenceCode}</span>
+                            <span className="tabular-nums text-stone-500 mr-2">{mov.referenceCode}</span>
                             <span className="text-stone-400">{formatDateTime(mov.createdAt)}</span>
                             {mov.note && <p className="text-stone-500 italic mt-0.5">{mov.note}</p>}
                           </div>
                           <div className="text-right">
                             <span
-                              className={`font-mono font-bold ${
+                              className={`tabular-nums font-bold ${
                                 mov.quantityChange > 0 ? 'text-emerald-600' : 'text-rose-600'
                               }`}
                             >
                               {mov.quantityChange > 0 ? `+${mov.quantityChange}` : mov.quantityChange}{' '}
                               {detailData.ingredient.unit}
                             </span>
-                            <span className="block text-stone-400 text-[10px]">
+                            <span className="block text-stone-400 text-[10px] tabular-nums">
                               Tồn sau: {mov.stockAfter} {detailData.ingredient.unit}
                             </span>
                           </div>
@@ -636,11 +636,11 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
               <div>
                 <span className="text-stone-400">Nguyên liệu: </span>
                 <span className="font-bold text-stone-900">{adjustTarget.name}</span>{' '}
-                <span className="font-mono text-stone-500">({adjustTarget.code})</span>
+                <span className="tabular-nums text-stone-500 font-semibold">({adjustTarget.code})</span>
               </div>
               <div>
                 <span className="text-stone-400">Tồn hiện tại: </span>
-                <span className="font-bold text-amber-700 font-mono">
+                <span className="font-bold text-amber-700 tabular-nums">
                   {adjustTarget.currentStock} {adjustTarget.unit}
                 </span>
               </div>
@@ -659,7 +659,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                     value={adjustQtyChange}
                     onChange={(e) => setAdjustQtyChange(e.target.value)}
                     required
-                    className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 font-mono"
+                    className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 tabular-nums font-semibold"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 font-medium">
                     {adjustTarget.unit}
@@ -669,7 +669,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                   <p className="text-[11px] text-stone-500 mt-1">
                     Dự kiến tồn sau điều chỉnh:{' '}
                     <span
-                      className={`font-mono font-bold ${
+                      className={`tabular-nums font-bold ${
                         adjustTarget.currentStock + parseFloat(adjustQtyChange) < 0
                           ? 'text-rose-600'
                           : 'text-emerald-600'
@@ -747,7 +747,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                   placeholder="VD: ING-BO-UC (tùy chọn)"
                   value={createForm.code}
                   onChange={(e) => setCreateForm({ ...createForm, code: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 font-mono"
+                  className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 tabular-nums font-semibold"
                 />
               </div>
 
@@ -795,7 +795,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                     onChange={(e) =>
                       setCreateForm({ ...createForm, minStockThreshold: parseFloat(e.target.value) || 0 })
                     }
-                    className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 font-mono"
+                    className="w-full px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-600 tabular-nums font-semibold"
                   />
                 </div>
               </div>

@@ -213,25 +213,25 @@ export const AdminReservationsPage: React.FC = () => {
                       const reservedRatio = it.physicalStock > 0 ? Math.min(100, Math.round((it.reservedStock / it.physicalStock) * 100)) : 0;
                       return (
                       <tr key={it.ingredientId} className="hover:bg-amber-50/30 transition-colors">
-                        <td className="py-3.5 px-4 font-mono font-bold text-stone-900 bg-stone-50/40 whitespace-nowrap">
+                        <td className="py-3.5 px-4 font-bold text-stone-900 bg-stone-50/40 whitespace-nowrap tabular-nums">
                           {it.ingredientCode}
                         </td>
                         <td className="py-3.5 px-4 font-bold text-stone-900">
                           {it.ingredientName}
                         </td>
-                        <td className="py-3.5 px-4 text-stone-500 font-mono">{it.unit}</td>
-                        <td className="py-3.5 px-4 text-right font-mono text-stone-600 whitespace-nowrap">
+                        <td className="py-3.5 px-4 text-stone-500">{it.unit}</td>
+                        <td className="py-3.5 px-4 text-right text-stone-600 whitespace-nowrap tabular-nums">
                           {formatQuantity(it.physicalStock)}
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono font-bold text-amber-800 whitespace-nowrap">
+                        <td className="py-3.5 px-4 text-right font-bold text-amber-800 whitespace-nowrap tabular-nums">
                           {formatQuantity(it.reservedStock)}
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono font-bold text-emerald-800 text-sm whitespace-nowrap">
+                        <td className="py-3.5 px-4 text-right font-bold text-emerald-800 text-sm whitespace-nowrap tabular-nums">
                           {formatQuantity(it.availableStock)}
                         </td>
                         <td className="py-3.5 px-4 text-center">
                           <div className="w-24 mx-auto">
-                            <div className="flex items-center justify-between text-[10px] text-stone-500 mb-1 font-mono">
+                            <div className="flex items-center justify-between text-[10px] text-stone-500 mb-1 tabular-nums">
                               <span>{reservedRatio}%</span>
                               <span className="text-[9px] text-stone-400">đang giữ</span>
                             </div>
@@ -326,10 +326,10 @@ export const AdminReservationsPage: React.FC = () => {
                   ) : (
                     reservations.map((res) => (
                       <tr key={res.id} className="hover:bg-amber-50/30 transition-colors">
-                        <td className="py-3.5 px-4 font-mono font-bold text-stone-900 bg-stone-50/40 whitespace-nowrap">
+                        <td className="py-3.5 px-4 font-bold text-stone-900 bg-stone-50/40 whitespace-nowrap tabular-nums">
                           #{res.id}
                         </td>
-                        <td className="py-3.5 px-4 font-mono font-bold whitespace-nowrap">
+                        <td className="py-3.5 px-4 font-bold whitespace-nowrap tabular-nums">
                           {res.orderId && res.orderCode ? (
                             <Link
                               to={`/admin/orders/${res.orderId}`}
@@ -367,10 +367,10 @@ export const AdminReservationsPage: React.FC = () => {
                               : 'Đã giải phóng'}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 font-mono text-stone-600 whitespace-nowrap">
+                        <td className="py-3.5 px-4 text-stone-600 whitespace-nowrap tabular-nums">
                           {formatDateTimeVn(res.expiresAt)}
                         </td>
-                        <td className="py-3.5 px-4 font-mono text-stone-400 whitespace-nowrap">
+                        <td className="py-3.5 px-4 text-stone-400 whitespace-nowrap tabular-nums">
                           {formatDateTimeVn(res.createdAt)}
                         </td>
                         <td className="py-3.5 px-4 text-right font-bold text-stone-800 whitespace-nowrap">

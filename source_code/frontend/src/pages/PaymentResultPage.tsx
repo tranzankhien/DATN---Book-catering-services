@@ -149,8 +149,8 @@ export function PaymentResultPage() {
           </div>
 
           {reference && (
-            <div className="inline-flex items-center gap-2 rounded-xl bg-stone-50 border border-stone-200 px-3.5 py-2 text-xs font-mono text-stone-700">
-              <span className="text-stone-400 font-sans text-[11px]">Mã tham chiếu:</span>
+            <div className="inline-flex items-center gap-2 rounded-xl bg-stone-50 border border-stone-200 px-3.5 py-2 text-xs tabular-nums text-stone-700">
+              <span className="text-stone-400 text-[11px]">Mã tham chiếu:</span>
               <span className="font-bold">{reference}</span>
               <button
                 type="button"
@@ -160,7 +160,7 @@ export function PaymentResultPage() {
               >
                 <Copy className="h-3.5 w-3.5" />
               </button>
-              {copied && <span className="text-emerald-600 text-[10px] font-sans font-medium">Đã chép</span>}
+              {copied && <span className="text-emerald-600 text-[10px] font-medium">Đã chép</span>}
             </div>
           )}
 

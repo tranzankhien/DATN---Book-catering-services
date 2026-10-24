@@ -178,7 +178,7 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-stone-500 uppercase">Phiếu Nhập</span>
+              <span className="tabular-nums text-xs font-bold text-stone-500 uppercase">Phiếu Nhập</span>
               <span
                 className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                   isConfirmed
@@ -199,7 +199,7 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
                 )}
               </span>
             </div>
-            <h1 className="text-2xl font-black text-stone-900 tracking-tight font-mono mt-0.5">
+            <h1 className="text-2xl font-black text-stone-900 tracking-tight tabular-nums mt-0.5">
               {receipt.code}
             </h1>
           </div>
@@ -268,7 +268,7 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
           </div>
           <div>
             <div className="font-bold text-stone-900 text-sm">{receipt.supplierName}</div>
-            <div className="text-stone-500 font-mono mt-0.5">SĐT: {receipt.supplierPhone}</div>
+            <div className="text-stone-500 tabular-nums mt-0.5">SĐT: {receipt.supplierPhone}</div>
             {receipt.supplierAddress && (
               <div className="text-stone-400 text-[11px] truncate mt-0.5">{receipt.supplierAddress}</div>
             )}
@@ -283,7 +283,7 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
           </div>
           <div>
             <div className="text-stone-900 font-semibold">
-              Ngày nhập: <span className="font-mono font-bold">{formatDate(receipt.receiptDate)}</span>
+              Ngày nhập: <span className="tabular-nums font-bold">{formatDate(receipt.receiptDate)}</span>
             </div>
             <div className="text-stone-500 mt-0.5">
               Người lập: <span className="font-medium text-stone-700">{receipt.createdByName || 'ADMIN'}</span>
@@ -307,15 +307,15 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
           <div className="space-y-1">
             <div className="flex justify-between">
               <span className="text-stone-500">Tổng tiền:</span>
-              <span className="font-mono font-bold text-stone-900 text-sm">{formatVnd(receipt.totalAmount)}</span>
+              <span className="tabular-nums font-bold text-stone-900 text-sm">{formatVnd(receipt.totalAmount)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-stone-500">Đã trả:</span>
-              <span className="font-mono font-semibold text-emerald-700">{formatVnd(receipt.amountPaid)}</span>
+              <span className="tabular-nums font-semibold text-emerald-700">{formatVnd(receipt.amountPaid)}</span>
             </div>
             <div className="flex justify-between pt-1 border-t border-stone-100">
               <span className="font-bold text-stone-700">Còn nợ:</span>
-              <span className="font-mono font-extrabold text-rose-700">{formatVnd(receipt.remainingAmount)}</span>
+              <span className="tabular-nums font-extrabold text-rose-700">{formatVnd(receipt.remainingAmount)}</span>
             </div>
           </div>
         </div>
@@ -350,8 +350,8 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
             <tbody className="divide-y divide-stone-100">
               {receipt.items?.map((item) => (
                 <tr key={item.id} className="hover:bg-amber-50/20 group">
-                  <td className="py-3.5 px-4 text-center font-mono text-stone-400 whitespace-nowrap">{item.lineNo}</td>
-                  <td className="py-3.5 px-4 font-mono font-bold text-stone-800 whitespace-nowrap bg-stone-50/40">
+                  <td className="py-3.5 px-4 text-center tabular-nums text-stone-400 whitespace-nowrap">{item.lineNo}</td>
+                  <td className="py-3.5 px-4 tabular-nums font-bold text-stone-800 whitespace-nowrap bg-stone-50/40">
                     {item.ingredientCode}
                   </td>
                   <td className="py-3.5 px-4 font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
@@ -362,13 +362,13 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
                       {item.unit}
                     </span>
                   </td>
-                  <td className="py-3.5 px-4 text-right font-mono font-bold text-stone-900 whitespace-nowrap">
+                  <td className="py-3.5 px-4 text-right tabular-nums font-bold text-stone-900 whitespace-nowrap">
                     {item.quantity} <span className="text-[11px] text-stone-400 font-normal">{item.unit}</span>
                   </td>
-                  <td className="py-3.5 px-4 text-right font-mono text-stone-700 whitespace-nowrap">
+                  <td className="py-3.5 px-4 text-right tabular-nums text-stone-700 whitespace-nowrap">
                     {formatVnd(item.unitPrice)}
                   </td>
-                  <td className="py-3.5 px-4 text-right font-mono font-black text-amber-900 whitespace-nowrap text-sm">
+                  <td className="py-3.5 px-4 text-right tabular-nums font-black text-amber-900 whitespace-nowrap text-sm">
                     {formatVnd(item.lineTotal)}
                   </td>
                   <td className="py-3.5 px-4 text-stone-500 italic text-[11px]">
@@ -382,7 +382,7 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
                 <td colSpan={6} className="py-3.5 px-4 text-right text-stone-600">
                   TỔNG CỘNG TIỀN PHIẾU:
                 </td>
-                <td className="py-3.5 px-4 text-right font-mono font-black text-amber-800 text-sm">
+                <td className="py-3.5 px-4 text-right tabular-nums font-black text-amber-800 text-sm">
                   {formatVnd(receipt.totalAmount)}
                 </td>
                 <td></td>
@@ -416,20 +416,20 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
             <div className="bg-stone-50 p-3 rounded-xl border border-stone-100 text-xs space-y-1.5">
               <div className="flex justify-between">
                 <span className="text-stone-500">Mã phiếu:</span>
-                <span className="font-mono font-bold text-stone-900">{receipt.code}</span>
+                <span className="tabular-nums font-bold text-stone-900">{receipt.code}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-stone-500">Tổng tiền phiếu:</span>
-                <span className="font-mono font-bold text-stone-900">{formatVnd(receipt.totalAmount)}</span>
+                <span className="tabular-nums font-bold text-stone-900">{formatVnd(receipt.totalAmount)}</span>
               </div>
               <div className="flex justify-between items-center pt-1 border-t border-stone-200">
                 <span className="font-bold text-stone-700">Số tiền thanh toán:</span>
-                <span className="font-mono font-extrabold text-base text-emerald-700">
+                <span className="tabular-nums font-extrabold text-base text-emerald-700">
                   {formatVnd(receipt.totalAmount)}
                 </span>
               </div>
               <p className="text-[11px] text-stone-400 italic pt-0.5">
-                * Quy tắc SRS BR-11: Hệ thống ghi nhận thanh toán toàn bộ cho phiếu nhập đã xác nhận kho.
+                * Hệ thống ghi nhận thanh toán toàn bộ cho phiếu nhập đã xác nhận kho.
               </p>
             </div>
 
