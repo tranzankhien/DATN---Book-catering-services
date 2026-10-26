@@ -13,6 +13,7 @@ import {
   Sparkles,
   Trash2,
   Layers,
+  ChevronDown,
 } from 'lucide-react';
 import { menuService } from '../../services/menuService';
 import { catalogService } from '../../services/catalogService';
@@ -427,9 +428,10 @@ export const AdminMenusPage: React.FC = () => {
 
       {/* Upsert Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-stone-200 max-h-[90vh] flex flex-col space-y-5">
-            <div className="flex items-center justify-between pb-3.5 border-b border-stone-100">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-950/60 backdrop-blur-xs flex min-h-full items-center justify-center p-4 sm:p-6 animate-fade-in">
+          <div className="relative bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-stone-200/90 my-auto flex flex-col max-h-[calc(100vh-3.5rem)] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-stone-100 shrink-0 bg-white">
               <div>
                 <h3 className="font-bold text-base text-stone-900 tracking-tight">
                   {editingMenu ? `Chỉnh sửa thực đơn (${editingMenu.code})` : 'Tạo thực đơn tiệc mẫu mới'}
@@ -442,12 +444,14 @@ export const AdminMenusPage: React.FC = () => {
                 type="button"
                 onClick={() => setModalOpen(false)}
                 className="p-1.5 rounded-xl hover:bg-stone-100 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
+                title="Đóng modal"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveMenu} className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-thin">
+            {/* Modal Scrollable Body */}
+            <form id="menu-modal-form" onSubmit={handleSaveMenu} className="flex-1 min-h-0 overflow-y-auto px-6 py-5 space-y-4 pr-5 scrollbar-thin">
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-stone-700">
                   Tên thực đơn <span className="text-rose-500">*</span>
@@ -496,7 +500,7 @@ export const AdminMenusPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="relative">
                   <select
                     defaultValue=""
                     onChange={(e) => {
@@ -505,7 +509,7 @@ export const AdminMenusPage: React.FC = () => {
                         e.target.value = '';
                       }
                     }}
-                    className="flex-1 rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:outline-none shadow-xs cursor-pointer"
+                    className="w-full appearance-none rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 pr-10 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none shadow-xs cursor-pointer"
                   >
                     <option value="" disabled>
                       -- Chọn món ăn từ danh mục để thêm vào thực đơn --
@@ -516,14 +520,17 @@ export const AdminMenusPage: React.FC = () => {
                       </option>
                     ))}
                   </select>
+                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 pointer-events-none" />
                 </div>
 
                 <div className="max-h-56 overflow-y-auto divide-y divide-stone-100 border border-stone-200 rounded-xl p-2 bg-stone-50/70 scrollbar-thin">
                   {formItems.length === 0 ? (
-                    <div className="py-8 text-center text-stone-400 text-xs space-y-1">
-                      <Utensils className="h-6 w-6 mx-auto text-stone-300" />
-                      <p className="font-medium text-stone-500">Chưa có món nào được chọn</p>
-                      <p className="text-[11px] text-stone-400">Chọn món ở thanh menu phía trên để thêm vào bàn tiệc.</p>
+                    <div className="py-8 text-center text-stone-400 text-xs space-y-1.5">
+                      <div className="h-10 w-10 mx-auto rounded-full bg-stone-100 flex items-center justify-center text-stone-400">
+                        <Utensils className="h-5 w-5" />
+                      </div>
+                      <p className="font-semibold text-stone-600">Chưa có món nào được chọn</p>
+                      <p className="text-[11px] text-stone-400">Chọn món ở thanh danh mục phía trên để thêm vào bàn tiệc.</p>
                     </div>
                   ) : (
                     formItems.map((it) => (
@@ -572,24 +579,26 @@ export const AdminMenusPage: React.FC = () => {
                   )}
                 </div>
               </div>
-
-              <div className="pt-3 border-t border-stone-100 flex justify-end gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="rounded-xl border border-stone-300 bg-white hover:bg-stone-50 px-4 py-2.5 text-xs font-semibold text-stone-700 shadow-xs transition-colors cursor-pointer"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-5 py-2.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
-                >
-                  {saving ? 'Đang lưu...' : editingMenu ? 'Cập nhật thực đơn' : 'Tạo thực đơn mẫu'}
-                </button>
-              </div>
             </form>
+
+            {/* Modal Fixed Footer */}
+            <div className="px-6 py-4 border-t border-stone-100 bg-stone-50/80 flex justify-end gap-2.5 shrink-0 rounded-b-2xl">
+              <button
+                type="button"
+                onClick={() => setModalOpen(false)}
+                className="rounded-xl border border-stone-300 bg-white hover:bg-stone-50 px-4 py-2.5 text-xs font-semibold text-stone-700 shadow-xs transition-colors cursor-pointer"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                form="menu-modal-form"
+                disabled={saving}
+                className="rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-5 py-2.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {saving ? 'Đang lưu...' : editingMenu ? 'Cập nhật thực đơn' : 'Tạo thực đơn mẫu'}
+              </button>
+            </div>
           </div>
         </div>
       )}

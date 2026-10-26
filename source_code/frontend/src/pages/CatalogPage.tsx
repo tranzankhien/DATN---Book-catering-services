@@ -348,16 +348,16 @@ export const CatalogPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => addDishToCalculator(dish)}
-                            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer shadow-xs ${
                               draftItem
-                                ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                                : 'bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200'
+                                ? 'bg-amber-900 hover:bg-amber-950 text-white ring-2 ring-amber-500/30'
+                                : 'bg-amber-700 hover:bg-amber-800 text-white'
                             }`}
                             title="Thêm món này vào bàn tiệc dự tính"
                           >
                             {draftItem ? (
                               <>
-                                <Check className="h-3.5 w-3.5 text-amber-700" />
+                                <Check className="h-3.5 w-3.5 text-amber-300" />
                                 <span>Đã chọn ({draftItem.portionsPerTable})</span>
                               </>
                             ) : (
@@ -429,9 +429,23 @@ export const CatalogPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => addDishToCalculator(dish)}
-                        className="rounded-lg bg-amber-700 hover:bg-amber-800 text-white px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer shadow-sm"
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer shadow-xs ${
+                          draftItem
+                            ? 'bg-amber-900 hover:bg-amber-950 text-white ring-2 ring-amber-500/30'
+                            : 'bg-amber-700 hover:bg-amber-800 text-white'
+                        }`}
                       >
-                        {draftItem ? `Đã chọn (${draftItem.portionsPerTable})` : 'Chọn món'}
+                        {draftItem ? (
+                          <>
+                            <Check className="h-3.5 w-3.5 text-amber-300" />
+                            <span>Đã chọn ({draftItem.portionsPerTable})</span>
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="h-3.5 w-3.5" />
+                            <span>Chọn món</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </article>

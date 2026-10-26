@@ -14,6 +14,7 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
 } from 'lucide-react';
 import { inventoryService } from '../../services/inventoryService';
 import type { IngredientDto, MovementType, StockMovementDto } from '../../services/types';
@@ -115,14 +116,32 @@ export const AdminStockMovementsPage: React.FC = () => {
   };
 
   const formatDateTime = (isoStr: string) => {
-    if (!isoStr) return '—';
-    return new Date(isoStr).toLocaleString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    if (!isoStr) return { date: '—', time: '' };
+    const d = new Date(isoStr);
+    const date = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const time = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    return { date, time };
+  };
+
+  const getReferenceTypeLabel = (type: string) => {
+    switch (type) {
+      case 'ORDER':
+        return 'Đơn tiệc';
+      case 'STOCK_RECEIPT':
+        return 'Phiếu nhập';
+      case 'MANUAL_ADJUSTMENT':
+      case 'STOCK_ADJUSTMENT':
+        return 'Kiểm kê';
+      default:
+        return type;
+    }
+  };
+
+  const getPerformerLabel = (name?: string | null) => {
+    if (!name) return 'Hệ thống';
+    if (name.toUpperCase() === 'SEPAY') return 'Cổng SePay';
+    if (name.toUpperCase() === 'SYSTEM') return 'Hệ thống tự động';
+    return name;
   };
 
   const formatVnd = (val: number) => {
@@ -160,12 +179,11 @@ export const AdminStockMovementsPage: React.FC = () => {
       <div className="bg-white p-3.5 rounded-2xl border border-stone-200/80 shadow-xs space-y-3 text-xs">
         <div className="flex flex-wrap items-center gap-3">
           {/* Ingredient select */}
-          <div className="flex items-center gap-2 min-w-[240px] flex-1">
-            <span className="font-bold text-stone-600 shrink-0">Nguyên liệu:</span>
+          <div className="relative min-w-[240px] flex-1">
             <select
               value={selectedIngredientId}
               onChange={(e) => handleFilterChange(() => setSelectedIngredientId(e.target.value))}
-              className="flex-1 px-3 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs shadow-xs"
+              className="w-full appearance-none pl-3.5 pr-8 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs shadow-xs transition-colors cursor-pointer"
             >
               <option value="ALL">Tất cả nguyên liệu ({ingredients.length})</option>
               {ingredients.map((ing) => (
@@ -174,66 +192,67 @@ export const AdminStockMovementsPage: React.FC = () => {
                 </option>
               ))}
             </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 pointer-events-none" />
           </div>
 
           {/* Movement Type select */}
-          <div className="flex items-center gap-2 min-w-[200px]">
-            <span className="font-bold text-stone-600 shrink-0">Loại:</span>
+          <div className="relative min-w-[200px]">
             <select
               value={movementTypeFilter}
               onChange={(e) => handleFilterChange(() => setMovementTypeFilter(e.target.value))}
-              className="px-3 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs shadow-xs"
+              className="w-full appearance-none pl-3.5 pr-8 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs shadow-xs transition-colors cursor-pointer"
             >
               <option value="ALL">Tất cả loại biến động</option>
               <option value="IMPORT">Nhập kho (IMPORT)</option>
               <option value="ADJUSTMENT">Điều chỉnh kiểm kê (ADJUSTMENT)</option>
               <option value="EXPORT">Xuất kho (EXPORT)</option>
             </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 pointer-events-none" />
           </div>
 
           {/* Date range filters */}
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-stone-600 shrink-0">Từ ngày:</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-stone-500 font-medium shrink-0">Từ ngày:</span>
             <input
               type="date"
               value={fromDate}
               onChange={(e) => handleFilterChange(() => setFromDate(e.target.value))}
-              className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-800 text-xs focus:outline-none focus:border-amber-600 tabular-nums shadow-xs"
+              className="px-3 py-2 rounded-xl border border-stone-200 bg-white text-stone-800 text-xs focus:outline-none focus:border-amber-600 tabular-nums shadow-xs transition-colors"
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-stone-600 shrink-0">Đến ngày:</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-stone-500 font-medium shrink-0">Đến ngày:</span>
             <input
               type="date"
               value={toDate}
               onChange={(e) => handleFilterChange(() => setToDate(e.target.value))}
-              className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-800 text-xs focus:outline-none focus:border-amber-600 tabular-nums shadow-xs"
+              className="px-3 py-2 rounded-xl border border-stone-200 bg-white text-stone-800 text-xs focus:outline-none focus:border-amber-600 tabular-nums shadow-xs transition-colors"
             />
           </div>
 
           {/* Page size */}
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-stone-600 shrink-0">Hiển thị:</span>
+          <div className="relative">
             <select
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value));
                 setPage(0);
               }}
-              className="px-3 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs tabular-nums shadow-xs"
+              className="appearance-none pl-3 pr-8 py-2 rounded-xl border border-stone-200 bg-white font-medium text-stone-800 focus:outline-none focus:border-amber-600 text-xs tabular-nums shadow-xs transition-colors cursor-pointer"
             >
               <option value={20}>20 dòng</option>
               <option value={50}>50 dòng</option>
               <option value={100}>100 dòng</option>
             </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 pointer-events-none" />
           </div>
 
           {(selectedIngredientId !== 'ALL' || movementTypeFilter !== 'ALL' || fromDate !== '' || toDate !== '') && (
             <button
               type="button"
               onClick={clearAllFilters}
-              className="text-[11px] font-bold text-amber-700 hover:underline cursor-pointer ml-auto"
+              className="text-[11px] font-bold text-amber-700 hover:text-amber-800 hover:underline cursor-pointer ml-auto px-2 py-1"
             >
               Xóa bộ lọc
             </button>
@@ -277,18 +296,20 @@ export const AdminStockMovementsPage: React.FC = () => {
               ) : (
                 movements.map((m) => {
                   const isPositive = m.quantityChange > 0;
+                  const dt = formatDateTime(m.createdAt);
                   return (
                     <tr key={m.id} className="hover:bg-amber-50/30 transition-colors group">
-                      <td className="py-3.5 px-4 tabular-nums text-stone-600 whitespace-nowrap bg-stone-50/40">
-                        {formatDateTime(m.createdAt)}
+                      <td className="py-3 px-4 tabular-nums whitespace-nowrap bg-stone-50/40">
+                        <div className="font-semibold text-stone-800 text-xs">{dt.time}</div>
+                        <div className="text-[11px] text-stone-400">{dt.date}</div>
                       </td>
-                      <td className="py-3.5 px-4">
-                        <span className="font-bold text-stone-900 block text-sm group-hover:text-amber-800 transition-colors">
+                      <td className="py-3 px-4">
+                        <span className="font-bold text-stone-900 block text-xs group-hover:text-amber-800 transition-colors">
                           {m.ingredientName}
                         </span>
-                        <span className="tabular-nums text-[11px] text-stone-400 font-semibold">{m.ingredientCode}</span>
+                        <span className="tabular-nums text-[11px] text-stone-400 font-medium">{m.ingredientCode}</span>
                       </td>
-                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
                         <span
                           className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold ${
                             m.movementType === 'IMPORT'
@@ -305,40 +326,40 @@ export const AdminStockMovementsPage: React.FC = () => {
                             : 'Xuất kho'}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-right tabular-nums font-bold whitespace-nowrap">
-                        <span className={`text-sm ${isPositive ? 'text-emerald-600 font-extrabold' : 'text-rose-600'}`}>
+                      <td className="py-3 px-4 text-right tabular-nums font-bold whitespace-nowrap">
+                        <span className={`text-xs ${isPositive ? 'text-emerald-600 font-extrabold' : 'text-rose-600'}`}>
                           {isPositive ? `+${m.quantityChange}` : m.quantityChange}
                         </span>{' '}
                         <span className="text-[11px] text-stone-400 font-normal">{m.unit}</span>
                       </td>
-                      <td className="py-3.5 px-4 text-right tabular-nums text-[11px] text-stone-600 whitespace-nowrap">
+                      <td className="py-3 px-4 text-right tabular-nums text-[11px] text-stone-600 whitespace-nowrap">
                         <span>{m.stockBefore}</span>
                         <span className="text-stone-300 mx-1">→</span>
                         <span className="font-bold text-stone-900">{m.stockAfter}</span>{' '}
                         <span className="text-stone-400">{m.unit}</span>
                       </td>
-                      <td className="py-3.5 px-4 text-right tabular-nums font-bold text-amber-900 whitespace-nowrap">
+                      <td className="py-3 px-4 text-right tabular-nums font-bold text-amber-900 whitespace-nowrap">
                         {formatVnd(m.avgCostAfter)}
                       </td>
-                      <td className="py-3.5 px-4 whitespace-nowrap">
+                      <td className="py-3 px-4 whitespace-nowrap">
                         {m.referenceType === 'STOCK_RECEIPT' && m.referenceId ? (
                           <Link
                             to={`/admin/inventory/receipts/${m.referenceId}`}
-                            className="tabular-nums text-amber-700 hover:underline font-bold"
+                            className="tabular-nums text-amber-700 hover:underline font-bold block text-xs"
                           >
-                            {m.referenceCode}
+                            {m.referenceCode || '—'}
                           </Link>
                         ) : (
-                          <span className="tabular-nums text-stone-700 font-medium">{m.referenceCode}</span>
+                          <span className="tabular-nums text-stone-800 font-medium block text-xs">{m.referenceCode || '—'}</span>
                         )}
-                        <span className="text-[10px] text-stone-400 block tabular-nums">
-                          {m.referenceType}
+                        <span className="inline-block mt-0.5 text-[10px] font-semibold text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded-md">
+                          {getReferenceTypeLabel(m.referenceType)}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 whitespace-nowrap font-medium text-stone-700">
-                        {m.performedByName || 'Hệ thống'}
+                      <td className="py-3 px-4 whitespace-nowrap text-stone-700 text-xs">
+                        <span className="font-medium">{getPerformerLabel(m.performedByName)}</span>
                       </td>
-                      <td className="py-3.5 px-4 text-stone-500 text-xs">
+                      <td className="py-3 px-4 text-stone-500 text-xs">
                         {m.note ? (
                           <span className="line-clamp-2" title={m.note}>{m.note}</span>
                         ) : (

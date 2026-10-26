@@ -150,7 +150,7 @@ export const AdminStockReceiptsPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-xs font-medium text-stone-500">
+            <span className="text-xs font-medium text-stone-600">
               Tổng số phiếu nhập
             </span>
             <p className="text-2xl font-bold text-stone-900">{receipts.length}</p>
@@ -189,13 +189,13 @@ export const AdminStockReceiptsPage: React.FC = () => {
 
         <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-xs font-medium text-stone-700">
+            <span className="text-xs font-medium text-amber-900">
               Tổng giá trị phiếu
             </span>
             <p className="text-xl font-bold tabular-nums text-amber-800">{formatVnd(totalReceiptsAmount)}</p>
             <span className="text-[11px] text-stone-400">Theo bộ lọc hiển thị</span>
           </div>
-          <div className="h-10 w-10 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
+          <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
             <Warehouse className="h-5 w-5" />
           </div>
         </div>
@@ -211,7 +211,7 @@ export const AdminStockReceiptsPage: React.FC = () => {
               placeholder="Tìm theo mã phiếu (PN-000001) hoặc tên nhà cung cấp..."
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              className="w-full pl-10 pr-9 py-2.5 text-xs rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 transition-colors"
+              className="w-full pl-10 pr-9 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 transition-colors"
             />
             {keyword && (
               <button
@@ -230,7 +230,7 @@ export const AdminStockReceiptsPage: React.FC = () => {
             <select
               value={selectedSupplierId}
               onChange={(e) => setSelectedSupplierId(e.target.value)}
-              className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 max-w-[220px] truncate shadow-xs"
+              className="px-3.5 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 max-w-[220px] truncate shadow-xs"
             >
               <option value="ALL">Tất cả nhà cung cấp ({suppliers.length})</option>
               {suppliers.map((s) => (
@@ -244,18 +244,18 @@ export const AdminStockReceiptsPage: React.FC = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
+              className="px-3.5 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
             >
               <option value="ALL">Tất cả trạng thái kho</option>
               <option value="DRAFT">Bản nháp ({draftCount})</option>
               <option value="CONFIRMED">Đã nhập kho ({confirmedCount})</option>
             </select>
 
-            {/* Payment Status Filter (SRS BR-11) */}
+            {/* Payment Status Filter */}
             <select
               value={paymentFilter}
               onChange={(e) => setPaymentFilter(e.target.value)}
-              className="px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
+              className="px-3.5 py-2 text-xs rounded-xl border border-stone-200 bg-white font-medium text-stone-700 focus:outline-none focus:border-amber-600 shadow-xs"
             >
               <option value="ALL">Tất cả thanh toán</option>
               <option value="UNPAID">Chưa thanh toán</option>
@@ -265,7 +265,7 @@ export const AdminStockReceiptsPage: React.FC = () => {
             <button
               type="button"
               onClick={loadReceipts}
-              className="p-2.5 text-stone-500 hover:text-stone-900 rounded-xl hover:bg-stone-100 transition-colors border border-stone-200 shadow-xs"
+              className="p-2 text-stone-500 hover:text-stone-900 rounded-xl hover:bg-stone-100 transition-colors border border-stone-200 shadow-xs cursor-pointer"
               title="Làm mới danh sách"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-amber-600' : ''}`} />
@@ -281,7 +281,7 @@ export const AdminStockReceiptsPage: React.FC = () => {
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="px-3 py-1.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-amber-600 tabular-nums shadow-xs"
+              className="px-3 py-2 rounded-xl border border-stone-200 bg-white text-xs focus:outline-none focus:border-amber-600 tabular-nums shadow-xs"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -290,7 +290,7 @@ export const AdminStockReceiptsPage: React.FC = () => {
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="px-3 py-1.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-amber-600 tabular-nums shadow-xs"
+              className="px-3 py-2 rounded-xl border border-stone-200 bg-white text-xs focus:outline-none focus:border-amber-600 tabular-nums shadow-xs"
             />
           </div>
           {(fromDate || toDate || keyword || statusFilter !== 'ALL' || paymentFilter !== 'ALL' || selectedSupplierId !== 'ALL') && (
@@ -409,33 +409,33 @@ export const AdminStockReceiptsPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="py-3.5 px-4 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <div className="inline-flex items-center justify-center gap-1">
+                        <div className="inline-flex items-center justify-center gap-1.5">
                           <Link
                             to={`/admin/inventory/receipts/${r.id}`}
-                            className="p-1.5 rounded-lg text-stone-500 hover:text-amber-700 hover:bg-amber-50 transition-colors"
+                            className="p-1.5 rounded-lg border border-stone-200 bg-white text-stone-600 hover:text-amber-800 hover:bg-amber-50 hover:border-amber-300 transition-colors shadow-2xs"
                             title="Xem chi tiết phiếu nhập"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className="h-3.5 w-3.5" />
                           </Link>
                           <button
                             type="button"
                             onClick={(e) => handleDownloadPdf(e, r)}
                             disabled={downloadingPdfId === r.id}
-                            className="p-1.5 rounded-lg text-stone-500 hover:text-blue-700 hover:bg-blue-50 transition-colors disabled:opacity-50"
+                            className="p-1.5 rounded-lg border border-stone-200 bg-white text-stone-600 hover:text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-colors disabled:opacity-50 shadow-2xs cursor-pointer"
                             title="Xuất file PDF A4 chuẩn in ấn"
                           >
                             <FileDown
-                              className={`h-4 w-4 ${downloadingPdfId === r.id ? 'animate-bounce text-blue-600' : ''}`}
+                              className={`h-3.5 w-3.5 ${downloadingPdfId === r.id ? 'animate-bounce text-blue-600' : ''}`}
                             />
                           </button>
                           {!isConfirmed && (
                             <button
                               type="button"
                               onClick={(e) => handleDeleteDraft(e, r)}
-                              className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                              className="p-1.5 rounded-lg border border-stone-200 bg-white text-stone-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-colors shadow-2xs cursor-pointer"
                               title="Xóa phiếu nháp"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3.5 w-3.5" />
                             </button>
                           )}
                         </div>
