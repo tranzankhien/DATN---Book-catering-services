@@ -102,8 +102,23 @@ export function PaymentResultPage() {
   };
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10 sm:py-16 animate-fade-up-1">
-      <section className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-10 shadow-xs space-y-8">
+    <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 animate-fade-up-1 space-y-6">
+      {/* Top Breadcrumb */}
+      <nav className="flex items-center gap-2 text-xs text-stone-500 font-medium">
+        <Link to="/" className="hover:text-stone-900 transition-colors">
+          Trang chủ
+        </Link>
+        <span>/</span>
+        <Link to="/my-orders" className="hover:text-stone-900 transition-colors">
+          Đơn tiệc của tôi
+        </Link>
+        <span>/</span>
+        <span className="font-semibold text-stone-900">Kết quả thanh toán</span>
+      </nav>
+
+      <section className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-10 shadow-xs space-y-8 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800" />
+
         {/* Top Status Hero */}
         <div className="text-center space-y-4 max-w-xl mx-auto">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl shadow-xs">
@@ -201,7 +216,7 @@ export function PaymentResultPage() {
 
               <div className="bg-white p-3.5 rounded-xl border border-stone-200/70 shadow-2xs">
                 <span className="block text-[11px] text-stone-400 font-medium">Trạng thái đơn tiệc:</span>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold mt-1 border ${
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold mt-1 border ${
                   state.orderStatus === 'PAID'
                     ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                     : state.orderStatus === 'PENDING_PAYMENT'
@@ -242,7 +257,7 @@ export function PaymentResultPage() {
             <Link
               to="/login"
               state={{ from: location.pathname + location.search }}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-semibold text-xs px-5 py-2.5 shadow-xs transition-colors"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-semibold text-xs shadow-xs transition-colors"
             >
               Đăng nhập lại để kiểm tra
             </Link>
@@ -250,17 +265,25 @@ export function PaymentResultPage() {
             <button
               type="button"
               onClick={() => setRetry((v) => v + 1)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-semibold text-xs px-5 py-2.5 shadow-xs transition-colors cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               <span>Kiểm tra lại kết quả</span>
             </button>
           ) : null}
 
+          <Link
+            to={state ? `/my-orders/${state.orderId}` : '/my-orders'}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-semibold text-xs shadow-xs transition-colors"
+          >
+            <ShoppingBag className="h-3.5 w-3.5" />
+            <span>Xem chi tiết đơn tiệc</span>
+          </Link>
+
           {state && (
             <Link
               to={`/orders/confirmation/${state.orderId}`}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-800 font-semibold text-xs px-5 py-2.5 shadow-xs transition-colors"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-800 font-semibold text-xs shadow-2xs transition-colors"
             >
               <FileCheck2 className="h-3.5 w-3.5 text-stone-500" />
               <span>Xem trang hợp đồng & QR</span>
@@ -268,16 +291,8 @@ export function PaymentResultPage() {
           )}
 
           <Link
-            to={state ? `/my-orders/${state.orderId}` : '/my-orders'}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs px-5 py-2.5 shadow-xs transition-colors"
-          >
-            <ShoppingBag className="h-3.5 w-3.5" />
-            <span>Xem chi tiết đơn tiệc</span>
-          </Link>
-
-          <Link
             to="/"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 font-semibold text-xs px-5 py-2.5 shadow-xs transition-colors"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 font-semibold text-xs shadow-2xs transition-colors"
           >
             Về trang chủ
           </Link>

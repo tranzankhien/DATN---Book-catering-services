@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
   Scale,
@@ -20,6 +20,7 @@ import { DEFAULT_DISH_IMAGE, handleImageError } from '../lib/imageConstants';
 
 export const DishDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [dish, setDish] = useState<DishDetailDto | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +28,31 @@ export const DishDetailPage: React.FC = () => {
   // Tính lượng tiêu hao = Số bàn × Số phần/bàn × Định lượng 01 phần
   const [portionsPerTable, setPortionsPerTable] = useState<number>(1);
   const [tableCount, setTableCount] = useState<number>(6);
+
+  const handleAddToMenuBuilder = () => {
+    if (!dish) return;
+    try {
+      const STORAGE_KEY = 'banquethub_builder_draft';
+      const existing = sessionStorage.getItem(STORAGE_KEY);
+      let items: { dishId: number; quantityPerTable: number }[] = [];
+      let savedTables = tableCount;
+      if (existing) {
+        const parsed = JSON.parse(existing);
+        if (Array.isArray(parsed.items)) items = parsed.items;
+        if (parsed.tableCount) savedTables = parsed.tableCount;
+      }
+      const found = items.find((it) => it.dishId === dish.id);
+      if (found) {
+        found.quantityPerTable += portionsPerTable;
+      } else {
+        items.push({ dishId: dish.id, quantityPerTable: portionsPerTable });
+      }
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ items, tableCount: savedTables }));
+    } catch {
+      // ignore
+    }
+    navigate('/menu-builder');
+  };
 
   const latestRequestIdRef = useRef<number>(0);
 
@@ -171,17 +197,18 @@ export const DishDetailPage: React.FC = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Link
-                to={`/menu-builder`}
-                className="inline-flex items-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-5 py-2.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              <button
+                type="button"
+                onClick={handleAddToMenuBuilder}
+                className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
               >
                 <Utensils className="h-4 w-4" />
                 <span>Đưa vào bàn tiệc tự phối</span>
-              </Link>
+              </button>
 
               <a
                 href="#recipe-section"
-                className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 px-4 py-2.5 text-xs font-semibold shadow-xs transition-colors"
+                className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-xs font-semibold shadow-2xs transition-colors"
               >
                 <Scale className="h-4 w-4 text-stone-500" />
                 <span>Xem định lượng tiêu hao ↓</span>

@@ -234,10 +234,68 @@ export const BookingConfirmationPage: React.FC = () => {
 
       {/* Main 12-Column Responsive Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column (7 Cols): Progress, Menu Dishes Snapshot, Event Logistics */}
+        {/* Left Column (7 Cols): Progress, Event Logistics, Menu Dishes Snapshot */}
         <div className="lg:col-span-7 space-y-6">
           {/* Progress Timeline */}
           <OrderProgress order={order} />
+
+          {/* Event Logistics & Contact Card */}
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-xs space-y-4">
+            <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
+              <Calendar className="h-4 w-4 text-amber-700" />
+              <h3 className="font-bold text-base text-stone-900 tracking-tight">
+                Thời gian & Thông tin tổ chức tiệc
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="space-y-3 rounded-xl bg-stone-50/70 p-4 border border-stone-100">
+                <div>
+                  <span className="block text-[11px] text-stone-400 font-medium">Khách hàng liên hệ:</span>
+                  <span className="font-bold text-stone-900 text-sm mt-0.5 block">{order.customerName}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] text-stone-400 font-medium">Số điện thoại:</span>
+                  <span className="font-semibold text-stone-900 tabular-nums">{order.customerPhone}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] text-stone-400 font-medium">Hộp thư nhận biên nhận:</span>
+                  <span className="font-medium text-stone-900">{order.customerEmail}</span>
+                </div>
+              </div>
+
+              <div className="space-y-3 rounded-xl bg-stone-50/70 p-4 border border-stone-100">
+                <div>
+                  <span className="block text-[11px] text-stone-400 font-medium">Thời gian đón khách:</span>
+                  <span className="font-bold text-stone-900 text-sm mt-0.5 block">
+                    {formatDateTimeVn(order.eventDateTime)}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-[11px] text-stone-400 font-medium">Địa điểm tổ chức:</span>
+                  <span className="font-semibold text-stone-900 block mt-0.5">
+                    {order.eventLocation || 'Chưa cung cấp'}
+                    {order.eventLatitude != null && order.eventLongitude != null && (
+                      <a
+                        className="ml-2 text-amber-800 underline font-normal"
+                        target="_blank"
+                        rel="noreferrer"
+                        href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}
+                      >
+                        Xem bản đồ
+                      </a>
+                    )}
+                  </span>
+                </div>
+                {order.note && (
+                  <div>
+                    <span className="block text-[11px] text-stone-400 font-medium">Ghi chú của khách:</span>
+                    <span className="text-stone-700 italic block mt-0.5">{order.note}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Contract Dishes Snapshot */}
           <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-xs space-y-5">
@@ -297,64 +355,6 @@ export const BookingConfirmationPage: React.FC = () => {
               <span className="text-lg sm:text-xl font-bold text-amber-900 tabular-nums">
                 {formatVnd(order.totalAmount)}
               </span>
-            </div>
-          </div>
-
-          {/* Event Logistics & Contact Card */}
-          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-xs space-y-4">
-            <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
-              <Calendar className="h-4 w-4 text-amber-700" />
-              <h3 className="font-bold text-base text-stone-900 tracking-tight">
-                Thời gian & Thông tin tổ chức tiệc
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="space-y-3 rounded-xl bg-stone-50/70 p-4 border border-stone-100">
-                <div>
-                  <span className="block text-[11px] text-stone-400 font-medium">Khách hàng liên hệ:</span>
-                  <span className="font-bold text-stone-900 text-sm mt-0.5 block">{order.customerName}</span>
-                </div>
-                <div>
-                  <span className="block text-[11px] text-stone-400 font-medium">Số điện thoại:</span>
-                  <span className="font-semibold text-stone-900 tabular-nums">{order.customerPhone}</span>
-                </div>
-                <div>
-                  <span className="block text-[11px] text-stone-400 font-medium">Hộp thư nhận biên nhận:</span>
-                  <span className="font-medium text-stone-900">{order.customerEmail}</span>
-                </div>
-              </div>
-
-              <div className="space-y-3 rounded-xl bg-stone-50/70 p-4 border border-stone-100">
-                <div>
-                  <span className="block text-[11px] text-stone-400 font-medium">Thời gian đón khách:</span>
-                  <span className="font-bold text-stone-900 text-sm mt-0.5 block">
-                    {formatDateTimeVn(order.eventDateTime)}
-                  </span>
-                </div>
-                <div>
-                  <span className="block text-[11px] text-stone-400 font-medium">Địa điểm tổ chức:</span>
-                  <span className="font-semibold text-stone-900 block mt-0.5">
-                    {order.eventLocation || 'Chưa cung cấp'}
-                    {order.eventLatitude != null && order.eventLongitude != null && (
-                      <a
-                        className="ml-2 text-amber-800 underline font-normal"
-                        target="_blank"
-                        rel="noreferrer"
-                        href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}
-                      >
-                        Xem bản đồ
-                      </a>
-                    )}
-                  </span>
-                </div>
-                {order.note && (
-                  <div>
-                    <span className="block text-[11px] text-stone-400 font-medium">Ghi chú của khách:</span>
-                    <span className="text-stone-700 italic block mt-0.5">{order.note}</span>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </div>

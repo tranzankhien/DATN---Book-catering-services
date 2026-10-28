@@ -336,19 +336,19 @@ export const CatalogPage: React.FC = () => {
 
                       <div className="pt-3.5 border-t border-stone-100 flex items-center justify-between gap-3">
                         <div>
-                          <span className="block text-[10px] text-stone-400">
-                            Giá / 01 bàn
+                          <span className="block text-[10px] text-stone-400 font-medium">
+                            Giá / 01 bàn (10 khách)
                           </span>
-                          <span className="text-base font-bold text-stone-900">
+                          <span className="text-base font-bold text-stone-900 tabular-nums">
                             {formatVnd(dish.price)}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           <button
                             type="button"
                             onClick={() => addDishToCalculator(dish)}
-                            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer shadow-xs ${
+                            className={`inline-flex items-center gap-1.5 h-8.5 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs ${
                               draftItem
                                 ? 'bg-amber-900 hover:bg-amber-950 text-white ring-2 ring-amber-500/30'
                                 : 'bg-amber-700 hover:bg-amber-800 text-white'
@@ -370,10 +370,10 @@ export const CatalogPage: React.FC = () => {
 
                           <Link
                             to={`/dishes/${dish.id}`}
-                            className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-stone-100 text-stone-600 hover:bg-amber-50 hover:text-amber-800 transition-colors"
-                            title="Xem chi tiết công thức định lượng"
+                            className="inline-flex items-center justify-center h-8.5 w-8.5 rounded-xl border border-stone-200 bg-white text-stone-500 hover:text-amber-800 hover:border-amber-300 hover:bg-amber-50/50 shadow-2xs transition-colors"
+                            title="Xem chi tiết & định lượng"
                           >
-                            <ArrowRight className="h-4 w-4" />
+                            <ArrowRight className="h-3.5 w-3.5" />
                           </Link>
                         </div>
                       </div>
@@ -420,8 +420,8 @@ export const CatalogPage: React.FC = () => {
 
                     <div className="flex items-center gap-4 shrink-0">
                       <div className="text-right">
-                        <span className="block text-[10px] text-stone-400">01 phần</span>
-                        <span className="text-sm font-bold text-amber-700">
+                        <span className="block text-[10px] text-stone-400 font-medium">Giá / 01 bàn (10 khách)</span>
+                        <span className="text-sm font-bold text-amber-700 tabular-nums">
                           {formatVnd(dish.price)}
                         </span>
                       </div>
@@ -429,7 +429,7 @@ export const CatalogPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => addDishToCalculator(dish)}
-                        className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer shadow-xs ${
+                        className={`inline-flex items-center gap-1.5 h-9 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs ${
                           draftItem
                             ? 'bg-amber-900 hover:bg-amber-950 text-white ring-2 ring-amber-500/30'
                             : 'bg-amber-700 hover:bg-amber-800 text-white'
