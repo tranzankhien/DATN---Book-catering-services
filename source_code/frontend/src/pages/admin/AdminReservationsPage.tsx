@@ -75,12 +75,21 @@ export const AdminReservationsPage: React.FC = () => {
   };
 
   useEffect(() => {
+    fetchAvailability();
+  }, []);
+
+  useEffect(() => {
     if (activeTab === 'availability') {
       fetchAvailability();
     } else {
       fetchReservations();
     }
   }, [activeTab, resStatus, page]);
+
+  const totalTracked = availabilities.length;
+  const inReservationCount = availabilities.filter((a) => a.reservedStock > 0).length;
+  const safeAvailableCount = availabilities.filter((a) => a.availableStock > 0 && !a.lowStock).length;
+  const alertCount = availabilities.filter((a) => a.availableStock <= 0 || a.lowStock).length;
 
   const filteredAvailabilities = availabilities.filter((a) => {
     if (!availKeyword.trim()) return true;
@@ -92,16 +101,16 @@ export const AdminReservationsPage: React.FC = () => {
   });
 
   return (
-    <div className="w-full max-w-[1720px] mx-auto space-y-8 animate-fade-up-1">
+    <div className="w-full max-w-[1720px] mx-auto space-y-6 animate-fade-up-1">
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-amber-700">
             <Package className="h-4 w-4" />
-            <span>Phân hệ theo dõi giữ kho nguyên liệu</span>
+            <span>Phân hệ vận hành & kho nguyên liệu</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-bold text-stone-900 tracking-tight mt-1">
-            Theo dõi giữ chỗ tồn kho (Stock Reservation)
+            Theo dõi giữ chỗ & tồn khả dụng kho
           </h1>
           <p className="text-sm text-stone-500 mt-1">
             Kiểm soát nguyên liệu đang được khóa giữ bởi các đơn đặt tiệc, tính toán tồn khả dụng thực tế.
@@ -111,12 +120,62 @@ export const AdminReservationsPage: React.FC = () => {
         <div className="flex items-center gap-2.5">
           <button
             type="button"
-            onClick={() => (activeTab === 'availability' ? fetchAvailability() : fetchReservations())}
+            onClick={() => {
+              fetchAvailability();
+              if (activeTab === 'reservations') fetchReservations();
+            }}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 transition-colors shadow-xs cursor-pointer"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${(loadingAvail || loadingRes) ? 'animate-spin text-amber-600' : ''}`} />
             <span>Làm mới</span>
           </button>
+        </div>
+      </div>
+
+      {/* 4 Executive KPI Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-stone-500">Mặt hàng kho theo dõi</span>
+            <p className="text-2xl font-bold text-stone-900 tabular-nums">{totalTracked}</p>
+            <span className="text-[11px] text-stone-400">Nguyên liệu quản lý giữ chỗ</span>
+          </div>
+          <div className="h-10 w-10 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center border border-stone-200">
+            <Layers className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-amber-700">Đang bị khóa giữ tiệc</span>
+            <p className="text-2xl font-bold text-amber-900 tabular-nums">{inReservationCount}</p>
+            <span className="text-[11px] text-amber-600/80">Mặt hàng có đơn tiệc giữ trước</span>
+          </div>
+          <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
+            <Clock className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-emerald-700">Khả dụng sẵn sàng</span>
+            <p className="text-2xl font-bold text-emerald-800 tabular-nums">{safeAvailableCount}</p>
+            <span className="text-[11px] text-emerald-600">Đủ tồn phục vụ đơn tiệc mới</span>
+          </div>
+          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4.5 border border-stone-200/80 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-rose-600">Cần bổ sung / Chạm ngưỡng</span>
+            <p className="text-2xl font-bold text-rose-700 tabular-nums">{alertCount}</p>
+            <span className="text-[11px] text-rose-500">Khả dụng chạm ngưỡng hoặc âm</span>
+          </div>
+          <div className="h-10 w-10 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center border border-rose-200">
+            <AlertTriangle className="h-5 w-5" />
+          </div>
         </div>
       </div>
 
@@ -132,7 +191,7 @@ export const AdminReservationsPage: React.FC = () => {
           }`}
         >
           <ShieldCheck className="h-4 w-4" />
-          <span>Tồn khả dụng thực tế (Available Stock)</span>
+          <span>Tồn khả dụng thực tế theo nguyên liệu</span>
         </button>
 
         <button
@@ -145,7 +204,7 @@ export const AdminReservationsPage: React.FC = () => {
           }`}
         >
           <Clock className="h-4 w-4" />
-          <span>Danh sách lệnh giữ kho (Stock Reservations)</span>
+          <span>Lịch sử lệnh khóa giữ kho</span>
         </button>
       </div>
 

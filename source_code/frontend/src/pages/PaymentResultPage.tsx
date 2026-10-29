@@ -142,8 +142,8 @@ export function PaymentResultPage() {
           </div>
 
           <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-stone-600">
-              VietQR • SePay Sandbox
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 py-0.5 text-[11px] font-semibold text-stone-600">
+              Cổng thanh toán VietQR
             </div>
             <h1 role="status" className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
               {!reference
@@ -154,12 +154,12 @@ export function PaymentResultPage() {
             </h1>
             <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
               {outcome === 'success'
-                ? 'Hệ thống đã nhận được khoản chuyển khoản và tự động kích hoạt hợp đồng tiệc của bạn. Bếp trung tâm đã nhận định mức để chuẩn bị nguyên liệu tươi.'
+                ? 'Hệ thống đã nhận được thanh toán và kích hoạt hợp đồng tiệc. Bộ phận điều phối và bếp sẽ liên hệ hỗ trợ bạn.'
                 : outcome === 'review'
                 ? 'Khoản thanh toán đang chờ kế toán đối soát xác nhận. Vui lòng không thao tác chuyển tiền lại để tránh trừ tiền trùng lặp.'
                 : outcome === 'expired'
                 ? 'Thời gian giữ kho 15 phút đã kết thúc trước khi hoàn tất giao dịch. Quý khách vui lòng chọn lại thực đơn mới.'
-                : 'Kết quả giao dịch đang được tự động đồng bộ theo thời gian thực từ cổng thanh toán SePay Sandbox.'}
+                : 'Kết quả giao dịch đang được tự động đồng bộ theo thời gian thực từ cổng thanh toán.'}
             </p>
           </div>
 
@@ -215,7 +215,7 @@ export function PaymentResultPage() {
               </div>
 
               <div className="bg-white p-3.5 rounded-xl border border-stone-200/70 shadow-2xs">
-                <span className="block text-[11px] text-stone-400 font-medium">Trạng thái đơn tiệc:</span>
+                <span className="block text-[11px] text-stone-400 font-medium">Trạng thái đơn:</span>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold mt-1 border ${
                   state.orderStatus === 'PAID'
                     ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
@@ -223,22 +223,21 @@ export function PaymentResultPage() {
                     ? 'bg-amber-50 text-amber-800 border-amber-200'
                     : 'bg-stone-100 text-stone-700 border-stone-200'
                 }`}>
-                  {state.orderStatus === 'PAID' ? 'Đã thanh toán (PAID)' : state.orderStatus}
+                  {state.orderStatus === 'PAID' ? 'Đã thanh toán' : state.orderStatus === 'PENDING_PAYMENT' ? 'Chờ thanh toán' : state.orderStatus}
                 </span>
               </div>
 
               <div className="bg-white p-3.5 rounded-xl border border-stone-200/70 shadow-2xs">
-                <span className="block text-[11px] text-stone-400 font-medium">Cổng giao dịch:</span>
+                <span className="block text-[11px] text-stone-400 font-medium">Phương thức:</span>
                 <span className="font-semibold text-stone-800 text-xs mt-1 block">
-                  {latestTx?.provider || 'SePay'} ({latestTx?.bankCode || 'VietQR'})
+                  Chuyển khoản VietQR
                 </span>
               </div>
 
               <div className="bg-white p-3.5 rounded-xl border border-stone-200/70 shadow-2xs">
-                <span className="block text-[11px] text-stone-400 font-medium">Kho nguyên liệu:</span>
-                <span className="inline-flex items-center gap-1 text-emerald-700 font-bold text-xs mt-1">
-                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                  <span>Bảo lưu 100%</span>
+                <span className="block text-[11px] text-stone-400 font-medium">Thời gian giao dịch:</span>
+                <span className="font-semibold text-stone-800 text-xs mt-1 block tabular-nums">
+                  {latestTx?.paidAt ? formatDateTimeVn(latestTx.paidAt) : 'Vừa xong'}
                 </span>
               </div>
             </div>

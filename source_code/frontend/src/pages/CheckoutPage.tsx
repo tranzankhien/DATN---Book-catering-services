@@ -589,14 +589,14 @@ export const CheckoutPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Phase 4 Payment Notice */}
+            {/* Payment Notice */}
             <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 text-amber-950 space-y-2">
               <div className="flex items-center gap-2 font-bold text-xs sm:text-sm text-amber-900">
                 <CreditCard className="h-4 w-4 text-amber-700" />
-                <span>Thanh toán qua SePay Sandbox</span>
+                <span>Phương thức thanh toán trực tuyến</span>
               </div>
               <p className="text-xs leading-relaxed text-amber-800">
-                Sau khi xác nhận đặt tiệc, bạn có thể thanh toán qua SePay trong thời hạn giữ kho hiển thị trên đơn.
+                Sau khi xác nhận đặt tiệc, quý khách có 15 phút để quét mã VietQR và hoàn tất thanh toán giữ chỗ thực đơn.
               </p>
             </div>
           </div>

@@ -187,8 +187,8 @@ export const DishDetailPage: React.FC = () => {
 
           {/* Pricing & Serving Standard Box */}
           <div className="rounded-xl border border-stone-200 bg-stone-50/70 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <span className="text-xs font-medium text-stone-500">
+            <div className="shrink-0">
+              <span className="text-xs font-medium text-stone-500 whitespace-nowrap block">
                 Đơn giá niêm yết / 01 phần món
               </span>
               <p className="text-2xl sm:text-3xl font-bold text-amber-900 tracking-tight mt-0.5 tabular-nums">

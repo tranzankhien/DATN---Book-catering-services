@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Utensils,
   Search,
@@ -427,9 +428,10 @@ export const AdminMenusPage: React.FC = () => {
       </div>
 
       {/* Upsert Modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-950/60 backdrop-blur-xs animate-fade-in">
-          <div className="relative bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-stone-200/90 flex flex-col max-h-[82vh] overflow-hidden">
+      {modalOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-stone-950/60 backdrop-blur-xs animate-fade-in">
+            <div className="relative bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-stone-200/90 flex flex-col max-h-[82vh] overflow-hidden my-auto">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 shrink-0 bg-white">
               <div>
@@ -600,7 +602,8 @@ export const AdminMenusPage: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

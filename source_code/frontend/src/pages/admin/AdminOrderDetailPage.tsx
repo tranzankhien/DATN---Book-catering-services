@@ -1,6 +1,7 @@
 import { OrderProgress } from '../../components/OrderProgress';
 import { OrderPaymentPanel } from '../../components/OrderPaymentPanel';
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -439,9 +440,10 @@ export const AdminOrderDetailPage: React.FC = () => {
       </div>
 
       {/* Admin Cancel Modal */}
-      {cancelModalOpen && canCancel && (
-        <div className="fixed inset-0 z-50 bg-stone-950/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
+      {cancelModalOpen && canCancel &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] bg-stone-950/40 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-stone-100">
               <h3 className="font-bold text-base text-stone-900">
                 Quản trị viên hủy đơn tiệc
@@ -492,7 +494,8 @@ export const AdminOrderDetailPage: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

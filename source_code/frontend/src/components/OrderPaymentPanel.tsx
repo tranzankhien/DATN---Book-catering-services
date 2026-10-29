@@ -273,7 +273,7 @@ export function OrderPaymentPanel({
 
           <div className="flex items-center gap-2 text-[11px] text-stone-500 pt-1">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-            <span>Mã QR tự động điền số tiền và nội dung chuyển khoản, kích hoạt tức thì không cần chụp ảnh biên nhận.</span>
+            <span>Xác nhận tự động tức thì qua Napas 24/7.</span>
           </div>
         </div>
       )}

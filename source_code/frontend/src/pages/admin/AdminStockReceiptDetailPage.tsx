@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Receipt,
@@ -393,12 +394,13 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
       </div>
 
       {/* Record Payment Modal */}
-      {showPaymentModal && (
-        <div className="fixed inset-0 z-50 bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <form
-            onSubmit={handlePaymentSubmit}
-            className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4 animate-in fade-in duration-150"
-          >
+      {showPaymentModal &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <form
+              onSubmit={handlePaymentSubmit}
+              className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4 animate-in fade-in duration-150"
+            >
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
               <div className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-purple-600" />
@@ -463,7 +465,8 @@ export const AdminStockReceiptDetailPage: React.FC = () => {
               </button>
             </div>
           </form>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

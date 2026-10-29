@@ -272,19 +272,22 @@ export const BookingConfirmationPage: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <span className="block text-[11px] text-stone-400 font-medium">Địa điểm tổ chức:</span>
-                  <span className="font-semibold text-stone-900 block mt-0.5">
-                    {order.eventLocation || 'Chưa cung cấp'}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] text-stone-400 font-medium">Địa điểm tổ chức:</span>
                     {order.eventLatitude != null && order.eventLongitude != null && (
                       <a
-                        className="ml-2 text-amber-800 underline font-normal"
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 hover:text-amber-900 hover:underline"
                         target="_blank"
                         rel="noreferrer"
                         href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}
                       >
-                        Xem bản đồ
+                        <MapPin className="h-3 w-3" />
+                        <span>Xem bản đồ →</span>
                       </a>
                     )}
+                  </div>
+                  <span className="font-semibold text-stone-900 block mt-1 leading-relaxed">
+                    {order.eventLocation || 'Chưa cung cấp'}
                   </span>
                 </div>
                 {order.note && (
@@ -407,15 +410,17 @@ export const BookingConfirmationPage: React.FC = () => {
                 </span>
               </div>
             </div>
+          </div>
 
-            <div className="flex items-center justify-between gap-3 pt-1">
-              <Link
-                to="/my-orders"
-                className="w-full text-center rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors shadow-xs"
-              >
-                Xem tất cả đơn tiệc của tôi
-              </Link>
-            </div>
+          {/* Navigation link back to orders */}
+          <div className="text-center pt-1">
+            <Link
+              to="/my-orders"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-stone-900 transition-colors"
+            >
+              <span>Xem tất cả đơn tiệc của tôi</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         </div>
       </div>

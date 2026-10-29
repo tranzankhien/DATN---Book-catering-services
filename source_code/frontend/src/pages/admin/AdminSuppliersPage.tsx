@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import {
   Truck,
@@ -433,8 +434,9 @@ export const AdminSuppliersPage: React.FC = () => {
       </div>
 
       {/* Upsert Supplier Modal */}
-      {showUpsertModal && (
-        <div className="fixed inset-0 z-50 bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+      {showUpsertModal &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4">
           <form
             onSubmit={handleSubmit}
             className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-stone-200 space-y-4 animate-in fade-in duration-150"
@@ -550,12 +552,14 @@ export const AdminSuppliersPage: React.FC = () => {
               </button>
             </div>
           </form>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Supplier Receipts History Modal */}
-      {viewingSupplierReceipts && (
-        <div className="fixed inset-0 z-50 bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+      {viewingSupplierReceipts &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-stone-200 space-y-4 animate-in fade-in duration-150 my-8 max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
               <div>
@@ -654,7 +658,8 @@ export const AdminSuppliersPage: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
