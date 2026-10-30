@@ -418,7 +418,7 @@ export const PublicLayout: React.FC = () => {
                 </li>
                 <li>
                   <Link to="/login" className="hover:text-amber-800 transition-colors">
-                    Chính sách đặt cọc & thanh toán SePay
+                    Chính sách đặt cọc & thanh toán trực tuyến
                   </Link>
                 </li>
                 <li>

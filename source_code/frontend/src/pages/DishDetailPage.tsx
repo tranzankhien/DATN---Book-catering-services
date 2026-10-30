@@ -120,50 +120,43 @@ export const DishDetailPage: React.FC = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Top Breadcrumb Navigation */}
-      <div className="flex items-center justify-between">
-        <Link
-          to="/dishes"
-          className="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-300 transition-colors shadow-xs"
-        >
-          <ArrowLeft className="h-4 w-4 text-stone-500" />
-          <span>Quay lại thực đơn món tiệc</span>
+      <nav className="flex items-center gap-2 text-xs text-stone-500 font-medium">
+        <Link to="/" className="hover:text-stone-900 transition-colors">
+          Trang chủ
         </Link>
+        <span>/</span>
+        <Link to="/dishes" className="hover:text-stone-900 transition-colors">
+          Thực đơn món tiệc
+        </Link>
+        <span>/</span>
+        <span className="text-stone-400">{dish.categoryName}</span>
+        <span>/</span>
+        <span className="font-semibold text-stone-900 truncate max-w-xs">{dish.name}</span>
+      </nav>
 
-        <span className="text-xs text-stone-500">
-          Danh mục: <strong className="text-stone-800 font-semibold">{dish.categoryName}</strong>
-        </span>
-      </div>
-
-      {/* Main Luxury Presentation Card (Full width 7xl) */}
-      <div className="overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-xs grid grid-cols-1 lg:grid-cols-12 items-stretch">
-        {/* Left: Fixed Dimension Culinary Showcase - Khung ảnh cố định chuẩn mực, chống vỡ layout */}
-        <div className="lg:col-span-5 xl:col-span-5 relative h-[320px] sm:h-[380px] lg:h-[420px] w-full bg-stone-100 overflow-hidden shrink-0 border-b lg:border-b-0 lg:border-r border-stone-200/70">
-          <img
-            src={dish.imageUrl || DEFAULT_DISH_IMAGE}
-            alt={dish.name}
-            onError={handleImageError}
-            className="h-full w-full object-cover object-center block transition-transform duration-500 hover:scale-102"
-          />
-        </div>
-
-        {/* Right: Dish Specs & Story */}
-        <div className="lg:col-span-7 xl:col-span-7 p-6 sm:p-8 lg:p-9 flex flex-col justify-between space-y-6">
-          <div className="space-y-3.5">
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="font-semibold text-amber-800 bg-amber-50 border border-amber-200/80 rounded-lg px-2.5 py-0.5">
+      {/* Main Luxury Presentation Card */}
+      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 lg:p-10 shadow-xs overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          {/* Left: Dish Details & Actions */}
+          <div className="lg:col-span-7 space-y-5">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="text-xs font-bold text-amber-900 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-lg tabular-nums">
+                {dish.code}
+              </span>
+              <span className="font-semibold text-amber-800 bg-amber-50 border border-amber-200/80 rounded-lg px-2.5 py-1 text-xs">
                 {dish.categoryName}
               </span>
               <DishStatusBadge status={dish.status} />
-              <span className="text-stone-400">
+              <span className="text-stone-400 text-xs">
                 • Cập nhật {formatDateTimeVn(dish.updatedAt)}
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-stone-900 tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-4xl font-bold text-stone-900 tracking-tight leading-tight">
               {dish.name}
             </h1>
 
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed max-w-2xl font-normal">
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-normal">
               {dish.description ||
                 'Món ăn chế biến theo quy chuẩn ẩm thực tiệc cưới và yến tiệc truyền thống Việt Nam, đảm bảo hương vị tinh túy và nguyên liệu tươi ngon nhất.'}
             </p>
@@ -183,37 +176,47 @@ export const DishDetailPage: React.FC = () => {
                 <span>Chế biến nóng tươi mới</span>
               </div>
             </div>
+
+            {/* Pricing & CTA Section */}
+            <div className="pt-2 flex flex-wrap items-center gap-4">
+              <div className="rounded-xl bg-amber-50/70 border border-amber-200/80 px-5 py-3">
+                <span className="block text-[11px] text-stone-500 font-semibold uppercase tracking-wider">
+                  Đơn giá niêm yết / 01 phần món
+                </span>
+                <span className="text-2xl sm:text-3xl font-bold text-amber-900 tracking-tight tabular-nums">
+                  {formatVnd(dish.price)}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleAddToMenuBuilder}
+                  className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                >
+                  <Utensils className="h-4 w-4" />
+                  <span>Đưa vào bàn tiệc tự phối</span>
+                </button>
+
+                <a
+                  href="#recipe-section"
+                  className="inline-flex items-center gap-2 h-11 px-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-xs font-semibold shadow-2xs transition-colors"
+                >
+                  <Scale className="h-4 w-4 text-stone-500" />
+                  <span>Xem định lượng tiêu hao ↓</span>
+                </a>
+              </div>
+            </div>
           </div>
 
-          {/* Pricing & Serving Standard Box */}
-          <div className="rounded-xl border border-stone-200 bg-stone-50/70 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="shrink-0">
-              <span className="text-xs font-medium text-stone-500 whitespace-nowrap block">
-                Đơn giá niêm yết / 01 phần món
-              </span>
-              <p className="text-2xl sm:text-3xl font-bold text-amber-900 tracking-tight mt-0.5 tabular-nums">
-                {formatVnd(dish.price)}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={handleAddToMenuBuilder}
-                className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-              >
-                <Utensils className="h-4 w-4" />
-                <span>Đưa vào bàn tiệc tự phối</span>
-              </button>
-
-              <a
-                href="#recipe-section"
-                className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-xs font-semibold shadow-2xs transition-colors"
-              >
-                <Scale className="h-4 w-4 text-stone-500" />
-                <span>Xem định lượng tiêu hao ↓</span>
-              </a>
-            </div>
+          {/* Right: Contained Showcase Image Card */}
+          <div className="lg:col-span-5 relative h-72 sm:h-96 lg:h-[400px] w-full rounded-2xl overflow-hidden shadow-xs border border-stone-200/80 bg-stone-100">
+            <img
+              src={dish.imageUrl || DEFAULT_DISH_IMAGE}
+              alt={dish.name}
+              onError={handleImageError}
+              className="h-full w-full object-cover object-center block transition-transform duration-500 hover:scale-102"
+            />
           </div>
         </div>
       </div>

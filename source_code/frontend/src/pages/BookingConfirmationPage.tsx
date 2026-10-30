@@ -234,90 +234,28 @@ export const BookingConfirmationPage: React.FC = () => {
 
       {/* Main 12-Column Responsive Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column (7 Cols): Progress, Event Logistics, Menu Dishes Snapshot */}
+        {/* Left Column (7 Cols): Menu Dishes Snapshot, Event Logistics, Progress */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Progress Timeline */}
-          <OrderProgress order={order} />
-
-          {/* Event Logistics & Contact Card */}
-          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-xs space-y-4">
-            <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
-              <Calendar className="h-4 w-4 text-amber-700" />
-              <h3 className="font-bold text-base text-stone-900 tracking-tight">
-                Thời gian & Thông tin tổ chức tiệc
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="space-y-3 rounded-xl bg-stone-50/70 p-4 border border-stone-100">
-                <div>
-                  <span className="block text-[11px] text-stone-400 font-medium">Khách hàng liên hệ:</span>
-                  <span className="font-bold text-stone-900 text-sm mt-0.5 block">{order.customerName}</span>
-                </div>
-                <div>
-                  <span className="block text-[11px] text-stone-400 font-medium">Số điện thoại:</span>
-                  <span className="font-semibold text-stone-900 tabular-nums">{order.customerPhone}</span>
-                </div>
-                <div>
-                  <span className="block text-[11px] text-stone-400 font-medium">Hộp thư nhận biên nhận:</span>
-                  <span className="font-medium text-stone-900">{order.customerEmail}</span>
-                </div>
-              </div>
-
-              <div className="space-y-3 rounded-xl bg-stone-50/70 p-4 border border-stone-100">
-                <div>
-                  <span className="block text-[11px] text-stone-400 font-medium">Thời gian đón khách:</span>
-                  <span className="font-bold text-stone-900 text-sm mt-0.5 block">
-                    {formatDateTimeVn(order.eventDateTime)}
-                  </span>
-                </div>
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] text-stone-400 font-medium">Địa điểm tổ chức:</span>
-                    {order.eventLatitude != null && order.eventLongitude != null && (
-                      <a
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 hover:text-amber-900 hover:underline"
-                        target="_blank"
-                        rel="noreferrer"
-                        href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}
-                      >
-                        <MapPin className="h-3 w-3" />
-                        <span>Xem bản đồ →</span>
-                      </a>
-                    )}
-                  </div>
-                  <span className="font-semibold text-stone-900 block mt-1 leading-relaxed">
-                    {order.eventLocation || 'Chưa cung cấp'}
-                  </span>
-                </div>
-                {order.note && (
-                  <div>
-                    <span className="block text-[11px] text-stone-400 font-medium">Ghi chú của khách:</span>
-                    <span className="text-stone-700 italic block mt-0.5">{order.note}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Contract Dishes Snapshot */}
+          {/* 1. Contract Dishes Snapshot */}
           <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-xs space-y-5">
-            <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-4">
               <div className="flex items-center gap-2.5">
-                <Utensils className="h-5 w-5 text-amber-700" />
+                <div className="h-9 w-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200/80">
+                  <Utensils className="h-4 w-4" />
+                </div>
                 <div>
                   <h2 className="text-base sm:text-lg font-bold text-stone-900 tracking-tight">
                     Thực đơn bàn tiệc ({order.items.length} món)
                   </h2>
                   <p className="text-xs text-stone-500">
-                    Áp dụng: <strong className="text-stone-800">{order.menuNameSnapshot || 'Thực đơn tự chọn'}</strong> • Quy mô: <strong className="text-stone-800 tabular-nums">{order.tableCount} bàn</strong>
+                    Áp dụng: <strong className="text-stone-800">{order.menuNameSnapshot || 'Thực đơn tự chọn'}</strong> • Quy mô: <strong className="text-stone-800 tabular-nums">{order.tableCount} bàn</strong> (~{order.tableCount * 10} khách)
                   </p>
                 </div>
               </div>
 
-              <div className="text-right">
-                <span className="block text-[11px] text-stone-400 font-medium">Tổng giá trị</span>
-                <span className="font-bold text-amber-900 text-base sm:text-lg tabular-nums">
+              <div className="text-left sm:text-right">
+                <span className="block text-[11px] text-stone-400 font-medium">Tổng giá trị đơn</span>
+                <span className="font-bold text-amber-900 text-lg sm:text-xl tabular-nums">
                   {formatVnd(order.totalAmount)}
                 </span>
               </div>
@@ -355,11 +293,81 @@ export const BookingConfirmationPage: React.FC = () => {
 
             <div className="pt-4 border-t border-stone-200 flex justify-between items-center text-xs sm:text-sm">
               <span className="font-semibold text-stone-600">Tổng cộng thanh toán (Đã gồm phí dịch vụ):</span>
-              <span className="text-lg sm:text-xl font-bold text-amber-900 tabular-nums">
+              <span className="text-lg sm:text-2xl font-bold text-amber-900 tabular-nums">
                 {formatVnd(order.totalAmount)}
               </span>
             </div>
           </div>
+
+          {/* 2. Event Logistics & Contact Card */}
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-xs space-y-4">
+            <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
+              <Calendar className="h-4 w-4 text-amber-700" />
+              <h3 className="font-bold text-base text-stone-900 tracking-tight">
+                Thời gian & Thông tin tổ chức tiệc
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="space-y-3 p-4 rounded-xl bg-stone-50/70 border border-stone-100">
+                <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">
+                  Người đặt & Liên hệ
+                </span>
+                <div>
+                  <span className="block text-[11px] text-stone-400">Khách hàng liên hệ:</span>
+                  <span className="font-bold text-stone-900 text-sm mt-0.5 block">{order.customerName}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] text-stone-400">Số điện thoại:</span>
+                  <span className="font-semibold text-stone-900 tabular-nums">{order.customerPhone}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] text-stone-400">Hộp thư nhận biên nhận:</span>
+                  <span className="font-medium text-stone-900">{order.customerEmail}</span>
+                </div>
+              </div>
+
+              <div className="space-y-3 p-4 rounded-xl bg-stone-50/70 border border-stone-100">
+                <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">
+                  Thời gian & Sảnh tiệc
+                </span>
+                <div>
+                  <span className="block text-[11px] text-stone-400">Thời gian đón khách:</span>
+                  <span className="font-bold text-stone-900 text-sm mt-0.5 block">
+                    {formatDateTimeVn(order.eventDateTime)}
+                  </span>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] text-stone-400">Địa điểm tổ chức:</span>
+                    {order.eventLatitude != null && order.eventLongitude != null && (
+                      <a
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 hover:text-amber-900 hover:underline"
+                        target="_blank"
+                        rel="noreferrer"
+                        href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}
+                      >
+                        <MapPin className="h-3 w-3" />
+                        <span>Xem bản đồ →</span>
+                      </a>
+                    )}
+                  </div>
+                  <span className="font-semibold text-stone-900 block mt-1 leading-relaxed">
+                    {order.eventLocation || 'Chưa cung cấp'}
+                  </span>
+                </div>
+                {order.note && (
+                  <div>
+                    <span className="block text-[11px] text-stone-400">Ghi chú của khách:</span>
+                    <span className="text-stone-700 italic block mt-0.5">{order.note}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Progress Timeline */}
+          <OrderProgress order={order} />
         </div>
 
         {/* Right Column (5 Cols, Sticky): VietQR SePay Payment Panel & Support */}

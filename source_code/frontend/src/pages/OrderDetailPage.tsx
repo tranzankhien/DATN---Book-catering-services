@@ -157,7 +157,7 @@ export const OrderDetailPage: React.FC = () => {
   const cancellationHint = !currentPayment
     ? 'Cập nhật trạng thái thanh toán để kiểm tra khả năng hủy đơn.'
     : hasOpenAttempt
-    ? 'Phiên SePay đang mở. Hãy đợi kết quả từ SePay hoặc đợi phiên hết hạn.'
+    ? 'Phiên thanh toán đang mở. Hãy đợi kết quả xác nhận hoặc đợi phiên hết hạn.'
     : '';
   const canCancel = eligibleToCancel && !cancellationHint;
 

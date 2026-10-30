@@ -133,8 +133,8 @@ export function OrderPaymentPanel({
               <h2 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                 Thanh toán trực tuyến VietQR
               </h2>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200">
-                SePay Sandbox
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Napas 24/7
               </span>
             </div>
             <p className="text-xs text-stone-500 mt-0.5">
@@ -245,7 +245,7 @@ export function OrderPaymentPanel({
           {checkoutConfigured === false ? (
             <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0" />
-              <span>Cổng thanh toán SePay chưa được cấu hình Secret Key. Vui lòng liên hệ nhà hàng.</span>
+              <span>Cổng thanh toán trực tuyến đang được bảo trì. Vui lòng liên hệ hotline nhà hàng để được hỗ trợ.</span>
             </div>
           ) : (
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -258,12 +258,12 @@ export function OrderPaymentPanel({
                 {busy ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Đang kết nối cổng SePay Sandbox...</span>
+                    <span>Đang tạo mã QR thanh toán...</span>
                   </>
                 ) : (
                   <>
                     <QrCode className="h-4 w-4" />
-                    <span>Thanh toán ngay qua VietQR (SePay Sandbox)</span>
+                    <span>Thanh toán ngay qua VietQR</span>
                     <ChevronRight className="h-4 w-4" />
                   </>
                 )}
@@ -332,7 +332,7 @@ export function OrderPaymentPanel({
 
                   {tx.providerTransactionNo && (
                     <div className="text-[11px] text-stone-500">
-                      Mã SePay: <span className="font-semibold text-stone-700 tabular-nums">{tx.providerTransactionNo}</span>
+                      Mã giao dịch: <span className="font-semibold text-stone-700 tabular-nums">{tx.providerTransactionNo}</span>
                     </div>
                   )}
 
