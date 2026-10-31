@@ -4,22 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   CheckCircle2,
-  Clock,
   Calendar,
-  AlertCircle,
   Copy,
-  ChefHat,
   ArrowRight,
-  ShieldAlert,
-  CreditCard,
-  FileCheck,
-  Check,
-  ShieldCheck,
   PhoneCall,
   MapPin,
-  Users,
-  ChevronRight,
   Utensils,
+  ShieldCheck,
 } from 'lucide-react';
 import { orderService } from '../services/orderService';
 import type { OrderDto } from '../services/types';
@@ -52,16 +43,17 @@ export const BookingConfirmationPage: React.FC = () => {
         const data = await orderService.getOrderById(Number(id));
         if (mounted) {
           setOrder(data);
-          if (data.paymentExpiresAt) {
-            setSecondsRemaining(calcRemaining(data.paymentExpiresAt));
-          } else if (data.secondsRemaining !== undefined && data.secondsRemaining !== null) {
-            setSecondsRemaining(Math.max(0, data.secondsRemaining));
-          }
+          const rem = calcRemaining(data.paymentExpiresAt);
+          setSecondsRemaining(rem);
         }
       } catch (err) {
-        if (mounted) setError(extractErrorMessage(err));
+        if (mounted) {
+          setError(extractErrorMessage(err));
+        }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     })();
     return () => {
@@ -69,34 +61,22 @@ export const BookingConfirmationPage: React.FC = () => {
     };
   }, [id]);
 
-  // Live countdown timer synced to real wall-clock time and tab focus
+  // Countdown timer for 15-minute stock reservation
   useEffect(() => {
     if (!order?.paymentExpiresAt || order.orderStatus !== 'PENDING_PAYMENT') return;
 
-    const updateTimer = () => {
-      const remaining = calcRemaining(order.paymentExpiresAt);
-      setSecondsRemaining(remaining);
-      if (remaining <= 0 && id) {
+    const timer = setInterval(() => {
+      const rem = calcRemaining(order.paymentExpiresAt);
+      setSecondsRemaining(rem);
+      if (rem <= 0) {
+        clearInterval(timer);
+        // Refresh order status when expired
         orderService.getOrderById(Number(id)).then(setOrder).catch(() => {});
       }
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') {
-        updateTimer();
-      }
-    };
-
-    document.addEventListener('visibilitychange', onVisible);
-    window.addEventListener('focus', onVisible);
+    }, 1000);
 
     return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', onVisible);
-      window.removeEventListener('focus', onVisible);
+      clearInterval(timer);
     };
   }, [order?.paymentExpiresAt, order?.orderStatus, id]);
 
@@ -143,9 +123,9 @@ export const BookingConfirmationPage: React.FC = () => {
     order.reservation?.status === 'ACTIVE';
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
-      {/* Top Breadcrumb & Status Navigation */}
-      <nav className="flex items-center gap-2 text-xs text-stone-500">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6 animate-fade-up-1">
+      {/* Top Breadcrumb */}
+      <nav className="flex items-center gap-2 text-xs text-stone-500 font-medium">
         <Link to="/" className="hover:text-stone-900 transition-colors">
           Trang chủ
         </Link>
@@ -154,17 +134,17 @@ export const BookingConfirmationPage: React.FC = () => {
           Đơn tiệc của tôi
         </Link>
         <span>/</span>
-        <span className="font-bold text-stone-900 tabular-nums">Xác nhận {order.orderCode}</span>
+        <span className="font-semibold text-stone-900 tabular-nums">Xác nhận {order.orderCode}</span>
       </nav>
 
-      {/* Success Celebration Banner (Spans Full Width 7xl) */}
+      {/* Success Celebration Banner */}
       <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800" />
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-start sm:items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-xs">
-              <CheckCircle2 className="h-8 w-8" />
+            <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-xs">
+              <CheckCircle2 className="h-7 w-7 sm:h-8 sm:w-8" />
             </div>
 
             <div className="space-y-1">
@@ -200,7 +180,7 @@ export const BookingConfirmationPage: React.FC = () => {
                     : order.orderStatus}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-normal">
                 {order.paymentStatus === 'PAID'
                   ? 'Đơn đã thanh toán thành công. Bếp trưởng và đội ngũ phục vụ đã bắt đầu chuẩn bị tiệc.'
                   : holdingStock
@@ -210,7 +190,7 @@ export const BookingConfirmationPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Order Code Pill & Copy Button */}
+          {/* Order Code Pill */}
           <div className="flex items-center gap-3 shrink-0 rounded-xl bg-stone-50 border border-stone-200/90 px-4 py-2.5">
             <div className="text-left">
               <span className="block text-[10px] uppercase font-bold tracking-wider text-stone-400">
@@ -233,29 +213,29 @@ export const BookingConfirmationPage: React.FC = () => {
       </div>
 
       {/* Main 12-Column Responsive Workspace */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column (7 Cols): Menu Dishes Snapshot, Event Logistics, Progress */}
         <div className="lg:col-span-7 space-y-6">
           {/* 1. Contract Dishes Snapshot */}
-          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-xs space-y-5">
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="h-9 w-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200/80">
+                <div className="h-8 w-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200/80">
                   <Utensils className="h-4 w-4" />
                 </div>
                 <div>
-                  <h2 className="text-base sm:text-lg font-bold text-stone-900 tracking-tight">
+                  <h2 className="text-base font-bold text-stone-900 tracking-tight">
                     Thực đơn bàn tiệc ({order.items.length} món)
                   </h2>
                   <p className="text-xs text-stone-500">
-                    Áp dụng: <strong className="text-stone-800">{order.menuNameSnapshot || 'Thực đơn tự chọn'}</strong> • Quy mô: <strong className="text-stone-800 tabular-nums">{order.tableCount} bàn</strong> (~{order.tableCount * 10} khách)
+                    Áp dụng: <strong className="text-stone-800 font-semibold">{order.menuNameSnapshot || 'Thực đơn tự chọn'}</strong> • Quy mô: <strong className="text-stone-800 font-semibold tabular-nums">{order.tableCount} bàn</strong> (~{order.tableCount * 10} khách)
                   </p>
                 </div>
               </div>
 
               <div className="text-left sm:text-right">
                 <span className="block text-[11px] text-stone-400 font-medium">Tổng giá trị đơn</span>
-                <span className="font-bold text-amber-900 text-lg sm:text-xl tabular-nums">
+                <span className="font-bold text-amber-900 text-lg tabular-nums">
                   {formatVnd(order.totalAmount)}
                 </span>
               </div>
@@ -264,16 +244,16 @@ export const BookingConfirmationPage: React.FC = () => {
             {/* Dishes Items List */}
             <div className="divide-y divide-stone-100">
               {order.items.map((it, idx) => (
-                <div key={it.id} className="py-3 flex items-center justify-between text-xs">
+                <div key={it.id} className="py-2.5 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-3">
                     <span className="w-6 h-6 rounded-lg bg-stone-100 flex items-center justify-center font-bold text-stone-500 text-[11px] shrink-0 tabular-nums">
                       {idx + 1}
                     </span>
                     <div>
-                      <div className="font-bold text-stone-900 text-xs sm:text-sm">
+                      <div className="font-semibold text-stone-900 text-xs sm:text-sm">
                         {it.dishNameSnapshot}
                       </div>
-                      <div className="text-[11px] text-stone-500 mt-0.5 tabular-nums">
+                      <div className="text-[11px] text-stone-400 mt-0.5 tabular-nums">
                         {formatVnd(it.unitPriceSnapshot)} / phần • {it.quantityPerTable} phần/bàn
                       </div>
                     </div>
@@ -291,16 +271,16 @@ export const BookingConfirmationPage: React.FC = () => {
               ))}
             </div>
 
-            <div className="pt-4 border-t border-stone-200 flex justify-between items-center text-xs sm:text-sm">
+            <div className="pt-3 border-t border-stone-200 flex justify-between items-center text-xs sm:text-sm">
               <span className="font-semibold text-stone-600">Tổng cộng thanh toán (Đã gồm phí dịch vụ):</span>
-              <span className="text-lg sm:text-2xl font-bold text-amber-900 tabular-nums">
+              <span className="text-lg sm:text-xl font-bold text-amber-900 tabular-nums">
                 {formatVnd(order.totalAmount)}
               </span>
             </div>
           </div>
 
-          {/* 2. Event Logistics & Contact Card */}
-          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-xs space-y-4">
+          {/* 2. Event Logistics & Contact Card (Clean Key-Value, NO Double Boxes) */}
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-4">
             <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
               <Calendar className="h-4 w-4 text-amber-700" />
               <h3 className="font-bold text-base text-stone-900 tracking-tight">
@@ -308,59 +288,41 @@ export const BookingConfirmationPage: React.FC = () => {
               </h3>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="space-y-3 p-4 rounded-xl bg-stone-50/70 border border-stone-100">
-                <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">
-                  Người đặt & Liên hệ
-                </span>
-                <div>
-                  <span className="block text-[11px] text-stone-400">Khách hàng liên hệ:</span>
-                  <span className="font-bold text-stone-900 text-sm mt-0.5 block">{order.customerName}</span>
-                </div>
-                <div>
-                  <span className="block text-[11px] text-stone-400">Số điện thoại:</span>
-                  <span className="font-semibold text-stone-900 tabular-nums">{order.customerPhone}</span>
-                </div>
-                <div>
-                  <span className="block text-[11px] text-stone-400">Hộp thư nhận biên nhận:</span>
-                  <span className="font-medium text-stone-900">{order.customerEmail}</span>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
+              <div className="space-y-1">
+                <span className="text-stone-400 block font-medium">Khách hàng liên hệ:</span>
+                <p className="font-bold text-stone-900 text-sm">{order.customerName}</p>
+                <p className="text-stone-600 tabular-nums">{order.customerPhone} • {order.customerEmail}</p>
               </div>
 
-              <div className="space-y-3 p-4 rounded-xl bg-stone-50/70 border border-stone-100">
-                <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">
-                  Thời gian & Sảnh tiệc
-                </span>
-                <div>
-                  <span className="block text-[11px] text-stone-400">Thời gian đón khách:</span>
-                  <span className="font-bold text-stone-900 text-sm mt-0.5 block">
-                    {formatDateTimeVn(order.eventDateTime)}
-                  </span>
+              <div className="space-y-1">
+                <span className="text-stone-400 block font-medium">Thời gian đón khách:</span>
+                <p className="font-bold text-stone-900 text-sm">{formatDateTimeVn(order.eventDateTime)}</p>
+                <p className="text-stone-500">Quy mô: {order.tableCount} bàn (~{order.tableCount * 10} khách)</p>
+              </div>
+
+              <div className="space-y-1 sm:col-span-2 pt-2 border-t border-stone-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-stone-400 block font-medium">Địa điểm tổ chức:</span>
+                  {order.eventLatitude != null && order.eventLongitude != null && (
+                    <a
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 hover:text-amber-900 hover:underline"
+                      target="_blank"
+                      rel="noreferrer"
+                      href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}
+                    >
+                      <MapPin className="h-3 w-3" />
+                      <span>Xem bản đồ →</span>
+                    </a>
+                  )}
                 </div>
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] text-stone-400">Địa điểm tổ chức:</span>
-                    {order.eventLatitude != null && order.eventLongitude != null && (
-                      <a
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 hover:text-amber-900 hover:underline"
-                        target="_blank"
-                        rel="noreferrer"
-                        href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}
-                      >
-                        <MapPin className="h-3 w-3" />
-                        <span>Xem bản đồ →</span>
-                      </a>
-                    )}
-                  </div>
-                  <span className="font-semibold text-stone-900 block mt-1 leading-relaxed">
-                    {order.eventLocation || 'Chưa cung cấp'}
-                  </span>
-                </div>
+                <p className="font-semibold text-stone-900 text-xs sm:text-sm leading-relaxed mt-0.5">
+                  {order.eventLocation || 'Chưa cung cấp'}
+                </p>
                 {order.note && (
-                  <div>
-                    <span className="block text-[11px] text-stone-400">Ghi chú của khách:</span>
-                    <span className="text-stone-700 italic block mt-0.5">{order.note}</span>
-                  </div>
+                  <p className="text-stone-500 italic text-xs mt-1">
+                    Ghi chú: "{order.note}"
+                  </p>
                 )}
               </div>
             </div>
@@ -370,9 +332,9 @@ export const BookingConfirmationPage: React.FC = () => {
           <OrderProgress order={order} />
         </div>
 
-        {/* Right Column (5 Cols, Sticky): VietQR SePay Payment Panel & Support */}
+        {/* Right Column (5 Cols, Sticky): VietQR Payment Panel & Support */}
         <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
-          {/* VietQR SePay Interactive Payment Panel */}
+          {/* VietQR Payment Panel */}
           <OrderPaymentPanel
             key={order.id}
             order={order}
@@ -392,10 +354,10 @@ export const BookingConfirmationPage: React.FC = () => {
             }
           />
 
-          {/* Luxury Concierge & Hotline Support Card */}
-          <div className="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-xs space-y-4">
+          {/* Luxury Concierge & Hotline Support Card (Clean, No Box-in-a-Box) */}
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-800 border border-amber-200">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-800 border border-amber-200/80">
                 <PhoneCall className="h-4 w-4" />
               </div>
               <div>
@@ -406,12 +368,12 @@ export const BookingConfirmationPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="rounded-xl bg-stone-50 p-3.5 border border-stone-200/70 text-xs space-y-2">
-              <div className="flex justify-between items-center">
+            <div className="divide-y divide-stone-100 text-xs">
+              <div className="py-2.5 flex justify-between items-center">
                 <span className="text-stone-500">Hotline đặt tiệc:</span>
                 <span className="font-bold text-amber-900 text-sm tabular-nums">1900 8899</span>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="py-2.5 flex justify-between items-center">
                 <span className="text-stone-500">Cam kết chất lượng:</span>
                 <span className="font-semibold text-emerald-700 flex items-center gap-1">
                   <ShieldCheck className="h-3.5 w-3.5" /> Chuẩn VSATTP 100%
