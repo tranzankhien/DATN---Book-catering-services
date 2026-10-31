@@ -213,9 +213,9 @@ export const BookingConfirmationPage: React.FC = () => {
       </div>
 
       {/* Main 12-Column Responsive Workspace */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column (7 Cols): Menu Dishes Snapshot, Event Logistics, Progress */}
-        <div className="lg:col-span-7 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        {/* Left Column (6 Cols): Menu Dishes Snapshot, Event Logistics, Progress */}
+        <div className="lg:col-span-6 xl:col-span-6 space-y-6">
           {/* 1. Contract Dishes Snapshot */}
           <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-4">
@@ -332,8 +332,8 @@ export const BookingConfirmationPage: React.FC = () => {
           <OrderProgress order={order} />
         </div>
 
-        {/* Right Column (5 Cols, Sticky): VietQR Payment Panel & Support */}
-        <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+        {/* Right Column (6 Cols, Sticky): VietQR Payment Panel & Support */}
+        <div className="lg:col-span-6 xl:col-span-6 space-y-6 lg:sticky lg:top-24">
           {/* VietQR Payment Panel */}
           <OrderPaymentPanel
             key={order.id}

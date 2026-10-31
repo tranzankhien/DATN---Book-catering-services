@@ -133,8 +133,18 @@ export const DishDetailPage: React.FC = () => {
 
       {/* Main Showcase Card */}
       <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 lg:p-10 shadow-xs overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          {/* Left: Dish Information & Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          {/* Left: Culinary Showcase Image (Standard E-Commerce Product Layout) */}
+          <div className="lg:col-span-5 relative h-72 sm:h-96 lg:h-[400px] w-full rounded-2xl overflow-hidden shadow-xs border border-stone-200/80 bg-stone-100">
+            <img
+              src={dish.imageUrl || DEFAULT_DISH_IMAGE}
+              alt={dish.name}
+              onError={handleImageError}
+              className="h-full w-full object-cover object-center block transition-transform duration-500 hover:scale-102"
+            />
+          </div>
+
+          {/* Right: Dish Information & Actions */}
           <div className="lg:col-span-7 space-y-5">
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="text-xs font-bold text-stone-500 tabular-nums">
@@ -174,7 +184,7 @@ export const DishDetailPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Price & Primary Actions (Clean, No Box-in-a-Box) */}
+            {/* Price & Primary Actions */}
             <div className="pt-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-stone-100">
               <div>
                 <span className="text-xs text-stone-500 font-medium block">Đơn giá niêm yết (01 phần / bàn 10 khách)</span>
@@ -202,16 +212,6 @@ export const DishDetailPage: React.FC = () => {
                 </a>
               </div>
             </div>
-          </div>
-
-          {/* Right: Contained Culinary Showcase Image */}
-          <div className="lg:col-span-5 relative h-72 sm:h-80 lg:h-[360px] w-full rounded-2xl overflow-hidden shadow-xs border border-stone-200/80 bg-stone-100">
-            <img
-              src={dish.imageUrl || DEFAULT_DISH_IMAGE}
-              alt={dish.name}
-              onError={handleImageError}
-              className="h-full w-full object-cover object-center block transition-transform duration-500 hover:scale-102"
-            />
           </div>
         </div>
       </div>

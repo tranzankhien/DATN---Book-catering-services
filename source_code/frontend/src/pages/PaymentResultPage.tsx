@@ -130,83 +130,75 @@ export function PaymentResultPage() {
       <section className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-10 shadow-xs space-y-8 relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800" />
 
-        {/* Status Hero */}
-        <div className="text-center space-y-3 max-w-xl mx-auto">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl shadow-xs">
-            {outcome === 'success' ? (
-              <div className="h-14 w-14 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center">
+        {/* Compact, Dignified Success Banner */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200/80 pb-5">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-xs shrink-0">
+              {outcome === 'success' ? (
                 <CheckCircle2 className="h-7 w-7" />
-              </div>
+              ) : outcome === 'review' ? (
+                <AlertTriangle className="h-7 w-7 text-purple-600" />
+              ) : waiting || outcome === 'pending' ? (
+                <RefreshCw className="h-6 w-6 animate-spin text-amber-600" />
+              ) : (
+                <XCircle className="h-7 w-7 text-rose-600" />
+              )}
+            </div>
+            <div>
+              <h1 role="status" className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
+                {!reference
+                  ? 'Thiếu mã tham chiếu giao dịch hợp lệ'
+                  : !waiting && outcome === 'pending'
+                  ? 'Giao dịch chưa được xác nhận'
+                  : messages[outcome]}
+              </h1>
+              {reference && (
+                <div className="flex items-center gap-2 text-xs text-stone-500 mt-0.5">
+                  <span>Mã GD VietQR:</span>
+                  <span className="font-semibold text-stone-800 tabular-nums">{reference}</span>
+                  <button
+                    type="button"
+                    onClick={copyRef}
+                    className="p-0.5 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
+                    title="Sao chép mã tham chiếu"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </button>
+                  {copied && <span className="text-emerald-600 text-[10px] font-medium">Đã chép</span>}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            {outcome === 'success' ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Đã thanh toán 100%
+              </span>
             ) : outcome === 'review' ? (
-              <div className="h-14 w-14 rounded-2xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center">
-                <AlertTriangle className="h-7 w-7" />
-              </div>
-            ) : waiting || outcome === 'pending' ? (
-              <div className="h-14 w-14 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center">
-                <RefreshCw className="h-7 w-7 animate-spin" />
-              </div>
-            ) : (
-              <div className="h-14 w-14 rounded-2xl bg-rose-50 text-rose-700 border border-rose-200 flex items-center justify-center">
-                <XCircle className="h-7 w-7" />
-              </div>
-            )}
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-800 border border-purple-200 text-xs font-bold">
+                <AlertTriangle className="h-3.5 w-3.5" /> Đang đối soát
+              </span>
+            ) : null}
           </div>
-
-          <div className="space-y-1">
-            <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block">
-              Cổng thanh toán VietQR Napas
-            </span>
-            <h1 role="status" className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
-              {!reference
-                ? 'Thiếu mã tham chiếu giao dịch hợp lệ'
-                : !waiting && outcome === 'pending'
-                ? 'Giao dịch chưa được xác nhận'
-                : messages[outcome]}
-            </h1>
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-normal">
-              {outcome === 'success'
-                ? 'Khoản thanh toán đã được xác nhận. Hợp đồng đặt tiệc đã chính thức kích hoạt thành công.'
-                : outcome === 'review'
-                ? 'Khoản thanh toán đang chờ kế toán đối soát xác nhận. Vui lòng không thao tác chuyển tiền lại để tránh trừ tiền trùng lặp.'
-                : outcome === 'expired'
-                ? 'Thời gian giữ kho 15 phút đã kết thúc trước khi hoàn tất giao dịch. Quý khách vui lòng chọn lại thực đơn mới.'
-                : 'Kết quả giao dịch đang được tự động đồng bộ theo thời gian thực từ hệ thống thanh toán.'}
-            </p>
-          </div>
-
-          {reference && (
-            <div className="inline-flex items-center gap-2 rounded-xl bg-stone-50 border border-stone-200 px-3.5 py-1.5 text-xs tabular-nums text-stone-700">
-              <span className="text-stone-400">Mã tham chiếu VietQR:</span>
-              <span className="font-bold">{reference}</span>
-              <button
-                type="button"
-                onClick={copyRef}
-                className="p-1 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
-                title="Sao chép mã tham chiếu"
-              >
-                <Copy className="h-3.5 w-3.5" />
-              </button>
-              {copied && <span className="text-emerald-600 text-[10px] font-medium">Đã chép</span>}
-            </div>
-          )}
-
-          {error && (
-            <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 text-left">
-              {error}
-            </div>
-          )}
-
-          {waiting && (
-            <div className="text-xs text-stone-400 flex items-center justify-center gap-1.5 pt-1">
-              <RefreshCw className="h-3 w-3 animate-spin text-amber-600" />
-              <span>Đang tự động xác minh kết quả với ngân hàng...</span>
-            </div>
-          )}
         </div>
+
+        {error && (
+          <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 text-left">
+            {error}
+          </div>
+        )}
+
+        {waiting && (
+          <div className="text-xs text-stone-400 flex items-center justify-center gap-1.5 pt-1">
+            <RefreshCw className="h-3 w-3 animate-spin text-amber-600" />
+            <span>Đang tự động xác minh kết quả với ngân hàng...</span>
+          </div>
+        )}
 
         {/* Clean Official Receipt Body */}
         {order ? (
-          <div className="space-y-6 pt-4 border-t border-stone-200">
+          <div className="space-y-6 pt-1">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
               <div className="flex items-center gap-2">
                 <Receipt className="h-4 w-4 text-amber-700" />
