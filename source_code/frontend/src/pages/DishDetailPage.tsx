@@ -7,6 +7,9 @@ import {
   Layers,
   Sparkles,
   Users,
+  Calculator,
+  Check,
+  ShieldCheck,
 } from 'lucide-react';
 import { catalogService } from '../services/catalogService';
 import { extractErrorMessage } from '../services/apiClient';
@@ -131,21 +134,27 @@ export const DishDetailPage: React.FC = () => {
         <span className="font-semibold text-stone-900 truncate max-w-xs">{dish.name}</span>
       </nav>
 
-      {/* Main Showcase Card */}
-      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 lg:p-10 shadow-xs overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-          {/* Left: Culinary Showcase Image (Standard E-Commerce Product Layout) */}
-          <div className="lg:col-span-5 relative h-72 sm:h-96 lg:h-[400px] w-full rounded-2xl overflow-hidden shadow-xs border border-stone-200/80 bg-stone-100">
+      {/* Main Showcase Card - Balanced Proportions & Full Width Utilization */}
+      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 lg:p-8 shadow-xs overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+          {/* Left: Culinary Showcase Image (Refined, Not Oversized) */}
+          <div className="lg:col-span-5 xl:col-span-4 relative h-64 sm:h-72 lg:h-[280px] w-full rounded-2xl overflow-hidden shadow-xs border border-stone-200/80 bg-stone-100 group">
             <img
               src={dish.imageUrl || DEFAULT_DISH_IMAGE}
               alt={dish.name}
               onError={handleImageError}
-              className="h-full w-full object-cover object-center block transition-transform duration-500 hover:scale-102"
+              className="h-full w-full object-cover object-center block transition-transform duration-500 group-hover:scale-102"
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-stone-950/40 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white text-xs font-medium">
+              <span className="bg-stone-900/80 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/20 text-[11px]">
+                Ẩm thực yến tiệc BanquetHub
+              </span>
+            </div>
           </div>
 
-          {/* Right: Dish Information & Actions */}
-          <div className="lg:col-span-7 space-y-5">
+          {/* Right: Dish Information & Full-Width Features */}
+          <div className="lg:col-span-7 xl:col-span-8 space-y-4">
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="text-xs font-bold text-stone-500 tabular-nums">
                 {dish.code}
@@ -159,7 +168,7 @@ export const DishDetailPage: React.FC = () => {
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-stone-900 tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight leading-tight">
               {dish.name}
             </h1>
 
@@ -168,24 +177,37 @@ export const DishDetailPage: React.FC = () => {
                 'Món ăn chế biến theo quy chuẩn ẩm thực yến tiệc truyền thống Việt Nam, hương vị thanh tao và nguyên liệu tươi mới.'}
             </p>
 
-            {/* Quick Specs */}
-            <div className="flex flex-wrap items-center gap-6 pt-3 text-xs text-stone-600 border-t border-stone-100">
-              <div className="flex items-center gap-1.5 font-medium">
-                <Users className="h-4 w-4 text-amber-700" />
-                <span>Tiêu chuẩn: 01 bàn / 10 khách</span>
+            {/* 3 Balanced Feature Cards (Utilizes Full Horizontal Space) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <div className="rounded-xl border border-stone-200/80 bg-stone-50/60 p-3">
+                <div className="flex items-center gap-1.5 text-amber-700 font-semibold text-xs">
+                  <Users className="h-4 w-4 shrink-0" />
+                  <span>Quy chuẩn bàn tiệc</span>
+                </div>
+                <p className="text-xs text-stone-800 font-medium mt-1">01 phần / bàn 10 khách</p>
               </div>
-              <div className="flex items-center gap-1.5 font-medium">
-                <Layers className="h-4 w-4 text-amber-700" />
-                <span>{dish.recipeItems.length} loại nguyên liệu</span>
+
+              <div className="rounded-xl border border-stone-200/80 bg-stone-50/60 p-3">
+                <div className="flex items-center gap-1.5 text-amber-700 font-semibold text-xs">
+                  <Layers className="h-4 w-4 shrink-0" />
+                  <span>Định mức công thức</span>
+                </div>
+                <p className="text-xs text-stone-800 font-medium mt-1 tabular-nums">
+                  {dish.recipeItems.length} loại nguyên liệu chuẩn
+                </p>
               </div>
-              <div className="flex items-center gap-1.5 font-medium">
-                <Sparkles className="h-4 w-4 text-emerald-600" />
-                <span>Chế biến nóng tươi mới</span>
+
+              <div className="rounded-xl border border-stone-200/80 bg-stone-50/60 p-3">
+                <div className="flex items-center gap-1.5 text-emerald-700 font-semibold text-xs">
+                  <Sparkles className="h-4 w-4 shrink-0" />
+                  <span>Quy trình bếp</span>
+                </div>
+                <p className="text-xs text-stone-800 font-medium mt-1">Chế biến nóng tươi mới</p>
               </div>
             </div>
 
-            {/* Price & Primary Actions */}
-            <div className="pt-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-stone-100">
+            {/* Price & Primary Actions Bar */}
+            <div className="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-stone-100">
               <div>
                 <span className="text-xs text-stone-500 font-medium block">Đơn giá niêm yết (01 phần / bàn 10 khách)</span>
                 <p className="text-2xl sm:text-3xl font-bold text-amber-900 tracking-tight mt-0.5 tabular-nums">
@@ -216,10 +238,11 @@ export const DishDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Interactive Ingredient Consumption Breakdown */}
-      <div id="recipe-section" className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-100 pb-5">
-          <div className="flex items-start gap-3">
+      {/* Balanced 2-Column Section: Left Recipe Table (8 Cols) + Right Interactive Estimator (4 Cols) */}
+      <div id="recipe-section" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column: Recipe & Ingredient Consumption Breakdown */}
+        <div className="lg:col-span-8 rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-xs space-y-5">
+          <div className="flex items-start gap-3 border-b border-stone-100 pb-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
               <Scale className="h-5 w-5" />
             </div>
@@ -228,16 +251,79 @@ export const DishDetailPage: React.FC = () => {
                 Bảng định lượng công thức & ước tính tiêu hao nguyên liệu
               </h2>
               <p className="text-xs text-stone-500 mt-0.5">
-                Tổng lượng tiêu hao = Số bàn × Số phần/bàn × Định lượng 01 phần
+                Tổng lượng tiêu hao = Số bàn ({tableCount} bàn) × Số phần/bàn ({portionsPerTable} phần) × Định lượng 01 phần
               </p>
             </div>
           </div>
 
-          {/* Interactive Steppers */}
-          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-stone-200 bg-stone-50/70 p-2.5">
-            <div className="flex items-center gap-2 text-xs">
-              <span className="font-medium text-stone-600">Phần/bàn:</span>
-              <div className="flex items-center gap-1">
+          {/* Clean Recipe Table */}
+          <div className="overflow-x-auto rounded-xl border border-stone-200/80">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-stone-200 bg-stone-50 text-stone-600 font-semibold text-[11px] uppercase tracking-wider">
+                  <th className="py-3 px-4">Nguyên liệu</th>
+                  <th className="py-3 px-4">Đơn vị</th>
+                  <th className="py-3 px-4 text-right">Định lượng / 01 phần</th>
+                  <th className="py-3 px-4 text-right">Tiêu hao ({totalPortions} phần)</th>
+                  <th className="py-3 px-4">Ghi chú chuẩn bị</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-100 bg-white">
+                {dish.recipeItems.map((item) => {
+                  const totalNeeded = Number(item.quantity) * totalPortions;
+                  return (
+                    <tr key={item.id} className="hover:bg-amber-50/20 transition-colors">
+                      <td className="py-3 px-4 font-semibold text-stone-900">
+                        {item.ingredientName}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="rounded-md bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-700 border border-stone-200/60">
+                          {item.unit}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right font-medium text-stone-700 tabular-nums">
+                        {formatQuantity(item.quantity)} {item.unit}
+                      </td>
+                      <td className="py-3 px-4 text-right font-bold text-amber-800 tabular-nums">
+                        {formatQuantity(totalNeeded)} {item.unit}
+                      </td>
+                      <td className="py-3 px-4 text-stone-500">
+                        {item.note || 'Theo tiêu chuẩn đầu bếp trưởng'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="pt-2 text-xs text-stone-500 flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+            <span>Định lượng được chuẩn hóa bởi Bếp trưởng, tự động đồng bộ khi xuất kho chuẩn bị tiệc.</span>
+          </div>
+        </div>
+
+        {/* Right Column: Interactive Banquet Estimator & Quick Action */}
+        <div className="lg:col-span-4 rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-5">
+          <div className="flex items-center gap-2.5 border-b border-stone-100 pb-3">
+            <div className="h-9 w-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200/80 shrink-0">
+              <Calculator className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-stone-900 tracking-tight">
+                Dự toán theo quy mô tiệc
+              </h3>
+              <p className="text-[11px] text-stone-500">
+                Mô phỏng tiêu hao và chi phí món ăn
+              </p>
+            </div>
+          </div>
+
+          {/* Stepper Controls */}
+          <div className="space-y-3.5 text-xs">
+            <div className="flex items-center justify-between p-3 rounded-xl border border-stone-200/80 bg-stone-50/60">
+              <span className="font-medium text-stone-700">Số phần mỗi bàn:</span>
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => setPortionsPerTable((p) => Math.max(1, p - 1))}
@@ -264,9 +350,12 @@ export const DishDetailPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs">
-              <span className="font-medium text-stone-600">Số bàn:</span>
-              <div className="flex items-center gap-1">
+            <div className="flex items-center justify-between p-3 rounded-xl border border-stone-200/80 bg-stone-50/60">
+              <div>
+                <span className="font-medium text-stone-700 block">Số lượng bàn tiệc:</span>
+                <span className="text-[10px] text-stone-400 tabular-nums">(~{estimatedGuests} khách tham dự)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => setTableCount((t) => Math.max(1, t - 1))}
@@ -291,55 +380,52 @@ export const DishDetailPage: React.FC = () => {
                   +
                 </button>
               </div>
-              <span className="text-[11px] text-stone-400 font-medium tabular-nums">(~{estimatedGuests} khách)</span>
-            </div>
-
-            <div className="rounded-lg bg-amber-50 border border-amber-200/80 px-3 py-1.5 text-xs text-amber-900 font-medium">
-              <span>Thành tiền ({totalPortions} phần): </span>
-              <strong className="font-bold text-amber-900 tabular-nums">{formatVnd(totalDishCost)}</strong>
             </div>
           </div>
-        </div>
 
-        {/* Clean Recipe Table */}
-        <div className="overflow-x-auto rounded-xl border border-stone-200/80">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="border-b border-stone-200 bg-stone-50 text-stone-600 font-semibold text-[11px] uppercase tracking-wider">
-                <th className="py-3 px-4">Nguyên liệu</th>
-                <th className="py-3 px-4">Đơn vị</th>
-                <th className="py-3 px-4 text-right">Định lượng / 01 phần</th>
-                <th className="py-3 px-4 text-right">Tiêu hao ({totalPortions} phần)</th>
-                <th className="py-3 px-4">Ghi chú chuẩn bị</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100 bg-white">
-              {dish.recipeItems.map((item) => {
-                const totalNeeded = Number(item.quantity) * totalPortions;
-                return (
-                  <tr key={item.id} className="hover:bg-amber-50/20 transition-colors">
-                    <td className="py-3 px-4 font-semibold text-stone-900">
-                      {item.ingredientName}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="rounded-md bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-700 border border-stone-200/60">
-                        {item.unit}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right font-medium text-stone-700 tabular-nums">
-                      {formatQuantity(item.quantity)} {item.unit}
-                    </td>
-                    <td className="py-3 px-4 text-right font-bold text-amber-800 tabular-nums">
-                      {formatQuantity(totalNeeded)} {item.unit}
-                    </td>
-                    <td className="py-3 px-4 text-stone-500">
-                      {item.note || 'Theo tiêu chuẩn đầu bếp trưởng'}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          {/* Cost Summary Box */}
+          <div className="p-4 rounded-xl border border-amber-200/80 bg-amber-50/70 space-y-2">
+            <div className="flex justify-between items-center text-xs text-stone-600">
+              <span>Tổng số phần phục vụ:</span>
+              <strong className="font-bold text-stone-900 tabular-nums">
+                {totalPortions} phần
+              </strong>
+            </div>
+            <div className="flex justify-between items-center text-xs text-stone-600">
+              <span>Đơn giá niêm yết:</span>
+              <span className="tabular-nums font-medium text-stone-800">
+                {formatVnd(dish.price)} / phần
+              </span>
+            </div>
+            <div className="pt-2 border-t border-amber-200 flex justify-between items-baseline">
+              <span className="text-xs font-semibold text-amber-900">Tổng chi phí món:</span>
+              <span className="text-xl font-bold text-amber-950 tabular-nums">
+                {formatVnd(totalDishCost)}
+              </span>
+            </div>
+          </div>
+
+          {/* Quick CTA */}
+          <button
+            type="button"
+            onClick={handleAddToMenuBuilder}
+            className="w-full inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+          >
+            <Utensils className="h-4 w-4" />
+            <span>Đưa {totalPortions} phần vào bàn tiệc tự phối</span>
+          </button>
+
+          {/* Banquet Commitments */}
+          <div className="space-y-1.5 text-[11px] text-stone-500 pt-2 border-t border-stone-100">
+            <div className="flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+              <span>Khóa giá niêm yết, không phụ thu phát sinh</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+              <span>Phục vụ đồng loạt nóng sốt đúng giờ tiệc</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

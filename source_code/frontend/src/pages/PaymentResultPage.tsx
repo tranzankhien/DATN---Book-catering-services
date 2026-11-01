@@ -12,6 +12,12 @@ import {
   ShieldCheck,
   Printer,
   ShoppingBag,
+  CreditCard,
+  Calendar,
+  MapPin,
+  Clock,
+  PhoneCall,
+  Home,
 } from 'lucide-react';
 import { paymentService, type PaymentState } from '../services/paymentService';
 import { orderService } from '../services/orderService';
@@ -112,7 +118,7 @@ export function PaymentResultPage() {
   };
 
   return (
-    <main className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10 animate-fade-up-1 space-y-6">
+    <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10 animate-fade-up-1 space-y-6">
       {/* Top Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-stone-500 font-medium print:hidden">
         <Link to="/" className="hover:text-stone-900 transition-colors">
@@ -126,13 +132,12 @@ export function PaymentResultPage() {
         <span className="font-semibold text-stone-900">Biên nhận thanh toán</span>
       </nav>
 
-      {/* Main Single Cohesive Receipt Card */}
-      <section className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-10 shadow-xs space-y-8 relative overflow-hidden">
+      {/* Full-Width Dignified Status Hero Banner */}
+      <section className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-xs relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800" />
 
-        {/* Compact, Dignified Success Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200/80 pb-5">
-          <div className="flex items-center gap-3.5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-xs shrink-0">
               {outcome === 'success' ? (
                 <CheckCircle2 className="h-7 w-7" />
@@ -152,31 +157,39 @@ export function PaymentResultPage() {
                   ? 'Giao dịch chưa được xác nhận'
                   : messages[outcome]}
               </h1>
-              {reference && (
-                <div className="flex items-center gap-2 text-xs text-stone-500 mt-0.5">
-                  <span>Mã GD VietQR:</span>
-                  <span className="font-semibold text-stone-800 tabular-nums">{reference}</span>
-                  <button
-                    type="button"
-                    onClick={copyRef}
-                    className="p-0.5 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
-                    title="Sao chép mã tham chiếu"
-                  >
-                    <Copy className="h-3 w-3" />
-                  </button>
-                  {copied && <span className="text-emerald-600 text-[10px] font-medium">Đã chép</span>}
-                </div>
-              )}
+              <p className="text-xs text-stone-500 mt-1">
+                Kho nguyên liệu đã được khóa an toàn, hợp đồng đặt tiệc chính thức có hiệu lực pháp lý.
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex flex-wrap items-center gap-3 self-start lg:self-center">
+            {order && (
+              <span className="text-xs font-bold text-stone-700 bg-stone-100 border border-stone-200 px-3 py-1.5 rounded-xl tabular-nums">
+                Hợp đồng: {order.orderCode}
+              </span>
+            )}
+            {reference && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-50 border border-stone-200 text-xs">
+                <span className="text-stone-400">Mã GD:</span>
+                <span className="font-semibold text-stone-800 tabular-nums">{reference}</span>
+                <button
+                  type="button"
+                  onClick={copyRef}
+                  className="p-0.5 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
+                  title="Sao chép mã tham chiếu"
+                >
+                  <Copy className="h-3 w-3" />
+                </button>
+                {copied && <span className="text-emerald-600 text-[10px] font-medium">Đã chép</span>}
+              </div>
+            )}
             {outcome === 'success' ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
                 <CheckCircle2 className="h-3.5 w-3.5" /> Đã thanh toán 100%
               </span>
             ) : outcome === 'review' ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-800 border border-purple-200 text-xs font-bold">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-50 text-purple-800 border border-purple-200 text-xs font-bold">
                 <AlertTriangle className="h-3.5 w-3.5" /> Đang đối soát
               </span>
             ) : null}
@@ -184,186 +197,270 @@ export function PaymentResultPage() {
         </div>
 
         {error && (
-          <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 text-left">
+          <div className="mt-4 rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 text-left">
             {error}
           </div>
         )}
 
         {waiting && (
-          <div className="text-xs text-stone-400 flex items-center justify-center gap-1.5 pt-1">
+          <div className="mt-3 text-xs text-stone-400 flex items-center justify-center gap-1.5">
             <RefreshCw className="h-3 w-3 animate-spin text-amber-600" />
-            <span>Đang tự động xác minh kết quả với ngân hàng...</span>
+            <span>Đang tự động xác minh kết quả với ngân hàng Napas...</span>
           </div>
         )}
+      </section>
 
-        {/* Clean Official Receipt Body */}
-        {order ? (
-          <div className="space-y-6 pt-1">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
-              <div className="flex items-center gap-2">
-                <Receipt className="h-4 w-4 text-amber-700" />
-                <span className="text-xs font-bold uppercase tracking-wider text-stone-700">
-                  Biên nhận yến tiệc chính thức
-                </span>
+      {/* Main 2-Column Balanced Architecture (Utilizes Full Horizontal Width) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column (8 Cols): Itemized Official Banquet Contract & Dishes */}
+        <section className="lg:col-span-8 rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="h-9 w-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200/80">
+                <Receipt className="h-4 w-4" />
               </div>
-              <span className="text-xs font-bold text-amber-900 tabular-nums">
-                Hợp đồng: {order.orderCode}
+              <div>
+                <h2 className="text-sm font-bold uppercase tracking-wider text-stone-900">
+                  Biên nhận yến tiệc chính thức
+                </h2>
+                <p className="text-xs text-stone-500">
+                  Hợp đồng dịch vụ tiệc lưu động chuẩn BanquetHub
+                </p>
+              </div>
+            </div>
+            {order && (
+              <span className="text-xs font-semibold text-stone-500">
+                Quy mô: <strong className="text-stone-800 font-bold tabular-nums">{order.tableCount} bàn</strong> (~{order.tableCount * 10} khách)
+              </span>
+            )}
+          </div>
+
+          {order ? (
+            <div className="space-y-6">
+              {/* 3 Logistics Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div className="p-3.5 rounded-xl border border-stone-200/80 bg-stone-50/60 space-y-1">
+                  <span className="text-stone-400 block font-medium">Khách hàng liên hệ:</span>
+                  <p className="font-bold text-stone-900 text-sm">{order.customerName}</p>
+                  <p className="text-stone-500 tabular-nums">{order.customerPhone}</p>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-stone-200/80 bg-stone-50/60 space-y-1">
+                  <span className="text-stone-400 block font-medium">Thời gian đón khách:</span>
+                  <p className="font-bold text-stone-900 text-sm">{formatDateTimeVn(order.eventDateTime)}</p>
+                  <p className="text-stone-500">Giữ sảnh phục vụ chu đáo</p>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-stone-200/80 bg-stone-50/60 space-y-1">
+                  <span className="text-stone-400 block font-medium">Địa điểm tổ chức:</span>
+                  <p className="font-bold text-stone-900 text-xs sm:text-sm line-clamp-2">{order.eventLocation || 'Chưa cung cấp địa chỉ'}</p>
+                </div>
+              </div>
+
+              {/* Dishes Summary Table */}
+              {order.items && order.items.length > 0 && (
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center justify-between text-xs font-semibold text-stone-700 border-b border-stone-100 pb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Utensils className="h-4 w-4 text-amber-700" />
+                      <span>Thực đơn yến tiệc ({order.items.length} món)</span>
+                    </div>
+                    <span className="tabular-nums text-stone-400 text-[11px] font-normal">
+                      Áp dụng: {order.menuNameSnapshot || 'Thực đơn tự chọn'}
+                    </span>
+                  </div>
+
+                  <div className="divide-y divide-stone-100 text-xs">
+                    {order.items.map((it, idx) => (
+                      <div key={it.id} className="py-2.5 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="w-5 h-5 rounded-md bg-stone-100 text-stone-500 flex items-center justify-center font-bold text-[10px] tabular-nums shrink-0">
+                            {idx + 1}
+                          </span>
+                          <div>
+                            <span className="font-semibold text-stone-900">{it.dishNameSnapshot}</span>
+                            <span className="text-stone-400 text-[11px] ml-2 tabular-nums">
+                              {formatVnd(it.unitPriceSnapshot)} / phần • {it.quantityPerTable} phần/bàn
+                            </span>
+                          </div>
+                        </div>
+                        <span className="font-bold text-stone-900 tabular-nums">
+                          {formatVnd(it.lineTotal)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Financial Calculation Breakdown */}
+              <div className="p-4 rounded-xl border border-stone-200 bg-stone-50/70 space-y-2 text-xs">
+                <div className="flex justify-between items-center text-stone-600">
+                  <span>Tổng giá trị hợp đồng (Đã bao gồm VAT & dịch vụ):</span>
+                  <span className="font-bold text-stone-900 tabular-nums">{formatVnd(order.totalAmount)}</span>
+                </div>
+                <div className="flex justify-between items-center text-emerald-800">
+                  <span className="flex items-center gap-1 font-medium">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Đã thanh toán qua VietQR Napas:
+                  </span>
+                  <span className="font-bold tabular-nums">{formatVnd(order.totalAmount)}</span>
+                </div>
+                <div className="pt-2 border-t border-stone-200/80 flex justify-between items-center text-stone-500">
+                  <span>Số dư còn lại cần thanh toán:</span>
+                  <span className="font-bold text-emerald-700 tabular-nums">0 đ (Đã tất toán 100%)</span>
+                </div>
+              </div>
+
+              {/* Service Guarantee */}
+              <div className="pt-2 text-xs text-stone-500 flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                <span>Chuyên viên BanquetHub sẽ liên hệ trong 24h để xác nhận điều phối sảnh và chuẩn bị tiệc.</span>
+              </div>
+            </div>
+          ) : (
+            <div className="py-12 text-center text-xs text-stone-400">
+              <RefreshCw className="h-5 w-5 animate-spin mx-auto text-amber-600 mb-2" />
+              <span>Đang tải thông tin hợp đồng đơn tiệc...</span>
+            </div>
+          )}
+        </section>
+
+        {/* Right Column (4 Cols): Digital Certificate, Timeline & Actions */}
+        <div className="lg:col-span-4 space-y-6">
+          {/* Digital Payment Certificate Card */}
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-amber-700" />
+                <h3 className="font-bold text-xs uppercase tracking-wider text-stone-800">
+                  Chứng từ VietQR
+                </h3>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Napas 24/7
               </span>
             </div>
 
-            {/* 4 Clean Key-Value Columns (NO nested grey boxes!) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-              <div className="space-y-1">
-                <span className="text-stone-400 block font-medium">Khách hàng liên hệ:</span>
-                <p className="font-bold text-stone-900 text-sm">{order.customerName}</p>
-                <p className="text-stone-500 tabular-nums">{order.customerPhone}</p>
+            <div className="space-y-2.5 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="text-stone-400">Cổng thanh toán:</span>
+                <span className="font-semibold text-stone-800">SePay Napas 24/7</span>
               </div>
-
-              <div className="space-y-1">
-                <span className="text-stone-400 block font-medium">Thời gian đón khách:</span>
-                <p className="font-bold text-stone-900 text-sm">{formatDateTimeVn(order.eventDateTime)}</p>
-                <p className="text-stone-500">Giữ sảnh phục vụ chu đáo</p>
-              </div>
-
-              <div className="space-y-1">
-                <span className="text-stone-400 block font-medium">Quy mô tiệc:</span>
-                <p className="font-bold text-stone-900 text-sm tabular-nums">
-                  {order.tableCount} bàn (~{order.tableCount * 10} khách)
-                </p>
-                <p className="text-stone-500 truncate">{order.menuNameSnapshot || 'Thực đơn tự chọn'}</p>
-              </div>
-
-              <div className="space-y-1">
-                <span className="text-stone-400 block font-medium">Số tiền thanh toán:</span>
-                <p className="font-bold text-amber-900 text-base tabular-nums">
-                  {formatVnd(order.totalAmount)}
-                </p>
-                <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold text-[11px]">
-                  <CheckCircle2 className="h-3 w-3" /> Đã thanh toán đủ
+              <div className="flex justify-between items-center">
+                <span className="text-stone-400">Mã GD ngân hàng:</span>
+                <span className="font-semibold text-stone-800 tabular-nums truncate max-w-[160px]" title={reference || ''}>
+                  {reference || 'Đang xác nhận'}
                 </span>
               </div>
+              <div className="flex justify-between items-center">
+                <span className="text-stone-400">Thời gian:</span>
+                <span className="font-semibold text-stone-800 tabular-nums">
+                  {latestTx?.paidAt ? formatDateTimeVn(latestTx.paidAt) : 'Vừa xong'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-stone-400">Trạng thái đối soát:</span>
+                <span className="font-bold text-emerald-700">Đã khớp tự động</span>
+              </div>
             </div>
 
-            {/* Address */}
-            <div className="text-xs space-y-0.5 pt-2 border-t border-stone-100">
-              <span className="text-stone-400 font-medium">Địa điểm tổ chức yến tiệc:</span>
-              <p className="font-semibold text-stone-900">{order.eventLocation || 'Chưa cung cấp địa chỉ'}</p>
-            </div>
+            <p className="text-[11px] text-stone-400 pt-2 border-t border-stone-100 leading-relaxed">
+              Biên nhận thanh toán điện tử có giá trị xác thực tương đương hóa đơn tạm tính của hệ thống BanquetHub.
+            </p>
+          </div>
 
-            {/* Dishes Summary Table */}
-            {order.items && order.items.length > 0 && (
-              <div className="space-y-2 pt-2">
-                <div className="flex items-center justify-between text-xs font-semibold text-stone-600 border-b border-stone-100 pb-2">
-                  <div className="flex items-center gap-1.5">
-                    <Utensils className="h-3.5 w-3.5 text-amber-700" />
-                    <span>Thực đơn ({order.items.length} món)</span>
-                  </div>
-                  <span className="tabular-nums text-stone-400 text-[11px] font-normal">
-                    Quy mô: {order.tableCount} bàn
-                  </span>
+          {/* Service Progress Timeline Card */}
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-4">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-stone-800 border-b border-stone-100 pb-3">
+              Tiến độ phục vụ tiệc
+            </h3>
+
+            <div className="space-y-4 text-xs">
+              <div className="flex items-start gap-3">
+                <div className="h-6 w-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs shrink-0">
+                  ✓
                 </div>
-
-                <div className="divide-y divide-stone-100 text-xs">
-                  {order.items.map((it, idx) => (
-                    <div key={it.id} className="py-2 flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-5 h-5 rounded-md bg-stone-100 text-stone-500 flex items-center justify-center font-bold text-[10px] tabular-nums">
-                          {idx + 1}
-                        </span>
-                        <div>
-                          <span className="font-semibold text-stone-900">{it.dishNameSnapshot}</span>
-                          <span className="text-stone-400 text-[11px] ml-2 tabular-nums">
-                            {formatVnd(it.unitPriceSnapshot)} / phần • {it.quantityPerTable} phần/bàn
-                          </span>
-                        </div>
-                      </div>
-                      <span className="font-bold text-stone-900 tabular-nums">
-                        {formatVnd(it.lineTotal)}
-                      </span>
-                    </div>
-                  ))}
+                <div>
+                  <strong className="text-stone-900 block font-semibold">Đã thanh toán 100%</strong>
+                  <span className="text-[11px] text-stone-500">Khóa an toàn kho nguyên liệu</span>
                 </div>
               </div>
-            )}
 
-            {/* Service Guarantee */}
-            <div className="pt-3 border-t border-stone-100 text-xs text-stone-600 flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
-              <span>Chuyên viên BanquetHub sẽ liên hệ trong 24h để xác nhận điều phối sảnh và chuẩn bị tiệc.</span>
+              <div className="flex items-start gap-3">
+                <div className="h-6 w-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs shrink-0">
+                  2
+                </div>
+                <div>
+                  <strong className="text-stone-900 block font-semibold">Bếp xuất kho & sơ chế</strong>
+                  <span className="text-[11px] text-stone-500">Chuẩn bị trước 24h sự kiện</span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="h-6 w-6 rounded-full bg-stone-100 text-stone-400 flex items-center justify-center font-bold text-xs shrink-0">
+                  3
+                </div>
+                <div>
+                  <strong className="text-stone-600 block font-medium">Hoàn thành phục vụ yến tiệc</strong>
+                  <span className="text-[11px] text-stone-400">Đúng giờ và địa điểm đã hẹn</span>
+                </div>
+              </div>
             </div>
           </div>
-        ) : state ? (
-          /* Fallback Compact Strip if Order Details are still loading */
-          <div className="pt-4 border-t border-stone-200 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-            <div>
-              <span className="text-stone-400 block font-medium">Số tiền:</span>
-              <p className="font-bold text-amber-900 text-base tabular-nums">
-                {latestTx ? formatVnd(latestTx.amount) : 'Theo đơn tiệc'}
-              </p>
-            </div>
-            <div>
-              <span className="text-stone-400 block font-medium">Trạng thái:</span>
-              <p className="font-bold text-emerald-700">Đã thanh toán</p>
-            </div>
-            <div>
-              <span className="text-stone-400 block font-medium">Phương thức:</span>
-              <p className="font-semibold text-stone-800">VietQR Napas</p>
-            </div>
-            <div>
-              <span className="text-stone-400 block font-medium">Thời gian:</span>
-              <p className="font-semibold text-stone-800 tabular-nums">
-                {latestTx?.paidAt ? formatDateTimeVn(latestTx.paidAt) : 'Vừa xong'}
-              </p>
-            </div>
-          </div>
-        ) : null}
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 border-t border-stone-100 print:hidden">
-          {authExpired ? (
+          {/* Actions & Helpdesk */}
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-3 print:hidden">
+            {authExpired ? (
+              <Link
+                to="/login"
+                state={{ from: location.pathname + location.search }}
+                className="w-full inline-flex items-center justify-center gap-1.5 h-11 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-xs transition-colors"
+              >
+                Đăng nhập lại để kiểm tra
+              </Link>
+            ) : reference && !waiting && outcome === 'pending' ? (
+              <button
+                type="button"
+                onClick={() => setRetry((v) => v + 1)}
+                className="w-full inline-flex items-center justify-center gap-1.5 h-11 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+                <span>Kiểm tra lại kết quả</span>
+              </button>
+            ) : null}
+
             <Link
-              to="/login"
-              state={{ from: location.pathname + location.search }}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-xs transition-colors"
+              to={state ? `/my-orders/${state.orderId}` : '/my-orders'}
+              className="w-full inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-xs transition-colors"
             >
-              Đăng nhập lại để kiểm tra
+              <ShoppingBag className="h-4 w-4" />
+              <span>Xem chi tiết đơn tiệc</span>
             </Link>
-          ) : reference && !waiting && outcome === 'pending' ? (
+
             <button
               type="button"
-              onClick={() => setRetry((v) => v + 1)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+              onClick={handlePrint}
+              className="w-full inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 font-semibold text-xs shadow-2xs transition-colors cursor-pointer"
             >
-              <RefreshCw className="h-3.5 w-3.5" />
-              <span>Kiểm tra lại kết quả</span>
+              <Printer className="h-4 w-4 text-stone-500" />
+              <span>In biên nhận PDF / In giấy</span>
             </button>
-          ) : null}
 
-          <Link
-            to={state ? `/my-orders/${state.orderId}` : '/my-orders'}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-xs transition-colors"
-          >
-            <ShoppingBag className="h-4 w-4" />
-            <span>Xem chi tiết đơn tiệc</span>
-          </Link>
+            <Link
+              to="/"
+              className="w-full inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 font-semibold text-xs shadow-2xs transition-colors"
+            >
+              <Home className="h-4 w-4 text-stone-500" />
+              <span>Về trang chủ</span>
+            </Link>
 
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 font-semibold text-xs shadow-2xs transition-colors cursor-pointer"
-          >
-            <Printer className="h-4 w-4 text-stone-500" />
-            <span>In biên nhận</span>
-          </button>
-
-          <Link
-            to="/"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 font-semibold text-xs shadow-2xs transition-colors"
-          >
-            Về trang chủ
-          </Link>
+            <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs">
+              <span className="text-stone-500">Hotline hỗ trợ:</span>
+              <strong className="text-amber-900 font-bold tabular-nums">1900 8899</strong>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
     </main>
   );
 }
