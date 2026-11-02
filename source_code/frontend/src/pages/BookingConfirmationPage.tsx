@@ -216,26 +216,19 @@ export const BookingConfirmationPage: React.FC = () => {
         <div className="lg:col-span-6 xl:col-span-6 space-y-6">
           {/* 1. Contract Dishes Snapshot */}
           <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-4">
+            <div className="border-b border-stone-100 pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200/80">
+                <div className="h-8 w-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200/80 shrink-0">
                   <Utensils className="h-4 w-4" />
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-stone-900 tracking-tight">
                     Thực đơn bàn tiệc ({order.items.length} món)
                   </h2>
-                  <p className="text-xs text-stone-500">
+                  <p className="text-xs text-stone-500 mt-0.5">
                     Áp dụng: <strong className="text-stone-800 font-semibold">{order.menuNameSnapshot || 'Thực đơn tự chọn'}</strong> • Quy mô: <strong className="text-stone-800 font-semibold tabular-nums">{order.tableCount} bàn</strong> (~{order.tableCount * 10} khách)
                   </p>
                 </div>
-              </div>
-
-              <div className="text-left sm:text-right">
-                <span className="block text-[11px] text-stone-400 font-medium">Tổng giá trị đơn</span>
-                <span className="font-bold text-amber-900 text-lg tabular-nums">
-                  {formatVnd(order.totalAmount)}
-                </span>
               </div>
             </div>
 

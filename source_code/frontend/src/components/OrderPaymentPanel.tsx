@@ -138,7 +138,7 @@ export function OrderPaymentPanel({
               </span>
             </div>
             <p className="text-xs text-stone-500 mt-0.5">
-              Cổng thanh toán tự động quét mã QR ngân hàng Napas 24/7
+              Quét mã chuyển khoản liên ngân hàng tự động
             </p>
           </div>
         </div>
@@ -273,7 +273,7 @@ export function OrderPaymentPanel({
 
           <div className="flex items-center gap-2 text-[11px] text-stone-500 pt-1">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-            <span>Xác nhận tự động tức thì qua Napas 24/7.</span>
+            <span>Xác nhận giao dịch tự động tức thì.</span>
           </div>
         </div>
       )}

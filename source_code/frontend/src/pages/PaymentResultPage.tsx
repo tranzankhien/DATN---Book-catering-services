@@ -346,23 +346,17 @@ export function PaymentResultPage() {
             <div className="space-y-2.5 text-xs">
               <div className="flex justify-between items-center">
                 <span className="text-stone-400">Cổng thanh toán:</span>
-                <span className="font-semibold text-stone-800">SePay Napas 24/7</span>
+                <span className="font-semibold text-stone-800">VietQR Napas 24/7</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-stone-400">Mã GD ngân hàng:</span>
-                <span className="font-semibold text-stone-800 tabular-nums truncate max-w-[160px]" title={reference || ''}>
-                  {reference || 'Đang xác nhận'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-stone-400">Thời gian:</span>
+                <span className="text-stone-400">Thời gian ghi nhận:</span>
                 <span className="font-semibold text-stone-800 tabular-nums">
                   {latestTx?.paidAt ? formatDateTimeVn(latestTx.paidAt) : 'Vừa xong'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-stone-400">Trạng thái đối soát:</span>
-                <span className="font-bold text-emerald-700">Đã khớp tự động</span>
+                <span className="text-stone-400">Đối soát hệ thống:</span>
+                <span className="font-bold text-emerald-700">Đã khớp tự động 100%</span>
               </div>
             </div>
 
