@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   Phone,
-  Clock,
-  MapPin,
   LogOut,
   UserCircle2,
   Menu,
@@ -59,36 +57,6 @@ export const PublicLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fdfcfa] text-stone-900 font-sans selection:bg-amber-100 selection:text-amber-900">
-      {/* Top Hospitality Notification Bar - Tinh gọn, đồng điệu */}
-      <div className="border-b border-stone-200/60 bg-[#f7f5f0] text-[11px] sm:text-xs text-stone-600">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 py-2">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 font-medium text-stone-700">
-              <MapPin className="h-3.5 w-3.5 text-amber-800 shrink-0" />
-              <span>Hệ thống yến tiệc BanquetHub • TP. Hồ Chí Minh & Hà Nội</span>
-            </span>
-            <span className="hidden md:flex items-center gap-1.5 text-stone-500">
-              <Clock className="h-3.5 w-3.5 text-stone-400 shrink-0" />
-              <span>Phục vụ: 08:00 – 22:00 hằng ngày</span>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4 text-xs">
-            <span className="hidden lg:inline-flex items-center gap-1 text-emerald-700 font-medium">
-              <CheckCircle className="h-3 w-3" />
-              <span>Chuẩn VSATTP & hóa đơn VAT</span>
-            </span>
-            <a
-              href="tel:19008899"
-              className="flex items-center gap-1 font-semibold text-amber-800 hover:text-amber-900 transition-colors"
-            >
-              <Phone className="h-3 w-3" />
-              <span>Hotline đặt tiệc: 1900 8899</span>
-            </a>
-          </div>
-        </div>
-      </div>
-
       {/* Main Navigation Header */}
       <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-white/95 backdrop-blur-md transition-all">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-20">

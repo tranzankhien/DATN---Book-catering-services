@@ -163,9 +163,6 @@ export const DishDetailPage: React.FC = () => {
                 {dish.categoryName}
               </span>
               <DishStatusBadge status={dish.status} />
-              <span className="text-xs text-stone-400">
-                • Cập nhật {formatDateTimeVn(dish.updatedAt)}
-              </span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight leading-tight">

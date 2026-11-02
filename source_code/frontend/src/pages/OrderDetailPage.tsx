@@ -192,7 +192,7 @@ export const OrderDetailPage: React.FC = () => {
               </button>
             </div>
             <p className="text-xs text-stone-500 mt-1">
-              Khởi tạo lúc: {formatDateTimeVn(order.createdAt)} • Cập nhật: {formatDateTimeVn(order.updatedAt)}
+              Thời gian khởi tạo: {formatDateTimeVn(order.createdAt)}
             </p>
           </div>
 

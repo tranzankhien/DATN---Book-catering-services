@@ -132,24 +132,22 @@ export function PaymentResultPage() {
         <span className="font-semibold text-stone-900">Biên nhận thanh toán</span>
       </nav>
 
-      {/* Full-Width Dignified Status Hero Banner */}
-      <section className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-xs relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800" />
-
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-xs shrink-0">
-              {outcome === 'success' ? (
-                <CheckCircle2 className="h-7 w-7" />
-              ) : outcome === 'review' ? (
-                <AlertTriangle className="h-7 w-7 text-purple-600" />
-              ) : waiting || outcome === 'pending' ? (
-                <RefreshCw className="h-6 w-6 animate-spin text-amber-600" />
-              ) : (
-                <XCircle className="h-7 w-7 text-rose-600" />
-              )}
-            </div>
-            <div>
+      {/* Executive Clean Header: Status, Contract & VietQR References */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-stone-200">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+            {outcome === 'success' ? (
+              <CheckCircle2 className="h-6 w-6" />
+            ) : outcome === 'review' ? (
+              <AlertTriangle className="h-6 w-6 text-purple-600" />
+            ) : waiting || outcome === 'pending' ? (
+              <RefreshCw className="h-5 w-5 animate-spin text-amber-600" />
+            ) : (
+              <XCircle className="h-6 w-6 text-rose-600" />
+            )}
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2.5">
               <h1 role="status" className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
                 {!reference
                   ? 'Thiếu mã tham chiếu giao dịch hợp lệ'
@@ -157,58 +155,62 @@ export function PaymentResultPage() {
                   ? 'Giao dịch chưa được xác nhận'
                   : messages[outcome]}
               </h1>
-              <p className="text-xs text-stone-500 mt-1">
-                Kho nguyên liệu đã được khóa an toàn, hợp đồng đặt tiệc chính thức có hiệu lực pháp lý.
-              </p>
+              {outcome === 'success' ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
+                  Đã thanh toán 100%
+                </span>
+              ) : outcome === 'review' ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200 text-xs font-bold">
+                  Đang đối soát
+                </span>
+              ) : null}
             </div>
+            <p className="text-xs text-stone-500 mt-0.5">
+              Kho nguyên liệu đã được khóa an toàn cho đơn tiệc của quý khách.
+            </p>
           </div>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-3 self-start lg:self-center">
-            {order && (
-              <span className="text-xs font-bold text-stone-700 bg-stone-100 border border-stone-200 px-3 py-1.5 rounded-xl tabular-nums">
-                Hợp đồng: {order.orderCode}
-              </span>
-            )}
-            {reference && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-50 border border-stone-200 text-xs">
-                <span className="text-stone-400">Mã GD:</span>
-                <span className="font-semibold text-stone-800 tabular-nums">{reference}</span>
+        {/* Clear Reference & Contract Codes */}
+        <div className="flex items-center gap-4 text-xs shrink-0 self-start md:self-auto">
+          {order && (
+            <div>
+              <span className="text-stone-400 block font-medium text-[11px]">Hợp đồng tiệc</span>
+              <span className="font-bold text-stone-900 text-sm tabular-nums">{order.orderCode}</span>
+            </div>
+          )}
+          {reference && (
+            <div className="pl-4 border-l border-stone-200">
+              <span className="text-stone-400 block font-medium text-[11px]">Mã GD VietQR</span>
+              <div className="flex items-center gap-1.5 font-semibold text-stone-800 tabular-nums">
+                <span>{reference}</span>
                 <button
                   type="button"
                   onClick={copyRef}
                   className="p-0.5 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
-                  title="Sao chép mã tham chiếu"
+                  title="Sao chép mã giao dịch"
                 >
                   <Copy className="h-3 w-3" />
                 </button>
-                {copied && <span className="text-emerald-600 text-[10px] font-medium">Đã chép</span>}
+                {copied && <span className="text-emerald-600 text-[10px] font-normal">Đã chép</span>}
               </div>
-            )}
-            {outcome === 'success' ? (
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
-                <CheckCircle2 className="h-3.5 w-3.5" /> Đã thanh toán 100%
-              </span>
-            ) : outcome === 'review' ? (
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-50 text-purple-800 border border-purple-200 text-xs font-bold">
-                <AlertTriangle className="h-3.5 w-3.5" /> Đang đối soát
-              </span>
-            ) : null}
-          </div>
+            </div>
+          )}
         </div>
+      </div>
 
-        {error && (
-          <div className="mt-4 rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 text-left">
-            {error}
-          </div>
-        )}
+      {error && (
+        <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 text-left">
+          {error}
+        </div>
+      )}
 
-        {waiting && (
-          <div className="mt-3 text-xs text-stone-400 flex items-center justify-center gap-1.5">
-            <RefreshCw className="h-3 w-3 animate-spin text-amber-600" />
-            <span>Đang tự động xác minh kết quả với ngân hàng Napas...</span>
-          </div>
-        )}
-      </section>
+      {waiting && (
+        <div className="text-xs text-stone-400 flex items-center justify-center gap-1.5">
+          <RefreshCw className="h-3 w-3 animate-spin text-amber-600" />
+          <span>Đang tự động xác minh kết quả với ngân hàng Napas...</span>
+        </div>
+      )}
 
       {/* Main 2-Column Balanced Architecture (Utilizes Full Horizontal Width) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

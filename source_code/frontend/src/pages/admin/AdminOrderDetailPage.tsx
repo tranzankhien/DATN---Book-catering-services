@@ -154,8 +154,8 @@ export const AdminOrderDetailPage: React.FC = () => {
               <Copy className="h-4 w-4" />
             </button>
           </h1>
-          <p className="text-sm text-stone-500 mt-1 tabular-nums">
-            Tạo lúc: {formatDateTimeVn(order.createdAt)} • Cập nhật lúc: {formatDateTimeVn(order.updatedAt)}
+          <p className="text-xs text-stone-500 mt-1 tabular-nums">
+            Thời gian tạo: {formatDateTimeVn(order.createdAt)}
           </p>
         </div>
 
