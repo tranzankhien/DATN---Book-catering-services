@@ -1,7 +1,8 @@
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { OrderProgress } from '../components/OrderProgress';
 import { OrderPaymentPanel } from '../components/OrderPaymentPanel';
-import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Calendar,
@@ -525,62 +526,64 @@ export const OrderDetailPage: React.FC = () => {
       </div>
 
       {/* Cancellation Modal */}
-      {cancelModalOpen && canCancel && (
-        <div className="fixed inset-0 z-50 bg-stone-950/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-stone-100">
-              <h3 className="font-bold text-base text-stone-900">
-                Xác nhận hủy đơn tiệc
-              </h3>
-              <button
-                type="button"
-                onClick={() => setCancelModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-700"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <p className="text-xs text-stone-600 leading-relaxed">
-              Quý khách có chắc chắn muốn hủy đơn tiệc <strong>{order.orderCode}</strong> không?
-              Toàn bộ nguyên liệu đang giữ trong kho sẽ được lập tức giải phóng về lại tồn khả dụng.
-            </p>
-
-            <form onSubmit={handleCancelOrder} className="space-y-4">
-              <div className="space-y-1">
-                <label className="block text-xs font-semibold text-stone-700">
-                  Lý do hủy đơn tiệc:
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="Nhập lý do thay đổi kế hoạch..."
-                  value={cancelReason}
-                  onChange={(e) => setCancelReason(e.target.value)}
-                  className="w-full rounded-xl border border-stone-300 p-2.5 text-xs focus:border-amber-600 focus:outline-none shadow-xs"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-stone-100">
+      {cancelModalOpen && canCancel &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                <h3 className="font-bold text-base text-stone-900">
+                  Xác nhận hủy đơn tiệc
+                </h3>
                 <button
                   type="button"
                   onClick={() => setCancelModalOpen(false)}
-                  className="rounded-xl border border-stone-300 bg-white hover:bg-stone-50 px-4 py-2 text-xs font-semibold text-stone-700 shadow-xs"
+                  className="p-1 rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-700"
                 >
-                  Đóng
-                </button>
-                <button
-                  type="submit"
-                  disabled={cancelling}
-                  className="rounded-xl bg-rose-700 hover:bg-rose-800 text-white px-4 py-2 text-xs font-semibold shadow-xs disabled:opacity-50"
-                >
-                  {cancelling ? 'Đang hủy...' : 'Xác nhận hủy đơn'}
+                  <X className="h-4 w-4" />
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+
+              <p className="text-xs text-stone-600 leading-relaxed">
+                Quý khách có chắc chắn muốn hủy đơn tiệc <strong>{order.orderCode}</strong> không?
+                Toàn bộ nguyên liệu đang giữ trong kho sẽ được lập tức giải phóng về lại tồn khả dụng.
+              </p>
+
+              <form onSubmit={handleCancelOrder} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-stone-700">
+                    Lý do hủy đơn tiệc:
+                  </label>
+                  <textarea
+                    rows={3}
+                    required
+                    placeholder="Nhập lý do thay đổi kế hoạch..."
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    className="w-full rounded-xl border border-stone-300 p-2.5 text-xs focus:border-amber-600 focus:outline-none shadow-xs"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2 border-t border-stone-100">
+                  <button
+                    type="button"
+                    onClick={() => setCancelModalOpen(false)}
+                    className="rounded-xl border border-stone-300 bg-white hover:bg-stone-50 px-4 py-2 text-xs font-semibold text-stone-700 shadow-xs"
+                  >
+                    Đóng
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={cancelling}
+                    className="rounded-xl bg-rose-700 hover:bg-rose-800 text-white px-4 py-2 text-xs font-semibold shadow-xs disabled:opacity-50"
+                  >
+                    {cancelling ? 'Đang hủy...' : 'Xác nhận hủy đơn'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

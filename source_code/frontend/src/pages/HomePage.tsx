@@ -62,8 +62,8 @@ const banquetSolutions = [
 const qualityCommitments = [
   {
     icon: Award,
-    title: 'Chứng nhận VSATTP & HACCP',
-    description: '100% quy trình tiếp nhận, lưu trữ và chế biến tuân thủ nghiêm ngặt tiêu chuẩn an toàn thực phẩm quốc tế.',
+    title: 'Chứng nhận An toàn Thực phẩm',
+    description: 'Quy trình tiếp nhận, bảo quản và chế biến tuân thủ nghiêm ngặt quy định vệ sinh an toàn thực phẩm.',
   },
   {
     icon: Sparkles,

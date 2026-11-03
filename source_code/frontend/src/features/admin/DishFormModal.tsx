@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Plus, Trash2, UtensilsCrossed, AlertCircle, Loader2, Save } from 'lucide-react';
 import type {
   CategoryDto,
@@ -152,9 +153,9 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 backdrop-blur-xs p-4">
-      <div className="w-full max-w-2xl rounded-2xl border border-stone-200 bg-white shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/60 backdrop-blur-xs p-4 animate-fade-in">
+      <div className="w-full max-w-2xl rounded-2xl border border-stone-200 bg-white shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-stone-200 px-6 py-4 bg-stone-50">
           <div className="flex items-center gap-3">
@@ -404,6 +405,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

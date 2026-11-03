@@ -197,7 +197,7 @@ export const MyOrdersPage: React.FC = () => {
           action={
             <Link
               to="/menus"
-              className="inline-flex items-center gap-2 rounded-xl bg-amber-800 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-amber-900 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl bg-amber-700 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-amber-800 transition-colors"
             >
               <span>Xem thực đơn mẫu</span>
             </Link>
@@ -240,7 +240,7 @@ export const MyOrdersPage: React.FC = () => {
                     {ord.menuNameSnapshot || 'Thực đơn tiệc tự chọn'}
                   </h3>
                   <p className="text-[11px] text-stone-400 mt-0.5 tabular-nums">
-                    Khởi tạo lúc: {formatDateTimeVn(ord.createdAt)}
+                    Ngày tạo: {formatDateTimeVn(ord.createdAt)}
                   </p>
                 </div>
 
@@ -303,7 +303,7 @@ export const MyOrdersPage: React.FC = () => {
                     }}
                     className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold shadow-xs transition-colors cursor-pointer ${
                       ord.orderStatus === 'PENDING_PAYMENT'
-                        ? 'bg-amber-800 hover:bg-amber-900 text-white'
+                        ? 'bg-amber-700 hover:bg-amber-800 text-white'
                         : 'border border-stone-300 bg-white hover:bg-stone-50 text-stone-800'
                     }`}
                   >

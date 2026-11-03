@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, PackagePlus, AlertCircle, Loader2, Save } from 'lucide-react';
 import type { IngredientDto, IngredientUpsertPayload } from '../../services/types';
 import { catalogService } from '../../services/catalogService';
@@ -75,9 +76,9 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 backdrop-blur-xs p-4">
-      <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white shadow-xl overflow-hidden">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/60 backdrop-blur-xs p-4 animate-fade-in">
+      <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-stone-200 px-6 py-4 bg-stone-50">
           <div className="flex items-center gap-3">
@@ -228,6 +229,7 @@ export const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

@@ -325,7 +325,7 @@ export const PublicLayout: React.FC = () => {
               <div className="pt-2 flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-lg bg-white border border-stone-200/80 px-2.5 py-1 text-[10px] font-medium text-stone-700 shadow-2xs">
                   <Award className="h-3.5 w-3.5 text-amber-800" />
-                  <span>Tiêu chuẩn HACCP & ISO 22000</span>
+                  <span>Tiêu chuẩn Vệ sinh ATTP</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-lg bg-white border border-stone-200/80 px-2.5 py-1 text-[10px] font-medium text-emerald-700 shadow-2xs">
                   <CheckCircle className="h-3.5 w-3.5" />
