@@ -818,7 +818,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={submittingCreate}
-                className="px-4 py-2 text-xs font-bold rounded-xl bg-amber-600 text-white hover:bg-amber-700 transition-colors shadow-sm disabled:opacity-50"
+                className="px-4 py-2 text-xs font-semibold rounded-xl bg-amber-700 hover:bg-amber-800 text-white transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {submittingCreate ? 'Đang tạo...' : 'Tạo Nguyên Liệu'}
               </button>

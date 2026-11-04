@@ -225,7 +225,7 @@ export const AdminCatalogPage: React.FC = () => {
                 setEditingDish(null);
                 setDishModalOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
             >
               <Plus className="h-4 w-4" />
               <span>Thêm món ăn mới</span>
@@ -237,7 +237,7 @@ export const AdminCatalogPage: React.FC = () => {
                 setEditingIngredient(null);
                 setIngredientModalOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
             >
               <Plus className="h-4 w-4" />
               <span>Thêm nguyên liệu</span>

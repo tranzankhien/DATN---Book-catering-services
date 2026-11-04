@@ -264,14 +264,14 @@ export const HomePage: React.FC = () => {
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
                 <Link
                   to="/dishes"
-                  className="inline-flex items-center gap-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white px-7 py-3.5 text-sm font-semibold shadow-xs hover:shadow-md transition-all duration-200"
+                  className="inline-flex items-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-7 py-3.5 text-sm font-semibold shadow-xs hover:shadow-md transition-all duration-200"
                 >
                   <span>Khám phá thực đơn</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
 
                 <Link
-                  to="/dishes"
+                  to="/menu-builder"
                   className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-800 px-6 py-3.5 text-sm font-semibold transition-all duration-200"
                 >
                   <span>Bảng tính giá bàn tiệc</span>
@@ -1015,7 +1015,7 @@ export const HomePage: React.FC = () => {
             <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
               <Link
                 to="/dishes"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white px-6 py-4 text-xs sm:text-sm font-semibold shadow-xs transition-all"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-6 py-4 text-xs sm:text-sm font-semibold shadow-xs transition-all"
               >
                 <span>Mở bảng tính thực đơn</span>
                 <ArrowRight className="h-4 w-4" />

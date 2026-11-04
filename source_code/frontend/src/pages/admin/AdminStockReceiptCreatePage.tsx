@@ -443,7 +443,7 @@ export const AdminStockReceiptCreatePage: React.FC = () => {
                 type="button"
                 disabled={submitting}
                 onClick={() => handleSubmit(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-700 transition-colors shadow-sm shadow-amber-600/20 disabled:opacity-50 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-semibold transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
                 title="Cộng kho ngay và tính lại giá vốn bình quân di động"
               >
                 <CheckCircle2 className="h-4 w-4" />

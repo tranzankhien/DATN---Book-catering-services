@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Search,
   Filter,
@@ -29,6 +29,7 @@ interface DraftMenuLine {
 }
 
 export const CatalogPage: React.FC = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategoryParam = searchParams.get('categoryId');
 
@@ -118,6 +119,21 @@ export const CatalogPage: React.FC = () => {
         )
         .filter((item) => item.portionsPerTable > 0)
     );
+  };
+
+  const handleProceedToBuilder = () => {
+    if (draftLines.length === 0) return;
+    try {
+      const STORAGE_KEY = 'banquethub_builder_draft';
+      const items = draftLines.map((line) => ({
+        dishId: line.dish.id,
+        quantityPerTable: line.portionsPerTable,
+      }));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ items, tableCount }));
+    } catch {
+      // ignore
+    }
+    navigate('/menu-builder');
   };
 
   const sortedDishes = useMemo(() => {
@@ -571,13 +587,25 @@ export const CatalogPage: React.FC = () => {
                     Tổng tiền dự kiến ({tableCount} bàn):
                   </span>
                 </div>
-                <p className="text-xl font-extrabold text-amber-700 text-right tracking-tight">
+                <p className="text-xl font-bold text-amber-900 text-right tracking-tight tabular-nums">
                   {formatVnd(totalOrderPrice)}
                 </p>
                 <p className="text-[10px] text-stone-500 text-right">
                   Chưa bao gồm thuế/phí • Hỗ trợ thanh toán trực tuyến an toàn
                 </p>
               </div>
+
+              {draftLines.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleProceedToBuilder}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-semibold text-xs py-3 shadow-xs transition-colors cursor-pointer"
+                >
+                  <Utensils className="h-4 w-4" />
+                  <span>Đưa vào bàn tiệc tự phối ({draftLines.length} món)</span>
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </div>
         </aside>

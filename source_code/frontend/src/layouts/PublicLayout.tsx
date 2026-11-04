@@ -195,7 +195,7 @@ export const PublicLayout: React.FC = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="rounded-xl bg-amber-800 px-5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-amber-900 transition-all"
+                  className="rounded-xl bg-amber-700 hover:bg-amber-800 px-5 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors"
                 >
                   Đăng ký thành viên
                 </Link>
@@ -284,7 +284,7 @@ export const PublicLayout: React.FC = () => {
                   <Link
                     to="/register"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 text-center rounded-lg bg-amber-800 py-2 text-xs font-semibold text-white"
+                    className="flex-1 text-center rounded-xl bg-amber-700 hover:bg-amber-800 py-2 text-xs font-semibold text-white shadow-xs transition-colors"
                   >
                     Đăng ký
                   </Link>

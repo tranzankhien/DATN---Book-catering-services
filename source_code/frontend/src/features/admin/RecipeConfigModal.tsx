@@ -266,14 +266,14 @@ export const RecipeConfigModal: React.FC<RecipeConfigModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-stone-300 bg-white px-5 py-2.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
+              className="rounded-xl border border-stone-300 bg-white px-5 py-2.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
             >
               Hủy Bỏ
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 px-6 py-2.5 text-xs font-semibold text-white shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 px-6 py-2.5 text-xs font-semibold text-white shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
             >
               {saving ? (
                 <>

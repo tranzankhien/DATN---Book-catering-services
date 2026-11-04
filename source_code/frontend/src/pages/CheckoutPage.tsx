@@ -370,7 +370,7 @@ export const CheckoutPage: React.FC = () => {
         <div className="text-center flex justify-center gap-3">
           <Link
             to="/menus"
-            className="rounded-xl bg-amber-800 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-amber-900 transition-colors"
+            className="rounded-xl bg-amber-700 hover:bg-amber-800 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors"
           >
             Xem thực đơn mẫu
           </Link>

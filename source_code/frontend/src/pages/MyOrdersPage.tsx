@@ -134,7 +134,7 @@ export const MyOrdersPage: React.FC = () => {
 
           <Link
             to="/menu-builder"
-            className="inline-flex items-center gap-2 rounded-xl bg-amber-800 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-amber-900 transition-all cursor-pointer shrink-0"
+            className="inline-flex items-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer shrink-0"
           >
             <Plus className="h-4 w-4" />
             <span>Đặt tiệc mới</span>
