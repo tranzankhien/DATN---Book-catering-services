@@ -332,3 +332,13 @@ V11 bổ sung trạng thái `REVIEW_CLOSED` và đưa các giao dịch cũ mang 
 V12 sửa đường dẫn email chưa gửi, chuẩn hóa thông báo đối soát từng hiển thị cho khách và cập nhật các payment attempt đã hết hạn.
 
 V14 chuyển cổng thanh toán mới sang SePay, giữ giao dịch lịch sử và kết thúc các phiên cũ còn chờ trong ứng dụng.
+
+### V15 – AI Recommendation Usage & Audit Log
+- Bảng `ai_recommendation_usage` lưu vết kỹ thuật các lượt yêu cầu gợi ý thực đơn bằng AI:
+  - `user_id`: ID người dùng thực hiện yêu cầu.
+  - `model`: Mã model AI (mặc định `gemini-flash-lite-latest`).
+  - `source`: Nguồn tạo (`GEMINI` hoặc `RULE_BASED`).
+  - `status`: Trạng thái xử lý (`SUCCESS` hoặc `FALLBACK`).
+  - `prompt_tokens`, `output_tokens`: Thống kê lượng token tiêu thụ.
+  - `response_time_ms`: Thời gian xử lý backend (ms).
+  - `created_at`: Thời điểm ghi nhận (phục vụ giới hạn tần suất 10 lượt/giờ/user).

@@ -198,3 +198,31 @@
 Admin gọi `POST /api/v1/admin/payments/{id}/resolve` với `action` là `RETRY_SETTLEMENT` hoặc `CLOSE_MANUALLY` và `reason` dài tối đa 300 ký tự. Thao tác thử lại yêu cầu kết quả thanh toán thành công đã xác thực. Thao tác đóng yêu cầu kết quả SePay dứt điểm và `resolutionReference` dài tối đa 80 ký tự để lưu mã chứng từ hoặc mã đối soát.
 
 POST /api/v1/payments/sepay/create, POST /payments/sepay/ipn, GET /orders/{id}/payment-status, GET /payments/reference/{reference}, GET /admin/payments và /review, GET /admin/payments/{id}, POST /admin/payments/{id}/query, GET /admin/notifications, POST /admin/notifications/{id}/retry và PATCH /{admin|employee}/orders/{id}/status. Các đường dẫn viết tắt dùng tiền tố /api/v1. Xem [luồng thanh toán](PAYMENT_FLOW.md).
+
+## Phase 5 – AI Menu Recommendation API
+
+### POST /api/v1/ai/menu/recommendations
+- **Yêu cầu xác thực**: Bắt buộc (Bearer JWT Token)
+- **Rate Limit**: Tối đa 10 lượt / giờ / user
+- **Request Body**:
+  ```json
+  {
+    "requestText": "Tiệc sinh nhật 5 bàn, 6 khách/bàn, ngân sách 1.500.000đ/bàn, thích món Việt",
+    "eventType": "Sinh nhật",
+    "tableCount": 5,
+    "guestsPerTable": 6,
+    "budgetAmount": 1500000,
+    "budgetType": "PER_TABLE",
+    "preferences": "Ưu tiên hải sản",
+    "excludedIngredients": "Không thịt bò"
+  }
+  ```
+- **Response Data**:
+  - `requestId`: UUID định danh phiên gợi ý.
+  - `source`: `"GEMINI"` hoặc `"RULE_BASED"`.
+  - `suggestions`: Mảng tối đa 3 phương án thực đơn. Mỗi phương án bao gồm:
+    - `name`, `reason`: Tên thực đơn và lý giải ẩm thực.
+    - `items`: Danh sách món kèm định lượng, đơn giá thật từ DB và thành tiền.
+    - `totalPerTable`, `totalOrderAmount`: Tổng tiền 1 bàn và tổng toàn tiệc.
+    - `budgetStatus`: `WITHIN_BUDGET` hoặc `OVER_BUDGET`.
+    - `availabilityStatus`: `AVAILABLE`, `PARTIAL_SHORTAGE` hoặc `OUT_OF_STOCK` (kiểm tra tồn khả dụng độc lập không giữ kho).

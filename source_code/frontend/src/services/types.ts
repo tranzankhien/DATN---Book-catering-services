@@ -490,4 +490,60 @@ export interface StockAvailabilityDto {
   lowStock: boolean;
 }
 
+// ==========================================
+// PHASE 5: AI MENU RECOMMENDATIONS
+// ==========================================
+
+export type BudgetType = 'PER_TABLE' | 'TOTAL_ORDER';
+export type BudgetStatus = 'WITHIN_BUDGET' | 'OVER_BUDGET' | 'NO_BUDGET_SET';
+export type AvailabilityStatus = 'AVAILABLE' | 'PARTIAL_SHORTAGE' | 'OUT_OF_STOCK';
+
+export interface AiMenuRecommendationRequestPayload {
+  requestText: string;
+  eventType?: string;
+  tableCount: number;
+  guestsPerTable: number;
+  budgetAmount?: number;
+  budgetType?: BudgetType;
+  preferences?: string;
+  excludedIngredients?: string;
+}
+
+export interface MenuSuggestionItemDto {
+  dishId: number;
+  dishCode: string;
+  dishName: string;
+  dishImageUrl?: string;
+  imageUrl?: string;
+  categoryName: string;
+  quantityPerTable: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface MenuSuggestionDto {
+  name: string;
+  title?: string;
+  description?: string;
+  reason?: string;
+  source?: string;
+  matchScore?: number;
+  items: MenuSuggestionItemDto[];
+  totalPerTable: number;
+  tableCount: number;
+  totalOrderAmount: number;
+  budgetStatus: BudgetStatus;
+  availabilityStatus: AvailabilityStatus;
+  validationMessages: string[];
+}
+
+export interface AiMenuRecommendationResponse {
+  requestId: string;
+  source: string;
+  suggestions: MenuSuggestionDto[];
+  message?: string;
+  generatedAt: string;
+}
+
+
 

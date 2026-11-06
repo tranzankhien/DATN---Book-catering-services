@@ -264,17 +264,25 @@ export const HomePage: React.FC = () => {
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
                 <Link
                   to="/dishes"
-                  className="inline-flex items-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-7 py-3.5 text-sm font-semibold shadow-xs hover:shadow-md transition-all duration-200"
+                  className="inline-flex items-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white px-6 py-3.5 text-sm font-semibold shadow-xs hover:shadow-md transition-all duration-200"
                 >
                   <span>Khám phá thực đơn</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
 
                 <Link
-                  to="/menu-builder"
-                  className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-800 px-6 py-3.5 text-sm font-semibold transition-all duration-200"
+                  to="/ai-menu"
+                  className="inline-flex items-center gap-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 px-5 py-3.5 text-sm font-semibold transition-all duration-200"
                 >
-                  <span>Bảng tính giá bàn tiệc</span>
+                  <Sparkles className="h-4 w-4 text-amber-700" />
+                  <span>Gợi ý thực đơn AI</span>
+                </Link>
+
+                <Link
+                  to="/menu-builder"
+                  className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-800 px-5 py-3.5 text-sm font-semibold transition-all duration-200"
+                >
+                  <span>Tự phối thực đơn</span>
                 </Link>
               </div>
             </div>

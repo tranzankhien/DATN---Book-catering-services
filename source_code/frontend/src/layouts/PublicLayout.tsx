@@ -11,6 +11,7 @@ import {
   Mail,
   Award,
   CheckCircle,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
@@ -101,6 +102,19 @@ export const PublicLayout: React.FC = () => {
               }
             >
               Tự phối thực đơn
+            </NavLink>
+            <NavLink
+              to="/ai-menu"
+              className={({ isActive }) =>
+                `inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-amber-100/80 text-amber-900 font-bold border border-amber-200'
+                    : 'text-amber-800 hover:text-amber-950 hover:bg-amber-50/80 font-semibold'
+                }`
+              }
+            >
+              <Sparkles className="h-4 w-4 text-amber-700" />
+              <span>Gợi ý AI</span>
             </NavLink>
             <NavLink
               to="/dishes"
@@ -239,6 +253,14 @@ export const PublicLayout: React.FC = () => {
               className="block rounded-lg px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100"
             >
               Tự phối thực đơn
+            </NavLink>
+            <NavLink
+              to="/ai-menu"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-amber-800 bg-amber-50/80 hover:bg-amber-100"
+            >
+              <Sparkles className="h-4 w-4 text-amber-700" />
+              <span>Gợi ý thực đơn AI</span>
             </NavLink>
             <NavLink
               to="/dishes"

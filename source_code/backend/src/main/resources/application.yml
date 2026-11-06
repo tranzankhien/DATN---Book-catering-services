@@ -73,6 +73,13 @@ app:
     expiration-ms: ${APP_JWT_EXPIRATION_MS:86400000}
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-flash-lite-latest}
+    enabled: ${GEMINI_ENABLED:true}
+    timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:30}
+    max-output-tokens: ${GEMINI_MAX_OUTPUT_TOKENS:4096}
+    max-requests-per-hour: ${AI_MAX_REQUESTS_PER_USER:10}
   seed:
     enabled: ${APP_SEED_ENABLED:true}
     admin-email: ${APP_SEED_ADMIN_EMAIL:admin@banquethub.vn}

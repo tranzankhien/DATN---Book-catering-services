@@ -1,4 +1,5 @@
 import { PaymentResultPage } from '../pages/PaymentResultPage';
+import { AiMenuPage } from '../pages/AiMenuPage';
 import { AdminPaymentsPage } from '../pages/admin/AdminPaymentsPage';
 import { AdminOverviewPage } from '../pages/admin/AdminOverviewPage';
 import React from 'react';
@@ -54,6 +55,7 @@ export const AppRouter: React.FC = () => {
           <Route path="/menus" element={<MenusPage />} />
           <Route path="/menus/:id" element={<MenuDetailPage />} />
           <Route path="/menu-builder" element={<MenuBuilderPage />} />
+          <Route path="/ai-menu" element={<AiMenuPage />} />
           <Route
             path="/checkout"
             element={

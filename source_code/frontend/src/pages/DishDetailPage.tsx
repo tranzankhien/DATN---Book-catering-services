@@ -5,7 +5,6 @@ import {
   Scale,
   Utensils,
   Layers,
-  Sparkles,
   Users,
   Calculator,
   Check,
@@ -145,15 +144,10 @@ export const DishDetailPage: React.FC = () => {
               onError={handleImageError}
               className="h-full w-full object-cover object-center block transition-transform duration-500 group-hover:scale-102"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-stone-950/40 via-transparent to-transparent pointer-events-none" />
-            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white text-xs font-medium">
-              <span className="bg-stone-900/80 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/20 text-[11px]">
-                Ẩm thực yến tiệc BanquetHub
-              </span>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-stone-950/20 via-transparent to-transparent pointer-events-none" />
           </div>
 
-          {/* Right: Dish Information & Full-Width Features */}
+          {/* Right: Dish Information & Actions */}
           <div className="lg:col-span-7 xl:col-span-8 space-y-4">
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="text-xs font-bold text-stone-500 tabular-nums">
@@ -174,32 +168,15 @@ export const DishDetailPage: React.FC = () => {
                 'Món ăn chế biến theo quy chuẩn ẩm thực yến tiệc truyền thống Việt Nam, hương vị thanh tao và nguyên liệu tươi mới.'}
             </p>
 
-            {/* 3 Balanced Feature Cards (Utilizes Full Horizontal Space) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-              <div className="rounded-xl border border-stone-200/80 bg-stone-50/60 p-3">
-                <div className="flex items-center gap-1.5 text-amber-700 font-semibold text-xs">
-                  <Users className="h-4 w-4 shrink-0" />
-                  <span>Quy chuẩn bàn tiệc</span>
-                </div>
-                <p className="text-xs text-stone-800 font-medium mt-1">01 phần / bàn 10 khách</p>
+            {/* Clean Specifications Row */}
+            <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-700">
+                <Users className="h-3.5 w-3.5 text-amber-700" />
+                <span>Tiêu chuẩn bàn: <strong>10 khách</strong></span>
               </div>
-
-              <div className="rounded-xl border border-stone-200/80 bg-stone-50/60 p-3">
-                <div className="flex items-center gap-1.5 text-amber-700 font-semibold text-xs">
-                  <Layers className="h-4 w-4 shrink-0" />
-                  <span>Định mức công thức</span>
-                </div>
-                <p className="text-xs text-stone-800 font-medium mt-1 tabular-nums">
-                  {dish.recipeItems.length} loại nguyên liệu chuẩn
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-stone-200/80 bg-stone-50/60 p-3">
-                <div className="flex items-center gap-1.5 text-emerald-700 font-semibold text-xs">
-                  <Sparkles className="h-4 w-4 shrink-0" />
-                  <span>Quy trình bếp</span>
-                </div>
-                <p className="text-xs text-stone-800 font-medium mt-1">Chế biến nóng tươi mới</p>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-700">
+                <Layers className="h-3.5 w-3.5 text-amber-700" />
+                <span>Công thức: <strong className="tabular-nums">{dish.recipeItems.length} nguyên liệu</strong></span>
               </div>
             </div>
 
