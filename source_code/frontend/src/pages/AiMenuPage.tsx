@@ -59,6 +59,72 @@ export const AiMenuPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<AiMenuRecommendationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [autoDetected, setAutoDetected] = useState(false);
+
+  const handleRequestTextChange = (text: string) => {
+    setRequestText(text);
+
+    let detected = false;
+
+    // Auto extract table count
+    const tableMatch = text.match(/(\d+)\s*(bàn|mâm)/i);
+    if (tableMatch) {
+      const count = parseInt(tableMatch[1], 10);
+      if (count >= 1 && count <= 500) {
+        setTableCount(count);
+        detected = true;
+      }
+    }
+
+    // Auto extract guests per table
+    const guestMatch = text.match(/(\d+)\s*(người|khách)\s*(mỗi|một|\/)?\s*(bàn|mâm)?/i);
+    if (guestMatch) {
+      const guests = parseInt(guestMatch[1], 10);
+      if (guests >= 1 && guests <= 50) {
+        setGuestsPerTable(guests);
+        detected = true;
+      }
+    }
+
+    // Auto extract budget
+    const budgetMatch = text.match(/ngân\s*sách[^0-9]*([0-9\.\,]+)\s*(triệu|tr|k|nghìn|đ|vnd)?/i);
+    if (budgetMatch) {
+      const rawNum = budgetMatch[1].replace(/[\.,]/g, '');
+      const base = parseInt(rawNum, 10);
+      const unit = (budgetMatch[2] || '').toLowerCase();
+      if (!isNaN(base) && base > 0) {
+        let finalBudget = base;
+        if (unit.includes('triệu') || unit.includes('tr')) {
+          finalBudget = base * 1_000_000;
+        } else if (unit.includes('k') || unit.includes('nghìn')) {
+          finalBudget = base * 1_000;
+        }
+        setBudgetAmount(finalBudget.toString());
+        detected = true;
+      }
+    }
+
+    // Auto extract event type
+    const lower = text.toLowerCase();
+    if (lower.includes('sinh nhật')) {
+      setEventType('Tiệc sinh nhật');
+      detected = true;
+    } else if (lower.includes('liên hoan') || lower.includes('công ty')) {
+      setEventType('Liên hoan công ty');
+      detected = true;
+    } else if (lower.includes('gia đình')) {
+      setEventType('Tiệc gia đình');
+      detected = true;
+    } else if (lower.includes('cưới') || lower.includes('đính hôn')) {
+      setEventType('Tiệc cưới / Đính hôn');
+      detected = true;
+    } else if (lower.includes('thôi nôi') || lower.includes('đầy tháng')) {
+      setEventType('Thôi nôi / Đầy tháng');
+      detected = true;
+    }
+
+    setAutoDetected(detected);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -200,9 +266,17 @@ export const AiMenuPage: React.FC = () => {
               maxLength={500}
               placeholder="Ví dụ: Tôi muốn tổ chức tiệc sinh nhật 5 bàn, 6 người mỗi bàn, ngân sách 1.500.000đ/bàn, thích món Việt, ít cay, có món khai vị thanh đạm và tráng miệng..."
               value={requestText}
-              onChange={(e) => setRequestText(e.target.value)}
+              onChange={(e) => handleRequestTextChange(e.target.value)}
               className="w-full rounded-xl border border-stone-300 bg-stone-50/50 p-3.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
             />
+            {autoDetected && (
+              <div className="flex items-center gap-1.5 text-[11px] text-amber-800 bg-amber-50/80 border border-amber-200/80 px-3 py-1.5 rounded-lg animate-fade-in">
+                <Sparkles className="h-3.5 w-3.5 text-amber-700 shrink-0" />
+                <span>
+                  Đã tự động nhận diện: <strong>{tableCount} bàn</strong> • <strong>{guestsPerTable} người/bàn</strong> • Ngân sách: <strong>{formatVnd(budgetAmount ? Number(budgetAmount.replace(/\D/g, '')) : 0)}</strong>
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Event Parameters Grid */}

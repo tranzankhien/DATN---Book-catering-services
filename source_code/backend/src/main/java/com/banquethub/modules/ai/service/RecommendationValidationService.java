@@ -56,13 +56,18 @@ public class RecommendationValidationService {
 
         int tableCount = request.getTableCount();
 
-        // Calculate max allowed budget per table if budget is set
+        // Calculate max allowed budget per table if budget is set or mentioned in text
         BigDecimal maxBudgetPerTable = null;
-        if (request.getBudgetAmount() != null && request.getBudgetAmount().signum() > 0) {
+        BigDecimal effectiveBudget = request.getBudgetAmount();
+        if (effectiveBudget == null && request.getRequestText() != null) {
+            effectiveBudget = extractBudgetFromText(request.getRequestText());
+        }
+
+        if (effectiveBudget != null && effectiveBudget.signum() > 0) {
             if (request.getBudgetType() == BudgetType.TOTAL_ORDER) {
-                maxBudgetPerTable = request.getBudgetAmount().divide(BigDecimal.valueOf(tableCount), 2, RoundingMode.HALF_UP);
+                maxBudgetPerTable = effectiveBudget.divide(BigDecimal.valueOf(tableCount), 2, RoundingMode.HALF_UP);
             } else {
-                maxBudgetPerTable = request.getBudgetAmount();
+                maxBudgetPerTable = effectiveBudget;
             }
         }
 
@@ -202,5 +207,31 @@ public class RecommendationValidationService {
         }
 
         return validatedSuggestions;
+    }
+
+    private BigDecimal extractBudgetFromText(String text) {
+        if (text == null || text.isBlank()) return null;
+        try {
+            java.util.regex.Pattern p = java.util.regex.Pattern.compile(
+                    "ngân\\s*sách[^0-9]*([0-9\\.\\,]+)\\s*(triệu|tr|k|nghìn|đ|vnd)?",
+                    java.util.regex.Pattern.CASE_INSENSITIVE
+            );
+            java.util.regex.Matcher m = p.matcher(text);
+            if (m.find()) {
+                String numStr = m.group(1).replace(".", "").replace(",", "");
+                long base = Long.parseLong(numStr);
+                String unit = m.group(2) != null ? m.group(2).toLowerCase() : "";
+                if (unit.contains("triệu") || unit.contains("tr")) {
+                    return BigDecimal.valueOf(base * 1_000_000L);
+                } else if (unit.contains("k") || unit.contains("nghìn")) {
+                    return BigDecimal.valueOf(base * 1_000L);
+                }
+                if (base > 0) {
+                    return BigDecimal.valueOf(base);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 }

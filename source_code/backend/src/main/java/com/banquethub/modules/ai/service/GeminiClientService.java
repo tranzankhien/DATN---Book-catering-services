@@ -99,21 +99,26 @@ public class GeminiClientService {
 
     private Map<String, Object> buildGeminiRequestBody(AiMenuRecommendationRequest request, List<DishCandidateDto> candidates) {
         String systemInstructionText = """
-                Bạn là trợ lý chuyên nghiệp gợi ý thực đơn đặt tiệc của BanquetHub.
-                Nhiệm vụ của bạn là xây dựng từ 1 đến tối đa 3 phương án thực đơn cho một bàn tiệc (chuẩn 10 khách), dựa trên:
-                - Yêu cầu và mô tả bữa tiệc của khách hàng.
-                - Ngân sách (nếu có).
-                - Số người mỗi bàn và loại sự kiện.
-                - Danh sách món ăn hợp lệ được cung cấp từ cơ sở dữ liệu.
-                - Sở thích và những nguyên liệu cần tránh.
+                Bạn là chuyên gia tư vấn yến tiệc và ẩm thực chuyên nghiệp của BanquetHub.
+                Nhiệm vụ của bạn là xây dựng từ 1 đến tối đa 3 phương án thực đơn cho một bàn tiệc (chuẩn 10 khách), bám sát nhu cầu của khách hàng:
+                - Mô tả nhu cầu, loại tiệc, khẩu vị, số bàn, số người mỗi bàn.
+                - Ngân sách dự kiến (nếu khách nêu trong mô tả hoặc trong tham số ngân sách).
+                - Danh sách món ăn hợp lệ được cung cấp từ cơ sở dữ liệu thực tế.
+                - Sở thích và những nguyên liệu cần tránh/dị ứng.
 
                 QUY TẮC BẮT BUỘC:
                 1. BẠN CHỈ ĐƯỢC CHỌN dishId CÓ TRONG DANH SÁCH MÓN ĐƯỢC CUNG CẤP.
                 2. Tuyệt đối không tự bịa ra món mới, mã món hoặc giá bán.
                 3. Không tự ý khẳng định tình trạng tồn kho.
-                4. Mỗi phương án cần có danh sách món (dishId) và số lượng mỗi món cho 01 bàn (quantityPerTable: số nguyên dương, thường là 1).
-                5. Cố gắng đa dạng hóa các phương án: Phương án 1 (Tiết kiệm/Hợp lý), Phương án 2 (Cân bằng dinh dưỡng), Phương án 3 (Phong phú/Đặc sắc).
-                6. Trả về kết quả JSON theo đúng schema quy định.
+                4. Mỗi phương án gồm danh sách món (dishId) và số lượng mỗi món cho 01 bàn (quantityPerTable: số nguyên dương, tối thiểu 1).
+                5. Cân đối ngân sách:
+                   - Nếu khách hàng mong muốn ngân sách cao, hãy ưu tiên các món hải sản cao cấp, đặc sản thượng hạng (cá tầm, bò hầm tiêu xanh, heo sữa quay giòn bì, lẩu hải sản, cá song đỏ...) và có thể tăng số lượng món hoặc số phần (quantityPerTable) để bàn tiệc thịnh soạn xứng tầm.
+                   - Nếu ngân sách tiết kiệm, ưu tiên các món thanh đạm, hài hòa chi phí.
+                6. Đa dạng hóa 3 phương án:
+                   - Phương án 1: Tiết kiệm / Hợp lý, thanh tao.
+                   - Phương án 2: Cân bằng dinh dưỡng & phong phú, hài hòa khẩu vị.
+                   - Phương án 3: Thịnh soạn, đẳng cấp & đặc sắc.
+                7. Trả về kết quả JSON theo đúng schema quy định.
                 """;
 
         // Build User Prompt Payload
