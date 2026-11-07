@@ -2,6 +2,7 @@ import { apiClient } from './apiClient';
 import type {
   AiMenuRecommendationRequestPayload,
   AiMenuRecommendationResponse,
+  ApiResponse,
 } from './types';
 
 export const aiMenuService = {
@@ -9,8 +10,8 @@ export const aiMenuService = {
     payload: AiMenuRecommendationRequestPayload,
     signal?: AbortSignal
   ): Promise<AiMenuRecommendationResponse> {
-    const response = await apiClient.post<{ data: AiMenuRecommendationResponse }>(
-      '/api/v1/ai/menu/recommendations',
+    const response = await apiClient.post<ApiResponse<AiMenuRecommendationResponse>>(
+      '/ai/menu/recommendations',
       payload,
       { signal }
     );
