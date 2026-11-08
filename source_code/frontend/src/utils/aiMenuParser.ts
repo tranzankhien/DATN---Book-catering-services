@@ -22,11 +22,17 @@ export interface ExtractedAiMenuParams {
  * - "3 triệu", "3tr", "3.000.000", "3,000,000", "3000000" -> 3000000
  * - "1tr5", "1.5 triệu", "1,5tr" -> 1500000
  * - "1tr2", "1.2 triệu" -> 1200000
- * - "800k", "800 ngàn", "800 nghìn" -> 800000
+ * - "800k", "800 ngàn", "800 nghìn", "50k" -> 800000, 50000
  */
 export function parseVietnameseNumber(rawNum: string, rawUnit?: string): number | null {
   if (!rawNum) return null;
   const numStr = rawNum.trim().toLowerCase();
+
+  // Negative values are invalid
+  if (numStr.startsWith('-') || numStr.includes(' -')) {
+    return null;
+  }
+
   const unitStr = (rawUnit || '').trim().toLowerCase();
 
   // Pattern: 1tr5, 2tr8, 1tr250
@@ -59,9 +65,9 @@ export function parseVietnameseNumber(rawNum: string, rawUnit?: string): number 
     }
   }
 
-  // Full currency: e.g. 3.000.000, 3,000,000, 3000000
+  // Full currency: e.g. 3.000.000, 3,000,000, 3000000, 50000
   const digitsOnly = numStr.replace(/[^0-9]/g, '');
-  if (digitsOnly.length >= 5) {
+  if (digitsOnly.length >= 4) {
     const parsed = parseInt(digitsOnly, 10);
     return isNaN(parsed) ? null : parsed;
   }
@@ -95,10 +101,10 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
 
   // 1. EXTRACT BUDGET
   // Mode A: Explicit keyword ("ngân sách 3.000.000đ/bàn", "chi phí tầm 25 triệu", "tài chính khoảng 1tr5/bàn")
-  const keywordBudgetRegex = /(?:ngân\s*sách|chi\s*phí|tài\s*chính|giá(?:\s*tiền)?)\s*(?:dự\s*kiến\s*)?(?:khoảng|tầm|tầm\s*khoảng|là)?\s*(\d+tr\d+|[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)?(?:\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*)(?:bàn|mâm|tiệc|cả tiệc|người))?/i;
+  const keywordBudgetRegex = /(?:ngân\s*sách|chi\s*phí|tài\s*chính|giá(?:\s*tiền)?)\s*(?:dự\s*kiến\s*)?(?:khoảng|tầm|tầm\s*khoảng|là)?\s*(-?\d+tr\d+|-?[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)?(?:\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*)(?:bàn|mâm|tiệc|cả tiệc|người))?/i;
   
-  // Mode B: Unit-based ("2tr5/bàn", "1.2 triệu một bàn", "3.000.000đ/bàn")
-  const unitBudgetRegex = /(\d+tr\d+|[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*)(?:bàn|mâm|tiệc|cả tiệc)/i;
+  // Mode B: Unit-based ("2tr5/bàn", "1.2 triệu một bàn", "3.000.000đ/bàn", "50k/bàn")
+  const unitBudgetRegex = /(-?\d+tr\d+|-?[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*)(?:bàn|mâm|tiệc|cả tiệc)/i;
 
   let budgetMatch = raw.match(keywordBudgetRegex);
   if (!budgetMatch) {
@@ -108,27 +114,44 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
   if (budgetMatch) {
     const rawNum = budgetMatch[1];
     const rawUnit = budgetMatch[2];
-    const parsedBudget = parseVietnameseNumber(rawNum, rawUnit);
 
-    if (parsedBudget && parsedBudget >= 100_000) {
-      result.budgetAmount = parsedBudget;
-      result.detectedFields.budget = true;
+    // Ignore negative numbers explicitly
+    if (!rawNum.startsWith('-')) {
+      const parsedBudget = parseVietnameseNumber(rawNum, rawUnit);
 
-      // Determine Budget Type (PER_TABLE vs TOTAL_ORDER)
-      const surroundingContext = raw.substring(
-        Math.max(0, budgetMatch.index! - 15),
-        Math.min(raw.length, budgetMatch.index! + budgetMatch[0].length + 30)
-      ).toLowerCase();
+      if (parsedBudget && parsedBudget >= 30_000) {
+        result.budgetAmount = parsedBudget;
+        result.detectedFields.budget = true;
 
-      if (
-        surroundingContext.includes('tổng') ||
-        surroundingContext.includes('cả tiệc') ||
-        surroundingContext.includes('toàn bộ') ||
-        surroundingContext.includes('trọn gói')
-      ) {
-        result.budgetType = 'TOTAL_ORDER';
-      } else {
-        result.budgetType = 'PER_TABLE';
+        const matchedPortion = budgetMatch[0].toLowerCase();
+        // Priority 1: If /bàn, mỗi bàn, 1 bàn is attached to the budget, it is strictly PER_TABLE
+        if (
+          matchedPortion.includes('/bàn') ||
+          matchedPortion.includes('mỗi bàn') ||
+          matchedPortion.includes('1 bàn') ||
+          matchedPortion.includes('một bàn') ||
+          matchedPortion.includes('mâm')
+        ) {
+          result.budgetType = 'PER_TABLE';
+        } else {
+          // Priority 2: Check if explicit total phrasing modifies this budget
+          const matchIndex = budgetMatch.index || 0;
+          const contextStart = Math.max(0, matchIndex - 20);
+          const contextEnd = Math.min(raw.length, matchIndex + budgetMatch[0].length + 20);
+          const localSnippet = raw.substring(contextStart, contextEnd).toLowerCase();
+
+          if (
+            localSnippet.includes('cả tiệc') ||
+            localSnippet.includes('toàn bộ tiệc') ||
+            localSnippet.includes('trọn gói') ||
+            localSnippet.includes('tổng ngân sách') ||
+            localSnippet.includes('tổng chi phí')
+          ) {
+            result.budgetType = 'TOTAL_ORDER';
+          } else {
+            result.budgetType = 'PER_TABLE';
+          }
+        }
       }
     }
   }
@@ -223,22 +246,37 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
     result.detectedFields.eventType = true;
   }
 
-  // 5. EXTRACT EXCLUDED INGREDIENTS / ALLERGIES
-  // Matches "không ăn thịt bò", "tránh đậu phộng", "ít cay", "không quá nhiều dầu mỡ"
-  const excludeRegex = /(?:không\s*(?:ăn|lấy|thích)?|tránh|dị ứng|kiêng)\s*([^.,;\n]+)/i;
-  const matchExclude = raw.match(excludeRegex);
-  if (matchExclude) {
-    const excl = matchExclude[1].trim();
-    if (excl.length > 2 && excl.length < 100) {
-      result.excludedIngredients = excl;
-      result.detectedFields.excludedIngredients = true;
-    }
+  // 5. EXTRACT EXCLUDED INGREDIENTS / ALLERGIES (Extract first and strip from text to protect preferences)
+  // Matches "không ăn tôm và cua", "không thích tôm, tránh cua", "dị ứng đậu phộng", "kiêng thịt bò"
+  let sanitizedForPref = raw;
+  const excludeMatches: string[] = [];
+
+  const excludeGlobalRegex = /(?:không\s*(?:ăn|lấy|thích)?|tránh|dị\s*ứng|kiêng)\s*([^.,;\n]+)/gi;
+  let exMatch: RegExpExecArray | null;
+  while ((exMatch = excludeGlobalRegex.exec(raw)) !== null) {
+    const rawPhrase = exMatch[1].trim();
+    // Replace in copy so "thích" inside "không thích" never pollutes preferences
+    sanitizedForPref = sanitizedForPref.replace(exMatch[0], ' ');
+
+    // Normalize compound tokens ("tôm và cua" -> "tôm, cua")
+    const tokens = rawPhrase
+      .split(/[,;\n]+|\s+(?:và|hoặc|với)\s+/i)
+      .map((t) => t.trim())
+      .filter((t) => t.length >= 2 && !/^(không|ăn|lấy|thích|tránh|dị ứng|kiêng)$/i.test(t));
+
+    excludeMatches.push(...tokens);
   }
 
-  // 6. EXTRACT PREFERENCES
+  if (excludeMatches.length > 0) {
+    const uniqueExclusions = Array.from(new Set(excludeMatches));
+    result.excludedIngredients = uniqueExclusions.join(', ');
+    result.detectedFields.excludedIngredients = true;
+  }
+
+  // 6. EXTRACT PREFERENCES (from text with exclusions removed)
   // Matches "thích thực đơn sang trọng, kết hợp món Việt và món Á", "ưu tiên hải sản"
   const prefRegex = /(?:thích|ưu tiên|muốn có|mong muốn)\s*([^.,;\n]+(?:,[^.,;\n]+)*)/i;
-  const matchPref = raw.match(prefRegex);
+  const matchPref = sanitizedForPref.match(prefRegex);
   if (matchPref) {
     const pref = matchPref[1].trim();
     if (pref.length > 3 && pref.length < 200) {

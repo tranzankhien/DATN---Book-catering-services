@@ -68,6 +68,6 @@ Phase 4 triển khai SePay Sandbox, xuất kho, email và tiến độ phục v�
 - Tích hợp Google Gemini AI API (`gemini-flash-lite-latest`) với định dạng Structured Output JSON Schema.
 - Cơ chế bảo vệ giá bán: Backend ghi đè giá bán thực từ PostgreSQL, tuyệt đối không tin giá do AI sinh ra.
 - Kiểm tra nguyên liệu tồn kho độc lập: Tính lượng tiêu hao thực tế từ công thức món và đối chiếu với tồn khả dụng (`physicalStock - activeReservedStock`).
-- Giới hạn tần suất (Rate Limiting): 10 lượt / giờ / user, ghi nhận nhật ký kỹ thuật vào bảng `ai_recommendation_usage`.
+- Giới hạn tần suất (Rate Limiting): 60 lượt / giờ / user (hỗ trợ GEMINI_MAX_REQUESTS_PER_HOUR hoặc AI_MAX_REQUESTS_PER_USER), bảo vệ nguyên tử chống race condition và ghi nhận nhật ký kỹ thuật vào bảng `ai_recommendation_usage`.
 - Cơ chế Fallback linh hoạt (`source = RULE_BASED`): Tự động kích hoạt thuật toán cân bằng dinh dưỡng và ngân sách khi AI ngoại tuyến hoặc quá tải.
 - Giao diện người dùng `/ai-menu` sang trọng, hiện đại, tích hợp chuyển giao thực đơn vào Menu Builder để tiếp tục quy trình đặt tiệc và thanh toán.

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Fallback recommendation engine that creates well-structured banquet menus
@@ -90,7 +91,9 @@ public class RecommendationFallbackService {
         ));
 
         // Validate and enrich all fallback proposals with real DB price calculations & inventory stock verification
-        List<MenuSuggestionDto> validated = validationService.validateAndEnrichSuggestions(rawSuggestions, request);
+        Set<Long> candidateIds = candidates.stream().map(DishCandidateDto::getId).collect(Collectors.toSet());
+        List<String> excludedKeywords = MenuCandidateService.parseExcludedKeywords(request.getExcludedIngredients());
+        List<MenuSuggestionDto> validated = validationService.validateAndEnrichSuggestions(rawSuggestions, request, candidateIds, excludedKeywords);
         for (MenuSuggestionDto s : validated) {
             s.setSource("RULE_BASED");
         }

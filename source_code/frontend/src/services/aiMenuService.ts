@@ -13,7 +13,10 @@ export const aiMenuService = {
     const response = await apiClient.post<ApiResponse<AiMenuRecommendationResponse>>(
       '/ai/menu/recommendations',
       payload,
-      { signal }
+      {
+        signal,
+        timeout: 35000, // Generous client timeout to allow backend AI fallback to complete cleanly
+      }
     );
     return response.data.data;
   },

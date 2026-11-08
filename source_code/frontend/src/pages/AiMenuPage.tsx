@@ -97,16 +97,19 @@ export const AiMenuPage: React.FC = () => {
       parts.push(extracted.eventType);
     }
 
-    if (extracted.detectedFields.excludedIngredients && extracted.excludedIngredients && !excludedIngredients) {
+    if (extracted.detectedFields.excludedIngredients && extracted.excludedIngredients) {
       setExcludedIngredients(extracted.excludedIngredients);
       parts.push(`Tránh: ${extracted.excludedIngredients}`);
     }
 
-    if (extracted.detectedFields.preferences && extracted.preferences && !preferences) {
+    if (extracted.detectedFields.preferences && extracted.preferences) {
       setPreferences(extracted.preferences);
     }
 
     setDetectedSummary(parts.length > 0 ? parts.join(' • ') : null);
+    if (response) {
+      setResponse(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -172,11 +175,17 @@ export const AiMenuPage: React.FC = () => {
         quantityPerTable: it.quantityPerTable || 1,
       }));
 
+      const finalTables = suggestion.tableCount || tableCount;
+      const finalGuestsPerTable = guestsPerTable || 10;
+      const finalGuestCount = finalTables * finalGuestsPerTable;
+
       sessionStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
           items,
-          tableCount: suggestion.tableCount || tableCount,
+          tableCount: finalTables,
+          guestsPerTable: finalGuestsPerTable,
+          guestCount: finalGuestCount,
         })
       );
       showToast(`Đã chọn "${suggestion.name}". Đang mở trình phối thực đơn để bạn tùy biến...`, 'success');
@@ -573,15 +582,27 @@ export const AiMenuPage: React.FC = () => {
 
                   {/* Card Bottom CTA */}
                   <div className="p-4 sm:p-5 border-t border-stone-100 bg-stone-50/50 mt-auto">
-                    <button
-                      type="button"
-                      onClick={() => handleSelectMenuAndCustomize(suggestion)}
-                      className="w-full inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
-                    >
-                      <Utensils className="h-4 w-4" />
-                      <span>Chọn thực đơn này & Tùy biến</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
+                    {suggestion.availabilityStatus !== 'AVAILABLE' ? (
+                      <div className="rounded-xl border border-rose-200 bg-rose-50/80 p-3 text-center">
+                        <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-rose-800">
+                          <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0" />
+                          <span>Tạm thời thiếu nguyên liệu trong kho</span>
+                        </div>
+                        <p className="text-[11px] text-rose-700 mt-0.5">
+                          Phương án này không thể chọn do không đủ nguyên liệu khả dụng để phục vụ quy mô tiệc.
+                        </p>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleSelectMenuAndCustomize(suggestion)}
+                        className="w-full inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                      >
+                        <Utensils className="h-4 w-4" />
+                        <span>Chọn thực đơn này & Tùy biến</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               );

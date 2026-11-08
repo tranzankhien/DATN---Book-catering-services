@@ -12,8 +12,8 @@ Add the following settings to your environment or `backend/.env`:
 GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-flash-lite-latest
 GEMINI_ENABLED=true
-GEMINI_TIMEOUT_SECONDS=30
-GEMINI_MAX_REQUESTS_PER_HOUR=10
+GEMINI_TIMEOUT_SECONDS=15
+GEMINI_MAX_REQUESTS_PER_HOUR=60
 ```
 
 ## 3. Verify via cURL

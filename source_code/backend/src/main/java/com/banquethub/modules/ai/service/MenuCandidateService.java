@@ -8,6 +8,7 @@ import com.banquethub.modules.catalog.repository.DishRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +33,9 @@ public class MenuCandidateService {
 
         List<String> excludedKeywords = parseExcludedKeywords(excludedIngredientsStr);
 
-        List<DishCandidateDto> candidates = new ArrayList<>();
+        List<DishCandidateDto> fullyStockedCandidates = new ArrayList<>();
+        List<DishCandidateDto> otherCandidates = new ArrayList<>();
+
         for (Dish dish : activeDishes) {
             // Must have price and recipe items
             if (dish.getPrice() == null || dish.getPrice().signum() <= 0) {
@@ -52,6 +55,12 @@ public class MenuCandidateService {
                 continue;
             }
 
+            // Check if all ingredients have positive stock
+            boolean hasFullPhysicalStock = dish.getRecipeItems().stream()
+                    .allMatch(r -> r.getIngredient() != null
+                            && r.getIngredient().getCurrentStock() != null
+                            && r.getIngredient().getCurrentStock().compareTo(BigDecimal.ZERO) > 0);
+
             DishCandidateDto dto = new DishCandidateDto(
                     dish.getId(),
                     dish.getCode(),
@@ -62,42 +71,60 @@ public class MenuCandidateService {
                     dish.getImageUrl(),
                     ingredientNames
             );
-            candidates.add(dto);
 
-            if (candidates.size() >= 50) {
-                break;
+            if (hasFullPhysicalStock) {
+                fullyStockedCandidates.add(dto);
+            } else {
+                otherCandidates.add(dto);
             }
         }
 
-        return candidates;
+        // Prioritize fully stocked candidates first, then fill up to 50
+        List<DishCandidateDto> result = new ArrayList<>(fullyStockedCandidates);
+        for (DishCandidateDto other : otherCandidates) {
+            if (result.size() >= 50) break;
+            result.add(other);
+        }
+
+        return result.size() > 50 ? result.subList(0, 50) : result;
     }
 
-    private List<String> parseExcludedKeywords(String input) {
+    public static List<String> parseExcludedKeywords(String input) {
         if (input == null || input.isBlank()) {
             return Collections.emptyList();
         }
-        return Arrays.stream(input.toLowerCase(Locale.ROOT).split("[,;\\n]+"))
+
+        String normalized = input.toLowerCase(Locale.ROOT)
+                .replaceAll("(?i)\\b(không\\s*ăn|không\\s*thích|không\\s*lấy|không|tránh|dị\\s*ứng|kiêng)\\b", " ")
+                .trim();
+
+        // Split by comma, semicolon, newline, and Vietnamese conjunctions 'và', 'hoặc', 'với'
+        String[] rawTokens = normalized.split("[,;\\n]+|\\s+(?:và|hoặc|với)\\s+");
+
+        return Arrays.stream(rawTokens)
                 .map(String::trim)
-                .filter(s -> !s.isEmpty())
+                .filter(s -> s.length() >= 2)
+                .distinct()
                 .toList();
     }
 
-    private boolean matchesAnyKeyword(String dishName, List<String> ingredientNames, List<String> keywords) {
-        if (keywords.isEmpty()) {
+    public static boolean matchesAnyKeyword(String dishName, List<String> ingredientNames, List<String> keywords) {
+        if (keywords == null || keywords.isEmpty()) {
             return false;
         }
-        String lowerDishName = dishName.toLowerCase(Locale.ROOT);
+        String lowerDishName = dishName != null ? dishName.toLowerCase(Locale.ROOT) : "";
         for (String kw : keywords) {
-            // strip prefix "không ", "tránh ", "dị ứng "
-            String cleanKw = kw.replace("không ", "").replace("tránh ", "").replace("dị ứng ", "").trim();
+            String cleanKw = kw.trim().toLowerCase(Locale.ROOT);
             if (cleanKw.length() < 2) continue;
 
             if (lowerDishName.contains(cleanKw)) {
                 return true;
             }
-            for (String ing : ingredientNames) {
-                if (ing.toLowerCase(Locale.ROOT).contains(cleanKw)) {
-                    return true;
+            if (ingredientNames != null) {
+                for (String ing : ingredientNames) {
+                    if (ing != null && ing.toLowerCase(Locale.ROOT).contains(cleanKw)) {
+                        return true;
+                    }
                 }
             }
         }

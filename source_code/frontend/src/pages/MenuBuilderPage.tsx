@@ -57,6 +57,7 @@ export const MenuBuilderPage: React.FC = () => {
   // Basket State
   const [selectedItems, setSelectedItems] = useState<SelectedDishItem[]>([]);
   const [tableCount, setTableCount] = useState<number>(6);
+  const [guestCount, setGuestCount] = useState<number | undefined>(undefined);
   const [isRestored, setIsRestored] = useState<boolean>(false);
 
   // Preview & Validation State
@@ -136,6 +137,9 @@ export const MenuBuilderPage: React.FC = () => {
           }
           if (parsed.tableCount) {
             setTableCount(parsed.tableCount);
+          }
+          if (parsed.guestCount) {
+            setGuestCount(parsed.guestCount);
           }
         } catch (e) {
           console.error('Failed to restore draft', e);
@@ -260,7 +264,8 @@ export const MenuBuilderPage: React.FC = () => {
 
   const handleProceedToCheckout = () => {
     if (selectedItems.length === 0) return;
-    navigate(`/checkout?tables=${tableCount}`);
+    const computedGuests = guestCount || (tableCount * 10);
+    navigate(`/checkout?tables=${tableCount}&guests=${computedGuests}`);
   };
 
   const filteredDishes = useMemo(() => {

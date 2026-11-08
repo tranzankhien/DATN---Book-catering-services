@@ -68,6 +68,7 @@ export const CheckoutPage: React.FC = () => {
 
   const menuIdParam = searchParams.get('menuId');
   const tablesParam = searchParams.get('tables');
+  const guestsParam = searchParams.get('guests');
 
   // Form Fields
   const [customerName, setCustomerName] = useState<string>('');
@@ -78,9 +79,22 @@ export const CheckoutPage: React.FC = () => {
   const [tableCount, setTableCount] = useState<number>(
     tablesParam ? Math.max(1, parseInt(tablesParam) || 1) : 6
   );
-  const [guestCount, setGuestCount] = useState<number>(
-    tablesParam ? Math.max(1, parseInt(tablesParam) || 1) * 10 : 60
-  );
+  const [guestCount, setGuestCount] = useState<number>(() => {
+    if (guestsParam) {
+      const g = parseInt(guestsParam, 10);
+      if (!isNaN(g) && g > 0) return g;
+    }
+    try {
+      const saved = sessionStorage.getItem('banquethub_builder_draft');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.guestCount && parsed.guestCount > 0) {
+          return parsed.guestCount;
+        }
+      }
+    } catch {}
+    return tablesParam ? Math.max(1, parseInt(tablesParam) || 1) * 10 : 60;
+  });
   const [eventLocation, setEventLocation] = useState<string>('');
   const [eventPoint, setEventPoint] = useState<MapPoint>();
   const [note, setNote] = useState<string>('');

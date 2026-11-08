@@ -88,13 +88,22 @@ public class GeminiClientService {
                     .retrieve()
                     .body(String.class);
         } catch (Exception e) {
-            log.error("Lỗi khi gửi yêu cầu tới Gemini API: {}", e.getMessage());
-            throw new RuntimeException("Không thể kết nối tới Google Gemini API: " + e.getMessage(), e);
+            log.warn("Lỗi khi gửi yêu cầu tới Gemini API: {}", e.getClass().getSimpleName());
+            throw new RuntimeException("Không thể kết nối tới Google Gemini API: " + e.getClass().getSimpleName(), e);
         }
 
         long responseTimeMs = System.currentTimeMillis() - startTime;
 
         return parseGeminiResponse(responseBody, responseTimeMs);
+    }
+
+    public static String sanitizeUserInput(String input) {
+        if (input == null) return "";
+        // Mask phone numbers (e.g. 0901234567, +84901234567)
+        String cleaned = input.replaceAll("(?i)\\b(?:0|\\+84)[0-9]{8,11}\\b", "[SĐT]");
+        // Mask emails
+        cleaned = cleaned.replaceAll("(?i)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}", "[EMAIL]");
+        return cleaned.trim();
     }
 
     private Map<String, Object> buildGeminiRequestBody(AiMenuRecommendationRequest request, List<DishCandidateDto> candidates) {
@@ -123,19 +132,19 @@ public class GeminiClientService {
 
         // Build User Prompt Payload
         Map<String, Object> userPayload = new HashMap<>();
-        userPayload.put("requestText", request.getRequestText());
-        userPayload.put("eventType", request.getEventType() != null ? request.getEventType() : "Tiệc chung");
+        userPayload.put("requestText", sanitizeUserInput(request.getRequestText()));
+        userPayload.put("eventType", request.getEventType() != null ? sanitizeUserInput(request.getEventType()) : "Tiệc chung");
         userPayload.put("tableCount", request.getTableCount());
         userPayload.put("guestsPerTable", request.getGuestsPerTable());
         if (request.getBudgetAmount() != null) {
             userPayload.put("budgetAmount", request.getBudgetAmount());
-            userPayload.put("budgetType", request.getBudgetType().name());
+            userPayload.put("budgetType", request.getBudgetType() != null ? request.getBudgetType().name() : "PER_TABLE");
         }
         if (request.getPreferences() != null && !request.getPreferences().isBlank()) {
-            userPayload.put("preferences", request.getPreferences());
+            userPayload.put("preferences", sanitizeUserInput(request.getPreferences()));
         }
         if (request.getExcludedIngredients() != null && !request.getExcludedIngredients().isBlank()) {
-            userPayload.put("excludedIngredients", request.getExcludedIngredients());
+            userPayload.put("excludedIngredients", sanitizeUserInput(request.getExcludedIngredients()));
         }
         userPayload.put("availableCandidateDishes", candidates);
 
