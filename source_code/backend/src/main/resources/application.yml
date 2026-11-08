@@ -79,7 +79,7 @@ app:
     enabled: ${GEMINI_ENABLED:true}
     timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:30}
     max-output-tokens: ${GEMINI_MAX_OUTPUT_TOKENS:4096}
-    max-requests-per-hour: ${AI_MAX_REQUESTS_PER_USER:10}
+    max-requests-per-hour: ${AI_MAX_REQUESTS_PER_USER:60}
   seed:
     enabled: ${APP_SEED_ENABLED:true}
     admin-email: ${APP_SEED_ADMIN_EMAIL:admin@banquethub.vn}

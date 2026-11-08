@@ -66,9 +66,16 @@ public class StockReservationService {
 
         Map<Long, BigDecimal> reservedMap = new HashMap<>();
         for (Object[] row : reservedList) {
-            Long ingId = (Long) row[0];
-            BigDecimal resQty = (BigDecimal) row[1];
-            reservedMap.put(ingId, resQty);
+            if (row != null && row.length >= 2 && row[0] != null) {
+                Long ingId = row[0] instanceof Number ? ((Number) row[0]).longValue() : Long.valueOf(row[0].toString());
+                BigDecimal resQty = BigDecimal.ZERO;
+                if (row[1] instanceof BigDecimal) {
+                    resQty = (BigDecimal) row[1];
+                } else if (row[1] instanceof Number) {
+                    resQty = BigDecimal.valueOf(((Number) row[1]).doubleValue());
+                }
+                reservedMap.put(ingId, resQty);
+            }
         }
 
         Map<Long, BigDecimal> availableMap = new HashMap<>();
@@ -93,9 +100,16 @@ public class StockReservationService {
         List<Object[]> reservedList = reservationRepository.getActiveReservedQuantitiesByIds(ids, now);
         Map<Long, BigDecimal> reservedMap = new HashMap<>();
         for (Object[] row : reservedList) {
-            Long ingId = (Long) row[0];
-            BigDecimal resQty = (BigDecimal) row[1];
-            reservedMap.put(ingId, resQty);
+            if (row != null && row.length >= 2 && row[0] != null) {
+                Long ingId = row[0] instanceof Number ? ((Number) row[0]).longValue() : Long.valueOf(row[0].toString());
+                BigDecimal resQty = BigDecimal.ZERO;
+                if (row[1] instanceof BigDecimal) {
+                    resQty = (BigDecimal) row[1];
+                } else if (row[1] instanceof Number) {
+                    resQty = BigDecimal.valueOf(((Number) row[1]).doubleValue());
+                }
+                reservedMap.put(ingId, resQty);
+            }
         }
 
         List<StockAvailabilityResponse> result = new ArrayList<>();

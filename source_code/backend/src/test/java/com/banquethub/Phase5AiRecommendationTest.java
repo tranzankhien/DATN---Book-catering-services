@@ -148,4 +148,26 @@ class Phase5AiRecommendationTest {
         assertThat(afterOrdersCount).isEqualTo(initialOrdersCount);
         assertThat(afterReservationsCount).isEqualTo(initialReservationsCount);
     }
+
+    @Test
+    @DisplayName("TC-05: Reproduce user wedding case with 10 tables, 30 guests per table, 3M budget")
+    void weddingCase_reproduceIssue() throws Exception {
+        String token = userToken();
+        String responseBody = mvc.perform(post("/api/v1/ai/menu/recommendations")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of(
+                                "requestText", "Tôi muốn đặt thực đơn tiệc cưới khoảng 100 khách, chia thành 10 bàn, mỗi bàn 10 người. Ngân sách 3.000.000đ/bàn. Tôi thích thực đơn sang trọng, kết hợp món Việt và món Á, có khai vị, hải sản, món chính, lẩu và tráng miệng.",
+                                "eventType", "Tiệc cưới / Đính hôn",
+                                "tableCount", 10,
+                                "guestsPerTable", 30,
+                                "budgetAmount", 3000000,
+                                "budgetType", "PER_TABLE"
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode root = json.readTree(responseBody);
+        assertThat(root.path("success").asBoolean()).isTrue();
+    }
 }
