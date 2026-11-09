@@ -424,4 +424,100 @@ class Phase5AiRecommendationTest {
         assertThat(okCount.get()).isEqualTo(1);
         assertThat(rateLimitedCount.get()).isEqualTo(3);
     }
+
+    @Test
+    @DisplayName("TC-14: Unfeasible budget returns empty suggestions list and proper explanatory message")
+    void impossibleBudget_returnsEmptySuggestions() throws Exception {
+        db.update("DELETE FROM ai_recommendation_usage WHERE user_id = 3");
+        String token = userToken();
+        String responseBody = mvc.perform(post("/api/v1/ai/menu/recommendations")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of(
+                                "requestText", "Tiệc 5 bàn, ngân sách 50.000đ/bàn",
+                                "tableCount", 5,
+                                "guestsPerTable", 6,
+                                "budgetAmount", 50000,
+                                "budgetType", "PER_TABLE"
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode root = json.readTree(responseBody);
+        assertThat(root.path("success").asBoolean()).isTrue();
+        JsonNode data = root.path("data");
+        JsonNode suggestions = data.path("suggestions");
+        assertThat(suggestions.isArray()).isTrue();
+        assertThat(suggestions.size()).isEqualTo(0);
+        assertThat(data.path("message").asText()).contains("Không tìm thấy phương án thực đơn nào phù hợp");
+    }
+
+    @Test
+    @DisplayName("TC-15: Unaccented allergy exclusion in requestText (\"di ung tom va cua\") filters out allergens")
+    void unaccentedAllergyExclusion_filtersDishesWithoutExplicitExcludedIngredients() throws Exception {
+        db.update("DELETE FROM ai_recommendation_usage WHERE user_id = 3");
+        String token = userToken();
+        String responseBody = mvc.perform(post("/api/v1/ai/menu/recommendations")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of(
+                                "requestText", "Gia đình tôi muốn đặt tiệc 4 bàn, di ung tom va cua, ngan sach 1.500.000d/ban",
+                                "tableCount", 4,
+                                "guestsPerTable", 6,
+                                "budgetAmount", 1500000,
+                                "budgetType", "PER_TABLE"
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode root = json.readTree(responseBody);
+        assertThat(root.path("success").asBoolean()).isTrue();
+        JsonNode suggestions = root.path("data").path("suggestions");
+        for (JsonNode suggestion : suggestions) {
+            for (JsonNode item : suggestion.path("items")) {
+                String dishName = item.path("dishName").asText().toLowerCase();
+                String unaccented = MenuCandidateService.removeDiacritics(dishName);
+                assertThat(unaccented).doesNotContain("tom");
+                assertThat(unaccented).doesNotContain("cua");
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("TC-16: Candidate selection scales ingredient inventory requirements with tableCount")
+    void candidateSelection_scalesStockRequirementWithTableCount() {
+        String unique = "SCALE-" + UUID.randomUUID().toString().substring(0, 8);
+        long ingredientId = db.queryForObject(
+                "INSERT INTO ingredients(code, name, unit, current_stock, avg_unit_cost) VALUES (?, ?, 'kg', 10, 50000) RETURNING id",
+                Long.class, unique, "Nguyên liệu " + unique
+        );
+        long categoryId = db.queryForObject("SELECT min(id) FROM dish_categories", Long.class);
+        long dishId = db.queryForObject(
+                "INSERT INTO dishes(code, name, price, category_id, status) VALUES (?, ?, 180000, ?, 'ACTIVE') RETURNING id",
+                Long.class, unique, "Món " + unique, categoryId
+        );
+        // Dish requires 2.0 kg per table
+        db.update("INSERT INTO recipe_items(dish_id, ingredient_id, quantity) VALUES (?, ?, 2.0)", dishId, ingredientId);
+
+        // 4 tables need 8 kg (available = 10kg -> eligible)
+        List<DishCandidateDto> candidates4Tables = menuCandidateService.getEligibleCandidates(null, 4);
+        boolean foundIn4 = candidates4Tables.stream().anyMatch(d -> d.getId().equals(dishId));
+        assertThat(foundIn4).isTrue();
+    }
+
+    @Test
+    @DisplayName("TC-17: Budget extraction with per-person rate (/người) correctly converts to per-table budget")
+    void extractBudgetFromText_convertsPerPersonToPerTable() {
+        var res1 = RecommendationValidationService.extractBudgetFromText("Ngân sách 300k/người, mỗi bàn 8 người", 8);
+        assertThat(res1).isNotNull();
+        assertThat(res1.budgetType()).isEqualTo(BudgetType.PER_TABLE);
+        // 300,000 * 8 = 2,400,000
+        assertThat(res1.amount()).isEqualByComparingTo(BigDecimal.valueOf(2_400_000L));
+
+        var res2 = RecommendationValidationService.extractBudgetFromText("chi phí 200k/người, tiệc 5 bàn");
+        assertThat(res2).isNotNull();
+        assertThat(res2.budgetType()).isEqualTo(BudgetType.PER_TABLE);
+        // Default 6 guests/table: 200,000 * 6 = 1,200,000
+        assertThat(res2.amount()).isEqualByComparingTo(BigDecimal.valueOf(1_200_000L));
+    }
 }

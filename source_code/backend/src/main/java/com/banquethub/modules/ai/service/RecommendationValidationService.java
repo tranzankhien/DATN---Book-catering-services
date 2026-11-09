@@ -74,7 +74,7 @@ public class RecommendationValidationService {
         BudgetType effectiveBudgetType = request.getBudgetType() != null ? request.getBudgetType() : BudgetType.PER_TABLE;
 
         if (effectiveBudget == null && request.getRequestText() != null) {
-            BudgetExtractionResult extracted = extractBudgetFromText(request.getRequestText());
+            BudgetExtractionResult extracted = extractBudgetFromText(request.getRequestText(), request.getGuestsPerTable());
             if (extracted != null) {
                 effectiveBudget = extracted.amount();
                 if (request.getBudgetType() == null && extracted.budgetType() != null) {
@@ -254,37 +254,47 @@ public class RecommendationValidationService {
     public record BudgetExtractionResult(BigDecimal amount, BudgetType budgetType) {}
 
     public static BudgetExtractionResult extractBudgetFromText(String text) {
+        return extractBudgetFromText(text, 6);
+    }
+
+    public static BudgetExtractionResult extractBudgetFromText(String text, Integer guestsPerTable) {
         if (text == null || text.isBlank()) return null;
         try {
-            // Priority 1: Shorthand like 1tr5, 2tr8
-            Pattern pShorthand = Pattern.compile("(?i)(?:tổng\\s*)?(?:ngân\\s*sách|chi\\s*phí|tầm|khoảng|giá)?\\s*(\\d+)tr(\\d+)(?:\\s*(\\/|mỗi|một)?\\s*(bàn|mâm|tiệc|cả tiệc))?");
+            // Priority 1: Shorthand like 1tr5, 2tr8, 300k/người
+            Pattern pShorthand = Pattern.compile("(?i)(?:tổng\\s*)?(?:ngân\\s*sách|chi\\s*phí|tầm|khoảng|giá)?\\s*(\\d+)tr(\\d+)(?:\\s*(\\/|mỗi|một)?\\s*(bàn|mâm|tiệc|cả tiệc|người))?");
             Matcher mShort = pShorthand.matcher(text);
             if (mShort.find()) {
                 long whole = Long.parseLong(mShort.group(1));
                 String fracStr = mShort.group(2);
                 double frac = Double.parseDouble("0." + fracStr);
                 BigDecimal amount = BigDecimal.valueOf((long) ((whole + frac) * 1_000_000L));
+                String matchSnippet = text.substring(mShort.start(), mShort.end()).toLowerCase();
+                if (matchSnippet.contains("người")) {
+                    int g = guestsPerTable != null && guestsPerTable > 0 ? guestsPerTable : 6;
+                    amount = amount.multiply(BigDecimal.valueOf(g));
+                    return new BudgetExtractionResult(amount, BudgetType.PER_TABLE);
+                }
                 BudgetType type = determineBudgetType(text, mShort.start(), mShort.end());
                 return new BudgetExtractionResult(amount, type);
             }
 
-            // Priority 2: Standard currency phrase (e.g. 1.5 triệu, 3.000.000đ/bàn, 800k, 50k)
+            // Priority 2: Standard currency phrase (e.g. 1.5 triệu, 3.000.000đ/bàn, 800k, 50k, 300k/người, 20k/bàn)
             Pattern p = Pattern.compile(
                     "(?i)(?:tổng\\s*)?(?:ngân\\s*sách|chi\\s*phí|tài\\s*chính|giá(?:\\s*tiền)?)\\s*(?:tổng(?:\\s*cộng)?)?\\s*(?:dự\\s*kiến\\s*)?(?:khoảng|tầm|tầm\\s*khoảng|là)?\\s*([0-9\\.\\,]+)\\s*(triệu|tr|k|nghìn|ngàn|đ|vnd)?(?:\\s*(?:\\/|\\s*mỗi\\s*|\\s*một\\s*|\\s*1\\s*|\\s*cho\\s*(?:cả\\s*)?)(bàn|mâm|tiệc|cả tiệc|người))?"
             );
             Matcher m = p.matcher(text);
             if (m.find()) {
-                BudgetExtractionResult res = parseMatch(text, m);
+                BudgetExtractionResult res = parseMatch(text, m, guestsPerTable);
                 if (res != null) return res;
             }
 
-            // Priority 3: Unit-based phrase without preceding keyword (e.g. "25 triệu/tiệc, 5 bàn")
+            // Priority 3: Unit-based phrase without preceding keyword (e.g. "25 triệu/tiệc, 5 bàn", "300k/người", "20k/bàn")
             Pattern pUnit = Pattern.compile(
-                    "(?i)([0-9\\.\\,]+)\\s*(triệu|tr|k|nghìn|ngàn|đ|vnd)?(?:\\s*(?:\\/|\\s*mỗi\\s*|\\s*một\\s*|\\s*1\\s*|\\s*cho\\s*(?:cả\\s*)?)(bàn|mâm|tiệc|cả tiệc))"
+                    "(?i)([0-9\\.\\,]+)\\s*(triệu|tr|k|nghìn|ngàn|đ|vnd)?(?:\\s*(?:\\/|\\s*mỗi\\s*|\\s*một\\s*|\\s*1\\s*|\\s*cho\\s*(?:cả\\s*)?)(bàn|mâm|tiệc|cả tiệc|người))"
             );
             Matcher mUnit = pUnit.matcher(text);
             if (mUnit.find()) {
-                BudgetExtractionResult res = parseMatch(text, mUnit);
+                BudgetExtractionResult res = parseMatch(text, mUnit, guestsPerTable);
                 if (res != null) return res;
             }
         } catch (Exception ignored) {
@@ -292,7 +302,7 @@ public class RecommendationValidationService {
         return null;
     }
 
-    private static BudgetExtractionResult parseMatch(String text, Matcher m) {
+    private static BudgetExtractionResult parseMatch(String text, Matcher m, Integer guestsPerTable) {
         String rawNum = m.group(1).trim();
         String unit = m.group(2) != null ? m.group(2).toLowerCase() : "";
 
@@ -308,13 +318,19 @@ public class RecommendationValidationService {
             String cleanDigits = rawNum.replace(".", "").replace(",", "");
             if (!cleanDigits.isEmpty()) {
                 long base = Long.parseLong(cleanDigits);
-                if (base >= 10_000) {
+                if (base > 0) {
                     parsedAmount = BigDecimal.valueOf(base);
                 }
             }
         }
 
         if (parsedAmount != null && parsedAmount.signum() > 0) {
+            String matchSnippet = text.substring(m.start(), m.end()).toLowerCase();
+            if (matchSnippet.contains("người")) {
+                int g = guestsPerTable != null && guestsPerTable > 0 ? guestsPerTable : 6;
+                parsedAmount = parsedAmount.multiply(BigDecimal.valueOf(g));
+                return new BudgetExtractionResult(parsedAmount, BudgetType.PER_TABLE);
+            }
             BudgetType type = determineBudgetType(text, m.start(), m.end());
             return new BudgetExtractionResult(parsedAmount, type);
         }

@@ -72,13 +72,26 @@ public class RecommendationFallbackService {
         desserts.sort(priceAsc);
 
         // Calculate target budget per table
+        BigDecimal effectiveBudget = request.getBudgetAmount();
+        BudgetType effectiveBudgetType = request.getBudgetType();
+        if (effectiveBudget == null && request.getRequestText() != null) {
+            RecommendationValidationService.BudgetExtractionResult extracted =
+                    RecommendationValidationService.extractBudgetFromText(request.getRequestText(), request.getGuestsPerTable());
+            if (extracted != null) {
+                effectiveBudget = extracted.amount();
+                if (effectiveBudgetType == null) {
+                    effectiveBudgetType = extracted.budgetType();
+                }
+            }
+        }
+
         BigDecimal budgetCapPerTable = null;
-        if (request.getBudgetAmount() != null && request.getBudgetAmount().signum() > 0) {
-            if (request.getBudgetType() == BudgetType.TOTAL_ORDER) {
+        if (effectiveBudget != null && effectiveBudget.signum() > 0) {
+            if (effectiveBudgetType == BudgetType.TOTAL_ORDER) {
                 int tables = request.getTableCount() != null && request.getTableCount() > 0 ? request.getTableCount() : 1;
-                budgetCapPerTable = request.getBudgetAmount().divide(BigDecimal.valueOf(tables), 2, RoundingMode.HALF_UP);
+                budgetCapPerTable = effectiveBudget.divide(BigDecimal.valueOf(tables), 2, RoundingMode.HALF_UP);
             } else {
-                budgetCapPerTable = request.getBudgetAmount();
+                budgetCapPerTable = effectiveBudget;
             }
         }
 
@@ -116,7 +129,14 @@ public class RecommendationFallbackService {
 
         // Validate and enrich all fallback proposals with real DB price calculations & inventory stock verification
         Set<Long> candidateIds = candidates.stream().map(DishCandidateDto::getId).collect(Collectors.toSet());
-        List<String> excludedKeywords = MenuCandidateService.parseExcludedKeywords(request.getExcludedIngredients());
+        String effectiveExclusions = request.getExcludedIngredients();
+        if (effectiveExclusions == null || effectiveExclusions.isBlank()) {
+            List<String> extracted = MenuCandidateService.extractExclusionPhrasesFromText(request.getRequestText());
+            if (!extracted.isEmpty()) {
+                effectiveExclusions = String.join(", ", extracted);
+            }
+        }
+        List<String> excludedKeywords = MenuCandidateService.parseExcludedKeywords(effectiveExclusions);
         List<MenuSuggestionDto> validated = validationService.validateAndEnrichSuggestions(rawSuggestions, request, candidateIds, excludedKeywords);
         for (MenuSuggestionDto s : validated) {
             s.setSource("RULE_BASED");

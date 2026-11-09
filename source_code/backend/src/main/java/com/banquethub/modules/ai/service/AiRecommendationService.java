@@ -75,7 +75,15 @@ public class AiRecommendationService {
         }
 
         // 2. Query real candidate dishes with stock and recipe validation
-        List<DishCandidateDto> candidates = menuCandidateService.getEligibleCandidates(request.getExcludedIngredients());
+        String effectiveExclusions = request.getExcludedIngredients();
+        if (effectiveExclusions == null || effectiveExclusions.isBlank()) {
+            List<String> extractedFromText = MenuCandidateService.extractExclusionPhrasesFromText(request.getRequestText());
+            if (!extractedFromText.isEmpty()) {
+                effectiveExclusions = String.join(", ", extractedFromText);
+            }
+        }
+
+        List<DishCandidateDto> candidates = menuCandidateService.getEligibleCandidates(effectiveExclusions, request.getTableCount());
         if (candidates.isEmpty()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -84,7 +92,7 @@ public class AiRecommendationService {
         }
 
         Set<Long> candidateIds = candidates.stream().map(DishCandidateDto::getId).collect(Collectors.toSet());
-        List<String> excludedKeywords = MenuCandidateService.parseExcludedKeywords(request.getExcludedIngredients());
+        List<String> excludedKeywords = MenuCandidateService.parseExcludedKeywords(effectiveExclusions);
 
         String source = "GEMINI";
         String message = "Gợi ý thực đơn thành công từ trợ lý AI BanquetHub.";
@@ -157,8 +165,8 @@ public class AiRecommendationService {
                     .toList();
 
             if (validatedSuggestions.isEmpty()) {
-                validatedSuggestions = fallbackRaw.stream().limit(3).toList();
-                message = "Gợi ý thực đơn tối ưu theo dữ liệu món ăn thực tế (một số phương án có thể chênh lệch ngân sách hoặc tồn kho).";
+                validatedSuggestions = Collections.emptyList();
+                message = "Không tìm thấy phương án thực đơn nào phù hợp với ngân sách hoặc tồn kho hiện tại của nhà hàng.";
             } else {
                 message = "Gợi ý thực đơn tối ưu theo dữ liệu món ăn và kho thực tế của nhà hàng.";
             }

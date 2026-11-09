@@ -100,19 +100,20 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
   const lower = raw.toLowerCase();
 
   // 1. EXTRACT BUDGET
-  // Mode A: Explicit keyword ("ngân sách 3.000.000đ/bàn", "ngân sách tổng 25 triệu", "tổng ngân sách khoảng 25 triệu", "chi phí 25 triệu cho tiệc")
+  // Mode A: Explicit keyword ("ngân sách 3.000.000đ/bàn", "ngân sách tổng 25 triệu", "tổng ngân sách khoảng 25 triệu", "chi phí 25 triệu cho tiệc", "300k/người")
   const keywordBudgetRegex =
-    /(?:tổng\s*)?(?:ngân\s*sách|chi\s*phí|tài\s*chính|giá(?:\s*tiền)?)\s*(?:tổng(?:\s*cộng)?)?\s*(?:dự\s*kiến\s*)?(?:khoảng|tầm|tầm\s*khoảng|là)?\s*(-?\d+tr\d+|-?[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)?(?:\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*|\s*cho\s*(?:cả\s*)?)(bàn|mâm|tiệc|cả tiệc|người))?/i;
+    /(?:tổng\s*)?(?:ngân\s*sách|chi\s*phí|tài\s*chính|giá(?:\s*tiền)?)\s*(?:tổng(?:\s*cộng)?)?\\s*(?:dự\s*kiến\s*)?(?:khoảng|tầm|tầm\s*khoảng|là)?\s*(-?\d+tr\d+|-?[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)?(?:\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*|\s*cho\s*(?:cả\s*)?)(bàn|mâm|tiệc|cả tiệc|người))?/i;
 
-  // Mode B: Unit-based ("25 triệu/tiệc", "2tr5/bàn", "1.2 triệu một bàn", "3.000.000đ/bàn", "50k/bàn")
+  // Mode B: Unit-based ("25 triệu/tiệc", "2tr5/bàn", "1.2 triệu một bàn", "3.000.000đ/bàn", "50k/bàn", "300k/người", "20k/bàn")
   const unitBudgetRegex =
-    /(-?\d+tr\d+|-?[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)?(?:\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*|\s*cho\s*(?:cả\s*)?)(bàn|mâm|tiệc|cả tiệc))/i;
+    /(-?\d+tr\d+|-?[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)?(?:\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*|\s*cho\s*(?:cả\s*)?)(bàn|mâm|tiệc|cả tiệc|người))/i;
 
   let budgetMatch = raw.match(keywordBudgetRegex);
   if (!budgetMatch) {
     budgetMatch = raw.match(unitBudgetRegex);
   }
 
+  let isPerPersonBudget = false;
   if (budgetMatch) {
     const rawNum = budgetMatch[1];
     const rawUnit = budgetMatch[2];
@@ -121,12 +122,20 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
     if (!rawNum.startsWith('-')) {
       const parsedBudget = parseVietnameseNumber(rawNum, rawUnit);
 
-      if (parsedBudget && parsedBudget >= 30_000) {
+      if (parsedBudget && parsedBudget > 0) {
         result.budgetAmount = parsedBudget;
         result.detectedFields.budget = true;
 
         const matchedPortion = budgetMatch[0].toLowerCase();
         if (
+          matchedPortion.includes('/người') ||
+          matchedPortion.includes('mỗi người') ||
+          matchedPortion.includes('1 người') ||
+          matchedPortion.includes('một người')
+        ) {
+          isPerPersonBudget = true;
+          result.budgetType = 'PER_TABLE';
+        } else if (
           matchedPortion.includes('/tiệc') ||
           matchedPortion.includes('mỗi tiệc') ||
           matchedPortion.includes('cả tiệc') ||
@@ -239,6 +248,13 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
     }
   }
 
+  // Adjust per-person budget to per-table budget once guests per table is resolved
+  if (isPerPersonBudget && result.budgetAmount) {
+    const guests = result.guestsPerTable || 6;
+    result.budgetAmount = result.budgetAmount * guests;
+    result.budgetType = 'PER_TABLE';
+  }
+
   // 4. EXTRACT EVENT TYPE
   if (/cưới|đính hôn|vu quy|tân hôn|thành hôn/i.test(lower)) {
     result.eventType = 'Tiệc cưới / Đính hôn';
@@ -261,27 +277,27 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
   }
 
   // 5. EXTRACT EXCLUDED INGREDIENTS / ALLERGIES (Extract first and strip from text to protect preferences)
-  // Matches "Dị ứng tôm, cua và đậu phộng", "không ăn tôm và cua", "không thích tôm, tránh cua", "kiêng thịt bò, thịt chó"
+  // Matches "Dị ứng tôm, cua và đậu phộng", "di ung tom va cua", "không ăn tôm và cua", "không thích tôm, tránh cua", "kiêng thịt bò, thịt chó"
   let sanitizedForPref = raw;
   const excludeMatches: string[] = [];
 
   const excludeGlobalRegex =
-    /(?:không\s*(?:ăn|lấy|thích|dùng)?|tránh|dị\s*ứng(?:\s*với)?|kiêng)\s+([^.!?\n;]+)/gi;
+    /(?:(?:không|khong)\s*(?:ăn|an|lấy|lay|thích|thich|dùng|dung)?|(?:tránh|tranh)|(?:dị\s*ứng|di\s*ung)(?:\s*(?:với|voi))?|(?:kiêng|kieng))\s+([^.!?\n;]+)/gi;
   let exMatch: RegExpExecArray | null;
   while ((exMatch = excludeGlobalRegex.exec(raw)) !== null) {
     let rawPhrase = exMatch[1].trim();
     // Stop if next clause starts
-    rawPhrase = rawPhrase.split(/(?:\bthích|\bưu tiên|\bmuốn|\bngân sách|\bchi phí|\btài chính)\b/i)[0];
+    rawPhrase = rawPhrase.split(/(?:\bthích|\bthich|\bưu tiên|\buu tien|\bmuốn|\bmuon|\bngân sách|\bngan sach|\bchi phí|\bchi phi|\btài chính|\btai chinh)\b/i)[0];
 
     // Replace in copy so "thích" inside "không thích" never pollutes preferences
     sanitizedForPref = sanitizedForPref.replace(exMatch[0], ' ');
 
-    // Normalize compound tokens ("tôm, cua và đậu phộng" -> ["tôm", "cua", "đậu phộng"])
+    // Normalize compound tokens ("tôm, cua và đậu phộng", "tom, cua va dau phong")
     const tokens = rawPhrase
-      .split(/[,;\n]+|\s+(?:và|hoặc|với)\s+/i)
-      .map((t) => t.trim().replace(/^(?:không\s*(?:ăn|lấy|thích|dùng)?|tránh|dị\s*ứng(?:\s*với)?|kiêng)\s*/i, ''))
+      .split(/[,;\n]+|\s+(?:và|va|hoặc|hoac|với|voi)\s+/i)
+      .map((t) => t.trim().replace(/^(?:(?:không|khong)\s*(?:ăn|an|lấy|lay|thích|thich|dùng|dung)?|(?:tránh|tranh)|(?:dị\s*ứng|di\s*ung)(?:\s*(?:với|voi))?|(?:kiêng|kieng))\s*/i, ''))
       .map((t) => t.trim())
-      .filter((t) => t.length >= 2 && !/^(không|ăn|lấy|thích|tránh|dị ứng|kiêng)$/i.test(t));
+      .filter((t) => t.length >= 2 && !/^(không|khong|ăn|an|lấy|lay|thích|thich|tránh|tranh|dị ứng|di ung|kiêng|kieng)$/i.test(t));
 
     excludeMatches.push(...tokens);
   }
