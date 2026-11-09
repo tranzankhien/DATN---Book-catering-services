@@ -100,11 +100,13 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
   const lower = raw.toLowerCase();
 
   // 1. EXTRACT BUDGET
-  // Mode A: Explicit keyword ("ngân sách 3.000.000đ/bàn", "chi phí tầm 25 triệu", "tài chính khoảng 1tr5/bàn")
-  const keywordBudgetRegex = /(?:ngân\s*sách|chi\s*phí|tài\s*chính|giá(?:\s*tiền)?)\s*(?:dự\s*kiến\s*)?(?:khoảng|tầm|tầm\s*khoảng|là)?\s*(-?\d+tr\d+|-?[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)?(?:\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*)(?:bàn|mâm|tiệc|cả tiệc|người))?/i;
-  
-  // Mode B: Unit-based ("2tr5/bàn", "1.2 triệu một bàn", "3.000.000đ/bàn", "50k/bàn")
-  const unitBudgetRegex = /(-?\d+tr\d+|-?[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*)(?:bàn|mâm|tiệc|cả tiệc)/i;
+  // Mode A: Explicit keyword ("ngân sách 3.000.000đ/bàn", "ngân sách tổng 25 triệu", "tổng ngân sách khoảng 25 triệu", "chi phí 25 triệu cho tiệc")
+  const keywordBudgetRegex =
+    /(?:tổng\s*)?(?:ngân\s*sách|chi\s*phí|tài\s*chính|giá(?:\s*tiền)?)\s*(?:tổng(?:\s*cộng)?)?\s*(?:dự\s*kiến\s*)?(?:khoảng|tầm|tầm\s*khoảng|là)?\s*(-?\d+tr\d+|-?[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)?(?:\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*|\s*cho\s*(?:cả\s*)?)(bàn|mâm|tiệc|cả tiệc|người))?/i;
+
+  // Mode B: Unit-based ("25 triệu/tiệc", "2tr5/bàn", "1.2 triệu một bàn", "3.000.000đ/bàn", "50k/bàn")
+  const unitBudgetRegex =
+    /(-?\d+tr\d+|-?[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)?(?:\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*|\s*cho\s*(?:cả\s*)?)(bàn|mâm|tiệc|cả tiệc))/i;
 
   let budgetMatch = raw.match(keywordBudgetRegex);
   if (!budgetMatch) {
@@ -124,8 +126,17 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
         result.detectedFields.budget = true;
 
         const matchedPortion = budgetMatch[0].toLowerCase();
-        // Priority 1: If /bàn, mỗi bàn, 1 bàn is attached to the budget, it is strictly PER_TABLE
         if (
+          matchedPortion.includes('/tiệc') ||
+          matchedPortion.includes('mỗi tiệc') ||
+          matchedPortion.includes('cả tiệc') ||
+          matchedPortion.includes('cho tiệc') ||
+          matchedPortion.includes('cho cả tiệc') ||
+          matchedPortion.includes('1 tiệc') ||
+          matchedPortion.includes('một tiệc')
+        ) {
+          result.budgetType = 'TOTAL_ORDER';
+        } else if (
           matchedPortion.includes('/bàn') ||
           matchedPortion.includes('mỗi bàn') ||
           matchedPortion.includes('1 bàn') ||
@@ -134,10 +145,9 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
         ) {
           result.budgetType = 'PER_TABLE';
         } else {
-          // Priority 2: Check if explicit total phrasing modifies this budget
           const matchIndex = budgetMatch.index || 0;
-          const contextStart = Math.max(0, matchIndex - 20);
-          const contextEnd = Math.min(raw.length, matchIndex + budgetMatch[0].length + 20);
+          const contextStart = Math.max(0, matchIndex - 25);
+          const contextEnd = Math.min(raw.length, matchIndex + budgetMatch[0].length + 25);
           const localSnippet = raw.substring(contextStart, contextEnd).toLowerCase();
 
           if (
@@ -145,7 +155,11 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
             localSnippet.includes('toàn bộ tiệc') ||
             localSnippet.includes('trọn gói') ||
             localSnippet.includes('tổng ngân sách') ||
-            localSnippet.includes('tổng chi phí')
+            localSnippet.includes('tổng chi phí') ||
+            localSnippet.includes('ngân sách tổng') ||
+            localSnippet.includes('tổng') ||
+            localSnippet.includes('tổng cộng') ||
+            localSnippet.includes('tổng tiệc')
           ) {
             result.budgetType = 'TOTAL_ORDER';
           } else {
@@ -247,20 +261,25 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
   }
 
   // 5. EXTRACT EXCLUDED INGREDIENTS / ALLERGIES (Extract first and strip from text to protect preferences)
-  // Matches "không ăn tôm và cua", "không thích tôm, tránh cua", "dị ứng đậu phộng", "kiêng thịt bò"
+  // Matches "Dị ứng tôm, cua và đậu phộng", "không ăn tôm và cua", "không thích tôm, tránh cua", "kiêng thịt bò, thịt chó"
   let sanitizedForPref = raw;
   const excludeMatches: string[] = [];
 
-  const excludeGlobalRegex = /(?:không\s*(?:ăn|lấy|thích)?|tránh|dị\s*ứng|kiêng)\s*([^.,;\n]+)/gi;
+  const excludeGlobalRegex =
+    /(?:không\s*(?:ăn|lấy|thích|dùng)?|tránh|dị\s*ứng(?:\s*với)?|kiêng)\s+([^.!?\n;]+)/gi;
   let exMatch: RegExpExecArray | null;
   while ((exMatch = excludeGlobalRegex.exec(raw)) !== null) {
-    const rawPhrase = exMatch[1].trim();
+    let rawPhrase = exMatch[1].trim();
+    // Stop if next clause starts
+    rawPhrase = rawPhrase.split(/(?:\bthích|\bưu tiên|\bmuốn|\bngân sách|\bchi phí|\btài chính)\b/i)[0];
+
     // Replace in copy so "thích" inside "không thích" never pollutes preferences
     sanitizedForPref = sanitizedForPref.replace(exMatch[0], ' ');
 
-    // Normalize compound tokens ("tôm và cua" -> "tôm, cua")
+    // Normalize compound tokens ("tôm, cua và đậu phộng" -> ["tôm", "cua", "đậu phộng"])
     const tokens = rawPhrase
       .split(/[,;\n]+|\s+(?:và|hoặc|với)\s+/i)
+      .map((t) => t.trim().replace(/^(?:không\s*(?:ăn|lấy|thích|dùng)?|tránh|dị\s*ứng(?:\s*với)?|kiêng)\s*/i, ''))
       .map((t) => t.trim())
       .filter((t) => t.length >= 2 && !/^(không|ăn|lấy|thích|tránh|dị ứng|kiêng)$/i.test(t));
 

@@ -116,8 +116,8 @@ public class RecommendationValidationService {
         Set<Set<Long>> seenDishSignatures = new HashSet<>();
 
         for (GeminiClientService.RawAiSuggestion raw : rawSuggestions) {
-            if (validatedSuggestions.size() >= 3) {
-                break; // Max 3 unique suggestions
+            if (validatedSuggestions.size() >= 10) {
+                break; // Evaluate up to 10 suggestions so caller can filter best feasible 3
             }
 
             if (raw.items() == null || raw.items().isEmpty()) {
@@ -257,7 +257,7 @@ public class RecommendationValidationService {
         if (text == null || text.isBlank()) return null;
         try {
             // Priority 1: Shorthand like 1tr5, 2tr8
-            Pattern pShorthand = Pattern.compile("(?i)(?:ngân\\s*sách|chi\\s*phí|tầm|khoảng|giá)?\\s*(\\d+)tr(\\d+)(?:\\s*(\\/|mỗi|một)?\\s*(bàn|mâm|tiệc|cả tiệc))?");
+            Pattern pShorthand = Pattern.compile("(?i)(?:tổng\\s*)?(?:ngân\\s*sách|chi\\s*phí|tầm|khoảng|giá)?\\s*(\\d+)tr(\\d+)(?:\\s*(\\/|mỗi|một)?\\s*(bàn|mâm|tiệc|cả tiệc))?");
             Matcher mShort = pShorthand.matcher(text);
             if (mShort.find()) {
                 long whole = Long.parseLong(mShort.group(1));
@@ -270,57 +270,79 @@ public class RecommendationValidationService {
 
             // Priority 2: Standard currency phrase (e.g. 1.5 triệu, 3.000.000đ/bàn, 800k, 50k)
             Pattern p = Pattern.compile(
-                    "(?i)(?:ngân\\s*sách|chi\\s*phí|tài\\s*chính|giá(?:\\s*tiền)?)\\s*(?:dự\\s*kiến\\s*)?(?:khoảng|tầm|tầm\\s*khoảng|là)?\\s*([0-9\\.\\,]+)\\s*(triệu|tr|k|nghìn|ngàn|đ|vnd)?(?:\\s*(?:\\/|\\s*mỗi\\s*|\\s*một\\s*|\\s*1\\s*)(bàn|mâm|tiệc|cả tiệc|người))?"
+                    "(?i)(?:tổng\\s*)?(?:ngân\\s*sách|chi\\s*phí|tài\\s*chính|giá(?:\\s*tiền)?)\\s*(?:tổng(?:\\s*cộng)?)?\\s*(?:dự\\s*kiến\\s*)?(?:khoảng|tầm|tầm\\s*khoảng|là)?\\s*([0-9\\.\\,]+)\\s*(triệu|tr|k|nghìn|ngàn|đ|vnd)?(?:\\s*(?:\\/|\\s*mỗi\\s*|\\s*một\\s*|\\s*1\\s*|\\s*cho\\s*(?:cả\\s*)?)(bàn|mâm|tiệc|cả tiệc|người))?"
             );
             Matcher m = p.matcher(text);
             if (m.find()) {
-                String rawNum = m.group(1).trim();
-                String unit = m.group(2) != null ? m.group(2).toLowerCase() : "";
+                BudgetExtractionResult res = parseMatch(text, m);
+                if (res != null) return res;
+            }
 
-                BigDecimal parsedAmount = null;
-
-                if (unit.contains("triệu") || unit.contains("tr")) {
-                    double val = Double.parseDouble(rawNum.replace(',', '.'));
-                    parsedAmount = BigDecimal.valueOf((long) (val * 1_000_000L));
-                } else if (unit.contains("k") || unit.contains("nghìn") || unit.contains("ngàn")) {
-                    double val = Double.parseDouble(rawNum.replace(',', '.'));
-                    parsedAmount = BigDecimal.valueOf((long) (val * 1_000L));
-                } else {
-                    String cleanDigits = rawNum.replace(".", "").replace(",", "");
-                    if (!cleanDigits.isEmpty()) {
-                        long base = Long.parseLong(cleanDigits);
-                        if (base >= 10_000) {
-                            parsedAmount = BigDecimal.valueOf(base);
-                        }
-                    }
-                }
-
-                if (parsedAmount != null && parsedAmount.signum() > 0) {
-                    BudgetType type = determineBudgetType(text, m.start(), m.end());
-                    return new BudgetExtractionResult(parsedAmount, type);
-                }
+            // Priority 3: Unit-based phrase without preceding keyword (e.g. "25 triệu/tiệc, 5 bàn")
+            Pattern pUnit = Pattern.compile(
+                    "(?i)([0-9\\.\\,]+)\\s*(triệu|tr|k|nghìn|ngàn|đ|vnd)?(?:\\s*(?:\\/|\\s*mỗi\\s*|\\s*một\\s*|\\s*1\\s*|\\s*cho\\s*(?:cả\\s*)?)(bàn|mâm|tiệc|cả tiệc))"
+            );
+            Matcher mUnit = pUnit.matcher(text);
+            if (mUnit.find()) {
+                BudgetExtractionResult res = parseMatch(text, mUnit);
+                if (res != null) return res;
             }
         } catch (Exception ignored) {
         }
         return null;
     }
 
+    private static BudgetExtractionResult parseMatch(String text, Matcher m) {
+        String rawNum = m.group(1).trim();
+        String unit = m.group(2) != null ? m.group(2).toLowerCase() : "";
+
+        BigDecimal parsedAmount = null;
+
+        if (unit.contains("triệu") || unit.contains("tr")) {
+            double val = Double.parseDouble(rawNum.replace(',', '.'));
+            parsedAmount = BigDecimal.valueOf((long) (val * 1_000_000L));
+        } else if (unit.contains("k") || unit.contains("nghìn") || unit.contains("ngàn")) {
+            double val = Double.parseDouble(rawNum.replace(',', '.'));
+            parsedAmount = BigDecimal.valueOf((long) (val * 1_000L));
+        } else {
+            String cleanDigits = rawNum.replace(".", "").replace(",", "");
+            if (!cleanDigits.isEmpty()) {
+                long base = Long.parseLong(cleanDigits);
+                if (base >= 10_000) {
+                    parsedAmount = BigDecimal.valueOf(base);
+                }
+            }
+        }
+
+        if (parsedAmount != null && parsedAmount.signum() > 0) {
+            BudgetType type = determineBudgetType(text, m.start(), m.end());
+            return new BudgetExtractionResult(parsedAmount, type);
+        }
+        return null;
+    }
+
     private static BudgetType determineBudgetType(String fullText, int matchStart, int matchEnd) {
         String matchSnippet = fullText.substring(matchStart, matchEnd).toLowerCase();
-        if (matchSnippet.contains("/bàn") || matchSnippet.contains("mỗi bàn") || matchSnippet.contains("1 bàn") || matchSnippet.contains("mâm")) {
+        if (matchSnippet.contains("/tiệc") || matchSnippet.contains("mỗi tiệc") || matchSnippet.contains("cả tiệc")
+                || matchSnippet.contains("1 tiệc") || matchSnippet.contains("một tiệc") || matchSnippet.contains("cho tiệc")
+                || matchSnippet.contains("cho cả tiệc")) {
+            return BudgetType.TOTAL_ORDER;
+        }
+
+        if (matchSnippet.contains("/bàn") || matchSnippet.contains("mỗi bàn") || matchSnippet.contains("1 bàn")
+                || matchSnippet.contains("một bàn") || matchSnippet.contains("mâm")) {
             return BudgetType.PER_TABLE;
         }
 
-        int start = Math.max(0, matchStart - 15);
+        int start = Math.max(0, matchStart - 25);
         int end = Math.min(fullText.length(), matchEnd + 25);
         String surrounding = fullText.substring(start, end).toLowerCase();
 
-        if (surrounding.contains("cả tiệc") || surrounding.contains("toàn bộ") || surrounding.contains("trọn gói")) {
+        if (surrounding.contains("cả tiệc") || surrounding.contains("toàn bộ") || surrounding.contains("trọn gói")
+                || surrounding.contains("tổng") || surrounding.contains("tổng cộng") || surrounding.contains("tổng tiệc")) {
             return BudgetType.TOTAL_ORDER;
         }
-        if (surrounding.contains("tổng ngân sách") || surrounding.contains("tổng chi phí")) {
-            return BudgetType.TOTAL_ORDER;
-        }
+
         return BudgetType.PER_TABLE;
     }
 }

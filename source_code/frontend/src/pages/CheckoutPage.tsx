@@ -84,15 +84,18 @@ export const CheckoutPage: React.FC = () => {
       const g = parseInt(guestsParam, 10);
       if (!isNaN(g) && g > 0) return g;
     }
-    try {
-      const saved = sessionStorage.getItem('banquethub_builder_draft');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.guestCount && parsed.guestCount > 0) {
-          return parsed.guestCount;
+    // Only read from sessionStorage builder draft if this is NOT a predefined sample menu order
+    if (!menuIdParam) {
+      try {
+        const saved = sessionStorage.getItem('banquethub_builder_draft');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.guestCount && parsed.guestCount > 0) {
+            return parsed.guestCount;
+          }
         }
-      }
-    } catch {}
+      } catch {}
+    }
     return tablesParam ? Math.max(1, parseInt(tablesParam) || 1) * 10 : 60;
   });
   const [eventLocation, setEventLocation] = useState<string>('');

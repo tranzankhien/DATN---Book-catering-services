@@ -3,25 +3,27 @@ package com.banquethub.modules.ai.service;
 import com.banquethub.modules.ai.dto.DishCandidateDto;
 import com.banquethub.modules.catalog.entity.Dish;
 import com.banquethub.modules.catalog.entity.DishStatus;
-import com.banquethub.modules.catalog.entity.RecipeItem;
 import com.banquethub.modules.catalog.repository.DishRepository;
+import com.banquethub.modules.reservations.service.StockReservationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
+/**
+ * Service responsible for selecting up to 50 active dishes with recipes
+ * and positive available inventory, respecting excluded ingredients/allergens.
+ */
 @Service
 public class MenuCandidateService {
 
     private final DishRepository dishRepository;
+    private final StockReservationService reservationService;
 
-    public MenuCandidateService(DishRepository dishRepository) {
+    public MenuCandidateService(DishRepository dishRepository, StockReservationService reservationService) {
         this.dishRepository = dishRepository;
+        this.reservationService = reservationService;
     }
 
     @Transactional(readOnly = true)
@@ -32,6 +34,19 @@ public class MenuCandidateService {
         }
 
         List<String> excludedKeywords = parseExcludedKeywords(excludedIngredientsStr);
+
+        // Fetch available stocks for all ingredients across active dishes (physical minus reserved)
+        List<Long> allIngredientIds = activeDishes.stream()
+                .filter(d -> d.getRecipeItems() != null)
+                .flatMap(d -> d.getRecipeItems().stream())
+                .filter(r -> r.getIngredient() != null && r.getIngredient().getId() != null)
+                .map(r -> r.getIngredient().getId())
+                .distinct()
+                .toList();
+
+        Map<Long, BigDecimal> availableStockMap = reservationService != null
+                ? reservationService.getAvailableStocks(allIngredientIds)
+                : Collections.emptyMap();
 
         List<DishCandidateDto> fullyStockedCandidates = new ArrayList<>();
         List<DishCandidateDto> otherCandidates = new ArrayList<>();
@@ -55,11 +70,14 @@ public class MenuCandidateService {
                 continue;
             }
 
-            // Check if all ingredients have positive stock
-            boolean hasFullPhysicalStock = dish.getRecipeItems().stream()
-                    .allMatch(r -> r.getIngredient() != null
-                            && r.getIngredient().getCurrentStock() != null
-                            && r.getIngredient().getCurrentStock().compareTo(BigDecimal.ZERO) > 0);
+            // Check if all ingredients have positive available stock (current - reserved)
+            boolean hasFullAvailableStock = dish.getRecipeItems().stream()
+                    .allMatch(r -> {
+                        if (r.getIngredient() == null) return false;
+                        Long ingId = r.getIngredient().getId();
+                        BigDecimal avail = availableStockMap.getOrDefault(ingId, r.getIngredient().getCurrentStock());
+                        return avail != null && avail.compareTo(BigDecimal.ZERO) > 0;
+                    });
 
             DishCandidateDto dto = new DishCandidateDto(
                     dish.getId(),
@@ -72,7 +90,7 @@ public class MenuCandidateService {
                     ingredientNames
             );
 
-            if (hasFullPhysicalStock) {
+            if (hasFullAvailableStock) {
                 fullyStockedCandidates.add(dto);
             } else {
                 otherCandidates.add(dto);
@@ -89,42 +107,38 @@ public class MenuCandidateService {
         return result.size() > 50 ? result.subList(0, 50) : result;
     }
 
-    public static List<String> parseExcludedKeywords(String input) {
-        if (input == null || input.isBlank()) {
+    public static List<String> parseExcludedKeywords(String excludedIngredientsStr) {
+        if (excludedIngredientsStr == null || excludedIngredientsStr.isBlank()) {
             return Collections.emptyList();
         }
 
-        String normalized = input.toLowerCase(Locale.ROOT)
-                .replaceAll("(?i)\\b(không\\s*ăn|không\\s*thích|không\\s*lấy|không|tránh|dị\\s*ứng|kiêng)\\b", " ")
-                .trim();
-
-        // Split by comma, semicolon, newline, and Vietnamese conjunctions 'và', 'hoặc', 'với'
-        String[] rawTokens = normalized.split("[,;\\n]+|\\s+(?:và|hoặc|với)\\s+");
-
-        return Arrays.stream(rawTokens)
+        return Arrays.stream(excludedIngredientsStr.split("[,;\\n]+|\\s+(?:và|hoặc|với)\\s+"))
                 .map(String::trim)
-                .filter(s -> s.length() >= 2)
+                .map(s -> s.replaceAll("(?i)^(?:không\\s*(?:ăn|lấy|thích|dùng)?|dị\\s*ứng(?:\\s*với)?|kiêng|tránh)\\s*", ""))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty() && s.length() >= 2)
+                .filter(s -> !s.matches("(?i)^(không|ăn|lấy|thích|tránh|dị ứng|kiêng)$"))
+                .map(String::toLowerCase)
                 .distinct()
                 .toList();
     }
 
     public static boolean matchesAnyKeyword(String dishName, List<String> ingredientNames, List<String> keywords) {
-        if (keywords == null || keywords.isEmpty()) {
-            return false;
-        }
-        String lowerDishName = dishName != null ? dishName.toLowerCase(Locale.ROOT) : "";
-        for (String kw : keywords) {
-            String cleanKw = kw.trim().toLowerCase(Locale.ROOT);
-            if (cleanKw.length() < 2) continue;
+        if (keywords == null || keywords.isEmpty()) return false;
 
-            if (lowerDishName.contains(cleanKw)) {
+        String lowerDish = dishName != null ? dishName.toLowerCase() : "";
+        List<String> lowerIngs = ingredientNames != null
+                ? ingredientNames.stream().map(String::toLowerCase).toList()
+                : Collections.emptyList();
+
+        for (String kw : keywords) {
+            if (kw.isEmpty()) continue;
+            if (lowerDish.contains(kw)) {
                 return true;
             }
-            if (ingredientNames != null) {
-                for (String ing : ingredientNames) {
-                    if (ing != null && ing.toLowerCase(Locale.ROOT).contains(cleanKw)) {
-                        return true;
-                    }
+            for (String ing : lowerIngs) {
+                if (ing.contains(kw)) {
+                    return true;
                 }
             }
         }

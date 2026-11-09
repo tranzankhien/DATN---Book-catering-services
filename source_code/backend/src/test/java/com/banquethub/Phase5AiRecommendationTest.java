@@ -1,11 +1,14 @@
 package com.banquethub;
 
 import com.banquethub.modules.ai.dto.AiMenuRecommendationRequest;
+import com.banquethub.modules.ai.dto.AvailabilityStatus;
+import com.banquethub.modules.ai.dto.BudgetStatus;
 import com.banquethub.modules.ai.dto.BudgetType;
 import com.banquethub.modules.ai.dto.DishCandidateDto;
 import com.banquethub.modules.ai.dto.MenuSuggestionDto;
 import com.banquethub.modules.ai.service.GeminiClientService;
 import com.banquethub.modules.ai.service.MenuCandidateService;
+import com.banquethub.modules.ai.service.RecommendationFallbackService;
 import com.banquethub.modules.ai.service.RecommendationValidationService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,11 +22,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -48,10 +49,34 @@ class Phase5AiRecommendationTest {
     @Autowired
     private MenuCandidateService menuCandidateService;
 
+    @Autowired
+    private RecommendationFallbackService fallbackService;
+
+    @Autowired
+    private com.banquethub.modules.ai.config.GeminiProperties geminiProperties;
+
     private String userToken() throws Exception {
         String body = mvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("email", "user@banquethub.vn", "password", "User@123"))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return json.readTree(body).path("data").path("accessToken").asText();
+    }
+
+    private String employeeToken() throws Exception {
+        String body = mvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of("email", "employee@banquethub.vn", "password", "Employee@123"))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return json.readTree(body).path("data").path("accessToken").asText();
+    }
+
+    private String adminToken() throws Exception {
+        String body = mvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of("email", "admin@banquethub.vn", "password", "Admin@123"))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         return json.readTree(body).path("data").path("accessToken").asText();
@@ -103,6 +128,9 @@ class Phase5AiRecommendationTest {
     @Test
     @DisplayName("TC-04: Authenticated user receives valid menu recommendations with accurate DB pricing and available stock")
     void validRequest_returnsStructuredSuggestionsWithoutCreatingOrders() throws Exception {
+        // Reset rate limit quota for user 3
+        db.update("DELETE FROM ai_recommendation_usage WHERE user_id = 3");
+
         // Ensure at least one active dish with recipes and ample stock exists
         String unique = "AI-" + UUID.randomUUID().toString().substring(0, 8);
         long ingredientId = db.queryForObject(
@@ -169,6 +197,7 @@ class Phase5AiRecommendationTest {
     @Test
     @DisplayName("TC-05: Wedding case with 10 tables, 10 guests per table, 3M budget")
     void weddingCase_verifiedPayload() throws Exception {
+        db.update("DELETE FROM ai_recommendation_usage WHERE user_id = 3");
         String token = userToken();
         String responseBody = mvc.perform(post("/api/v1/ai/menu/recommendations")
                         .header("Authorization", "Bearer " + token)
@@ -267,5 +296,132 @@ class Phase5AiRecommendationTest {
         var res3 = RecommendationValidationService.extractBudgetFromText("Ngân sách 1tr2/bàn");
         assertThat(res3).isNotNull();
         assertThat(res3.amount()).isEqualByComparingTo(BigDecimal.valueOf(1200000L));
+    }
+
+    @Test
+    @DisplayName("TC-09: Fallback menu strictly obeys budget limit and available inventory")
+    void fallbackMenu_strictlyObeysBudgetCap() {
+        AiMenuRecommendationRequest req = new AiMenuRecommendationRequest();
+        req.setRequestText("Tiệc gia đình 4 bàn, ngân sách 1.5 triệu/bàn");
+        req.setTableCount(4);
+        req.setGuestsPerTable(8);
+        req.setBudgetAmount(BigDecimal.valueOf(1500000));
+        req.setBudgetType(BudgetType.PER_TABLE);
+
+        List<DishCandidateDto> candidates = menuCandidateService.getEligibleCandidates(null);
+        assertThat(candidates).isNotEmpty();
+
+        List<MenuSuggestionDto> fallbackResults = fallbackService.generateFallbackSuggestions(req, candidates);
+        assertThat(fallbackResults).isNotEmpty();
+
+        for (MenuSuggestionDto menu : fallbackResults) {
+            assertThat(menu.getTotalPerTable()).isLessThanOrEqualTo(BigDecimal.valueOf(1500000));
+            assertThat(menu.getBudgetStatus()).isEqualTo(BudgetStatus.WITHIN_BUDGET);
+            assertThat(menu.getAvailabilityStatus()).isEqualTo(AvailabilityStatus.AVAILABLE);
+        }
+    }
+
+    @Test
+    @DisplayName("TC-10: Excluded ingredients parser handles 'Dị ứng tôm, cua và đậu phộng'")
+    void excludedIngredients_parsesAllergenListCleanly() {
+        List<String> keywords = MenuCandidateService.parseExcludedKeywords("Dị ứng tôm, cua và đậu phộng");
+        assertThat(keywords).contains("tôm", "cua", "đậu phộng");
+    }
+
+    @Test
+    @DisplayName("TC-11: Budget extraction handles '25 triệu/tiệc, 5 bàn' and 'ngân sách tổng 25 triệu'")
+    void budgetExtraction_handlesTotalPartyUnits() {
+        var res1 = RecommendationValidationService.extractBudgetFromText("25 triệu/tiệc, 5 bàn");
+        assertThat(res1).isNotNull();
+        assertThat(res1.amount()).isEqualByComparingTo(BigDecimal.valueOf(25000000L));
+        assertThat(res1.budgetType()).isEqualTo(BudgetType.TOTAL_ORDER);
+
+        var res2 = RecommendationValidationService.extractBudgetFromText("ngân sách tổng 25 triệu, 5 bàn");
+        assertThat(res2).isNotNull();
+        assertThat(res2.amount()).isEqualByComparingTo(BigDecimal.valueOf(25000000L));
+        assertThat(res2.budgetType()).isEqualTo(BudgetType.TOTAL_ORDER);
+    }
+
+    @Test
+    @DisplayName("TC-12: Role-based authorization rejects ROLE_EMPLOYEE and ROLE_ADMIN from customer AI endpoint")
+    void nonUserRole_isForbidden() throws Exception {
+        String empToken = employeeToken();
+        mvc.perform(post("/api/v1/ai/menu/recommendations")
+                        .header("Authorization", "Bearer " + empToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of(
+                                "requestText", "Tiệc sinh nhật 5 bàn, ngân sách 1.500.000đ/bàn",
+                                "tableCount", 5,
+                                "guestsPerTable", 6
+                        ))))
+                .andExpect(status().isForbidden());
+
+        String admToken = adminToken();
+        mvc.perform(post("/api/v1/ai/menu/recommendations")
+                        .header("Authorization", "Bearer " + admToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of(
+                                "requestText", "Tiệc sinh nhật 5 bàn, ngân sách 1.500.000đ/bàn",
+                                "tableCount", 5,
+                                "guestsPerTable", 6
+                        ))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("TC-13: Concurrent rate limiting at quota boundary allows only allowed quota")
+    void concurrentRateLimiting_strictlyEnforcesSlotReservation() throws Exception {
+        // Pre-fill (limit - 1) usage records for user 3 in the last 30 minutes
+        long validUserId = 3L;
+        db.update("DELETE FROM ai_recommendation_usage WHERE user_id = ?", validUserId);
+        int limit = geminiProperties.getMaxRequestsPerHour();
+        for (int i = 0; i < limit - 1; i++) {
+            db.update("INSERT INTO ai_recommendation_usage (user_id, model, source, status, prompt_tokens, output_tokens, response_time_ms, created_at) " +
+                    "VALUES (?, 'gemini-1.5-flash', 'GEMINI', 'SUCCESS', 100, 100, 100, NOW() - INTERVAL '10 minutes')", validUserId);
+        }
+
+        String validUserToken = userToken();
+
+        // Fire 4 concurrent requests. Exactly 1 slot is remaining.
+        int concurrentRequests = 4;
+        ExecutorService executor = Executors.newFixedThreadPool(concurrentRequests);
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicInteger okCount = new AtomicInteger(0);
+        AtomicInteger rateLimitedCount = new AtomicInteger(0);
+
+        List<Future<?>> futures = new ArrayList<>();
+        for (int i = 0; i < concurrentRequests; i++) {
+            futures.add(executor.submit(() -> {
+                try {
+                    latch.await();
+                    int code = mvc.perform(post("/api/v1/ai/menu/recommendations")
+                                    .header("Authorization", "Bearer " + validUserToken)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(json.writeValueAsString(Map.of(
+                                            "requestText", "Cần tiệc gia đình 4 bàn",
+                                            "tableCount", 4,
+                                            "guestsPerTable", 6
+                                    ))))
+                            .andReturn().getResponse().getStatus();
+                    if (code == 200) {
+                        okCount.incrementAndGet();
+                    } else if (code == 429) {
+                        rateLimitedCount.incrementAndGet();
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
+            }));
+        }
+
+        latch.countDown();
+        for (Future<?> f : futures) {
+            f.get(10, TimeUnit.SECONDS);
+        }
+        executor.shutdown();
+
+        // Exactly 1 request should have succeeded, and the other 3 should have received 429 Too Many Requests
+        assertThat(okCount.get()).isEqualTo(1);
+        assertThat(rateLimitedCount.get()).isEqualTo(3);
     }
 }

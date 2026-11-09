@@ -59,6 +59,7 @@ export const AiMenuPage: React.FC = () => {
   // Execution & Response State
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<AiMenuRecommendationResponse | null>(null);
+  const [submittedPayload, setSubmittedPayload] = useState<AiMenuRecommendationRequestPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [detectedSummary, setDetectedSummary] = useState<string | null>(null);
 
@@ -150,6 +151,8 @@ export const AiMenuPage: React.FC = () => {
       excludedIngredients: excludedIngredients.trim() || undefined,
     };
 
+    setSubmittedPayload(payload);
+
     try {
       const res = await aiMenuService.getRecommendations(payload);
       setResponse(res);
@@ -175,8 +178,8 @@ export const AiMenuPage: React.FC = () => {
         quantityPerTable: it.quantityPerTable || 1,
       }));
 
-      const finalTables = suggestion.tableCount || tableCount;
-      const finalGuestsPerTable = guestsPerTable || 10;
+      const finalTables = submittedPayload?.tableCount ?? suggestion.tableCount ?? tableCount;
+      const finalGuestsPerTable = submittedPayload?.guestsPerTable ?? guestsPerTable;
       const finalGuestCount = finalTables * finalGuestsPerTable;
 
       sessionStorage.setItem(
@@ -278,7 +281,10 @@ export const AiMenuPage: React.FC = () => {
               <label className="block text-xs font-semibold text-stone-700">Loại tiệc</label>
               <select
                 value={eventType}
-                onChange={(e) => setEventType(e.target.value)}
+                onChange={(e) => {
+                  setEventType(e.target.value);
+                  if (response) setResponse(null);
+                }}
                 className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none shadow-xs cursor-pointer"
               >
                 {EVENT_TYPE_OPTIONS.map((type) => (
@@ -302,7 +308,10 @@ export const AiMenuPage: React.FC = () => {
                   max={500}
                   required
                   value={tableCount}
-                  onChange={(e) => setTableCount(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) => {
+                    setTableCount(Math.max(1, parseInt(e.target.value) || 1));
+                    if (response) setResponse(null);
+                  }}
                   className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none shadow-xs tabular-nums"
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-stone-400 font-medium pointer-events-none">
@@ -323,7 +332,10 @@ export const AiMenuPage: React.FC = () => {
                   max={50}
                   required
                   value={guestsPerTable}
-                  onChange={(e) => setGuestsPerTable(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) => {
+                    setGuestsPerTable(Math.max(1, parseInt(e.target.value) || 1));
+                    if (response) setResponse(null);
+                  }}
                   className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none shadow-xs tabular-nums"
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-stone-400 font-medium pointer-events-none">
@@ -339,7 +351,10 @@ export const AiMenuPage: React.FC = () => {
                 <div className="flex items-center gap-1.5 text-[11px]">
                   <button
                     type="button"
-                    onClick={() => setBudgetType('PER_TABLE')}
+                    onClick={() => {
+                      setBudgetType('PER_TABLE');
+                      if (response) setResponse(null);
+                    }}
                     className={`px-1.5 py-0.5 rounded cursor-pointer ${
                       budgetType === 'PER_TABLE'
                         ? 'font-bold text-amber-800 bg-amber-100'
@@ -351,7 +366,10 @@ export const AiMenuPage: React.FC = () => {
                   <span className="text-stone-300">|</span>
                   <button
                     type="button"
-                    onClick={() => setBudgetType('TOTAL_ORDER')}
+                    onClick={() => {
+                      setBudgetType('TOTAL_ORDER');
+                      if (response) setResponse(null);
+                    }}
                     className={`px-1.5 py-0.5 rounded cursor-pointer ${
                       budgetType === 'TOTAL_ORDER'
                         ? 'font-bold text-amber-800 bg-amber-100'
@@ -369,7 +387,10 @@ export const AiMenuPage: React.FC = () => {
                   value={
                     budgetAmount ? Number(budgetAmount.replace(/\D/g, '')).toLocaleString('vi-VN') : ''
                   }
-                  onChange={(e) => setBudgetAmount(e.target.value)}
+                  onChange={(e) => {
+                    setBudgetAmount(e.target.value);
+                    if (response) setResponse(null);
+                  }}
                   className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 pr-12 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none shadow-xs tabular-nums font-semibold"
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-stone-400 font-bold pointer-events-none">
@@ -389,7 +410,10 @@ export const AiMenuPage: React.FC = () => {
                 type="text"
                 placeholder="Ví dụ: Ưu tiên hải sản tươi sống, thích vị thanh nhẹ..."
                 value={preferences}
-                onChange={(e) => setPreferences(e.target.value)}
+                onChange={(e) => {
+                  setPreferences(e.target.value);
+                  if (response) setResponse(null);
+                }}
                 className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none shadow-xs"
               />
             </div>
@@ -402,9 +426,15 @@ export const AiMenuPage: React.FC = () => {
                 type="text"
                 placeholder="Ví dụ: Không ăn thịt bò, tránh đậu phộng..."
                 value={excludedIngredients}
-                onChange={(e) => setExcludedIngredients(e.target.value)}
+                onChange={(e) => {
+                  setExcludedIngredients(e.target.value);
+                  if (response) setResponse(null);
+                }}
                 className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none shadow-xs"
               />
+              <p className="text-[11px] text-stone-500 leading-tight">
+                * Lưu ý: Hệ thống đối soát dị ứng tự động theo danh mục nguyên liệu trong định lượng công thức của nhà hàng.
+              </p>
             </div>
           </div>
 

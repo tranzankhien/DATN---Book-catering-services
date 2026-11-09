@@ -1,12 +1,7 @@
 package com.banquethub.modules.ai.service;
 
 import com.banquethub.modules.ai.config.GeminiProperties;
-import com.banquethub.modules.ai.dto.AiMenuRecommendationRequest;
-import com.banquethub.modules.ai.dto.AiMenuRecommendationResponse;
-import com.banquethub.modules.ai.dto.AvailabilityStatus;
-import com.banquethub.modules.ai.dto.BudgetStatus;
-import com.banquethub.modules.ai.dto.DishCandidateDto;
-import com.banquethub.modules.ai.dto.MenuSuggestionDto;
+import com.banquethub.modules.ai.dto.*;
 import com.banquethub.modules.ai.entity.AiRecommendationUsage;
 import com.banquethub.modules.ai.repository.AiRecommendationUsageRepository;
 import com.banquethub.modules.users.entity.User;
@@ -17,26 +12,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Main coordinator service for AI Menu Recommendations.
- * Integrates atomic rate limiting, Gemini AI structured generation, DB price verification,
- * live stock reservation checking, and rule-based fallback handling.
+ * Orchestrator service for AI Menu Recommendations.
+ * Integrates Gemini API with real PostgreSQL inventory & recipe validation,
+ * automated fallbacks, and rate limiting.
  */
 @Service
 public class AiRecommendationService {
 
     private static final Logger log = LoggerFactory.getLogger(AiRecommendationService.class);
 
-    // Concurrency guard to prevent overwhelming provider rate limits
-    private final Semaphore concurrentCallLimiter = new Semaphore(10);
+    // Concurrency limiter to protect Gemini project quota (max 10 parallel outgoing requests)
+    private static final Semaphore concurrentCallLimiter = new Semaphore(10);
 
     private final GeminiProperties geminiProperties;
     private final MenuCandidateService menuCandidateService;
@@ -44,6 +36,7 @@ public class AiRecommendationService {
     private final RecommendationValidationService validationService;
     private final RecommendationFallbackService fallbackService;
     private final AiRecommendationUsageRepository usageRepository;
+    private final AiRateLimiterService rateLimiterService;
 
     public AiRecommendationService(
             GeminiProperties geminiProperties,
@@ -51,7 +44,8 @@ public class AiRecommendationService {
             GeminiClientService geminiClientService,
             RecommendationValidationService validationService,
             RecommendationFallbackService fallbackService,
-            AiRecommendationUsageRepository usageRepository
+            AiRecommendationUsageRepository usageRepository,
+            AiRateLimiterService rateLimiterService
     ) {
         this.geminiProperties = geminiProperties;
         this.menuCandidateService = menuCandidateService;
@@ -59,6 +53,7 @@ public class AiRecommendationService {
         this.validationService = validationService;
         this.fallbackService = fallbackService;
         this.usageRepository = usageRepository;
+        this.rateLimiterService = rateLimiterService;
     }
 
     public AiMenuRecommendationResponse getRecommendations(
@@ -68,94 +63,69 @@ public class AiRecommendationService {
         long startTime = System.currentTimeMillis();
         UUID requestId = UUID.randomUUID();
 
-        // 1. Atomic Rate Limiting Check & Reservation (per user per hour)
+        // 1. Atomic Rate Limiting Check & Reservation (per user per hour via PostgreSQL lock)
         AiRecommendationUsage usageRecord = null;
         if (currentUser != null && currentUser.getId() != null) {
-            OffsetDateTime oneHourAgo = OffsetDateTime.now().minusHours(1);
-            long recentCalls = usageRepository.countByUserIdAndCreatedAtAfter(currentUser.getId(), oneHourAgo);
-            if (recentCalls >= geminiProperties.getMaxRequestsPerHour()) {
-                throw new ResponseStatusException(
-                        HttpStatus.TOO_MANY_REQUESTS,
-                        "Bạn đã sử dụng tối đa " + geminiProperties.getMaxRequestsPerHour() +
-                                " lượt gợi ý thực đơn trong 1 giờ. Vui lòng quay lại sau ít phút hoặc tự phối thực đơn."
-                );
-            }
-
-            // Immediately record entry to prevent concurrent race condition bypass
-            try {
-                usageRecord = new AiRecommendationUsage(
-                        currentUser.getId(),
-                        geminiProperties.getModel(),
-                        "GEMINI",
-                        "STARTED",
-                        0,
-                        0,
-                        0L
-                );
-                usageRecord = usageRepository.save(usageRecord);
-            } catch (Exception e) {
-                log.warn("Failed to create initial AI usage record: {}", e.getMessage());
-            }
+            usageRecord = rateLimiterService.acquireUsageSlot(
+                    currentUser.getId(),
+                    geminiProperties.getModel(),
+                    "GEMINI",
+                    geminiProperties.getMaxRequestsPerHour()
+            );
         }
 
-        // 2. Query valid candidate dishes from PostgreSQL
+        // 2. Query real candidate dishes with stock and recipe validation
         List<DishCandidateDto> candidates = menuCandidateService.getEligibleCandidates(request.getExcludedIngredients());
         if (candidates.isEmpty()) {
-            if (usageRecord != null) {
-                usageRecord.setStatus("EMPTY_CANDIDATES");
-                usageRecord.setResponseTimeMs(System.currentTimeMillis() - startTime);
-                usageRepository.save(usageRecord);
-            }
-            return new AiMenuRecommendationResponse(
-                    requestId,
-                    "EMPTY",
-                    Collections.emptyList(),
-                    "Hiện tại không có món ăn nào phù hợp với tiêu chí loại trừ hoặc đang hoạt động trong hệ thống.",
-                    OffsetDateTime.now()
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Không tìm thấy món ăn phù hợp với yêu cầu loại trừ hoặc tồn kho hiện tại của nhà hàng."
             );
         }
 
         Set<Long> candidateIds = candidates.stream().map(DishCandidateDto::getId).collect(Collectors.toSet());
         List<String> excludedKeywords = MenuCandidateService.parseExcludedKeywords(request.getExcludedIngredients());
 
-        List<MenuSuggestionDto> validatedSuggestions = null;
         String source = "GEMINI";
         String message = "Gợi ý thực đơn thành công từ trợ lý AI BanquetHub.";
-        String errorMessage = null;
-        Integer promptTokens = 0;
-        Integer candidateTokens = 0;
+        List<MenuSuggestionDto> validatedSuggestions = null;
 
-        // 3. Attempt Gemini Recommendation if enabled
+        int promptTokens = 0;
+        int candidateTokens = 0;
+        String errorMessage = null;
+
+        // 3. Invoke Gemini AI if enabled
         if (geminiProperties.isEnabled() && geminiProperties.getApiKey() != null && !geminiProperties.getApiKey().isBlank()) {
             boolean permitAcquired = false;
             try {
-                permitAcquired = concurrentCallLimiter.tryAcquire(5, TimeUnit.SECONDS);
+                permitAcquired = concurrentCallLimiter.tryAcquire(2, TimeUnit.SECONDS);
                 if (permitAcquired) {
-                    GeminiClientService.GeminiCallResult geminiResult =
+                    GeminiClientService.GeminiCallResult callResult =
                             geminiClientService.callGemini(request, candidates);
 
-                    promptTokens = geminiResult.promptTokens();
-                    candidateTokens = geminiResult.outputTokens();
+                    promptTokens = callResult.promptTokens();
+                    candidateTokens = callResult.outputTokens();
 
-                    if (geminiResult.suggestions() != null && geminiResult.suggestions().suggestions() != null && !geminiResult.suggestions().suggestions().isEmpty()) {
-                        List<MenuSuggestionDto> rawValidated = validationService.validateAndEnrichSuggestions(
-                                geminiResult.suggestions().suggestions(),
+                    List<GeminiClientService.RawAiSuggestion> rawSuggestions =
+                            callResult.suggestions() != null ? callResult.suggestions().suggestions() : null;
+
+                    if (rawSuggestions != null && !rawSuggestions.isEmpty()) {
+                        List<MenuSuggestionDto> validated = validationService.validateAndEnrichSuggestions(
+                                rawSuggestions,
                                 request,
                                 candidateIds,
                                 excludedKeywords
                         );
 
-                        // Only accept feasible suggestions: must be fully AVAILABLE and not OVER_BUDGET
-                        List<MenuSuggestionDto> feasibleSuggestions = rawValidated.stream()
-                                .filter(s -> s.getAvailabilityStatus() == AvailabilityStatus.AVAILABLE)
-                                .filter(s -> s.getBudgetStatus() != BudgetStatus.OVER_BUDGET)
+                        // Strict Feasibility Filter: Only accept suggestions that are fully AVAILABLE and WITHIN_BUDGET
+                        List<MenuSuggestionDto> feasible = validated.stream()
+                                .filter(s -> s.getAvailabilityStatus() == AvailabilityStatus.AVAILABLE
+                                        && s.getBudgetStatus() != BudgetStatus.OVER_BUDGET)
+                                .limit(3)
                                 .toList();
 
-                        if (!feasibleSuggestions.isEmpty()) {
-                            validatedSuggestions = feasibleSuggestions;
-                            for (MenuSuggestionDto s : validatedSuggestions) {
-                                s.setSource("GEMINI");
-                            }
+                        if (!feasible.isEmpty()) {
+                            validatedSuggestions = feasible;
                         } else {
                             log.info("Gemini suggestions had stock shortages or budget violations. Discarding and using fallback.");
                         }
@@ -179,8 +149,19 @@ public class AiRecommendationService {
         // 4. Fallback if Gemini failed or produced no valid/feasible menus
         if (validatedSuggestions == null || validatedSuggestions.isEmpty()) {
             source = "RULE_BASED";
-            validatedSuggestions = fallbackService.generateFallbackSuggestions(request, candidates);
-            message = "Gợi ý thực đơn được khởi tạo theo thuật toán quy chuẩn dinh dưỡng và giá vốn của nhà hàng (hệ thống AI đang tạm thời ngoại tuyến hoặc đề xuất chưa tối ưu tồn kho).";
+            List<MenuSuggestionDto> fallbackRaw = fallbackService.generateFallbackSuggestions(request, candidates);
+            validatedSuggestions = fallbackRaw.stream()
+                    .filter(s -> s.getAvailabilityStatus() == AvailabilityStatus.AVAILABLE
+                            && s.getBudgetStatus() != BudgetStatus.OVER_BUDGET)
+                    .limit(3)
+                    .toList();
+
+            if (validatedSuggestions.isEmpty()) {
+                validatedSuggestions = fallbackRaw.stream().limit(3).toList();
+                message = "Gợi ý thực đơn tối ưu theo dữ liệu món ăn thực tế (một số phương án có thể chênh lệch ngân sách hoặc tồn kho).";
+            } else {
+                message = "Gợi ý thực đơn tối ưu theo dữ liệu món ăn và kho thực tế của nhà hàng.";
+            }
         }
 
         long latencyMs = System.currentTimeMillis() - startTime;

@@ -35,7 +35,7 @@ public class AiMenuRecommendationController {
     }
 
     @PostMapping("/recommendations")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('USER')")
     @Operation(summary = "Gợi ý thực đơn yến tiệc theo ngân sách, số bàn và khẩu vị bằng AI")
     public ResponseEntity<ApiResponse<AiMenuRecommendationResponse>> getRecommendations(
             @Valid @RequestBody AiMenuRecommendationRequest request,
