@@ -75,12 +75,19 @@ public class AiRecommendationService {
         }
 
         // 2. Query real candidate dishes with stock and recipe validation
-        String effectiveExclusions = request.getExcludedIngredients();
-        if (effectiveExclusions == null || effectiveExclusions.isBlank()) {
+        String effectiveExclusions;
+        if (request.getExcludedIngredients() == null) {
+            // Field omitted (e.g. prompt-only API call): extract from requestText
             List<String> extractedFromText = MenuCandidateService.extractExclusionPhrasesFromText(request.getRequestText());
-            if (!extractedFromText.isEmpty()) {
-                effectiveExclusions = String.join(", ", extractedFromText);
-            }
+            effectiveExclusions = extractedFromText.isEmpty() ? null : String.join(", ", extractedFromText);
+        } else if (request.getExcludedIngredients().isBlank()) {
+            // Caller explicitly provided an empty string (confirmed 0 exclusions): respect empty list
+            effectiveExclusions = "";
+        } else {
+            // Caller provided confirmed exclusions: combine with any exclusions in requestText
+            Set<String> combined = new LinkedHashSet<>(MenuCandidateService.parseExcludedKeywords(request.getExcludedIngredients()));
+            combined.addAll(MenuCandidateService.extractExclusionPhrasesFromText(request.getRequestText()));
+            effectiveExclusions = String.join(", ", combined);
         }
 
         List<DishCandidateDto> candidates = menuCandidateService.getEligibleCandidates(effectiveExclusions, request.getTableCount());

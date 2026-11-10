@@ -520,4 +520,64 @@ class Phase5AiRecommendationTest {
         // Default 6 guests/table: 200,000 * 6 = 1,200,000
         assertThat(res2.amount()).isEqualByComparingTo(BigDecimal.valueOf(1_200_000L));
     }
+
+    @Test
+    @DisplayName("TC-18: Explicit empty excludedIngredients field (\"\") respects user decision to clear exclusions")
+    void explicitEmptyExclusions_doesNotReExtractFromText() throws Exception {
+        db.update("DELETE FROM ai_recommendation_usage WHERE user_id = 3");
+        String token = userToken();
+        // Client sends excludedIngredients as explicit empty string ""
+        String responseBody = mvc.perform(post("/api/v1/ai/menu/recommendations")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of(
+                                "requestText", "Tiệc 4 bàn, dị ứng tôm, ngân sách 1.500.000đ/bàn",
+                                "tableCount", 4,
+                                "guestsPerTable", 6,
+                                "budgetAmount", 1500000,
+                                "budgetType", "PER_TABLE",
+                                "excludedIngredients", ""
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode root = json.readTree(responseBody);
+        assertThat(root.path("success").asBoolean()).isTrue();
+        // Request succeeded and did not fail candidate check
+        JsonNode suggestions = root.path("data").path("suggestions");
+        assertThat(suggestions).isNotNull();
+    }
+
+    @Test
+    @DisplayName("TC-19: Description allergy ('dị ứng tôm') and separate field allergy ('cua') are both enforced")
+    void descriptionAndSeparateExclusions_areBothEnforced() throws Exception {
+        db.update("DELETE FROM ai_recommendation_usage WHERE user_id = 3");
+        String token = userToken();
+        // Client sends requestText mentioning "dị ứng tôm", and excludedIngredients mentioning "cua"
+        String responseBody = mvc.perform(post("/api/v1/ai/menu/recommendations")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of(
+                                "requestText", "Tiệc 4 bàn, dị ứng tôm, ngân sách 1.500.000đ/bàn",
+                                "tableCount", 4,
+                                "guestsPerTable", 6,
+                                "budgetAmount", 1500000,
+                                "budgetType", "PER_TABLE",
+                                "excludedIngredients", "cua"
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode root = json.readTree(responseBody);
+        assertThat(root.path("success").asBoolean()).isTrue();
+        JsonNode suggestions = root.path("data").path("suggestions");
+        for (JsonNode suggestion : suggestions) {
+            for (JsonNode item : suggestion.path("items")) {
+                String dishName = item.path("dishName").asText().toLowerCase();
+                String unaccented = MenuCandidateService.removeDiacritics(dishName);
+                assertThat(unaccented).doesNotContain("tom");
+                assertThat(unaccented).doesNotContain("cua");
+            }
+        }
+    }
 }

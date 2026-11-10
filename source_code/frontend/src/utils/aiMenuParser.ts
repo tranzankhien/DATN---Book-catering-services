@@ -102,7 +102,7 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
   // 1. EXTRACT BUDGET
   // Mode A: Explicit keyword ("ngân sách 3.000.000đ/bàn", "ngân sách tổng 25 triệu", "tổng ngân sách khoảng 25 triệu", "chi phí 25 triệu cho tiệc", "300k/người")
   const keywordBudgetRegex =
-    /(?:tổng\s*)?(?:ngân\s*sách|chi\s*phí|tài\s*chính|giá(?:\s*tiền)?)\s*(?:tổng(?:\s*cộng)?)?\\s*(?:dự\s*kiến\s*)?(?:khoảng|tầm|tầm\s*khoảng|là)?\s*(-?\d+tr\d+|-?[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)?(?:\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*|\s*cho\s*(?:cả\s*)?)(bàn|mâm|tiệc|cả tiệc|người))?/i;
+    /(?:tổng\s*)?(?:ngân\s*sách|chi\s*phí|tài\s*chính|giá(?:\s*tiền)?)\s*(?:tổng(?:\s*cộng)?)?\s*(?:dự\s*kiến\s*)?(?:khoảng|tầm|tầm\s*khoảng|là)?\s*(-?\d+tr\d+|-?[0-9\.,]+)\s*(triệu|tr|nghìn|ngàn|k|đ|vnd)?(?:\s*(?:\/|\s*mỗi\s*|\s*một\s*|\s*1\s*|\s*cho\s*(?:cả\s*)?)(bàn|mâm|tiệc|cả tiệc|người))?/i;
 
   // Mode B: Unit-based ("25 triệu/tiệc", "2tr5/bàn", "1.2 triệu một bàn", "3.000.000đ/bàn", "50k/bàn", "300k/người", "20k/bàn")
   const unitBudgetRegex =

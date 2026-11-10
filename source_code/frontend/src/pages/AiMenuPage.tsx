@@ -67,8 +67,13 @@ export const AiMenuPage: React.FC = () => {
   // In-flight request tracking to eliminate race conditions from form modifications
   const activeRequestIdRef = useRef<number>(0);
 
-  const handleRequestTextChange = (text: string) => {
+  const invalidateInFlightRequest = () => {
     activeRequestIdRef.current++;
+    setLoading(false);
+  };
+
+  const handleRequestTextChange = (text: string) => {
+    invalidateInFlightRequest();
     setRequestText(text);
 
     if (!text.trim()) {
@@ -119,7 +124,7 @@ export const AiMenuPage: React.FC = () => {
   };
 
   const handleRemoveAllergen = (itemToRemove: string) => {
-    activeRequestIdRef.current++;
+    invalidateInFlightRequest();
     const currentList = excludedIngredients
       .split(/[,;\n]+/)
       .map((s) => s.trim())
@@ -128,6 +133,20 @@ export const AiMenuPage: React.FC = () => {
       .filter((it) => it.toLowerCase() !== itemToRemove.toLowerCase())
       .join(', ');
     setExcludedIngredients(updated);
+
+    // Also sanitize requestText so it does not retain contradictory allergy phrasing
+    if (requestText) {
+      const escaped = itemToRemove.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const pattern = new RegExp(
+        `(?:(?:không|khong)\\s*(?:ăn|an|lấy|lay|thích|thich|dùng|dung)?|(?:tránh|tranh)|(?:dị\\s*ứng|di\\s*ung)(?:\\s*(?:với|voi))?|(?:kiêng|kieng))\\s*[^,;\\.\\!\\?]*?\\b${escaped}\\b[^,;\\.\\!\\?]*([,;\\.\\!\\?]|$)`,
+        'gi'
+      );
+      const cleaned = requestText.replace(pattern, '$1').replace(/\\s{2,}/g, ' ').trim();
+      if (cleaned !== requestText) {
+        setRequestText(cleaned);
+      }
+    }
+
     if (response) setResponse(null);
   };
 
@@ -167,7 +186,7 @@ export const AiMenuPage: React.FC = () => {
       budgetAmount: parsedBudget,
       budgetType,
       preferences: preferences.trim() || undefined,
-      excludedIngredients: excludedIngredients.trim() || undefined,
+      excludedIngredients: excludedIngredients.trim(),
     };
 
     setSubmittedPayload(payload);
@@ -310,7 +329,7 @@ export const AiMenuPage: React.FC = () => {
               <select
                 value={eventType}
                 onChange={(e) => {
-                  activeRequestIdRef.current++;
+                  invalidateInFlightRequest();
                   setEventType(e.target.value);
                   if (response) setResponse(null);
                 }}
@@ -338,7 +357,7 @@ export const AiMenuPage: React.FC = () => {
                   required
                   value={tableCount}
                   onChange={(e) => {
-                    activeRequestIdRef.current++;
+                    invalidateInFlightRequest();
                     setTableCount(Math.max(1, parseInt(e.target.value) || 1));
                     if (response) setResponse(null);
                   }}
@@ -363,7 +382,7 @@ export const AiMenuPage: React.FC = () => {
                   required
                   value={guestsPerTable}
                   onChange={(e) => {
-                    activeRequestIdRef.current++;
+                    invalidateInFlightRequest();
                     setGuestsPerTable(Math.max(1, parseInt(e.target.value) || 1));
                     if (response) setResponse(null);
                   }}
@@ -383,7 +402,7 @@ export const AiMenuPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      activeRequestIdRef.current++;
+                      invalidateInFlightRequest();
                       setBudgetType('PER_TABLE');
                       if (response) setResponse(null);
                     }}
@@ -399,7 +418,7 @@ export const AiMenuPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      activeRequestIdRef.current++;
+                      invalidateInFlightRequest();
                       setBudgetType('TOTAL_ORDER');
                       if (response) setResponse(null);
                     }}
@@ -421,7 +440,7 @@ export const AiMenuPage: React.FC = () => {
                     budgetAmount ? Number(budgetAmount.replace(/\D/g, '')).toLocaleString('vi-VN') : ''
                   }
                   onChange={(e) => {
-                    activeRequestIdRef.current++;
+                    invalidateInFlightRequest();
                     setBudgetAmount(e.target.value);
                     if (response) setResponse(null);
                   }}
@@ -445,7 +464,7 @@ export const AiMenuPage: React.FC = () => {
                 placeholder="Ví dụ: Ưu tiên hải sản tươi sống, thích vị thanh nhẹ..."
                 value={preferences}
                 onChange={(e) => {
-                  activeRequestIdRef.current++;
+                  invalidateInFlightRequest();
                   setPreferences(e.target.value);
                   if (response) setResponse(null);
                 }}
@@ -462,7 +481,7 @@ export const AiMenuPage: React.FC = () => {
                 placeholder="Ví dụ: Không ăn thịt bò, tránh đậu phộng..."
                 value={excludedIngredients}
                 onChange={(e) => {
-                  activeRequestIdRef.current++;
+                  invalidateInFlightRequest();
                   setExcludedIngredients(e.target.value);
                   if (response) setResponse(null);
                 }}

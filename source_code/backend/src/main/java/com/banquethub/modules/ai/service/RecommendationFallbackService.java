@@ -129,12 +129,16 @@ public class RecommendationFallbackService {
 
         // Validate and enrich all fallback proposals with real DB price calculations & inventory stock verification
         Set<Long> candidateIds = candidates.stream().map(DishCandidateDto::getId).collect(Collectors.toSet());
-        String effectiveExclusions = request.getExcludedIngredients();
-        if (effectiveExclusions == null || effectiveExclusions.isBlank()) {
+        String effectiveExclusions;
+        if (request.getExcludedIngredients() == null) {
             List<String> extracted = MenuCandidateService.extractExclusionPhrasesFromText(request.getRequestText());
-            if (!extracted.isEmpty()) {
-                effectiveExclusions = String.join(", ", extracted);
-            }
+            effectiveExclusions = extracted.isEmpty() ? null : String.join(", ", extracted);
+        } else if (request.getExcludedIngredients().isBlank()) {
+            effectiveExclusions = "";
+        } else {
+            Set<String> combined = new LinkedHashSet<>(MenuCandidateService.parseExcludedKeywords(request.getExcludedIngredients()));
+            combined.addAll(MenuCandidateService.extractExclusionPhrasesFromText(request.getRequestText()));
+            effectiveExclusions = String.join(", ", combined);
         }
         List<String> excludedKeywords = MenuCandidateService.parseExcludedKeywords(effectiveExclusions);
         List<MenuSuggestionDto> validated = validationService.validateAndEnrichSuggestions(rawSuggestions, request, candidateIds, excludedKeywords);
