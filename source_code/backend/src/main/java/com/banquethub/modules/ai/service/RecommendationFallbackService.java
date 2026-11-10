@@ -133,12 +133,8 @@ public class RecommendationFallbackService {
         if (request.getExcludedIngredients() == null) {
             List<String> extracted = MenuCandidateService.extractExclusionPhrasesFromText(request.getRequestText());
             effectiveExclusions = extracted.isEmpty() ? null : String.join(", ", extracted);
-        } else if (request.getExcludedIngredients().isBlank()) {
-            effectiveExclusions = "";
         } else {
-            Set<String> combined = new LinkedHashSet<>(MenuCandidateService.parseExcludedKeywords(request.getExcludedIngredients()));
-            combined.addAll(MenuCandidateService.extractExclusionPhrasesFromText(request.getRequestText()));
-            effectiveExclusions = String.join(", ", combined);
+            effectiveExclusions = request.getExcludedIngredients().trim();
         }
         List<String> excludedKeywords = MenuCandidateService.parseExcludedKeywords(effectiveExclusions);
         List<MenuSuggestionDto> validated = validationService.validateAndEnrichSuggestions(rawSuggestions, request, candidateIds, excludedKeywords);

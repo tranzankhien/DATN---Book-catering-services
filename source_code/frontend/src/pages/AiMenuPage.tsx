@@ -54,6 +54,7 @@ export const AiMenuPage: React.FC = () => {
   const [guestsPerTable, setGuestsPerTable] = useState<number>(6);
   const [budgetType, setBudgetType] = useState<BudgetType>('PER_TABLE');
   const [budgetAmount, setBudgetAmount] = useState<string>('1500000');
+  const [perPersonBudget, setPerPersonBudget] = useState<number | null>(null);
   const [preferences, setPreferences] = useState('');
   const [excludedIngredients, setExcludedIngredients] = useState('');
 
@@ -70,6 +71,7 @@ export const AiMenuPage: React.FC = () => {
   const invalidateInFlightRequest = () => {
     activeRequestIdRef.current++;
     setLoading(false);
+    setResponse(null);
   };
 
   const handleRequestTextChange = (text: string) => {
@@ -78,6 +80,7 @@ export const AiMenuPage: React.FC = () => {
 
     if (!text.trim()) {
       setDetectedSummary(null);
+      setPerPersonBudget(null);
       return;
     }
 
@@ -99,8 +102,15 @@ export const AiMenuPage: React.FC = () => {
       if (extracted.budgetType) {
         setBudgetType(extracted.budgetType);
       }
-      const typeLabel = extracted.budgetType === 'TOTAL_ORDER' ? ' (tổng tiệc)' : '/bàn';
+      setPerPersonBudget(extracted.perPersonBudget ?? null);
+      const typeLabel = extracted.perPersonBudget
+        ? ` (${formatVnd(extracted.perPersonBudget)}/người)`
+        : extracted.budgetType === 'TOTAL_ORDER'
+        ? ' (tổng tiệc)'
+        : '/bàn';
       parts.push(`Ngân sách: ${formatVnd(extracted.budgetAmount)}${typeLabel}`);
+    } else {
+      setPerPersonBudget(null);
     }
 
     if (extracted.detectedFields.eventType && extracted.eventType) {
@@ -118,9 +128,6 @@ export const AiMenuPage: React.FC = () => {
     }
 
     setDetectedSummary(parts.length > 0 ? parts.join(' • ') : null);
-    if (response) {
-      setResponse(null);
-    }
   };
 
   const handleRemoveAllergen = (itemToRemove: string) => {
@@ -133,21 +140,6 @@ export const AiMenuPage: React.FC = () => {
       .filter((it) => it.toLowerCase() !== itemToRemove.toLowerCase())
       .join(', ');
     setExcludedIngredients(updated);
-
-    // Also sanitize requestText so it does not retain contradictory allergy phrasing
-    if (requestText) {
-      const escaped = itemToRemove.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const pattern = new RegExp(
-        `(?:(?:không|khong)\\s*(?:ăn|an|lấy|lay|thích|thich|dùng|dung)?|(?:tránh|tranh)|(?:dị\\s*ứng|di\\s*ung)(?:\\s*(?:với|voi))?|(?:kiêng|kieng))\\s*[^,;\\.\\!\\?]*?\\b${escaped}\\b[^,;\\.\\!\\?]*([,;\\.\\!\\?]|$)`,
-        'gi'
-      );
-      const cleaned = requestText.replace(pattern, '$1').replace(/\\s{2,}/g, ' ').trim();
-      if (cleaned !== requestText) {
-        setRequestText(cleaned);
-      }
-    }
-
-    if (response) setResponse(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -383,8 +375,12 @@ export const AiMenuPage: React.FC = () => {
                   value={guestsPerTable}
                   onChange={(e) => {
                     invalidateInFlightRequest();
-                    setGuestsPerTable(Math.max(1, parseInt(e.target.value) || 1));
-                    if (response) setResponse(null);
+                    const newGuests = Math.max(1, parseInt(e.target.value) || 1);
+                    setGuestsPerTable(newGuests);
+                    if (perPersonBudget) {
+                      const recalculated = perPersonBudget * newGuests;
+                      setBudgetAmount(recalculated.toString());
+                    }
                   }}
                   className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none shadow-xs tabular-nums"
                 />
@@ -404,7 +400,6 @@ export const AiMenuPage: React.FC = () => {
                     onClick={() => {
                       invalidateInFlightRequest();
                       setBudgetType('PER_TABLE');
-                      if (response) setResponse(null);
                     }}
                     className={`px-1.5 py-0.5 rounded cursor-pointer ${
                       budgetType === 'PER_TABLE'
@@ -419,8 +414,8 @@ export const AiMenuPage: React.FC = () => {
                     type="button"
                     onClick={() => {
                       invalidateInFlightRequest();
+                      setPerPersonBudget(null);
                       setBudgetType('TOTAL_ORDER');
-                      if (response) setResponse(null);
                     }}
                     className={`px-1.5 py-0.5 rounded cursor-pointer ${
                       budgetType === 'TOTAL_ORDER'
@@ -441,8 +436,8 @@ export const AiMenuPage: React.FC = () => {
                   }
                   onChange={(e) => {
                     invalidateInFlightRequest();
+                    setPerPersonBudget(null);
                     setBudgetAmount(e.target.value);
-                    if (response) setResponse(null);
                   }}
                   className="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 pr-12 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none shadow-xs tabular-nums font-semibold"
                 />

@@ -4,6 +4,7 @@ export interface ExtractedAiMenuParams {
   totalGuests?: number;
   budgetAmount?: number;
   budgetType?: 'PER_TABLE' | 'TOTAL_ORDER';
+  perPersonBudget?: number;
   eventType?: string;
   preferences?: string;
   excludedIngredients?: string;
@@ -250,8 +251,9 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
 
   // Adjust per-person budget to per-table budget once guests per table is resolved
   if (isPerPersonBudget && result.budgetAmount) {
+    result.perPersonBudget = result.budgetAmount;
     const guests = result.guestsPerTable || 6;
-    result.budgetAmount = result.budgetAmount * guests;
+    result.budgetAmount = result.perPersonBudget * guests;
     result.budgetType = 'PER_TABLE';
   }
 

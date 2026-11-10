@@ -549,21 +549,21 @@ class Phase5AiRecommendationTest {
     }
 
     @Test
-    @DisplayName("TC-19: Description allergy ('dị ứng tôm') and separate field allergy ('cua') are both enforced")
-    void descriptionAndSeparateExclusions_areBothEnforced() throws Exception {
+    @DisplayName("TC-19: Explicit confirmed exclusions field strictly governs without re-extracting deleted allergens from requestText")
+    void confirmedExclusions_strictlyGovernsWithoutReExtraction() throws Exception {
         db.update("DELETE FROM ai_recommendation_usage WHERE user_id = 3");
         String token = userToken();
-        // Client sends requestText mentioning "dị ứng tôm", and excludedIngredients mentioning "cua"
+        // Client had description "Dị ứng thịt bò, tôm", but user confirmed only "tôm" (removed thịt bò)
         String responseBody = mvc.perform(post("/api/v1/ai/menu/recommendations")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of(
-                                "requestText", "Tiệc 4 bàn, dị ứng tôm, ngân sách 1.500.000đ/bàn",
+                                "requestText", "Tiệc 4 bàn, dị ứng thịt bò, tôm, ngân sách 1.500.000đ/bàn",
                                 "tableCount", 4,
                                 "guestsPerTable", 6,
                                 "budgetAmount", 1500000,
                                 "budgetType", "PER_TABLE",
-                                "excludedIngredients", "cua"
+                                "excludedIngredients", "tôm"
                         ))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -575,8 +575,8 @@ class Phase5AiRecommendationTest {
             for (JsonNode item : suggestion.path("items")) {
                 String dishName = item.path("dishName").asText().toLowerCase();
                 String unaccented = MenuCandidateService.removeDiacritics(dishName);
+                // "tôm" must be excluded because it is in excludedIngredients
                 assertThat(unaccented).doesNotContain("tom");
-                assertThat(unaccented).doesNotContain("cua");
             }
         }
     }
