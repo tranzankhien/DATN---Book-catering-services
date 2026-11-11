@@ -12,6 +12,7 @@ import com.banquethub.modules.ai.service.RecommendationFallbackService;
 import com.banquethub.modules.ai.service.RecommendationValidationService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,14 @@ class Phase5AiRecommendationTest {
 
     @Autowired
     private com.banquethub.modules.ai.config.GeminiProperties geminiProperties;
+
+    @AfterEach
+    void cleanupTestData() {
+        db.update("DELETE FROM recipe_items WHERE dish_id IN (SELECT id FROM dishes WHERE code LIKE 'AI-%' OR code LIKE 'SCALE-%')");
+        db.update("DELETE FROM recipe_items WHERE ingredient_id IN (SELECT id FROM ingredients WHERE code LIKE 'AI-%' OR code LIKE 'SCALE-%')");
+        db.update("DELETE FROM dishes WHERE code LIKE 'AI-%' OR code LIKE 'SCALE-%'");
+        db.update("DELETE FROM ingredients WHERE code LIKE 'AI-%' OR code LIKE 'SCALE-%'");
+    }
 
     private String userToken() throws Exception {
         String body = mvc.perform(post("/api/v1/auth/login")

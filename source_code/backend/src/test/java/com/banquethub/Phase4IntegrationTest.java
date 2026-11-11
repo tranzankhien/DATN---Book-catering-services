@@ -2,6 +2,7 @@ package com.banquethub;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,6 +33,25 @@ class Phase4IntegrationTest {
     @Autowired ObjectMapper json;
     @Autowired JdbcTemplate db;
     @Autowired com.banquethub.modules.reservations.service.ReservationExpiryScheduler expiryScheduler;
+
+    @AfterEach
+    void cleanupP4TestData() {
+        db.update("DELETE FROM email_outbox WHERE order_id IN (SELECT id FROM orders WHERE customer_email LIKE '%@example.test' OR customer_name IN ('Phase Four', 'Map Test'))");
+        db.update("DELETE FROM payment_transactions WHERE order_id IN (SELECT id FROM orders WHERE customer_email LIKE '%@example.test' OR customer_name IN ('Phase Four', 'Map Test'))");
+        db.update("DELETE FROM order_ingredient_consumptions WHERE order_id IN (SELECT id FROM orders WHERE customer_email LIKE '%@example.test' OR customer_name IN ('Phase Four', 'Map Test'))");
+        db.update("DELETE FROM order_status_histories WHERE order_id IN (SELECT id FROM orders WHERE customer_email LIKE '%@example.test' OR customer_name IN ('Phase Four', 'Map Test'))");
+        db.update("DELETE FROM stock_reservation_items WHERE reservation_id IN (SELECT id FROM stock_reservations WHERE order_id IN (SELECT id FROM orders WHERE customer_email LIKE '%@example.test' OR customer_name IN ('Phase Four', 'Map Test')))");
+        db.update("DELETE FROM stock_reservations WHERE order_id IN (SELECT id FROM orders WHERE customer_email LIKE '%@example.test' OR customer_name IN ('Phase Four', 'Map Test'))");
+        db.update("DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE customer_email LIKE '%@example.test' OR customer_name IN ('Phase Four', 'Map Test'))");
+        db.update("DELETE FROM orders WHERE customer_email LIKE '%@example.test' OR customer_name IN ('Phase Four', 'Map Test')");
+
+        db.update("DELETE FROM order_items WHERE dish_id IN (SELECT id FROM dishes WHERE code LIKE 'P4-%')");
+        db.update("DELETE FROM recipe_items WHERE dish_id IN (SELECT id FROM dishes WHERE code LIKE 'P4-%')");
+        db.update("DELETE FROM recipe_items WHERE ingredient_id IN (SELECT id FROM ingredients WHERE code LIKE 'P4-%')");
+        db.update("DELETE FROM stock_movements WHERE ingredient_id IN (SELECT id FROM ingredients WHERE code LIKE 'P4-%')");
+        db.update("DELETE FROM dishes WHERE code LIKE 'P4-%'");
+        db.update("DELETE FROM ingredients WHERE code LIKE 'P4-%'");
+    }
     record Fixture(long order, long ingredient, long dish, String token, BigDecimal amount) {}
 
     String token(String email, String password) throws Exception {
