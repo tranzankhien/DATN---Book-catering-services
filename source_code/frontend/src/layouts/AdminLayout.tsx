@@ -24,6 +24,9 @@ import {
   LayoutDashboard,
   CreditCard,
   PackageCheck,
+  CalendarRange,
+  Banknote,
+  UserCheck,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
@@ -436,6 +439,136 @@ export const AdminLayout: React.FC = () => {
                     {!isOpen && (
                       <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Theo dõi giữ kho
+                      </div>
+                    )}
+                  </NavLink>
+                </nav>
+              </div>
+
+              {/* Phase 6: Quản lý nhân sự & tiền lương */}
+              <div>
+                {isOpen && (
+                  <p className="px-2.5 mb-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-400 whitespace-nowrap">
+                    Nhân sự & Tiền lương
+                  </p>
+                )}
+                <nav className="space-y-1">
+                  <NavLink
+                    to="/admin/employees"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Hồ sơ nhân viên' : undefined}
+                  >
+                    <Users className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Hồ sơ nhân viên</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Hồ sơ nhân viên
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/attendance"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Bảng chấm công' : undefined}
+                  >
+                    <CalendarDays className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Bảng chấm công</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Bảng chấm công
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/payroll-periods"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Kỳ tính lương & chốt sổ' : undefined}
+                  >
+                    <CalendarRange className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Kỳ tính lương & chốt sổ</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Kỳ tính lương & chốt sổ
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/payrolls"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Bảng lương nhân viên' : undefined}
+                  >
+                    <Receipt className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Bảng lương nhân viên</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Bảng lương nhân viên
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/salary-payments"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Nhật ký chi trả lương' : undefined}
+                  >
+                    <Banknote className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Nhật ký chi trả lương</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Nhật ký chi trả lương
                       </div>
                     )}
                   </NavLink>

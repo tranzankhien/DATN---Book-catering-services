@@ -547,3 +547,255 @@ export interface AiMenuRecommendationResponse {
 
 
 
+
+// =============================================================================
+// PHASE 6: HR, ATTENDANCE & PAYROLL TYPES
+// =============================================================================
+
+export type EmployeeStatus = 'ACTIVE' | 'INACTIVE';
+export type AttendanceStatus = 'PRESENT' | 'HALF_DAY' | 'ABSENT';
+export type PayrollPeriodStatus = 'DRAFT' | 'FINALIZED' | 'CLOSED';
+export type AdjustmentType = 'ALLOWANCE' | 'DEDUCTION';
+export type PaymentMethod = 'CASH' | 'BANK_TRANSFER';
+
+export interface EmployeeDto {
+  id: number;
+  employeeCode: string;
+  userId?: number | null;
+  userEmail?: string | null;
+  fullName: string;
+  phone?: string | null;
+  email?: string | null;
+  position: string;
+  hireDate: string;
+  baseSalary: number;
+  status: EmployeeStatus;
+  note?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateEmployeePayload {
+  employeeCode?: string;
+  userId?: number | null;
+  fullName: string;
+  phone?: string | null;
+  email?: string | null;
+  position: string;
+  hireDate: string;
+  baseSalary: number;
+  note?: string | null;
+}
+
+export interface UpdateEmployeePayload {
+  userId?: number | null;
+  fullName: string;
+  phone?: string | null;
+  email?: string | null;
+  position: string;
+  hireDate: string;
+  baseSalary: number;
+  note?: string | null;
+}
+
+export interface AttendanceDto {
+  id: number;
+  employeeId: number;
+  employeeCode: string;
+  employeeName: string;
+  workDate: string;
+  attendanceStatus: AttendanceStatus;
+  workUnits: number;
+  note?: string | null;
+  recordedBy?: string | null;
+  recordedAt?: string;
+}
+
+export interface RecordAttendancePayload {
+  attendanceStatus: AttendanceStatus;
+  note?: string | null;
+}
+
+export interface AttendanceItemPayload {
+  employeeId: number;
+  attendanceStatus: AttendanceStatus;
+  note?: string | null;
+}
+
+export interface BulkAttendancePayload {
+  workDate: string;
+  items: AttendanceItemPayload[];
+}
+
+export interface AttendanceMonthlySummaryDto {
+  employeeId: number;
+  employeeCode: string;
+  employeeName: string;
+  position: string;
+  year: number;
+  month: number;
+  totalDaysInMonth: number;
+  presentDays: number;
+  halfDays: number;
+  absentDays: number;
+  unrecordedDays: number;
+  totalWorkUnits: number;
+  dailyStatusMap: Record<number, AttendanceStatus>;
+  dailyNoteMap: Record<number, string>;
+}
+
+export interface CompanyAttendanceSummaryDto {
+  year: number;
+  month: number;
+  totalEmployees: number;
+  totalCompanyWorkUnits: number;
+  employeeSummaries: AttendanceMonthlySummaryDto[];
+}
+
+export interface PayrollPeriodDto {
+  id: number;
+  year: number;
+  month: number;
+  standardWorkdays: number;
+  status: PayrollPeriodStatus;
+  finalizedAt?: string | null;
+  finalizedBy?: string | null;
+  closedAt?: string | null;
+  note?: string | null;
+  totalEmployeesCount: number;
+  totalFinalizedAmount: number;
+  paidCount: number;
+  unpaidCount: number;
+}
+
+export interface CreatePayrollPeriodPayload {
+  year: number;
+  month: number;
+  standardWorkdays: number;
+  note?: string | null;
+}
+
+export interface UpdatePayrollPeriodPayload {
+  standardWorkdays: number;
+  note?: string | null;
+}
+
+export interface PayrollAdjustmentDto {
+  id: number;
+  payrollPeriodId: number;
+  employeeId: number;
+  employeeCode: string;
+  employeeName: string;
+  adjustmentType: AdjustmentType;
+  amount: number;
+  reason: string;
+  createdAt: string;
+}
+
+export interface CreatePayrollAdjustmentPayload {
+  employeeId: number;
+  adjustmentType: AdjustmentType;
+  amount: number;
+  reason: string;
+}
+
+export interface UpdatePayrollAdjustmentPayload {
+  amount: number;
+  reason: string;
+}
+
+export interface PayrollPreviewItemDto {
+  employeeId: number;
+  employeeCode: string;
+  employeeName: string;
+  position: string;
+  baseSalary: number;
+  standardWorkdays: number;
+  actualWorkdays: number;
+  calculatedSalary: number;
+  totalAllowances: number;
+  totalDeductions: number;
+  netSalary: number;
+  warnings: string[];
+}
+
+export interface PayrollPeriodPreviewDto {
+  periodId: number;
+  year: number;
+  month: number;
+  standardWorkdays: number;
+  status: PayrollPeriodStatus;
+  items: PayrollPreviewItemDto[];
+  totalCalculatedSalary: number;
+  totalAllowances: number;
+  totalDeductions: number;
+  totalNetSalary: number;
+  totalWarningsCount: number;
+}
+
+export interface PayrollDto {
+  id: number;
+  employeeId: number;
+  payrollPeriodId: number;
+  employeeCodeSnapshot: string;
+  employeeNameSnapshot: string;
+  baseSalarySnapshot: number;
+  standardWorkdaysSnapshot: number;
+  actualWorkdaysSnapshot: number;
+  calculatedSalary: number;
+  totalAllowances: number;
+  totalDeductions: number;
+  netSalary: number;
+  paymentStatus: PaymentStatus;
+  finalizedAt: string;
+  paymentDate?: string | null;
+  paymentMethod?: PaymentMethod | null;
+  paidAmount?: number | null;
+  paymentNote?: string | null;
+  paidBy?: string | null;
+}
+
+export interface RecordSalaryPaymentPayload {
+  paymentDate?: string | null;
+  paymentMethod: PaymentMethod;
+  note?: string | null;
+}
+
+export interface SalaryPaymentDto {
+  id: number;
+  payrollId: number;
+  employeeCode: string;
+  employeeName: string;
+  periodYear: number;
+  periodMonth: number;
+  amount: number;
+  paymentDate: string;
+  paymentMethod: PaymentMethod;
+  note?: string | null;
+  recordedBy?: string | null;
+  recordedAt: string;
+}
+
+export interface MonthlyPayrollMetricDto {
+  year: number;
+  month: number;
+  periodName: string;
+  finalizedAmount: number;
+  paidAmount: number;
+  unpaidAmount: number;
+  status: PayrollPeriodStatus;
+}
+
+export interface PayrollSummaryDto {
+  year?: number | null;
+  month?: number | null;
+  totalFinalizedPayrollAmount: number;
+  totalPaidAmount: number;
+  totalUnpaidAmount: number;
+  totalCalculatedSalary: number;
+  totalAllowances: number;
+  totalDeductions: number;
+  activeEmployeesCount: number;
+  totalRecordedWorkdays: number;
+  monthlyMetrics: MonthlyPayrollMetricDto[];
+}

@@ -12,6 +12,8 @@ import {
   Award,
   CheckCircle,
   Sparkles,
+  CalendarCheck,
+  Receipt,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
@@ -167,14 +169,32 @@ export const PublicLayout: React.FC = () => {
                     </Link>
 
                     {user.role === 'ROLE_EMPLOYEE' && (
-                      <Link
-                        to="/employee/orders"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-stone-700 hover:bg-amber-50 hover:text-amber-900 transition-colors"
-                      >
-                        <ShieldCheck className="h-4 w-4 text-amber-800" />
-                        <span>Lịch điều phối bếp</span>
-                      </Link>
+                      <>
+                        <Link
+                          to="/employee/orders"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-stone-700 hover:bg-amber-50 hover:text-amber-900 transition-colors"
+                        >
+                          <ShieldCheck className="h-4 w-4 text-amber-800" />
+                          <span>Lịch điều phối bếp</span>
+                        </Link>
+                        <Link
+                          to="/employee/attendance"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-stone-700 hover:bg-amber-50 hover:text-amber-900 transition-colors"
+                        >
+                          <CalendarCheck className="h-4 w-4 text-amber-800" />
+                          <span>Chấm công của tôi</span>
+                        </Link>
+                        <Link
+                          to="/employee/payrolls"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-stone-700 hover:bg-amber-50 hover:text-amber-900 transition-colors"
+                        >
+                          <Receipt className="h-4 w-4 text-amber-800" />
+                          <span>Phiếu lương của tôi</span>
+                        </Link>
+                      </>
                     )}
 
                     {user.role === 'ROLE_ADMIN' && (

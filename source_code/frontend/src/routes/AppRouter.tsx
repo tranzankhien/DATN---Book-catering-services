@@ -42,6 +42,17 @@ import { AdminReservationsPage } from '../pages/admin/AdminReservationsPage';
 import { EmployeeOrdersPage } from '../pages/employee/EmployeeOrdersPage';
 import { EmployeeOrderDetailPage } from '../pages/employee/EmployeeOrderDetailPage';
 
+// Phase 6 Admin HR & Payroll Pages
+import { AdminEmployeesPage } from '../pages/admin/AdminEmployeesPage';
+import { AdminAttendancePage } from '../pages/admin/AdminAttendancePage';
+import { AdminPayrollPeriodsPage } from '../pages/admin/AdminPayrollPeriodsPage';
+import { AdminPayrollsPage } from '../pages/admin/AdminPayrollsPage';
+import { AdminSalaryPaymentsPage } from '../pages/admin/AdminSalaryPaymentsPage';
+
+// Phase 6 Employee Self-Service Pages
+import { EmployeeMyAttendancePage } from '../pages/employee/EmployeeMyAttendancePage';
+import { EmployeeMyPayrollsPage } from '../pages/employee/EmployeeMyPayrollsPage';
+
 export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
@@ -111,6 +122,22 @@ export const AppRouter: React.FC = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/employee/attendance"
+            element={
+              <ProtectedRoute allowedRoles={['ROLE_EMPLOYEE', 'ROLE_ADMIN']}>
+                <EmployeeMyAttendancePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/payrolls"
+            element={
+              <ProtectedRoute allowedRoles={['ROLE_EMPLOYEE', 'ROLE_ADMIN']}>
+                <EmployeeMyPayrollsPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         {/* Protected Admin Area */}
@@ -136,6 +163,11 @@ export const AppRouter: React.FC = () => {
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="orders/:id" element={<AdminOrderDetailPage />} />
           <Route path="payments" element={<AdminPaymentsPage />} />
+          <Route path="employees" element={<AdminEmployeesPage />} />
+          <Route path="attendance" element={<AdminAttendancePage />} />
+          <Route path="payroll-periods" element={<AdminPayrollPeriodsPage />} />
+          <Route path="payrolls" element={<AdminPayrollsPage />} />
+          <Route path="salary-payments" element={<AdminSalaryPaymentsPage />} />
         </Route>
 
         {/* Fallback */}
