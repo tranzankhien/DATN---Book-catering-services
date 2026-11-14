@@ -18,6 +18,7 @@ public record PayrollAdjustmentDto(
         BigDecimal amount,
         String note,
         String createdBy,
+        String updatedBy,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
 ) {
@@ -35,6 +36,7 @@ public record PayrollAdjustmentDto(
                 a.getAmount(),
                 a.getNote(),
                 a.getCreatedBy(),
+                a.getUpdatedBy(),
                 a.getCreatedAt(),
                 a.getUpdatedAt()
         );

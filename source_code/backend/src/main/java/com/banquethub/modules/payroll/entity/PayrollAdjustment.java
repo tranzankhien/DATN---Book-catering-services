@@ -41,6 +41,9 @@ public class PayrollAdjustment {
     @Column(name = "created_by", length = 120)
     private String createdBy;
 
+    @Column(name = "updated_by", length = 120)
+    private String updatedBy;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -130,6 +133,14 @@ public class PayrollAdjustment {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
     public OffsetDateTime getCreatedAt() {

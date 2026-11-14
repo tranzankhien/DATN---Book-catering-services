@@ -7,7 +7,9 @@ import com.banquethub.modules.employees.dto.UpdateEmployeeRequest;
 import com.banquethub.modules.employees.entity.EmployeeStatus;
 import com.banquethub.modules.payroll.dto.CreatePayrollAdjustmentRequest;
 import com.banquethub.modules.payroll.dto.CreatePayrollPeriodRequest;
+import com.banquethub.modules.payroll.dto.FinalizePayrollPeriodRequest;
 import com.banquethub.modules.payroll.dto.RecordSalaryPaymentRequest;
+import com.banquethub.modules.payroll.dto.UpdatePayrollAdjustmentRequest;
 import com.banquethub.modules.payroll.entity.AdjustmentType;
 import com.banquethub.modules.payroll.entity.PaymentMethod;
 import com.banquethub.modules.payroll.entity.PayrollPeriodStatus;
@@ -1154,6 +1156,113 @@ class Phase6HrPayrollIntegrationTest {
             String statusStr = json.readTree(periodRes).path("data").path("status").asText();
             assertThat(statusStr).isEqualTo("CLOSED");
         }
+    }
+
+    @Test
+    @DisplayName("TC-46: Block recording attendance before employee hire date")
+    void tc46_attendanceBeforeHireDateBlocked() throws Exception {
+        String token = adminToken();
+        String code = "TEST-HIRE-" + UUID.randomUUID().toString().substring(0, 6);
+        CreateEmployeeRequest req = new CreateEmployeeRequest(
+                code, null, "Nhân Viên " + code, "0912345678", null,
+                "Nhân viên kho", LocalDate.of(2025, 6, 1), new BigDecimal("10000000"), null
+        );
+        String res = mvc.perform(post("/api/v1/admin/employees")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(req)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        long empId = json.readTree(res).path("data").path("id").asLong();
+
+        // Attempt attendance before hire date (2025-05-31 < 2025-06-01)
+        mvc.perform(put("/api/v1/admin/attendance/" + empId + "/2025-05-31")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(new RecordAttendanceRequest(AttendanceStatus.PRESENT, "Chấm sớm"))))
+                .andExpect(status().isBadRequest());
+
+        // Valid attendance on or after hire date should succeed
+        mvc.perform(put("/api/v1/admin/attendance/" + empId + "/2025-06-01")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(new RecordAttendanceRequest(AttendanceStatus.PRESENT, "Ngày đầu đi làm"))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("TC-47: Finalize rejects when expectedTotalNetSalary or expectedEmployeeCount does not match preview")
+    void tc47_finalizeWithMismatchedExpectedSalaryFails() throws Exception {
+        String token = adminToken();
+        int year = 2098;
+        int month = 1;
+        long periodId = createPayrollPeriod(token, year, month, new BigDecimal("26.0"));
+
+        // Get preview figures
+        String prevRes = mvc.perform(get("/api/v1/admin/payroll-periods/" + periodId + "/preview")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode prevData = json.readTree(prevRes).path("data");
+        BigDecimal totalNet = new BigDecimal(prevData.path("totalNetSalary").asText());
+        int empCount = prevData.path("totalEmployees").asInt();
+
+        // 1. Try to finalize with mismatched totalNet (e.g. + 100,000 VND) -> Rejected 400
+        FinalizePayrollPeriodRequest badRequest = new FinalizePayrollPeriodRequest(totalNet.add(new BigDecimal("100000")), empCount);
+        mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(badRequest)))
+                .andExpect(status().isBadRequest());
+
+        // 2. Finalize with matching checksum values -> Succeeds 200
+        FinalizePayrollPeriodRequest goodRequest = new FinalizePayrollPeriodRequest(totalNet, empCount);
+        mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(goodRequest)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("TC-48: Payroll adjustment audit tracking records updatedBy and audit note history")
+    void tc48_adjustmentAuditTracking() throws Exception {
+        String token = adminToken();
+        long periodId = createPayrollPeriod(token, 2098, 2, new BigDecimal("26.0"));
+        Long empId = db.queryForObject("SELECT id FROM employees ORDER BY id ASC LIMIT 1", Long.class);
+
+        // Create adjustment
+        CreatePayrollAdjustmentRequest createReq = new CreatePayrollAdjustmentRequest(
+                empId, periodId, AdjustmentType.ALLOWANCE, "Phụ cấp xăng xe", new BigDecimal("500000"), "Xăng xe ban đầu"
+        );
+        String createRes = mvc.perform(post("/api/v1/admin/payroll-adjustments")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(createReq)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        long adjId = json.readTree(createRes).path("data").path("id").asLong();
+
+        // Update adjustment
+        UpdatePayrollAdjustmentRequest updateReq = new UpdatePayrollAdjustmentRequest(
+                "Phụ cấp xăng xe tăng", new BigDecimal("700000"), "Tăng định mức xăng xe"
+        );
+        String updateRes = mvc.perform(put("/api/v1/admin/payroll-adjustments/" + adjId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(updateReq)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode adjNode = json.readTree(updateRes).path("data");
+        assertThat(adjNode.path("amount").asDouble()).isEqualTo(700000.0);
+        assertThat(adjNode.path("updatedBy").asText()).isNotEmpty();
+
+        // Verify updated_by column in database
+        String updatedByDb = db.queryForObject("SELECT updated_by FROM payroll_adjustments WHERE id = ?", String.class, adjId);
+        assertThat(updatedByDb).isNotEmpty();
     }
 
     // =========================================================================

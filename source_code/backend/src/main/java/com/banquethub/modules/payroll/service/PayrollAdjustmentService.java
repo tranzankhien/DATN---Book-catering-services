@@ -12,6 +12,8 @@ import com.banquethub.modules.payroll.entity.PayrollPeriod;
 import com.banquethub.modules.payroll.entity.PayrollPeriodStatus;
 import com.banquethub.modules.payroll.repository.PayrollAdjustmentRepository;
 import com.banquethub.modules.payroll.repository.PayrollPeriodRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,8 @@ import java.util.List;
 @Service
 @Transactional
 public class PayrollAdjustmentService {
+
+    private static final Logger log = LoggerFactory.getLogger(PayrollAdjustmentService.class);
 
     private final PayrollAdjustmentRepository adjustmentRepository;
     private final PayrollPeriodRepository periodRepository;
@@ -86,6 +90,10 @@ public class PayrollAdjustmentService {
     }
 
     public PayrollAdjustmentDto updateAdjustment(Long id, UpdatePayrollAdjustmentRequest request) {
+        return updateAdjustment(id, request, "Admin");
+    }
+
+    public PayrollAdjustmentDto updateAdjustment(Long id, UpdatePayrollAdjustmentRequest request, String adminName) {
         PayrollAdjustment adjustment = adjustmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khoản điều chỉnh với ID: " + id));
 
@@ -106,15 +114,33 @@ public class PayrollAdjustmentService {
             throw new BusinessValidationException("Tên hoặc lý do điều chỉnh không được để trống.");
         }
 
+        BigDecimal oldAmount = adjustment.getAmount();
+        String oldName = adjustment.getName();
+
         adjustment.setName(name);
         adjustment.setAmount(request.amount());
-        adjustment.setNote(request.note() != null ? request.note().trim() : null);
+        adjustment.setUpdatedBy(adminName);
+
+        String auditLog = String.format("[Sửa bởi %s: %s đ -> %s đ]", adminName, oldAmount, request.amount());
+        String userNote = request.note() != null ? request.note().trim() : (adjustment.getNote() != null ? adjustment.getNote() : "");
+        if (!userNote.contains(auditLog)) {
+            adjustment.setNote(userNote.isBlank() ? auditLog : userNote + " | " + auditLog);
+        } else {
+            adjustment.setNote(userNote);
+        }
+
+        log.info("Quản trị viên '{}' đã sửa khoản điều chỉnh ID {}: '{}' ({}) -> '{}' ({})",
+                adminName, id, oldName, oldAmount, name, request.amount());
 
         PayrollAdjustment saved = adjustmentRepository.save(adjustment);
         return PayrollAdjustmentDto.fromEntity(saved);
     }
 
     public void deleteAdjustment(Long id) {
+        deleteAdjustment(id, "Admin");
+    }
+
+    public void deleteAdjustment(Long id, String adminName) {
         PayrollAdjustment adjustment = adjustmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khoản điều chỉnh với ID: " + id));
 
@@ -125,6 +151,9 @@ public class PayrollAdjustmentService {
         if (period.getStatus() != PayrollPeriodStatus.DRAFT) {
             throw new BusinessValidationException("Kỳ lương đã ở trạng thái " + period.getStatus() + ". Không thể xóa khoản điều chỉnh.");
         }
+
+        log.info("Quản trị viên '{}' đã xóa khoản điều chỉnh ID {} ({}, {} đ) của nhân viên ID {}",
+                adminName, id, adjustment.getName(), adjustment.getAmount(), adjustment.getEmployee().getId());
 
         adjustmentRepository.delete(adjustment);
     }

@@ -152,7 +152,9 @@ public class PayrollPeriodService {
                 continue;
             }
 
+            // Strictly exclude any attendance record prior to employee's hire date
             BigDecimal actualWorkdays = empRecords.stream()
+                    .filter(a -> emp.getHireDate() == null || !a.getWorkDate().isBefore(emp.getHireDate()))
                     .map(Attendance::getWorkUnits)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -179,6 +181,12 @@ public class PayrollPeriodService {
             );
 
             List<String> itemWarnings = new ArrayList<>();
+            if (emp.getHireDate() != null) {
+                boolean hasPriorToHire = empRecords.stream().anyMatch(a -> a.getWorkDate().isBefore(emp.getHireDate()));
+                if (hasPriorToHire) {
+                    itemWarnings.add("Có bản ghi chấm công trước ngày vào làm (đã loại khỏi tính công).");
+                }
+            }
             if (empRecords.size() < daysInMonth) {
                 itemWarnings.add(String.format("Có %d ngày chưa được ghi nhận công trong tháng.", daysInMonth - empRecords.size()));
             }
@@ -234,6 +242,10 @@ public class PayrollPeriodService {
     }
 
     public List<PayrollDto> finalizePeriod(Long periodId, String adminName) {
+        return finalizePeriod(periodId, null, adminName);
+    }
+
+    public List<PayrollDto> finalizePeriod(Long periodId, FinalizePayrollPeriodRequest request, String adminName) {
         // Concurrency protection: pessimistic write lock on period row
         PayrollPeriod period = periodRepository.findByIdForUpdate(periodId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỳ lương với ID: " + periodId));
@@ -248,7 +260,25 @@ public class PayrollPeriodService {
 
         PayrollPeriodPreviewDto preview = previewPayroll(periodId);
         if (!preview.canFinalize()) {
-            throw new BusinessValidationException("Không thể chốt bảng lương do có nhân viên có lương thực lĩnh âm hoặc dữ liệu không hợp lệ. Vui lòng rà soát cảnh báo.");
+            throw new BusinessValidationException("Không thể chốt bảng lương do có nhân viên có lương thực lĩnh âm hoặc số công vượt công chuẩn. Vui lòng rà soát cảnh báo.");
+        }
+
+        // Integrity check: verify that preview data matches what the admin reviewed
+        if (request != null) {
+            if (request.expectedTotalNetSalary() != null &&
+                    preview.totalNetSalary().compareTo(request.expectedTotalNetSalary()) != 0) {
+                throw new BusinessValidationException(String.format(
+                        "Số liệu bảng lương đã bị thay đổi bởi quản trị viên khác kể từ lần xem trước gần nhất (Thực lĩnh xem trước: %s đ, thực tế hiện tại: %s đ). Vui lòng tải lại bản xem trước để rà soát trước khi chốt.",
+                        request.expectedTotalNetSalary(), preview.totalNetSalary()
+                ));
+            }
+            if (request.expectedEmployeeCount() != null &&
+                    preview.items().size() != request.expectedEmployeeCount()) {
+                throw new BusinessValidationException(String.format(
+                        "Số lượng nhân viên trong bảng lương đã thay đổi (Xem trước: %d, thực tế: %d). Vui lòng tải lại bản xem trước.",
+                        request.expectedEmployeeCount(), preview.items().size()
+                ));
+            }
         }
 
         OffsetDateTime now = OffsetDateTime.now(VN_ZONE);

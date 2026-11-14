@@ -133,9 +133,13 @@ export const employeeService = {
     return res.data.data;
   },
 
-  async finalizePayrollPeriod(id: number): Promise<PayrollDto[]> {
+  async finalizePayrollPeriod(
+    id: number,
+    payload?: { expectedTotalNetSalary?: number; expectedEmployeeCount?: number }
+  ): Promise<PayrollDto[]> {
     const res = await apiClient.post<ApiResponse<PayrollDto[]>>(
-      `/admin/payroll-periods/${id}/finalize`
+      `/admin/payroll-periods/${id}/finalize`,
+      payload || {}
     );
     return res.data.data;
   },

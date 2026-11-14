@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Receipt,
@@ -21,6 +21,7 @@ import { employeeService } from '../../services/employeeService';
 import type {
   PayrollDto,
   PayrollPeriodDto,
+  PayrollSummaryDto,
   PaymentStatus,
   PaymentMethod,
   RecordSalaryPaymentPayload,
@@ -45,9 +46,11 @@ export const AdminPayrollsPage: React.FC = () => {
 
   const [periods, setPeriods] = useState<PayrollPeriodDto[]>([]);
   const [payrolls, setPayrolls] = useState<PayrollDto[]>([]);
+  const [periodSummary, setPeriodSummary] = useState<PayrollSummaryDto | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [statusFilter, setStatusFilter] = useState<'ALL' | PaymentStatus>('ALL');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const activeRequestIdRef = useRef<number>(0);
 
   // Mark Paid Modal
   const [payingPayroll, setPayingPayroll] = useState<PayrollDto | null>(null);
@@ -78,8 +81,24 @@ export const AdminPayrollsPage: React.FC = () => {
     fetchPeriods();
   }, []);
 
+  const selectedPeriod = useMemo(
+    () => periods.find((p) => String(p.id) === selectedPeriodId),
+    [periods, selectedPeriodId]
+  );
+
+  const fetchPeriodSummary = async (period: PayrollPeriodDto) => {
+    try {
+      const summary = await employeeService.getPayrollSummary(period.year, period.month);
+      setPeriodSummary(summary);
+    } catch {
+      // Fallback gracefully
+      setPeriodSummary(null);
+    }
+  };
+
   const fetchPayrolls = async () => {
     if (!selectedPeriodId) return;
+    const reqId = ++activeRequestIdRef.current;
     try {
       setLoading(true);
       const res = await employeeService.getPayrolls({
@@ -87,11 +106,17 @@ export const AdminPayrollsPage: React.FC = () => {
         paymentStatus: statusFilter === 'ALL' ? undefined : statusFilter,
         size: 200,
       });
-      setPayrolls(res.content);
+      if (reqId === activeRequestIdRef.current) {
+        setPayrolls(res.content);
+      }
     } catch (err) {
-      showToast(extractErrorMessage(err, 'Không thể tải danh sách bảng lương'), 'error');
+      if (reqId === activeRequestIdRef.current) {
+        showToast(extractErrorMessage(err, 'Không thể tải danh sách bảng lương'), 'error');
+      }
     } finally {
-      setLoading(false);
+      if (reqId === activeRequestIdRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -99,8 +124,12 @@ export const AdminPayrollsPage: React.FC = () => {
     if (selectedPeriodId) {
       fetchPayrolls();
       setSearchParams({ periodId: selectedPeriodId });
+      const current = periods.find((p) => String(p.id) === selectedPeriodId);
+      if (current) {
+        fetchPeriodSummary(current);
+      }
     }
-  }, [selectedPeriodId, statusFilter]);
+  }, [selectedPeriodId, statusFilter, periods]);
 
   const filteredPayrolls = useMemo(() => {
     if (!searchTerm.trim()) return payrolls;
@@ -112,18 +141,36 @@ export const AdminPayrollsPage: React.FC = () => {
     );
   }, [payrolls, searchTerm]);
 
-  // Totals
-  const totalNet = useMemo(() => payrolls.reduce((s, p) => s + (p.netSalary || 0), 0), [payrolls]);
-  const totalPaid = useMemo(
-    () => payrolls.filter((p) => p.paymentStatus === 'PAID').reduce((s, p) => s + (p.netSalary || 0), 0),
-    [payrolls]
-  );
-  const totalUnpaid = useMemo(
-    () => payrolls.filter((p) => p.paymentStatus === 'UNPAID').reduce((s, p) => s + (p.netSalary || 0), 0),
-    [payrolls]
-  );
+  // Totals: strictly period-level to avoid skew when filtering or paginating
+  const totalNet = useMemo(() => {
+    if (periodSummary && periodSummary.totalFinalizedPayrollAmount != null) {
+      return periodSummary.totalFinalizedPayrollAmount;
+    }
+    if (selectedPeriod && selectedPeriod.totalFinalizedAmount != null) {
+      return selectedPeriod.totalFinalizedAmount;
+    }
+    return payrolls.reduce((s, p) => s + (p.netSalary || 0), 0);
+  }, [periodSummary, selectedPeriod, payrolls]);
+
+  const totalPaid = useMemo(() => {
+    if (periodSummary && periodSummary.totalPaidAmount != null) {
+      return periodSummary.totalPaidAmount;
+    }
+    return payrolls.filter((p) => p.paymentStatus === 'PAID').reduce((s, p) => s + (p.netSalary || 0), 0);
+  }, [periodSummary, payrolls]);
+
+  const totalUnpaid = useMemo(() => {
+    if (periodSummary && periodSummary.totalUnpaidAmount != null) {
+      return periodSummary.totalUnpaidAmount;
+    }
+    return payrolls.filter((p) => p.paymentStatus === 'UNPAID').reduce((s, p) => s + (p.netSalary || 0), 0);
+  }, [periodSummary, payrolls]);
 
   const openPayModal = (p: PayrollDto) => {
+    if (selectedPeriodId && p.payrollPeriodId !== Number(selectedPeriodId)) {
+      showToast('Bản ghi bảng lương không khớp với kỳ đang chọn. Vui lòng tải lại.', 'error');
+      return;
+    }
     setPayingPayroll(p);
     setPayMethod('BANK_TRANSFER');
     setPayDate(getLocalTodayDateString());
@@ -133,6 +180,12 @@ export const AdminPayrollsPage: React.FC = () => {
   const handleMarkPaid = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!payingPayroll) return;
+
+    if (selectedPeriodId && payingPayroll.payrollPeriodId !== Number(selectedPeriodId)) {
+      showToast('Kỳ lương đã thay đổi trong khi thực hiện giao dịch.', 'error');
+      setPayingPayroll(null);
+      return;
+    }
 
     try {
       setSubmittingPay(true);
@@ -148,6 +201,10 @@ export const AdminPayrollsPage: React.FC = () => {
       );
       setPayingPayroll(null);
       fetchPayrolls();
+      fetchPeriods();
+      if (selectedPeriod) {
+        fetchPeriodSummary(selectedPeriod);
+      }
     } catch (err) {
       showToast(extractErrorMessage(err, 'Không thể ghi nhận thanh toán lương'), 'error');
     } finally {
@@ -249,7 +306,7 @@ export const AdminPayrollsPage: React.FC = () => {
                 statusFilter === 'ALL' ? 'bg-white text-stone-900 shadow-2xs font-bold' : 'text-stone-600'
               }`}
             >
-              Tất cả ({payrolls.length})
+              Tất cả ({selectedPeriod?.totalEmployeesCount ?? payrolls.length})
             </button>
             <button
               onClick={() => setStatusFilter('UNPAID')}
@@ -257,7 +314,7 @@ export const AdminPayrollsPage: React.FC = () => {
                 statusFilter === 'UNPAID' ? 'bg-white text-rose-800 shadow-2xs font-bold' : 'text-stone-600'
               }`}
             >
-              Chưa chi ({payrolls.filter((p) => p.paymentStatus === 'UNPAID').length})
+              Chưa chi ({selectedPeriod ? selectedPeriod.unpaidCount : payrolls.filter((p) => p.paymentStatus === 'UNPAID').length})
             </button>
             <button
               onClick={() => setStatusFilter('PAID')}
@@ -265,7 +322,7 @@ export const AdminPayrollsPage: React.FC = () => {
                 statusFilter === 'PAID' ? 'bg-white text-emerald-800 shadow-2xs font-bold' : 'text-stone-600'
               }`}
             >
-              Đã chi ({payrolls.filter((p) => p.paymentStatus === 'PAID').length})
+              Đã chi ({selectedPeriod ? selectedPeriod.paidCount : payrolls.filter((p) => p.paymentStatus === 'PAID').length})
             </button>
           </div>
         </div>

@@ -148,6 +148,13 @@ public class AttendanceService {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên với ID: " + employeeId));
 
+        if (employee.getHireDate() != null && workDate.isBefore(employee.getHireDate())) {
+            throw new BusinessValidationException(String.format(
+                    "Không thể ghi nhận chấm công cho nhân viên %s vào ngày %s vì trước ngày bắt đầu vào làm (%s).",
+                    employee.getFullName(), workDate, employee.getHireDate()
+            ));
+        }
+
         Attendance attendance = attendanceRepository.findByEmployeeIdAndWorkDate(employeeId, workDate)
                 .orElseGet(() -> {
                     Attendance newAtt = new Attendance();

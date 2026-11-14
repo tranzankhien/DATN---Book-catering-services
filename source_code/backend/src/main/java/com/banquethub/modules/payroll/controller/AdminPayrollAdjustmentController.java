@@ -57,16 +57,22 @@ public class AdminPayrollAdjustmentController {
     @Operation(summary = "Cập nhật khoản phụ cấp hoặc khấu trừ khi kỳ lương chưa chốt")
     public ResponseEntity<ApiResponse<PayrollAdjustmentDto>> updateAdjustment(
             @PathVariable Long id,
-            @Valid @RequestBody UpdatePayrollAdjustmentRequest request
+            @Valid @RequestBody UpdatePayrollAdjustmentRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        PayrollAdjustmentDto result = adjustmentService.updateAdjustment(id, request);
+        String adminName = userDetails != null ? userDetails.getFullName() : "Admin";
+        PayrollAdjustmentDto result = adjustmentService.updateAdjustment(id, request, adminName);
         return ResponseEntity.ok(ApiResponse.ok("Cập nhật khoản điều chỉnh thành công", result));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Xóa khoản phụ cấp hoặc khấu trừ khi kỳ lương chưa chốt")
-    public ResponseEntity<ApiResponse<Void>> deleteAdjustment(@PathVariable Long id) {
-        adjustmentService.deleteAdjustment(id);
+    public ResponseEntity<ApiResponse<Void>> deleteAdjustment(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        String adminName = userDetails != null ? userDetails.getFullName() : "Admin";
+        adjustmentService.deleteAdjustment(id, adminName);
         return ResponseEntity.ok(ApiResponse.ok("Đã xóa khoản điều chỉnh thành công", null));
     }
 }

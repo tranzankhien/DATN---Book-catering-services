@@ -77,10 +77,11 @@ public class AdminPayrollPeriodController {
     @Operation(summary = "Chốt bảng lương chính thức cho kỳ lương (lưu snapshot lịch sử)")
     public ResponseEntity<ApiResponse<List<PayrollDto>>> finalizePayrollPeriod(
             @PathVariable Long id,
+            @RequestBody(required = false) FinalizePayrollPeriodRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         String adminName = userDetails != null ? userDetails.getFullName() : "Admin";
-        List<PayrollDto> result = periodService.finalizePeriod(id, adminName);
+        List<PayrollDto> result = periodService.finalizePeriod(id, request, adminName);
         return ResponseEntity.ok(ApiResponse.ok("Chốt bảng lương kỳ thành công", result));
     }
 
