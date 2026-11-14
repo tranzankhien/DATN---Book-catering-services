@@ -1263,6 +1263,55 @@ class Phase6HrPayrollIntegrationTest {
         // Verify updated_by column in database
         String updatedByDb = db.queryForObject("SELECT updated_by FROM payroll_adjustments WHERE id = ?", String.class, adjId);
         assertThat(updatedByDb).isNotEmpty();
+
+        // Verify audit trail table entries
+        Integer auditCount = db.queryForObject("SELECT count(*) FROM payroll_adjustment_audits WHERE adjustment_id = ?", Integer.class, adjId);
+        assertThat(auditCount).isGreaterThanOrEqualTo(2); // CREATED and UPDATED
+
+        // Delete adjustment and verify DELETED audit trail entry
+        mvc.perform(delete("/api/v1/admin/payroll-adjustments/" + adjId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+
+        Integer finalAuditCount = db.queryForObject("SELECT count(*) FROM payroll_adjustment_audits WHERE adjustment_id = ?", Integer.class, adjId);
+        assertThat(finalAuditCount).isGreaterThanOrEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("TC-49: Finalize rejects when itemized line values change even if total net and employee count are identical")
+    void tc49_finalizeFailsIfLineItemsChangedEvenIfTotalNetAndCountMatch() throws Exception {
+        String token = adminToken();
+        int year = 2098;
+        int month = 3;
+        long periodId = createPayrollPeriod(token, year, month, new BigDecimal("26.0"));
+
+        // Get preview with original previewHash
+        String prevRes = mvc.perform(get("/api/v1/admin/payroll-periods/" + periodId + "/preview")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode prevData = json.readTree(prevRes).path("data");
+        BigDecimal totalNet = new BigDecimal(prevData.path("totalNetSalary").asText());
+        int empCount = prevData.path("totalEmployees").asInt();
+        String originalHash = prevData.path("previewHash").asText();
+        assertThat(originalHash).isNotEmpty();
+
+        // Pass a stale / mismatched hash (simulating line items modified after preview)
+        FinalizePayrollPeriodRequest badHashRequest = new FinalizePayrollPeriodRequest(totalNet, empCount, "tampered-or-outdated-hash");
+        mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(badHashRequest)))
+                .andExpect(status().isBadRequest());
+
+        // Finalize with valid hash succeeds
+        FinalizePayrollPeriodRequest validRequest = new FinalizePayrollPeriodRequest(totalNet, empCount, originalHash);
+        mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(validRequest)))
+                .andExpect(status().isOk());
     }
 
     // =========================================================================

@@ -174,11 +174,15 @@ public class InventoryService {
             throw new BusinessValidationException("Lý do điều chỉnh tồn kho bắt buộc phải nhập");
         }
 
+        BigDecimal change = request.getQuantityChange().setScale(3, RoundingMode.HALF_UP);
+        if (change.compareTo(BigDecimal.ZERO) == 0) {
+            throw new BusinessValidationException("Số lượng điều chỉnh kho quá nhỏ hoặc bằng 0 (độ chính xác tối đa 3 chữ số thập phân, tối thiểu ±0.001)");
+        }
+
         Ingredient ingredient = ingredientRepository.findByIdForUpdate(request.getIngredientId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nguyên liệu với ID: " + request.getIngredientId()));
 
         BigDecimal currentStock = ingredient.getCurrentStock();
-        BigDecimal change = request.getQuantityChange().setScale(3, RoundingMode.HALF_UP);
         BigDecimal newStock = currentStock.add(change).setScale(3, RoundingMode.HALF_UP);
 
         if (newStock.compareTo(BigDecimal.ZERO) < 0) {

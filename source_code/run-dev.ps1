@@ -109,16 +109,11 @@ if (-not $ready) { Fail "PostgreSQL khong san sang sau 30 giay. Xem log: docker 
 $sqlPass = $dbPass.Replace("'", "''")
 docker compose -f $composeFile exec -T postgres psql -U $dbUser -d $dbName -v ON_ERROR_STOP=1 -c "ALTER USER $dbUser WITH PASSWORD '$sqlPass';" *> $null
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "  -> Volume cu khong tuong thich (sai user/DB). Dang tao lai database sach..." -ForegroundColor DarkYellow
-    docker compose -f $composeFile down -v
-    docker compose -f $composeFile up -d
-    for ($i = 1; $i -le 30; $i++) {
-        docker compose -f $composeFile exec -T postgres pg_isready -U $dbUser -d $dbName *> $null
-        if ($LASTEXITCODE -eq 0) { break }
-        Start-Sleep -Seconds 1
-    }
+    Write-Host "  -> Canh bao: Khong the cap nhat mat khau cho user '$dbUser'. Vui long kiem tra file .env." -ForegroundColor Yellow
+    Write-Host "  -> Luu y: He thong khong tu y xoa volume du lieu. Neu can reset toan bo database, vui long chay: docker compose -f $composeFile down -v" -ForegroundColor Yellow
+} else {
+    Write-Host "  -> PostgreSQL san sang tai localhost:$dbPort, mat khau da dong bo voi .env" -ForegroundColor Green
 }
-Write-Host "  -> PostgreSQL san sang tai localhost:$dbPort, mat khau da dong bo voi .env" -ForegroundColor Green
 
 # ---------------------------------------------------------------------
 # 4. Thu vien Frontend

@@ -55,6 +55,7 @@ export const AiMenuPage: React.FC = () => {
   const [budgetType, setBudgetType] = useState<BudgetType>('PER_TABLE');
   const [budgetAmount, setBudgetAmount] = useState<string>('1500000');
   const [perPersonBudget, setPerPersonBudget] = useState<number | null>(null);
+  const [explicitTotalGuests, setExplicitTotalGuests] = useState<number | null>(null);
   const [preferences, setPreferences] = useState('');
   const [excludedIngredients, setExcludedIngredients] = useState('');
 
@@ -81,11 +82,18 @@ export const AiMenuPage: React.FC = () => {
     if (!text.trim()) {
       setDetectedSummary(null);
       setPerPersonBudget(null);
+      setExplicitTotalGuests(null);
       return;
     }
 
     const extracted = extractAiMenuParameters(text);
     const parts: string[] = [];
+
+    if (extracted.totalGuests && extracted.totalGuests > 0) {
+      setExplicitTotalGuests(extracted.totalGuests);
+    } else {
+      setExplicitTotalGuests(null);
+    }
 
     if (extracted.detectedFields.tableCount && extracted.tableCount) {
       setTableCount(extracted.tableCount);
@@ -219,7 +227,9 @@ export const AiMenuPage: React.FC = () => {
 
       const finalTables = submittedPayload?.tableCount ?? suggestion.tableCount ?? tableCount;
       const finalGuestsPerTable = submittedPayload?.guestsPerTable ?? guestsPerTable;
-      const finalGuestCount = finalTables * finalGuestsPerTable;
+      const finalGuestCount = explicitTotalGuests && explicitTotalGuests > 0
+        ? explicitTotalGuests
+        : (finalTables * finalGuestsPerTable);
 
       sessionStorage.setItem(
         STORAGE_KEY,

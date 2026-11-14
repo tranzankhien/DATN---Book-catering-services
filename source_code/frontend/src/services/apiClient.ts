@@ -4,7 +4,7 @@ import type { ApiErrorResponse } from './types';
 export const TOKEN_STORAGE_KEY = 'banquethub_access_token';
 export const USER_STORAGE_KEY = 'banquethub_user_profile';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+const baseURL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:8080/api/v1' : '/api/v1');
 
 export const apiClient = axios.create({
   baseURL,

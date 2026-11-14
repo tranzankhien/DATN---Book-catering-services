@@ -50,6 +50,9 @@ export const AdminPayrollsPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [statusFilter, setStatusFilter] = useState<'ALL' | PaymentStatus>('ALL');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [page, setPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalElements, setTotalElements] = useState<number>(0);
   const activeRequestIdRef = useRef<number>(0);
 
   // Mark Paid Modal
@@ -86,13 +89,16 @@ export const AdminPayrollsPage: React.FC = () => {
     [periods, selectedPeriodId]
   );
 
-  const fetchPeriodSummary = async (period: PayrollPeriodDto) => {
+  const fetchPeriodSummary = async (period: PayrollPeriodDto, reqId: number) => {
     try {
       const summary = await employeeService.getPayrollSummary(period.year, period.month);
-      setPeriodSummary(summary);
+      if (reqId === activeRequestIdRef.current) {
+        setPeriodSummary(summary);
+      }
     } catch {
-      // Fallback gracefully
-      setPeriodSummary(null);
+      if (reqId === activeRequestIdRef.current) {
+        setPeriodSummary(null);
+      }
     }
   };
 
@@ -104,10 +110,14 @@ export const AdminPayrollsPage: React.FC = () => {
       const res = await employeeService.getPayrolls({
         periodId: Number(selectedPeriodId),
         paymentStatus: statusFilter === 'ALL' ? undefined : statusFilter,
-        size: 200,
+        search: searchTerm.trim() || undefined,
+        page,
+        size: 50,
       });
       if (reqId === activeRequestIdRef.current) {
         setPayrolls(res.content);
+        setTotalPages(res.totalPages || 1);
+        setTotalElements(res.totalElements || res.content.length);
       }
     } catch (err) {
       if (reqId === activeRequestIdRef.current) {
@@ -121,25 +131,21 @@ export const AdminPayrollsPage: React.FC = () => {
   };
 
   useEffect(() => {
+    setPage(0);
+  }, [selectedPeriodId, statusFilter, searchTerm]);
+
+  useEffect(() => {
     if (selectedPeriodId) {
       fetchPayrolls();
       setSearchParams({ periodId: selectedPeriodId });
       const current = periods.find((p) => String(p.id) === selectedPeriodId);
       if (current) {
-        fetchPeriodSummary(current);
+        fetchPeriodSummary(current, activeRequestIdRef.current);
       }
     }
-  }, [selectedPeriodId, statusFilter, periods]);
+  }, [selectedPeriodId, statusFilter, searchTerm, page, periods]);
 
-  const filteredPayrolls = useMemo(() => {
-    if (!searchTerm.trim()) return payrolls;
-    const term = searchTerm.toLowerCase();
-    return payrolls.filter(
-      (p) =>
-        p.employeeNameSnapshot.toLowerCase().includes(term) ||
-        p.employeeCodeSnapshot.toLowerCase().includes(term)
-    );
-  }, [payrolls, searchTerm]);
+  const filteredPayrolls = payrolls;
 
   // Totals: strictly period-level to avoid skew when filtering or paginating
   const totalNet = useMemo(() => {
@@ -203,7 +209,7 @@ export const AdminPayrollsPage: React.FC = () => {
       fetchPayrolls();
       fetchPeriods();
       if (selectedPeriod) {
-        fetchPeriodSummary(selectedPeriod);
+        fetchPeriodSummary(selectedPeriod, activeRequestIdRef.current);
       }
     } catch (err) {
       showToast(extractErrorMessage(err, 'Không thể ghi nhận thanh toán lương'), 'error');
@@ -434,6 +440,32 @@ export const AdminPayrollsPage: React.FC = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Pagination Bar */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-200 text-xs text-stone-600 bg-stone-50/50">
+            <span>Hiển thị {payrolls.length} / {totalElements} nhân viên</span>
+            <div className="flex items-center gap-1.5">
+              <button
+                disabled={page === 0}
+                onClick={() => setPage((prev) => Math.max(0, prev - 1))}
+                className="px-3 py-1.5 border border-stone-200 rounded-lg hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-medium"
+              >
+                Trang trước
+              </button>
+              <span className="px-2 font-bold text-stone-900">
+                Trang {page + 1} / {totalPages}
+              </span>
+              <button
+                disabled={page >= totalPages - 1}
+                onClick={() => setPage((prev) => prev + 1)}
+                className="px-3 py-1.5 border border-stone-200 rounded-lg hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-medium"
+              >
+                Trang sau
+              </button>
+            </div>
           </div>
         )}
       </div>

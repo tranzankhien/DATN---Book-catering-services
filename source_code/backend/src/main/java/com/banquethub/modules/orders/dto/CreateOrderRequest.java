@@ -65,6 +65,8 @@ public class CreateOrderRequest {
 
     private String idempotencyKey;
 
+    private BigDecimal expectedTotalAmount;
+
     public CreateOrderRequest() {}
 
     public String getCustomerName() {
@@ -161,5 +163,13 @@ public class CreateOrderRequest {
 
     public void setIdempotencyKey(String idempotencyKey) {
         this.idempotencyKey = idempotencyKey;
+    }
+
+    public BigDecimal getExpectedTotalAmount() {
+        return expectedTotalAmount;
+    }
+
+    public void setExpectedTotalAmount(BigDecimal expectedTotalAmount) {
+        this.expectedTotalAmount = expectedTotalAmount;
     }
 }

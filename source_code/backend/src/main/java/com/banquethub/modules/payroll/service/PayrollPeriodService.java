@@ -223,6 +223,7 @@ public class PayrollPeriodService {
         }
 
         items.sort(Comparator.comparing(PayrollPeriodPreviewDto.PayrollPreviewItemDto::employeeId));
+        String previewHash = computePreviewHash(items);
 
         return new PayrollPeriodPreviewDto(
                 period.getId(),
@@ -237,7 +238,8 @@ public class PayrollPeriodService {
                 totalNet,
                 canFinalize,
                 globalWarnings,
-                items
+                items,
+                previewHash
         );
     }
 
@@ -265,6 +267,12 @@ public class PayrollPeriodService {
 
         // Integrity check: verify that preview data matches what the admin reviewed
         if (request != null) {
+            if (request.previewHash() != null && !request.previewHash().isBlank() &&
+                    !preview.previewHash().equals(request.previewHash())) {
+                throw new BusinessValidationException(
+                        "Bảng lương đã bị thay đổi chi tiết từng nhân viên (mức lương, công hoặc phụ cấp) kể từ lần xem trước gần nhất. Vui lòng tải lại bản xem trước để rà soát trước khi chốt."
+                );
+            }
             if (request.expectedTotalNetSalary() != null &&
                     preview.totalNetSalary().compareTo(request.expectedTotalNetSalary()) != 0) {
                 throw new BusinessValidationException(String.format(
@@ -351,6 +359,28 @@ public class PayrollPeriodService {
             long paidCount = payrollRepository.countByPayrollPeriodIdAndPaymentStatus(p.getId(), PaymentStatus.PAID);
             long unpaidCount = payrollRepository.countByPayrollPeriodIdAndPaymentStatus(p.getId(), PaymentStatus.UNPAID);
             return PayrollPeriodDto.fromEntity(p, (int) totalCount, totalFinalized, (int) paidCount, (int) unpaidCount);
+        }
+    }
+
+    public static String computePreviewHash(List<PayrollPeriodPreviewDto.PayrollPreviewItemDto> items) {
+        if (items == null || items.isEmpty()) {
+            return "EMPTY";
+        }
+        List<PayrollPeriodPreviewDto.PayrollPreviewItemDto> sorted = items.stream()
+                .sorted(Comparator.comparing(PayrollPeriodPreviewDto.PayrollPreviewItemDto::employeeId))
+                .toList();
+        StringBuilder sb = new StringBuilder();
+        for (PayrollPeriodPreviewDto.PayrollPreviewItemDto it : sorted) {
+            sb.append(it.employeeId()).append(':')
+              .append(it.actualWorkdays() != null ? it.actualWorkdays().stripTrailingZeros().toPlainString() : "0").append(':')
+              .append(it.netSalary() != null ? it.netSalary().stripTrailingZeros().toPlainString() : "0").append(';');
+        }
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            return java.util.HexFormat.of().formatHex(digest);
+        } catch (Exception e) {
+            return Integer.toHexString(sb.toString().hashCode());
         }
     }
 }

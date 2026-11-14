@@ -243,6 +243,15 @@ public class OrderService {
 
         sePayConfig.validateAmount(totalAmount);
 
+        if (request.getExpectedTotalAmount() != null &&
+                totalAmount.compareTo(request.getExpectedTotalAmount()) != 0) {
+            throw new BusinessValidationException(String.format(
+                    "Đơn giá món ăn hoặc tổng tiền bàn tiệc đã thay đổi kể từ lúc bạn xem trước (Đã xem: %s đ, thực tế hiện tại: %s đ). Vui lòng kiểm tra lại đơn trước khi xác nhận đặt tiệc.",
+                    new java.text.DecimalFormat("#,###").format(request.getExpectedTotalAmount()),
+                    new java.text.DecimalFormat("#,###").format(totalAmount)
+            ));
+        }
+
         // 3. Generate Order Code
         Long seq = orderRepository.getNextOrderCodeSeq();
         String datePart = LocalDate.now(VN_ZONE).format(DATE_FORMATTER);

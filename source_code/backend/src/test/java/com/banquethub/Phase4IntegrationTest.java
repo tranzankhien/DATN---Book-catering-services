@@ -3,6 +3,7 @@ package com.banquethub;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -34,6 +35,7 @@ class Phase4IntegrationTest {
     @Autowired JdbcTemplate db;
     @Autowired com.banquethub.modules.reservations.service.ReservationExpiryScheduler expiryScheduler;
 
+    @BeforeEach
     @AfterEach
     void cleanupP4TestData() {
         db.update("DELETE FROM email_outbox WHERE order_id IN (SELECT id FROM orders WHERE customer_email LIKE '%@example.test' OR customer_name IN ('Phase Four', 'Map Test'))");
@@ -138,6 +140,8 @@ class Phase4IntegrationTest {
     @Test void wrongSignatureAndWrongAmountLeaveEverythingUnpaid() throws Exception {
         Fixture f = fixture(); var p = notification(f, create(f));
         mvc.perform(notificationRequest(p, "incorrect")).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/v1/payments/sepay/ipn").contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(p))).andExpect(status().isUnauthorized());
         p.withObject("order").put("order_amount", "100");
         mvc.perform(notificationRequest(p, "ipn-test-secret")).andExpect(status().isBadRequest());
         assertThat(orderStatus(f)).isEqualTo("PENDING_PAYMENT"); assertThat(stock(f)).isEqualByComparingTo("100");
@@ -175,7 +179,8 @@ class Phase4IntegrationTest {
         assertThat(db.queryForObject("SELECT status FROM stock_reservations WHERE order_id=?", String.class, f.order))
             .isEqualTo("ACTIVE");
 
-        db.update("UPDATE payment_transactions SET expires_at=now()-interval '1 second' WHERE order_id=?",f.order);
+        db.update("UPDATE payment_transactions SET expires_at=now()-interval '10 seconds' WHERE order_id=?",f.order);
+        db.update("UPDATE orders SET payment_expires_at=now()+interval '15 minutes' WHERE id=?", f.order);
         mvc.perform(cancel).andExpect(status().isOk());
         assertThat(orderStatus(f)).isEqualTo("CANCELLED");
         assertThat(db.queryForObject("SELECT status FROM stock_reservations WHERE order_id=?", String.class, f.order))
@@ -284,7 +289,7 @@ class Phase4IntegrationTest {
         db.update("UPDATE orders SET event_date_time=? WHERE id=?", event, f.order);
         JsonNode attempt = create(f);
         assertThat(OffsetDateTime.parse(attempt.path("expiresAt").asText()).toInstant()).isEqualTo(event.toInstant());
-        db.update("UPDATE orders SET payment_expires_at=now()-interval '1 second' WHERE id=?", f.order);
+        db.update("UPDATE orders SET payment_expires_at=now()-interval '10 seconds' WHERE id=?", f.order);
         expiryScheduler.cleanupExpiredReservations();
         assertThat(db.queryForObject("SELECT status FROM payment_transactions WHERE order_id=?",String.class,f.order)).isEqualTo("EXPIRED");
     }

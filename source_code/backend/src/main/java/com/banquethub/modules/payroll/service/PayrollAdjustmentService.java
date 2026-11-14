@@ -29,15 +29,18 @@ public class PayrollAdjustmentService {
     private final PayrollAdjustmentRepository adjustmentRepository;
     private final PayrollPeriodRepository periodRepository;
     private final EmployeeRepository employeeRepository;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     public PayrollAdjustmentService(
             PayrollAdjustmentRepository adjustmentRepository,
             PayrollPeriodRepository periodRepository,
-            EmployeeRepository employeeRepository
+            EmployeeRepository employeeRepository,
+            org.springframework.jdbc.core.JdbcTemplate jdbc
     ) {
         this.adjustmentRepository = adjustmentRepository;
         this.periodRepository = periodRepository;
         this.employeeRepository = employeeRepository;
+        this.jdbc = jdbc;
     }
 
     @Transactional(readOnly = true)
@@ -86,6 +89,17 @@ public class PayrollAdjustmentService {
         adjustment.setCreatedBy(adminName);
 
         PayrollAdjustment saved = adjustmentRepository.save(adjustment);
+
+        try {
+            jdbc.update("""
+                INSERT INTO payroll_adjustment_audits(adjustment_id, employee_id, payroll_period_id, action, adjustment_type, old_amount, new_amount, old_name, new_name, note, actor_name)
+                VALUES (?, ?, ?, 'CREATED', ?, NULL, ?, NULL, ?, ?, ?)
+            """, saved.getId(), saved.getEmployee().getId(), saved.getPayrollPeriod().getId(),
+                saved.getAdjustmentType().name(), saved.getAmount(), saved.getName(), saved.getNote(), adminName);
+        } catch (Exception ex) {
+            log.warn("Không thể lưu audit trail cho khoản điều chỉnh ID {}: {}", saved.getId(), ex.getMessage());
+        }
+
         return PayrollAdjustmentDto.fromEntity(saved);
     }
 
@@ -133,6 +147,17 @@ public class PayrollAdjustmentService {
                 adminName, id, oldName, oldAmount, name, request.amount());
 
         PayrollAdjustment saved = adjustmentRepository.save(adjustment);
+
+        try {
+            jdbc.update("""
+                INSERT INTO payroll_adjustment_audits(adjustment_id, employee_id, payroll_period_id, action, adjustment_type, old_amount, new_amount, old_name, new_name, note, actor_name)
+                VALUES (?, ?, ?, 'UPDATED', ?, ?, ?, ?, ?, ?, ?)
+            """, id, adjustment.getEmployee().getId(), period.getId(),
+                adjustment.getAdjustmentType().name(), oldAmount, request.amount(), oldName, name, adjustment.getNote(), adminName);
+        } catch (Exception ex) {
+            log.warn("Không thể lưu audit trail cho khoản điều chỉnh ID {}: {}", id, ex.getMessage());
+        }
+
         return PayrollAdjustmentDto.fromEntity(saved);
     }
 
@@ -154,6 +179,16 @@ public class PayrollAdjustmentService {
 
         log.info("Quản trị viên '{}' đã xóa khoản điều chỉnh ID {} ({}, {} đ) của nhân viên ID {}",
                 adminName, id, adjustment.getName(), adjustment.getAmount(), adjustment.getEmployee().getId());
+
+        try {
+            jdbc.update("""
+                INSERT INTO payroll_adjustment_audits(adjustment_id, employee_id, payroll_period_id, action, adjustment_type, old_amount, new_amount, old_name, new_name, note, actor_name)
+                VALUES (?, ?, ?, 'DELETED', ?, ?, NULL, ?, NULL, ?, ?)
+            """, id, adjustment.getEmployee().getId(), period.getId(),
+                adjustment.getAdjustmentType().name(), adjustment.getAmount(), adjustment.getName(), "Xóa khoản điều chỉnh", adminName);
+        } catch (Exception ex) {
+            log.warn("Không thể lưu audit trail khi xóa khoản điều chỉnh ID {}: {}", id, ex.getMessage());
+        }
 
         adjustmentRepository.delete(adjustment);
     }

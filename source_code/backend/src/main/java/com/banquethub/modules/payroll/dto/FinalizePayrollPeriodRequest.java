@@ -4,6 +4,10 @@ import java.math.BigDecimal;
 
 public record FinalizePayrollPeriodRequest(
         BigDecimal expectedTotalNetSalary,
-        Integer expectedEmployeeCount
+        Integer expectedEmployeeCount,
+        String previewHash
 ) {
+    public FinalizePayrollPeriodRequest(BigDecimal expectedTotalNetSalary, Integer expectedEmployeeCount) {
+        this(expectedTotalNetSalary, expectedEmployeeCount, null);
+    }
 }

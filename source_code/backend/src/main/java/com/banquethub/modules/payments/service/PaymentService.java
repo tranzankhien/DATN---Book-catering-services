@@ -191,6 +191,8 @@ public class PaymentService {
                 history.save(new OrderStatusHistory(order, order.getOrderStatus(), order.getOrderStatus(), null, "SEPAY", note));
             }
         } else if ("PENDING".equals(payment.getStatus())) {
+            payment.setResponseCode("00");
+            payment.setTransactionStatus("02");
             flagReview(order, payment, "SePay thông báo hủy giao dịch. Cần đối soát trạng thái.");
         }
     }
@@ -226,8 +228,10 @@ public class PaymentService {
             String failure=settle(order,payment,actor,"Đã xác nhận thanh toán sau đối soát.");
             if(failure!=null) throw new BusinessValidationException(failure);
         } else if("CLOSE_MANUALLY".equals(action)) {
-            boolean finalResult = "00".equals(payment.getResponseCode())
-                && Set.of("00","02").contains(Objects.toString(payment.getTransactionStatus(),""));
+            boolean finalResult = ("00".equals(payment.getResponseCode())
+                && Set.of("00","02").contains(Objects.toString(payment.getTransactionStatus(),"")))
+                || "02".equals(payment.getTransactionStatus())
+                || "VOID".equalsIgnoreCase(payment.getTransactionStatus());
             if (!finalResult) throw new BusinessValidationException("Cần kết quả SePay dứt điểm trước khi đóng đối soát.");
             if (resolutionReference==null || resolutionReference.isBlank())
                 throw new BusinessValidationException("Cần mã chứng từ hoặc mã đối soát xác nhận đã xử lý khoản tiền.");

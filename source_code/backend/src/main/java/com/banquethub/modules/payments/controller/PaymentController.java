@@ -60,10 +60,11 @@ public class PaymentController {
         if (isWebhookTest) {
             return ResponseEntity.ok(Map.of("success",true));
         }
-        if (secret != null && !config.ipnSecret.isBlank() && !java.security.MessageDigest.isEqual(
+        if (config.ipnSecret == null || config.ipnSecret.isBlank() || secret == null || !java.security.MessageDigest.isEqual(
                 config.ipnSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8),
-                secret.getBytes(java.nio.charset.StandardCharsets.UTF_8)))
+                secret.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
             return ResponseEntity.status(401).body(Map.of("success",false));
+        }
         var order = payload.path("order");
         String reference = order.path("order_invoice_number").asText();
         String type = payload.path("notification_type").asText();

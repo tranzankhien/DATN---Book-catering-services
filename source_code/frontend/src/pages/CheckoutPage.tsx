@@ -355,6 +355,7 @@ export const CheckoutPage: React.FC = () => {
         guestCount: Number(guestCount),
         eventLocation: eventLocation.trim(),
         idempotencyKey: effectiveKey,
+        expectedTotalAmount: preview.totalAmount,
       };
 
       const createdOrder = await orderService.createOrder(payload, effectiveKey);

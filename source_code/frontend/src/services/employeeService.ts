@@ -135,7 +135,7 @@ export const employeeService = {
 
   async finalizePayrollPeriod(
     id: number,
-    payload?: { expectedTotalNetSalary?: number; expectedEmployeeCount?: number }
+    payload?: { expectedTotalNetSalary?: number; expectedEmployeeCount?: number; previewHash?: string }
   ): Promise<PayrollDto[]> {
     const res = await apiClient.post<ApiResponse<PayrollDto[]>>(
       `/admin/payroll-periods/${id}/finalize`,

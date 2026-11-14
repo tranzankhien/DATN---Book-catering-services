@@ -470,6 +470,7 @@ export interface CreateOrderPayload {
   menuId?: number;
   items: CreateOrderItemPayload[];
   idempotencyKey?: string;
+  expectedTotalAmount?: number;
 }
 
 export interface OrderPreviewPayload {
@@ -740,6 +741,7 @@ export interface PayrollPeriodPreviewDto {
   totalDeductions: number;
   totalNetSalary: number;
   totalWarningsCount: number;
+  previewHash?: string;
 }
 
 export interface PayrollDto {

@@ -147,6 +147,7 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
       await employeeService.finalizePayrollPeriod(previewPeriodId, {
         expectedTotalNetSalary: previewData?.totalNetSalary,
         expectedEmployeeCount: previewData?.items.length,
+        previewHash: previewData?.previewHash,
       });
       showToast('Chốt sổ kỳ lương thành công! Dữ liệu bảng lương đã được khóa an toàn.', 'success');
       setPreviewPeriodId(null);

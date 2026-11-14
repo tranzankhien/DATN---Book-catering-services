@@ -727,6 +727,22 @@ class Phase2IntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("âm")));
+
+        // Test adjustment quantity too small (< 0.001) returns 400 Bad Request instead of 500
+        String tinyPayload = String.format("""
+                {
+                  "ingredientId": %d,
+                  "quantityChange": 0.0004,
+                  "reason": "Điều chỉnh quá nhỏ thử nghiệm"
+                }
+                """, ingId);
+        mockMvc.perform(post("/api/v1/admin/inventory/adjustments")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(tinyPayload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("quá nhỏ")));
     }
 
     @Test

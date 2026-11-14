@@ -252,9 +252,14 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
   // Adjust per-person budget to per-table budget once guests per table is resolved
   if (isPerPersonBudget && result.budgetAmount) {
     result.perPersonBudget = result.budgetAmount;
-    const guests = result.guestsPerTable || 6;
-    result.budgetAmount = result.perPersonBudget * guests;
-    result.budgetType = 'PER_TABLE';
+    if (result.totalGuests && result.totalGuests > 0) {
+      result.budgetAmount = result.perPersonBudget * result.totalGuests;
+      result.budgetType = 'TOTAL_ORDER';
+    } else {
+      const guests = result.guestsPerTable || 6;
+      result.budgetAmount = result.perPersonBudget * guests;
+      result.budgetType = 'PER_TABLE';
+    }
   }
 
   // 4. EXTRACT EVENT TYPE
