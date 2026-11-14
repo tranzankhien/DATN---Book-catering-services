@@ -226,3 +226,48 @@ POST /api/v1/payments/sepay/create, POST /payments/sepay/ipn, GET /orders/{id}/p
     - `totalPerTable`, `totalOrderAmount`: Tổng tiền 1 bàn và tổng toàn tiệc.
     - `budgetStatus`: `WITHIN_BUDGET` hoặc `OVER_BUDGET`.
     - `availabilityStatus`: `AVAILABLE`, `PARTIAL_SHORTAGE` hoặc `OUT_OF_STOCK` (kiểm tra tồn khả dụng độc lập không giữ kho).
+
+
+## Phase 6 – Quản lý Nhân sự, Chấm công, Bảng lương & Chi trả (HR & Payroll APIs)
+
+### 1. Quản lý Nhân sự (Admin Employee APIs - `ROLE_ADMIN`)
+- **`GET /api/v1/admin/employees`**: Lấy danh sách nhân viên phân trang (hỗ trợ search `search`, filter trạng thái `status=ACTIVE|INACTIVE`, `page`, `size`).
+- **`GET /api/v1/admin/employees/{id}`**: Lấy chi tiết hồ sơ nhân viên.
+- **`POST /api/v1/admin/employees`**: Tạo mới hồ sơ nhân sự (mã NV tự sinh `NV-XXXX` nếu bỏ trống, `fullName`, `position`, `hireDate`, `baseSalary`, `phone`, `email`, `userId`, `note`).
+- **`PUT /api/v1/admin/employees/{id}`**: Cập nhật thông tin nhân viên (họ tên, chức vụ, mức lương cơ bản, liên kết tài khoản).
+- **`PATCH /api/v1/admin/employees/{id}/status`**: Cập nhật trạng thái `ACTIVE` hoặc `INACTIVE`.
+
+### 2. Quản lý Chấm công Hàng ngày (Admin Attendance APIs - `ROLE_ADMIN`)
+- **`GET /api/v1/admin/attendance`**: Lấy danh sách chấm công theo tháng/năm (`year`, `month`, `employeeId` tùy chọn).
+- **`GET /api/v1/admin/attendance/summary`**: Lấy bảng tổng hợp công ma trận toàn viện cả tháng theo từng ngày 1..31 (`CompanyAttendanceSummaryDto`).
+- **`PUT /api/v1/admin/attendance/{employeeId}/{date}`**: Chấm công hoặc sửa công cho một nhân viên theo ngày (`attendanceStatus: PRESENT|HALF_DAY|ABSENT`, `note`). Khóa chống sửa nếu kỳ lương đã `FINALIZED` hoặc `CLOSED`.
+- **`POST /api/v1/admin/attendance/bulk`**: Chấm công hàng loạt cho nhiều nhân sự trong một ngày (`BulkAttendanceRequest`).
+
+### 3. Kỳ tính lương & Chốt sổ (Admin Payroll Period APIs - `ROLE_ADMIN`)
+- **`GET /api/v1/admin/payroll-periods`**: Lấy danh sách các kỳ tính lương (`status` filter tùy chọn).
+- **`GET /api/v1/admin/payroll-periods/{id}`**: Xem chi tiết kỳ lương.
+- **`POST /api/v1/admin/payroll-periods`**: Khởi tạo kỳ tính lương mới (`year`, `month`, `standardWorkdays` mặc định 26.0, `note`).
+- **`PUT /api/v1/admin/payroll-periods/{id}`**: Cập nhật số công chuẩn hoặc ghi chú (chỉ áp dụng khi kỳ lương đang `DRAFT`).
+- **`GET /api/v1/admin/payroll-periods/{id}/preview`**: Xem trước bảng dự toán tính lương tự động toàn bộ nhân viên kèm các cảnh báo (công vượt công chuẩn, lương âm).
+- **`POST /api/v1/admin/payroll-periods/{id}/finalize`**: Xác nhận chốt sổ kỳ lương, tạo các bản ghi snapshot bất biến trong `payrolls`, chuyển trạng thái `FINALIZED`, khóa chỉnh sửa chấm công.
+- **`POST /api/v1/admin/payroll-periods/{id}/close`**: Đóng và lưu trữ kỳ tính lương (`CLOSED`).
+
+### 4. Phụ cấp & Khấu trừ (Admin Adjustments APIs - `ROLE_ADMIN`)
+- **`GET /api/v1/admin/payroll-periods/{periodId}/adjustments`**: Lấy danh sách các khoản điều chỉnh trong kỳ.
+- **`POST /api/v1/admin/payroll-periods/{periodId}/adjustments`**: Thêm khoản phụ cấp hoặc khấu trừ cho nhân viên (`employeeId`, `adjustmentType: ALLOWANCE|DEDUCTION`, `amount`, `reason`). Chỉ thao tác khi kỳ lương đang `DRAFT`.
+- **`PUT /api/v1/admin/payroll-periods/{periodId}/adjustments/{id}`**: Cập nhật số tiền hoặc lý do điều chỉnh.
+- **`DELETE /api/v1/admin/payroll-periods/{periodId}/adjustments/{id}`**: Xóa khoản điều chỉnh.
+
+### 5. Bảng lương & Chi trả (Admin Payrolls & Salary Payments - `ROLE_ADMIN`)
+- **`GET /api/v1/admin/payrolls`**: Lấy danh sách bảng lương snapshot (`periodId`, `employeeId`, `paymentStatus`, phân trang).
+- **`GET /api/v1/admin/payrolls/{id}`**: Lấy chi tiết bảng lương một nhân viên.
+- **`POST /api/v1/admin/payrolls/{id}/mark-paid`**: Ghi nhận chi trả lương (`paymentMethod: CASH|BANK_TRANSFER`, `paymentDate`, `note`). Thanh toán đúng toàn bộ `netSalary` một lần duy nhất, chống chi trùng lặp qua pessimistic row lock.
+- **`GET /api/v1/admin/payrolls/summary`**: API tổng hợp tài chính lương phục vụ tích hợp Dashboard Phase 7 (`totalFinalizedPayrollAmount`, `totalPaidAmount`, `totalUnpaidAmount`, `monthlyMetrics`).
+- **`GET /api/v1/admin/salary-payments`**: Nhật ký toàn bộ các giao dịch giải ngân lương trên hệ thống.
+- **`GET /api/v1/admin/salary-payments/{payrollId}`**: Lấy biên nhận chi trả của một bảng lương cụ thể.
+
+### 6. Cổng Tự phục vụ của Nhân viên (Employee Self-Service APIs - `ROLE_EMPLOYEE` / `ROLE_ADMIN`)
+- **`GET /api/v1/employee/me/profile`**: Xem hồ sơ nhân sự của chính mình (nhận diện qua JWT `userId`).
+- **`GET /api/v1/employee/me/attendance?year=YYYY&month=MM`**: Xem lịch sử chấm công và tổng ngày công của chính mình.
+- **`GET /api/v1/employee/me/payrolls`**: Xem danh sách các phiếu lương chính thức đã chốt sổ của chính mình.
+- **`GET /api/v1/employee/me/payrolls/{payrollId}`**: Xem chi tiết phiếu lương (bị chặn 403 Forbidden nếu cố tình xem phiếu lương của người khác).

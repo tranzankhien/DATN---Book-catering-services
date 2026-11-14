@@ -189,3 +189,27 @@ Xem [cấu hình SePay Sandbox](docs/SEPAY_SETUP.md), [SMTP](docs/EMAIL_SETUP.md
 
 ### Chọn địa điểm đặt tiệc
 Checkout dùng Photon để gợi ý địa chỉ Việt Nam và OpenLayers với bản đồ OpenFreeMap. Có thể nhập tay, chọn gợi ý hoặc ghim. Tọa độ là tùy chọn và được lưu qua Flyway V13. Photon công cộng và OpenFreeMap phù hợp demo/lưu lượng nhỏ, không có cam kết dịch vụ. Có thể đặt VITE_PHOTON_URL và VITE_MAP_STYLE_URL trong frontend/.env để đổi máy chủ.
+
+
+---
+
+## 9. Phase 6 – Quản lý Nhân sự, Chấm công, Bảng lương & Chi trả (HR & Payroll)
+
+Chi tiết đặc tả và quy trình xem tại:
+- **Tài liệu đặc tả**: [`docs/HR_PAYROLL.md`](docs/HR_PAYROLL.md)
+- **Quy trình trực quan**: [`docs/PAYROLL_WORKFLOW.md`](docs/PAYROLL_WORKFLOW.md)
+
+### Các đường dẫn phân hệ Phase 6:
+| Phân hệ | Đường dẫn Frontend | Mô tả chức năng |
+|---|---|---|
+| **Hồ sơ nhân sự** | `/admin/employees` | Quản lý danh bạ nhân sự, vị trí, ngày vào làm, mức lương cơ bản, liên kết user |
+| **Bảng chấm công** | `/admin/attendance` | Ma trận chấm công toàn viện theo ngày (P = 1.0, H = 0.5, A = 0.0), khóa khi chốt sổ |
+| **Kỳ tính lương** | `/admin/payroll-periods` | Thiết lập công chuẩn (26 ngày), dự toán lương, phụ cấp/khấu trừ, chốt sổ snapshot |
+| **Bảng lương** | `/admin/payrolls` | Bảng lương chính thức bất biến, ghi nhận giải ngân (Tiền mặt / Chuyển khoản) |
+| **Nhật ký chi trả** | `/admin/salary-payments` | Sổ cái theo dõi các giao dịch thanh toán lương toàn hệ thống |
+| **Chấm công của tôi** | `/employee/attendance` | Nhân viên (`ROLE_EMPLOYEE`) tự tra cứu lịch sử chấm công cá nhân |
+| **Phiếu lương của tôi** | `/employee/payrolls` | Nhân viên tự xem phiếu lương chính thức (Payslip) với đầy đủ chi tiết thu nhập |
+
+### Kiểm thử hệ thống:
+- **Backend**: `139 / 139` test cases tích hợp PASS 100% (gồm `39 / 39` test Phase 6 trong `Phase6HrPayrollIntegrationTest.java`).
+- **Frontend**: Typecheck TypeScript và Vite build thành công 100% (0 lỗi).

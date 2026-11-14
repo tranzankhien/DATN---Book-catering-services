@@ -71,3 +71,40 @@ Phase 4 triển khai SePay Sandbox, xuất kho, email và tiến độ phục v�
 - Giới hạn tần suất (Rate Limiting): 60 lượt / giờ / user (hỗ trợ GEMINI_MAX_REQUESTS_PER_HOUR hoặc AI_MAX_REQUESTS_PER_USER), bảo vệ nguyên tử chống race condition và ghi nhận nhật ký kỹ thuật vào bảng `ai_recommendation_usage`.
 - Cơ chế Fallback linh hoạt (`source = RULE_BASED`): Tự động kích hoạt thuật toán cân bằng dinh dưỡng và ngân sách khi AI ngoại tuyến hoặc quá tải.
 - Giao diện người dùng `/ai-menu` sang trọng, hiện đại, tích hợp chuyển giao thực đơn vào Menu Builder để tiếp tục quy trình đặt tiệc và thanh toán.
+
+
+---
+
+## Phase 6 – Quản lý Nhân sự, Chấm công, Bảng lương & Chi trả (Hoàn thành)
+- **Hồ sơ nhân sự (Employee Directory)**:
+  - CRUD hồ sơ nhân sự, tự sinh mã nhân viên chuẩn hóa (`NV-XXXX`), quản lý vị trí chuyên môn, ngày vào làm và mức lương cơ bản hợp đồng.
+  - Liên kết 1-1 với tài khoản người dùng `ROLE_EMPLOYEE`. Bảo toàn lịch sử nhân sự `INACTIVE`.
+- **Bảng chấm công hàng ngày (Daily Attendance)**:
+  - Chấm công chi tiết từng ngày trong tháng theo 3 trạng thái chuẩn hóa: `PRESENT` (1.0 công), `HALF_DAY` (0.5 công), `ABSENT` (0.0 công), ngày chưa chấm (0.0 công).
+  - Hỗ trợ chấm công đơn lẻ và chấm công hàng loạt theo ngày.
+  - Ma trận chấm công toàn viện theo tháng, tự động tính tổng công thực tế tích lũy.
+  - Khóa chấm công bất biến chống sửa đổi một khi kỳ tính lương của tháng đã được chốt sổ (`FINALIZED` hoặc `CLOSED`).
+- **Kỳ tính lương & Động cơ tính lương chuẩn xác (Payroll Engine)**:
+  - Chu kỳ tính lương theo tháng (`year`, `month`), cấu hình số ngày công chuẩn (mặc định 26.0 ngày).
+  - Trạng thái vòng đời kỳ lương rõ ràng: `DRAFT` (Đang tính toán) -> `FINALIZED` (Đã chốt sổ) -> `CLOSED` (Đã đóng).
+  - Động cơ tính toán lương tự động:
+    - `Lương theo công = Round(Lương cơ bản * Số công thực tế / Số công chuẩn, 0, HALF_UP)`
+    - `Lương thực lĩnh = Lương theo công + Tổng phụ cấp - Tổng khấu trừ`
+  - Quản lý các khoản phụ cấp (`ALLOWANCE`) và khấu trừ (`DEDUCTION`) linh hoạt trong giai đoạn `DRAFT`.
+  - Bảng dự toán tính lương (Preview) hiển thị chi tiết từng nhân sự kèm cờ cảnh báo (công vượt công chuẩn, lương âm).
+  - Chốt sổ tạo snapshot bất biến (`payrolls`) lưu giữ toàn bộ thông số tính lương tại thời điểm chốt.
+- **Theo dõi chi trả lương (Salary Payment Tracking)**:
+  - Ghi nhận giải ngân tiền lương qua 2 hình thức: `CASH` (Tiền mặt) và `BANK_TRANSFER` (Chuyển khoản).
+  - Nguyên tắc chi trả toàn bộ `netSalary` một lần duy nhất, chuyển trạng thái sang `PAID`.
+  - Cơ chế chống chi trùng lặp triệt để bằng khóa bi quan `SELECT FOR UPDATE` và ràng buộc CSDL `UNIQUE(payroll_id)`.
+  - Sổ cái nhật ký chi trả lương (`salary_payments`) lưu trữ thông tin ngày chi, phương thức, người ghi nhận và ghi chú.
+- **Cổng Tự phục vụ của Nhân viên (Employee Self-Service)**:
+  - Nhân viên đăng nhập xem lịch sử chấm công và tổng công tháng của chính mình.
+  - Nhân viên xem danh sách các phiếu lương chính thức (Payslip) với định dạng thẻ chuyên nghiệp, minh bạch các khoản thu nhập.
+  - Cơ chế kiểm soát an toàn tuyệt đối: Nhân viên chỉ có thể xem dữ liệu của chính mình, chặn đứng mọi hành vi sửa ID trên URL hoặc API.
+- **Tích hợp Dashboard Phase 7**:
+  - API tổng hợp tài chính lương `/api/v1/admin/payrolls/summary` cung cấp các chỉ số: Tổng chi phí lương đã chốt, Tổng tiền đã chi trả, Công nợ lương chưa thanh toán, Số nhân sự đang hoạt động và biểu đồ các tháng.
+- **Kiểm thử & Chất lượng**:
+  - 39 / 39 test cases tự động Phase 6 đạt tỷ lệ **100% PASS**.
+  - Toàn bộ suite hồi quy 139 / 139 test cases backend (Phase 1 đến Phase 6) đều **100% PASS**.
+  - Frontend typecheck và build production: **0 lỗi**.

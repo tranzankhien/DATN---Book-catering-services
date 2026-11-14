@@ -342,3 +342,157 @@ V14 chuyển cổng thanh toán mới sang SePay, giữ giao dịch lịch sử 
   - `prompt_tokens`, `output_tokens`: Thống kê lượng token tiêu thụ.
   - `response_time_ms`: Thời gian xử lý backend (ms).
   - `created_at`: Thời điểm ghi nhận (phục vụ giới hạn tần suất 10 lượt/giờ/user).
+
+
+---
+
+## 5. Phase 6 – Quản lý Nhân sự, Chấm công, Bảng lương & Chi trả (Migration V16)
+
+```mermaid
+erDiagram
+    USERS ||--o| EMPLOYEES : "liên kết 1-1 qua user_id"
+    EMPLOYEES ||--o{ ATTENDANCES : "chấm công hàng ngày"
+    EMPLOYEES ||--o{ PAYROLL_ADJUSTMENTS : "phụ cấp & giảm trừ"
+    EMPLOYEES ||--o{ PAYROLLS : "bảng lương snapshot"
+    PAYROLL_PERIODS ||--o{ PAYROLL_ADJUSTMENTS : "chứa các khoản điều chỉnh"
+    PAYROLL_PERIODS ||--o{ PAYROLLS : "chứa bảng lương chi tiết"
+    PAYROLLS ||--o| SALARY_PAYMENTS : "giải ngân chi trả 1-1"
+
+    EMPLOYEES {
+        BIGSERIAL id PK
+        VARCHAR employee_code UK
+        BIGINT user_id UK
+        VARCHAR full_name
+        VARCHAR position
+        DATE hire_date
+        NUMERIC_15_2 base_salary
+        VARCHAR status
+    }
+
+    ATTENDANCES {
+        BIGSERIAL id PK
+        BIGINT employee_id FK
+        DATE work_date
+        VARCHAR attendance_status
+        NUMERIC_3_2 work_units
+        VARCHAR note
+    }
+
+    PAYROLL_PERIODS {
+        BIGSERIAL id PK
+        INT year
+        INT month
+        NUMERIC_5_2 standard_workdays
+        VARCHAR status
+        TIMESTAMPTZ finalized_at
+    }
+
+    PAYROLL_ADJUSTMENTS {
+        BIGSERIAL id PK
+        BIGINT payroll_period_id FK
+        BIGINT employee_id FK
+        VARCHAR adjustment_type
+        NUMERIC_15_2 amount
+        VARCHAR reason
+    }
+
+    PAYROLLS {
+        BIGSERIAL id PK
+        BIGINT employee_id FK
+        BIGINT payroll_period_id FK
+        NUMERIC_15_2 base_salary_snapshot
+        NUMERIC_5_2 standard_workdays_snapshot
+        NUMERIC_5_2 actual_workdays_snapshot
+        NUMERIC_15_2 calculated_salary
+        NUMERIC_15_2 total_allowances
+        NUMERIC_15_2 total_deductions
+        NUMERIC_15_2 net_salary
+        VARCHAR payment_status
+    }
+
+    SALARY_PAYMENTS {
+        BIGSERIAL id PK
+        BIGINT payroll_id UK_FK
+        NUMERIC_15_2 amount
+        DATE payment_date
+        VARCHAR payment_method
+        VARCHAR recorded_by
+    }
+```
+
+### 5.1. Bảng `employees` (Hồ sơ Nhân sự)
+- `id`: `BIGSERIAL PRIMARY KEY`.
+- `employee_code`: `VARCHAR(30) UNIQUE NOT NULL`. Tự sinh theo định dạng `NV-XXXX` nếu không chỉ định.
+- `user_id`: `BIGINT UNIQUE NULL REFERENCES users(id) ON DELETE SET NULL`. Liên kết tài khoản `ROLE_EMPLOYEE`.
+- `full_name`: `VARCHAR(120) NOT NULL`.
+- `phone`: `VARCHAR(25) NULL`, `email`: `VARCHAR(150) NULL`.
+- `position`: `VARCHAR(80) NOT NULL`.
+- `hire_date`: `DATE NOT NULL`.
+- `base_salary`: `NUMERIC(15, 2) NOT NULL DEFAULT 0.00 CHECK (base_salary >= 0)`.
+- `status`: `VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE'))`.
+- `note`: `TEXT NULL`.
+- `created_at`, `updated_at`: `TIMESTAMPTZ NOT NULL`.
+- Indexes: `idx_employees_code`, `idx_employees_user_id`, `idx_employees_status`.
+
+### 5.2. Bảng `attendances` (Chấm công hàng ngày)
+- `id`: `BIGSERIAL PRIMARY KEY`.
+- `employee_id`: `BIGINT NOT NULL REFERENCES employees(id) ON DELETE CASCADE`.
+- `work_date`: `DATE NOT NULL`.
+- `attendance_status`: `VARCHAR(20) NOT NULL CHECK (attendance_status IN ('PRESENT', 'HALF_DAY', 'ABSENT'))`.
+- `work_units`: `NUMERIC(3, 2) NOT NULL CHECK (work_units IN (1.00, 0.50, 0.00))`.
+  - `PRESENT` $\rightarrow$ 1.00
+  - `HALF_DAY` $\rightarrow$ 0.50
+  - `ABSENT` $\rightarrow$ 0.00
+- `note`: `VARCHAR(255) NULL`.
+- `recorded_by`: `VARCHAR(120) NULL`, `recorded_at`: `TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP`.
+- Ràng buộc duy nhất: `CONSTRAINT uq_attendance_emp_date UNIQUE (employee_id, work_date)`.
+- Indexes: `idx_attendance_emp_date`, `idx_attendance_date`.
+
+### 5.3. Bảng `payroll_periods` (Kỳ tính lương)
+- `id`: `BIGSERIAL PRIMARY KEY`.
+- `year`: `INT NOT NULL CHECK (year >= 2000 AND year <= 2100)`.
+- `month`: `INT NOT NULL CHECK (month >= 1 AND month <= 12)`.
+- `standard_workdays`: `NUMERIC(5, 2) NOT NULL DEFAULT 26.00 CHECK (standard_workdays > 0 AND standard_workdays <= 31)`.
+- `status`: `VARCHAR(20) NOT NULL DEFAULT 'DRAFT' CHECK (status IN ('DRAFT', 'FINALIZED', 'CLOSED'))`.
+- `finalized_at`: `TIMESTAMPTZ NULL`, `finalized_by`: `VARCHAR(120) NULL`, `closed_at`: `TIMESTAMPTZ NULL`.
+- `note`: `TEXT NULL`.
+- `created_at`, `updated_at`: `TIMESTAMPTZ NOT NULL`.
+- Ràng buộc duy nhất: `CONSTRAINT uq_payroll_period_year_month UNIQUE (year, month)`.
+
+### 5.4. Bảng `payroll_adjustments` (Phụ cấp & Khấu trừ)
+- `id`: `BIGSERIAL PRIMARY KEY`.
+- `payroll_period_id`: `BIGINT NOT NULL REFERENCES payroll_periods(id) ON DELETE CASCADE`.
+- `employee_id`: `BIGINT NOT NULL REFERENCES employees(id) ON DELETE CASCADE`.
+- `adjustment_type`: `VARCHAR(20) NOT NULL CHECK (adjustment_type IN ('ALLOWANCE', 'DEDUCTION'))`.
+- `amount`: `NUMERIC(15, 2) NOT NULL CHECK (amount > 0)`.
+- `reason`: `VARCHAR(255) NOT NULL`.
+- `created_at`: `TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP`.
+- Indexes: `idx_adjustments_period_emp`.
+
+### 5.5. Bảng `payrolls` (Bảng lương bất biến - Snapshot)
+- `id`: `BIGSERIAL PRIMARY KEY`.
+- `employee_id`: `BIGINT NOT NULL REFERENCES employees(id) ON DELETE RESTRICT`.
+- `payroll_period_id`: `BIGINT NOT NULL REFERENCES payroll_periods(id) ON DELETE RESTRICT`.
+- `employee_code_snapshot`: `VARCHAR(30) NOT NULL`.
+- `employee_name_snapshot`: `VARCHAR(120) NOT NULL`.
+- `base_salary_snapshot`: `NUMERIC(15, 2) NOT NULL`.
+- `standard_workdays_snapshot`: `NUMERIC(5, 2) NOT NULL`.
+- `actual_workdays_snapshot`: `NUMERIC(5, 2) NOT NULL`.
+- `calculated_salary`: `NUMERIC(15, 2) NOT NULL`.
+- `total_allowances`: `NUMERIC(15, 2) NOT NULL DEFAULT 0.00`.
+- `total_deductions`: `NUMERIC(15, 2) NOT NULL DEFAULT 0.00`.
+- `net_salary`: `NUMERIC(15, 2) NOT NULL CHECK (net_salary >= 0)`.
+- `payment_status`: `VARCHAR(20) NOT NULL DEFAULT 'UNPAID' CHECK (payment_status IN ('UNPAID', 'PAID'))`.
+- `finalized_at`: `TIMESTAMPTZ NOT NULL`.
+- Ràng buộc duy nhất: `CONSTRAINT uq_payroll_employee_period UNIQUE (employee_id, payroll_period_id)`.
+- Indexes: `idx_payrolls_period`, `idx_payrolls_employee`, `idx_payrolls_status`.
+
+### 5.6. Bảng `salary_payments` (Nhật ký chi trả tiền lương)
+- `id`: `BIGSERIAL PRIMARY KEY`.
+- `payroll_id`: `BIGINT NOT NULL UNIQUE REFERENCES payrolls(id) ON DELETE RESTRICT`.
+- `amount`: `NUMERIC(15, 2) NOT NULL CHECK (amount >= 0)`.
+- `payment_date`: `DATE NOT NULL`.
+- `payment_method`: `VARCHAR(30) NOT NULL CHECK (payment_method IN ('CASH', 'BANK_TRANSFER'))`.
+- `note`: `VARCHAR(255) NULL`.
+- `recorded_by`: `VARCHAR(120) NULL`, `recorded_at`: `TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP`.
+- Indexes: `idx_salary_payments_date`.

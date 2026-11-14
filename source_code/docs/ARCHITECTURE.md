@@ -82,7 +82,22 @@ flowchart LR
     - `service/OrderPreviewService`: Tính thử realtime giá mỗi bàn, tổng tiền và nhu cầu nguyên liệu cho client.
     - `service/OrderService`: Tạo đơn đặt tiệc với Idempotency Key, chụp ảnh bất biến giá món (`dish_name_snapshot`, `unit_price_snapshot`), tích hợp giữ kho, hủy đơn và ghi audit log.
     - `controller/`: `OrderPreviewController`, `OrderController`, `AdminOrderController`, `EmployeeOrderController`.
-  - **Dự kiến mở rộng ở Phase 4–7**: `payments (SePay)`, `ai`, `notifications`, `employees (ca làm & chấm công)`, `payroll`, `reports`.
+  - **`employees` (Phase 6)**:
+    - `entity/`: `Employee`, `EmployeeStatus`.
+    - `repository/`: `EmployeeRepository` (hỗ trợ `JpaSpecificationExecutor`).
+    - `service/EmployeeService`: Quản lý hồ sơ nhân viên, tự sinh mã NV `NV-XXXX`, liên kết tài khoản hệ thống `ROLE_EMPLOYEE`, bảo toàn lịch sử nhân sự `INACTIVE`.
+    - `controller/`: `AdminEmployeeController`, `EmployeeSelfServiceController`.
+  - **`attendance` (Phase 6)**:
+    - `entity/`: `Attendance`, `AttendanceStatus` (`PRESENT`, `HALF_DAY`, `ABSENT`).
+    - `repository/`: `AttendanceRepository`.
+    - `service/AttendanceService`: Chấm công hàng ngày, chấm công hàng loạt, tính tổng công thực tế theo tháng, khóa chỉnh sửa khi kỳ lương đã `FINALIZED` hoặc `CLOSED`.
+    - `controller/`: `AdminAttendanceController`.
+  - **`payroll` (Phase 6)**:
+    - `entity/`: `PayrollPeriod`, `PayrollAdjustment`, `Payroll`, `SalaryPayment`.
+    - `repository/`: `PayrollPeriodRepository`, `PayrollAdjustmentRepository`, `PayrollRepository`, `SalaryPaymentRepository`.
+    - `service/`: `PayrollCalculationService` (làm tròn HALF_UP đến từng đồng VND), `PayrollAdjustmentService`, `PayrollPeriodService`, `PayrollService`, `SalaryPaymentService` (khóa bi quan chống chi trùng).
+    - `controller/`: `AdminPayrollPeriodController`, `AdminPayrollAdjustmentController`, `AdminPayrollController`, `AdminSalaryPaymentController`.
+  - **Dự kiến mở rộng ở Phase 7**: `reports (Báo cáo kinh doanh, Phân tích chi phí & Lợi nhuận)`.
 
 ---
 
