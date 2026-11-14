@@ -26,4 +26,8 @@ public interface PayrollPeriodRepository extends JpaRepository<PayrollPeriod, Lo
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM PayrollPeriod p WHERE p.id = :id")
     Optional<PayrollPeriod> findByIdForUpdate(@Param("id") Long id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM PayrollPeriod p WHERE p.year = :year AND p.month = :month")
+    Optional<PayrollPeriod> findByYearAndMonthForUpdate(@Param("year") int year, @Param("month") int month);
 }

@@ -32,10 +32,12 @@ public class AdminPayrollAdjustmentController {
     @GetMapping
     @Operation(summary = "Lấy danh sách phụ cấp/khấu trừ theo kỳ lương và nhân viên")
     public ResponseEntity<ApiResponse<List<PayrollAdjustmentDto>>> getAdjustments(
-            @RequestParam Long payrollPeriodId,
+            @RequestParam(required = false) Long payrollPeriodId,
+            @RequestParam(required = false) Long periodId,
             @RequestParam(required = false) Long employeeId
     ) {
-        List<PayrollAdjustmentDto> result = adjustmentService.getAdjustments(payrollPeriodId, employeeId);
+        Long targetPeriodId = payrollPeriodId != null ? payrollPeriodId : periodId;
+        List<PayrollAdjustmentDto> result = adjustmentService.getAdjustments(targetPeriodId, employeeId);
         return ResponseEntity.ok(ApiResponse.ok("Lấy danh sách điều chỉnh lương thành công", result));
     }
 

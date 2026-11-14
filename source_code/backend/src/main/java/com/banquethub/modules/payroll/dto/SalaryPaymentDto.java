@@ -18,10 +18,18 @@ public record SalaryPaymentDto(
         PaymentMethod paymentMethod,
         String note,
         String recordedBy,
-        OffsetDateTime recordedAt
+        OffsetDateTime recordedAt,
+        int periodYear,
+        int periodMonth
 ) {
     public static SalaryPaymentDto fromEntity(SalaryPayment sp) {
         if (sp == null) return null;
+        int yr = 0;
+        int mo = 0;
+        if (sp.getPayroll() != null && sp.getPayroll().getPayrollPeriod() != null) {
+            yr = sp.getPayroll().getPayrollPeriod().getYear();
+            mo = sp.getPayroll().getPayrollPeriod().getMonth();
+        }
         return new SalaryPaymentDto(
                 sp.getId(),
                 sp.getPayroll() != null ? sp.getPayroll().getId() : null,
@@ -33,7 +41,9 @@ public record SalaryPaymentDto(
                 sp.getPaymentMethod(),
                 sp.getNote(),
                 sp.getRecordedBy(),
-                sp.getRecordedAt()
+                sp.getRecordedAt(),
+                yr,
+                mo
         );
     }
 }

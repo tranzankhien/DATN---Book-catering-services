@@ -56,7 +56,10 @@ public class SalaryPaymentService {
         Payroll payroll = payrollRepository.findByIdForUpdate(payrollId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bảng lương với ID: " + payrollId));
 
-        PayrollPeriod period = payroll.getPayrollPeriod();
+        // Concurrency lock: pessimistic write lock on parent payroll_periods row to serialize concurrent payments and auto-close
+        PayrollPeriod period = periodRepository.findByIdForUpdate(payroll.getPayrollPeriod().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỳ lương của bảng lương."));
+
         if (period.getStatus() == PayrollPeriodStatus.DRAFT) {
             throw new BusinessValidationException("Không thể ghi nhận thanh toán cho kỳ lương đang ở trạng thái DRAFT. Vui lòng chốt kỳ lương trước.");
         }
@@ -65,7 +68,11 @@ public class SalaryPaymentService {
             throw new BusinessValidationException("Bảng lương này đã được ghi nhận thanh toán trước đó. Không thể thanh toán trùng.");
         }
 
-        LocalDate paymentDate = request.paymentDate() != null ? request.paymentDate() : LocalDate.now(VN_ZONE);
+        LocalDate todayVn = LocalDate.now(VN_ZONE);
+        LocalDate paymentDate = request.paymentDate() != null ? request.paymentDate() : todayVn;
+        if (paymentDate.isAfter(todayVn)) {
+            throw new BusinessValidationException("Ngày thanh toán (" + paymentDate + ") không được lớn hơn ngày hiện tại (" + todayVn + ").");
+        }
 
         SalaryPayment payment = new SalaryPayment();
         payment.setPayroll(payroll);

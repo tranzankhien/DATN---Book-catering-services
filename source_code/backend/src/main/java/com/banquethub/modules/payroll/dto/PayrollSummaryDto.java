@@ -7,15 +7,45 @@ public record PayrollSummaryDto(
         Integer year,
         Integer month,
         BigDecimal totalFinalizedPayrollAmount, // Chi phí lương theo kỳ (thực lĩnh đã chốt)
-        BigDecimal totalPaidAmount,             // Dòng tiền lương đã chi thực tế
+        BigDecimal totalPaidAmount,             // Lương kỳ đã thanh toán
         BigDecimal totalUnpaidAmount,           // Lương còn phải trả
         BigDecimal totalCalculatedSalary,       // Tổng lương theo ngày công
         BigDecimal totalAllowances,             // Tổng phụ cấp
         BigDecimal totalDeductions,             // Tổng khấu trừ
         long activeEmployeesCount,              // Tổng số nhân viên đang hoạt động
         BigDecimal totalRecordedWorkdays,       // Tổng số công ghi nhận trong kỳ
-        List<MonthlyPayrollMetricDto> monthlyMetrics
+        List<MonthlyPayrollMetricDto> monthlyMetrics,
+        BigDecimal actualCashOutflowInMonth     // Dòng tiền thực tế chi trong tháng dương lịch (theo payment_date)
 ) {
+    public PayrollSummaryDto(
+            Integer year,
+            Integer month,
+            BigDecimal totalFinalizedPayrollAmount,
+            BigDecimal totalPaidAmount,
+            BigDecimal totalUnpaidAmount,
+            BigDecimal totalCalculatedSalary,
+            BigDecimal totalAllowances,
+            BigDecimal totalDeductions,
+            long activeEmployeesCount,
+            BigDecimal totalRecordedWorkdays,
+            List<MonthlyPayrollMetricDto> monthlyMetrics
+    ) {
+        this(
+                year,
+                month,
+                totalFinalizedPayrollAmount,
+                totalPaidAmount,
+                totalUnpaidAmount,
+                totalCalculatedSalary,
+                totalAllowances,
+                totalDeductions,
+                activeEmployeesCount,
+                totalRecordedWorkdays,
+                monthlyMetrics,
+                totalPaidAmount
+        );
+    }
+
     public record MonthlyPayrollMetricDto(
             int year,
             int month,

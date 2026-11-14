@@ -36,6 +36,9 @@ public interface PayrollRepository extends JpaRepository<Payroll, Long>, JpaSpec
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END FROM Payroll p WHERE p.employee.id = :employeeId AND p.payrollPeriod.id = :payrollPeriodId")
     boolean existsByEmployeeIdAndPayrollPeriodId(@Param("employeeId") Long employeeId, @Param("payrollPeriodId") Long payrollPeriodId);
 
+    @Query("SELECT COUNT(p) FROM Payroll p WHERE p.payrollPeriod.id = :payrollPeriodId")
+    long countByPayrollPeriodId(@Param("payrollPeriodId") Long payrollPeriodId);
+
     @Query("SELECT COUNT(p) FROM Payroll p WHERE p.payrollPeriod.id = :payrollPeriodId AND p.paymentStatus = :paymentStatus")
     long countByPayrollPeriodIdAndPaymentStatus(@Param("payrollPeriodId") Long payrollPeriodId, @Param("paymentStatus") PaymentStatus paymentStatus);
 

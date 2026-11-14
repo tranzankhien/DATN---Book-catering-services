@@ -162,7 +162,12 @@ export const employeeService = {
   ): Promise<PayrollAdjustmentDto> {
     const res = await apiClient.post<ApiResponse<PayrollAdjustmentDto>>(
       `/admin/payroll-periods/${periodId}/adjustments`,
-      payload
+      {
+        ...payload,
+        payrollPeriodId: periodId,
+        name: payload.name || payload.reason,
+        reason: payload.reason || payload.name,
+      }
     );
     return res.data.data;
   },
@@ -173,14 +178,18 @@ export const employeeService = {
     payload: UpdatePayrollAdjustmentPayload
   ): Promise<PayrollAdjustmentDto> {
     const res = await apiClient.put<ApiResponse<PayrollAdjustmentDto>>(
-      `/admin/payroll-periods/${periodId}/adjustments/${id}`,
-      payload
+      `/admin/payroll-adjustments/${id}`,
+      {
+        ...payload,
+        name: payload.name || payload.reason,
+        reason: payload.reason || payload.name,
+      }
     );
     return res.data.data;
   },
 
   async deleteAdjustment(periodId: number, id: number): Promise<void> {
-    await apiClient.delete(`/admin/payroll-periods/${periodId}/adjustments/${id}`);
+    await apiClient.delete(`/admin/payroll-adjustments/${id}`);
   },
 
   // =========================================================================
@@ -188,12 +197,19 @@ export const employeeService = {
   // =========================================================================
   async getPayrolls(params?: {
     periodId?: number;
+    payrollPeriodId?: number;
     employeeId?: number;
     paymentStatus?: PaymentStatus;
+    search?: string;
     page?: number;
     size?: number;
   }): Promise<{ content: PayrollDto[]; totalElements: number; totalPages: number }> {
-    const res = await apiClient.get<ApiResponse<any>>('/admin/payrolls', { params });
+    const effectiveParams = {
+      ...params,
+      payrollPeriodId: params?.payrollPeriodId ?? params?.periodId,
+      periodId: params?.periodId ?? params?.payrollPeriodId,
+    };
+    const res = await apiClient.get<ApiResponse<any>>('/admin/payrolls', { params: effectiveParams });
     if (res.data.data?.content) {
       return res.data.data;
     }

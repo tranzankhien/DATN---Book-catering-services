@@ -39,13 +39,15 @@ public class AdminPayrollController {
     @Operation(summary = "Lấy danh sách bảng lương có phân trang và bộ lọc")
     public ResponseEntity<ApiResponse<Page<PayrollDto>>> getPayrolls(
             @RequestParam(required = false) Long payrollPeriodId,
+            @RequestParam(required = false) Long periodId,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) PaymentStatus paymentStatus,
             @RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        Page<PayrollDto> result = payrollService.getPayrolls(payrollPeriodId, year, month, paymentStatus, search, pageable);
+        Long targetPeriodId = payrollPeriodId != null ? payrollPeriodId : periodId;
+        Page<PayrollDto> result = payrollService.getPayrolls(targetPeriodId, year, month, paymentStatus, search, pageable);
         return ResponseEntity.ok(ApiResponse.ok("Lấy danh sách bảng lương thành công", result));
     }
 

@@ -1,9 +1,11 @@
 package com.banquethub.modules.payroll.dto;
 
+import com.banquethub.modules.payroll.entity.PaymentMethod;
 import com.banquethub.modules.payroll.entity.PaymentStatus;
 import com.banquethub.modules.payroll.entity.Payroll;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -26,7 +28,12 @@ public record PayrollDto(
         OffsetDateTime finalizedAt,
         OffsetDateTime createdAt,
         SalaryPaymentDto paymentDetails,
-        List<PayrollAdjustmentDto> adjustments
+        List<PayrollAdjustmentDto> adjustments,
+        LocalDate paymentDate,
+        PaymentMethod paymentMethod,
+        BigDecimal paidAmount,
+        String paymentNote,
+        String paidBy
 ) {
     public static PayrollDto fromEntity(Payroll p) {
         return fromEntity(p, null, null);
@@ -34,6 +41,12 @@ public record PayrollDto(
 
     public static PayrollDto fromEntity(Payroll p, SalaryPaymentDto payment, List<PayrollAdjustmentDto> adjustments) {
         if (p == null) return null;
+        LocalDate payDate = payment != null ? payment.paymentDate() : null;
+        PaymentMethod payMethod = payment != null ? payment.paymentMethod() : null;
+        BigDecimal paidAmt = payment != null ? payment.amount() : null;
+        String payNote = payment != null ? payment.note() : null;
+        String payUser = payment != null ? payment.recordedBy() : null;
+
         return new PayrollDto(
                 p.getId(),
                 p.getEmployee() != null ? p.getEmployee().getId() : null,
@@ -53,7 +66,12 @@ public record PayrollDto(
                 p.getFinalizedAt(),
                 p.getCreatedAt(),
                 payment,
-                adjustments
+                adjustments,
+                payDate,
+                payMethod,
+                paidAmt,
+                payNote,
+                payUser
         );
     }
 }

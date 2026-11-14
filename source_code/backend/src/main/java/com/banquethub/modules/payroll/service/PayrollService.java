@@ -197,6 +197,14 @@ public class PayrollService {
 
         long activeEmployees = employeeRepository.countByStatus(EmployeeStatus.ACTIVE);
 
+        BigDecimal cashOutflow;
+        if (year != null && month != null) {
+            YearMonth ym = YearMonth.of(year, month);
+            cashOutflow = salaryPaymentRepository.sumPaidAmountBetween(ym.atDay(1), ym.atEndOfMonth());
+        } else {
+            cashOutflow = salaryPaymentRepository.sumTotalPaid();
+        }
+
         // Monthly trend for past 6 periods
         List<PayrollPeriod> recentPeriods = periodRepository.findAllByOrderByYearDescMonthDesc();
         List<PayrollSummaryDto.MonthlyPayrollMetricDto> monthlyMetrics = recentPeriods.stream().limit(12).map(p -> {
@@ -225,7 +233,8 @@ public class PayrollService {
                 totalDeductions,
                 activeEmployees,
                 totalWorkdays,
-                monthlyMetrics
+                monthlyMetrics,
+                cashOutflow
         );
     }
 }

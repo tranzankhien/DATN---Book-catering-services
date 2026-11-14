@@ -178,7 +178,9 @@ export const AdminSalaryPaymentsPage: React.FC = () => {
                     <td className="py-3.5 px-4">
                       <span className="inline-flex items-center gap-1 font-semibold text-stone-800">
                         <Calendar className="h-3 w-3 text-stone-400" />
-                        Tháng {String(pay.periodMonth).padStart(2, '0')}/{pay.periodYear}
+                        {pay.periodMonth
+                          ? `Tháng ${String(pay.periodMonth).padStart(2, '0')}/${pay.periodYear}`
+                          : 'Kỳ lương'}
                       </span>
                     </td>
 

@@ -114,8 +114,8 @@ export const AdminAttendancePage: React.FC = () => {
       showToast('Kỳ lương của tháng này đã chốt sổ. Không thể sửa chấm công.', 'info');
       return;
     }
-    const currentStatus = employee.dailyStatusMap[day];
-    const currentNote = employee.dailyNoteMap[day] || '';
+    const currentStatus = employee.dailyRecords?.[day]?.attendanceStatus || employee.dailyStatusMap?.[day];
+    const currentNote = employee.dailyRecords?.[day]?.note || employee.dailyNoteMap?.[day] || '';
 
     setSelectedCell({
       employeeId: employee.employeeId,
@@ -355,7 +355,7 @@ export const AdminAttendancePage: React.FC = () => {
                     </td>
 
                     {daysArray.map((day) => {
-                      const status = emp.dailyStatusMap[day];
+                      const status = emp.dailyRecords?.[day]?.attendanceStatus || emp.dailyStatusMap?.[day];
                       const dateObj = new Date(year, month - 1, day);
                       const isToday =
                         day === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear();

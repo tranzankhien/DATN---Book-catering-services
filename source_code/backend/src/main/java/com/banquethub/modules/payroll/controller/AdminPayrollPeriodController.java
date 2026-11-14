@@ -3,6 +3,7 @@ package com.banquethub.modules.payroll.controller;
 import com.banquethub.common.dto.ApiResponse;
 import com.banquethub.common.security.CustomUserDetails;
 import com.banquethub.modules.payroll.dto.*;
+import com.banquethub.modules.payroll.service.PayrollAdjustmentService;
 import com.banquethub.modules.payroll.service.PayrollPeriodService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,9 +23,11 @@ import java.util.List;
 public class AdminPayrollPeriodController {
 
     private final PayrollPeriodService periodService;
+    private final PayrollAdjustmentService adjustmentService;
 
-    public AdminPayrollPeriodController(PayrollPeriodService periodService) {
+    public AdminPayrollPeriodController(PayrollPeriodService periodService, PayrollAdjustmentService adjustmentService) {
         this.periodService = periodService;
+        this.adjustmentService = adjustmentService;
     }
 
     @GetMapping
@@ -90,5 +93,37 @@ public class AdminPayrollPeriodController {
         String adminName = userDetails != null ? userDetails.getFullName() : "Admin";
         PayrollPeriodDto result = periodService.closePeriod(id, adminName);
         return ResponseEntity.ok(ApiResponse.ok("Đóng kỳ lương thành công", result));
+    }
+
+    @GetMapping("/{id}/adjustments")
+    @Operation(summary = "Lấy danh sách khoản điều chỉnh lương của kỳ")
+    public ResponseEntity<ApiResponse<List<PayrollAdjustmentDto>>> getPeriodAdjustments(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long employeeId
+    ) {
+        List<PayrollAdjustmentDto> result = adjustmentService.getAdjustments(id, employeeId);
+        return ResponseEntity.ok(ApiResponse.ok("Lấy danh sách điều chỉnh kỳ lương thành công", result));
+    }
+
+    @PostMapping("/{id}/adjustments")
+    @Operation(summary = "Thêm mới khoản điều chỉnh lương cho kỳ")
+    public ResponseEntity<ApiResponse<PayrollAdjustmentDto>> createPeriodAdjustment(
+            @PathVariable Long id,
+            @Valid @RequestBody CreatePayrollAdjustmentRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        String adminName = userDetails != null ? userDetails.getFullName() : "Admin";
+        CreatePayrollAdjustmentRequest effectiveRequest = new CreatePayrollAdjustmentRequest(
+                request.employeeId(),
+                id,
+                request.adjustmentType(),
+                request.effectiveName(),
+                request.effectiveName(),
+                request.amount(),
+                request.note()
+        );
+        PayrollAdjustmentDto result = adjustmentService.createAdjustment(effectiveRequest, adminName);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Thêm khoản điều chỉnh thành công", result));
     }
 }

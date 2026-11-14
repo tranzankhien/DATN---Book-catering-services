@@ -640,8 +640,9 @@ export interface AttendanceMonthlySummaryDto {
   absentDays: number;
   unrecordedDays: number;
   totalWorkUnits: number;
-  dailyStatusMap: Record<number, AttendanceStatus>;
-  dailyNoteMap: Record<number, string>;
+  dailyRecords?: Record<number, { attendanceStatus: AttendanceStatus; workUnits: number; note?: string }>;
+  dailyStatusMap?: Record<number, AttendanceStatus>;
+  dailyNoteMap?: Record<number, string>;
 }
 
 export interface CompanyAttendanceSummaryDto {
@@ -688,20 +689,28 @@ export interface PayrollAdjustmentDto {
   employeeName: string;
   adjustmentType: AdjustmentType;
   amount: number;
-  reason: string;
+  name?: string;
+  reason?: string;
+  note?: string;
+  createdBy?: string;
   createdAt: string;
 }
 
 export interface CreatePayrollAdjustmentPayload {
   employeeId: number;
+  payrollPeriodId?: number;
   adjustmentType: AdjustmentType;
   amount: number;
-  reason: string;
+  name?: string;
+  reason?: string;
+  note?: string;
 }
 
 export interface UpdatePayrollAdjustmentPayload {
   amount: number;
-  reason: string;
+  name?: string;
+  reason?: string;
+  note?: string;
 }
 
 export interface PayrollPreviewItemDto {

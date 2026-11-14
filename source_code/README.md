@@ -1,4 +1,4 @@
-﻿# BanquetHub â€“ Ná»n táº£ng Äáº·t Tiá»‡c TÃ­ch Há»£p Quáº£n LÃ½ CÆ¡ Sá»Ÿ Kinh Doanh (MVP)
+# BanquetHub â€“ Ná»n táº£ng Äáº·t Tiá»‡c TÃ­ch Há»£p Quáº£n LÃ½ CÆ¡ Sá»Ÿ Kinh Doanh (MVP)
 
 Há»‡ thá»‘ng **BanquetHub** lÃ  ná»n táº£ng Ä‘áº·t tiá»‡c trá»±c tuyáº¿n tÃ­ch há»£p quáº£n lÃ½ cÆ¡ sá»Ÿ kinh doanh theo kiáº¿n trÃºc **Modular Monolith**, phÃ¡t triá»ƒn theo Ä‘áº·c táº£ yÃªu cáº§u pháº§n má»m **`docs/SRS_MVP.docx` (`SRS-PARTY-001`)**.
 

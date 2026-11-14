@@ -48,7 +48,12 @@ public class PayrollAdjustmentService {
     }
 
     public PayrollAdjustmentDto createAdjustment(CreatePayrollAdjustmentRequest request, String adminName) {
-        PayrollPeriod period = periodRepository.findById(request.payrollPeriodId())
+        if (request.payrollPeriodId() == null) {
+            throw new BusinessValidationException("ID kỳ lương không được để trống.");
+        }
+
+        // Concurrency protection: lock payroll period row
+        PayrollPeriod period = periodRepository.findByIdForUpdate(request.payrollPeriodId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỳ lương với ID: " + request.payrollPeriodId()));
 
         if (period.getStatus() != PayrollPeriodStatus.DRAFT) {
@@ -62,11 +67,16 @@ public class PayrollAdjustmentService {
             throw new BusinessValidationException("Số tiền điều chỉnh phải lớn hơn 0.");
         }
 
+        String name = request.effectiveName();
+        if (name.isBlank()) {
+            throw new BusinessValidationException("Tên hoặc lý do điều chỉnh không được để trống.");
+        }
+
         PayrollAdjustment adjustment = new PayrollAdjustment();
         adjustment.setEmployee(employee);
         adjustment.setPayrollPeriod(period);
         adjustment.setAdjustmentType(request.adjustmentType());
-        adjustment.setName(request.name().trim());
+        adjustment.setName(name);
         adjustment.setAmount(request.amount());
         adjustment.setNote(request.note() != null ? request.note().trim() : null);
         adjustment.setCreatedBy(adminName);
@@ -79,7 +89,10 @@ public class PayrollAdjustmentService {
         PayrollAdjustment adjustment = adjustmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khoản điều chỉnh với ID: " + id));
 
-        PayrollPeriod period = adjustment.getPayrollPeriod();
+        // Concurrency protection: lock payroll period row
+        PayrollPeriod period = periodRepository.findByIdForUpdate(adjustment.getPayrollPeriod().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỳ lương của khoản điều chỉnh."));
+
         if (period.getStatus() != PayrollPeriodStatus.DRAFT) {
             throw new BusinessValidationException("Kỳ lương đã ở trạng thái " + period.getStatus() + ". Không thể sửa khoản điều chỉnh.");
         }
@@ -88,7 +101,12 @@ public class PayrollAdjustmentService {
             throw new BusinessValidationException("Số tiền điều chỉnh phải lớn hơn 0.");
         }
 
-        adjustment.setName(request.name().trim());
+        String name = request.effectiveName();
+        if (name.isBlank()) {
+            throw new BusinessValidationException("Tên hoặc lý do điều chỉnh không được để trống.");
+        }
+
+        adjustment.setName(name);
         adjustment.setAmount(request.amount());
         adjustment.setNote(request.note() != null ? request.note().trim() : null);
 
@@ -100,7 +118,10 @@ public class PayrollAdjustmentService {
         PayrollAdjustment adjustment = adjustmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khoản điều chỉnh với ID: " + id));
 
-        PayrollPeriod period = adjustment.getPayrollPeriod();
+        // Concurrency protection: lock payroll period row
+        PayrollPeriod period = periodRepository.findByIdForUpdate(adjustment.getPayrollPeriod().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỳ lương của khoản điều chỉnh."));
+
         if (period.getStatus() != PayrollPeriodStatus.DRAFT) {
             throw new BusinessValidationException("Kỳ lương đã ở trạng thái " + period.getStatus() + ". Không thể xóa khoản điều chỉnh.");
         }

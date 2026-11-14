@@ -57,7 +57,7 @@ public class PayrollPeriodService {
     public List<PayrollPeriodDto> getPayrollPeriods() {
         return periodRepository.findAllByOrderByYearDescMonthDesc()
                 .stream()
-                .map(PayrollPeriodDto::fromEntity)
+                .map(this::enrichPeriodDto)
                 .toList();
     }
 
@@ -65,7 +65,7 @@ public class PayrollPeriodService {
     public PayrollPeriodDto getPayrollPeriodById(Long id) {
         PayrollPeriod period = periodRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỳ lương với ID: " + id));
-        return PayrollPeriodDto.fromEntity(period);
+        return enrichPeriodDto(period);
     }
 
     public PayrollPeriodDto createPeriod(CreatePayrollPeriodRequest request, String adminName) {
@@ -86,11 +86,12 @@ public class PayrollPeriodService {
         period.setCreatedBy(adminName);
 
         PayrollPeriod saved = periodRepository.save(period);
-        return PayrollPeriodDto.fromEntity(saved);
+        return enrichPeriodDto(saved);
     }
 
     public PayrollPeriodDto updatePeriod(Long id, UpdatePayrollPeriodRequest request) {
-        PayrollPeriod period = periodRepository.findById(id)
+        // Concurrency protection: lock payroll period row
+        PayrollPeriod period = periodRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỳ lương với ID: " + id));
 
         if (period.getStatus() != PayrollPeriodStatus.DRAFT) {
@@ -107,7 +108,7 @@ public class PayrollPeriodService {
         }
 
         PayrollPeriod saved = periodRepository.save(period);
-        return PayrollPeriodDto.fromEntity(saved);
+        return enrichPeriodDto(saved);
     }
 
     @Transactional(readOnly = true)
@@ -183,7 +184,8 @@ public class PayrollPeriodService {
             }
 
             if (actualWorkdays.compareTo(period.getStandardWorkdays()) > 0) {
-                itemWarnings.add(String.format("Số công thực tế (%.1f) vượt số công chuẩn (%.1f).", actualWorkdays, period.getStandardWorkdays()));
+                canFinalize = false;
+                itemWarnings.add(String.format("Số công thực tế (%.1f) vượt số công chuẩn (%.1f). Vui lòng điều chỉnh lại công hoặc ngày công chuẩn trước khi chốt.", actualWorkdays, period.getStandardWorkdays()));
             }
 
             if (netSalary.compareTo(BigDecimal.ZERO) < 0) {
@@ -305,6 +307,20 @@ public class PayrollPeriodService {
         period.setClosedAt(OffsetDateTime.now(VN_ZONE));
         PayrollPeriod saved = periodRepository.save(period);
 
-        return PayrollPeriodDto.fromEntity(saved);
+        return enrichPeriodDto(saved);
+    }
+
+    private PayrollPeriodDto enrichPeriodDto(PayrollPeriod p) {
+        if (p == null) return null;
+        if (p.getStatus() == PayrollPeriodStatus.DRAFT) {
+            long empCount = employeeRepository.countByStatus(com.banquethub.modules.employees.entity.EmployeeStatus.ACTIVE);
+            return PayrollPeriodDto.fromEntity(p, (int) empCount, BigDecimal.ZERO, 0, 0);
+        } else {
+            long totalCount = payrollRepository.countByPayrollPeriodId(p.getId());
+            BigDecimal totalFinalized = payrollRepository.sumNetSalaryByPeriodId(p.getId());
+            long paidCount = payrollRepository.countByPayrollPeriodIdAndPaymentStatus(p.getId(), PaymentStatus.PAID);
+            long unpaidCount = payrollRepository.countByPayrollPeriodIdAndPaymentStatus(p.getId(), PaymentStatus.UNPAID);
+            return PayrollPeriodDto.fromEntity(p, (int) totalCount, totalFinalized, (int) paidCount, (int) unpaidCount);
+        }
     }
 }

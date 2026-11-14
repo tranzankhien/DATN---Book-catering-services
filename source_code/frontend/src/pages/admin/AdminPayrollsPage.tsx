@@ -28,6 +28,14 @@ import type {
 import { useToast } from '../../hooks/useToast';
 import { extractErrorMessage } from '../../services/apiClient';
 
+const getLocalTodayDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export const AdminPayrollsPage: React.FC = () => {
   const { showToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -44,7 +52,7 @@ export const AdminPayrollsPage: React.FC = () => {
   // Mark Paid Modal
   const [payingPayroll, setPayingPayroll] = useState<PayrollDto | null>(null);
   const [payMethod, setPayMethod] = useState<PaymentMethod>('BANK_TRANSFER');
-  const [payDate, setPayDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [payDate, setPayDate] = useState<string>(getLocalTodayDateString());
   const [payNote, setPayNote] = useState<string>('');
   const [submittingPay, setSubmittingPay] = useState<boolean>(false);
 
@@ -118,7 +126,7 @@ export const AdminPayrollsPage: React.FC = () => {
   const openPayModal = (p: PayrollDto) => {
     setPayingPayroll(p);
     setPayMethod('BANK_TRANSFER');
-    setPayDate(new Date().toISOString().split('T')[0]);
+    setPayDate(getLocalTodayDateString());
     setPayNote(`Thanh toán lương cho ${p.employeeNameSnapshot}`);
   };
 
@@ -436,6 +444,7 @@ export const AdminPayrollsPage: React.FC = () => {
                 <input
                   type="date"
                   required
+                  max={getLocalTodayDateString()}
                   value={payDate}
                   onChange={(e) => setPayDate(e.target.value)}
                   className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"

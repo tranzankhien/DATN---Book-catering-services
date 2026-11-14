@@ -18,9 +18,23 @@ public record PayrollPeriodDto(
         OffsetDateTime finalizedAt,
         OffsetDateTime closedAt,
         OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
+        OffsetDateTime updatedAt,
+        int totalEmployeesCount,
+        BigDecimal totalFinalizedAmount,
+        int paidCount,
+        int unpaidCount
 ) {
     public static PayrollPeriodDto fromEntity(PayrollPeriod p) {
+        return fromEntity(p, 0, BigDecimal.ZERO, 0, 0);
+    }
+
+    public static PayrollPeriodDto fromEntity(
+            PayrollPeriod p,
+            int totalEmployeesCount,
+            BigDecimal totalFinalizedAmount,
+            int paidCount,
+            int unpaidCount
+    ) {
         if (p == null) return null;
         return new PayrollPeriodDto(
                 p.getId(),
@@ -34,7 +48,11 @@ public record PayrollPeriodDto(
                 p.getFinalizedAt(),
                 p.getClosedAt(),
                 p.getCreatedAt(),
-                p.getUpdatedAt()
+                p.getUpdatedAt(),
+                totalEmployeesCount,
+                totalFinalizedAmount != null ? totalFinalizedAmount : BigDecimal.ZERO,
+                paidCount,
+                unpaidCount
         );
     }
 }

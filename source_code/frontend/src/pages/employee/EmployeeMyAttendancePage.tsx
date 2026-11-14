@@ -214,8 +214,8 @@ export const EmployeeMyAttendancePage: React.FC = () => {
                 const dayName = isSunday
                   ? 'Chủ Nhật'
                   : `Thứ ${dateObj.getDay() + 1}`;
-                const status = summary.dailyStatusMap[day];
-                const note = summary.dailyNoteMap[day];
+                const status = summary.dailyRecords?.[day]?.attendanceStatus || summary.dailyStatusMap?.[day];
+                const note = summary.dailyRecords?.[day]?.note || summary.dailyNoteMap?.[day];
                 const isToday =
                   day === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear();
 

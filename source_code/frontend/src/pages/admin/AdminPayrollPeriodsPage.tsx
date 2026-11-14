@@ -62,6 +62,18 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
   const [adjReason, setAdjReason] = useState<string>('');
   const [addingAdj, setAddingAdj] = useState<boolean>(false);
 
+  // Edit Period Modal
+  const [editingPeriod, setEditingPeriod] = useState<PayrollPeriodDto | null>(null);
+  const [editStandardDays, setEditStandardDays] = useState<string>('26.0');
+  const [editPeriodNote, setEditPeriodNote] = useState<string>('');
+  const [updatingPeriod, setUpdatingPeriod] = useState<boolean>(false);
+
+  // Edit Adjustment Modal
+  const [editingAdj, setEditingAdj] = useState<PayrollAdjustmentDto | null>(null);
+  const [editAdjAmount, setEditAdjAmount] = useState<string>('500000');
+  const [editAdjReason, setEditAdjReason] = useState<string>('');
+  const [updatingAdj, setUpdatingAdj] = useState<boolean>(false);
+
   const fetchPeriods = async () => {
     try {
       setLoading(true);
@@ -222,6 +234,69 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
     }
   };
 
+  const openEditPeriod = (p: PayrollPeriodDto) => {
+    setEditingPeriod(p);
+    setEditStandardDays(String(p.standardWorkdays));
+    setEditPeriodNote(p.note || '');
+  };
+
+  const handleUpdatePeriod = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPeriod) return;
+    const daysNum = Number(editStandardDays);
+    if (isNaN(daysNum) || daysNum <= 0 || daysNum > 31) {
+      showToast('Số công chuẩn phải từ 1 đến 31 ngày', 'error');
+      return;
+    }
+    try {
+      setUpdatingPeriod(true);
+      await employeeService.updatePayrollPeriod(editingPeriod.id, {
+        standardWorkdays: daysNum,
+        note: editPeriodNote.trim() || null,
+      });
+      showToast(`Đã cập nhật kỳ lương Tháng ${editingPeriod.month}/${editingPeriod.year}`, 'success');
+      setEditingPeriod(null);
+      fetchPeriods();
+    } catch (err) {
+      showToast(extractErrorMessage(err, 'Không thể cập nhật kỳ lương'), 'error');
+    } finally {
+      setUpdatingPeriod(false);
+    }
+  };
+
+  const openEditAdjustment = (adj: PayrollAdjustmentDto) => {
+    setEditingAdj(adj);
+    setEditAdjAmount(String(adj.amount));
+    setEditAdjReason(adj.name || adj.reason || '');
+  };
+
+  const handleUpdateAdjustment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAdj || !adjPeriodId) return;
+    const amt = Number(editAdjAmount);
+    if (isNaN(amt) || amt <= 0) {
+      showToast('Số tiền điều chỉnh phải lớn hơn 0', 'error');
+      return;
+    }
+    try {
+      setUpdatingAdj(true);
+      await employeeService.updateAdjustment(adjPeriodId, editingAdj.id, {
+        amount: amt,
+        reason: editAdjReason.trim(),
+        name: editAdjReason.trim(),
+      });
+      showToast('Đã cập nhật khoản điều chỉnh thành công', 'success');
+      setEditingAdj(null);
+      const adjs = await employeeService.getAdjustments(adjPeriodId);
+      setAdjustments(adjs);
+      fetchPeriods();
+    } catch (err) {
+      showToast(extractErrorMessage(err, 'Không thể cập nhật khoản điều chỉnh'), 'error');
+    } finally {
+      setUpdatingAdj(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'DRAFT':
@@ -349,6 +424,14 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
                         title="Thêm phụ cấp / giảm trừ"
                       >
                         <SlidersHorizontal className="h-3.5 w-3.5" /> Phụ cấp / Khấu trừ
+                      </button>
+
+                      <button
+                        onClick={() => openEditPeriod(p)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold transition-colors cursor-pointer"
+                        title="Chỉnh sửa ngày công chuẩn và ghi chú kỳ lương DRAFT"
+                      >
+                        <CalendarRange className="h-3.5 w-3.5" /> Sửa công chuẩn
                       </button>
 
                       <button
@@ -747,7 +830,7 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
                       <th className="py-2.5 px-3">Loại</th>
                       <th className="py-2.5 px-3 text-right">Số tiền</th>
                       <th className="py-2.5 px-3">Lý do</th>
-                      <th className="py-2.5 px-3 text-right">Xóa</th>
+                      <th className="py-2.5 px-3 text-right">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100">
@@ -777,11 +860,18 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
                           <td className="py-2.5 px-3 text-right font-bold text-stone-900">
                             {new Intl.NumberFormat('vi-VN').format(a.amount)} đ
                           </td>
-                          <td className="py-2.5 px-3 text-stone-600 truncate max-w-xs">{a.reason}</td>
-                          <td className="py-2.5 px-3 text-right">
+                          <td className="py-2.5 px-3 text-stone-600 truncate max-w-xs">{a.name || a.reason}</td>
+                          <td className="py-2.5 px-3 text-right space-x-1">
+                            <button
+                              onClick={() => openEditAdjustment(a)}
+                              className="p-1 rounded text-stone-400 hover:text-amber-700 transition-colors inline-block cursor-pointer"
+                              title="Sửa"
+                            >
+                              <SlidersHorizontal className="h-3.5 w-3.5" />
+                            </button>
                             <button
                               onClick={() => handleDeleteAdjustment(a.id)}
-                              className="p-1 rounded text-stone-400 hover:text-rose-600 transition-colors"
+                              className="p-1 rounded text-stone-400 hover:text-rose-600 transition-colors inline-block cursor-pointer"
                               title="Xóa"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -799,11 +889,146 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setAdjPeriodId(null)}
-                className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl"
+                className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl cursor-pointer"
               >
                 Hoàn tất
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT PERIOD MODAL (DRAFT ONLY) */}
+      {editingPeriod && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 animate-fade-up-1">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <h2 className="text-base font-bold text-stone-900 flex items-center gap-2">
+                <CalendarRange className="h-5 w-5 text-amber-700" />
+                Cập nhật kỳ lương Tháng {editingPeriod.month}/{editingPeriod.year}
+              </h2>
+              <button
+                onClick={() => setEditingPeriod(null)}
+                className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdatePeriod} className="mt-4 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 mb-1">
+                  Số ngày công chuẩn trong tháng <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="1"
+                  max="31"
+                  required
+                  value={editStandardDays}
+                  onChange={(e) => setEditStandardDays(e.target.value)}
+                  className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 mb-1">Ghi chú</label>
+                <textarea
+                  rows={2}
+                  value={editPeriodNote}
+                  onChange={(e) => setEditPeriodNote(e.target.value)}
+                  placeholder="Ghi chú về kỳ lương..."
+                  className="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingPeriod(null)}
+                  className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={updatingPeriod}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs cursor-pointer disabled:opacity-60"
+                >
+                  {updatingPeriod && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  Lưu thay đổi
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT ADJUSTMENT MODAL */}
+      {editingAdj && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 animate-fade-up-1">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <h2 className="text-base font-bold text-stone-900 flex items-center gap-2">
+                <SlidersHorizontal className="h-5 w-5 text-amber-700" />
+                Sửa khoản điều chỉnh ({editingAdj.employeeName})
+              </h2>
+              <button
+                onClick={() => setEditingAdj(null)}
+                className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateAdjustment} className="mt-4 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 mb-1">
+                  Số tiền (VNĐ) <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  min="1000"
+                  step="1000"
+                  required
+                  value={editAdjAmount}
+                  onChange={(e) => setEditAdjAmount(e.target.value)}
+                  className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 mb-1">
+                  Lý do / Tên khoản <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editAdjReason}
+                  onChange={(e) => setEditAdjReason(e.target.value)}
+                  className="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingAdj(null)}
+                  className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={updatingAdj}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs cursor-pointer disabled:opacity-60"
+                >
+                  {updatingAdj && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  Cập nhật
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

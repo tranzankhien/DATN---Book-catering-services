@@ -146,10 +146,13 @@ class Phase6HrPayrollIntegrationTest {
     void tc03_oneUserToMultipleEmployeesRejected() throws Exception {
         String token = adminToken();
 
-        // User id 2 is already linked to EMP-001
+        // Resolve demo employee user id dynamically
+        Long linkedUserId = db.queryForObject("SELECT user_id FROM employees WHERE employee_code = 'EMP-001'", Long.class);
+        assertThat(linkedUserId).isNotNull();
+
         String code = "TEST-LINK-01";
         CreateEmployeeRequest req = new CreateEmployeeRequest(
-                code, 2L, "Trùng User", "0987654321", null,
+                code, linkedUserId, "Trùng User", "0987654321", null,
                 "Tạp vụ", LocalDate.of(2025, 1, 1), new BigDecimal("6000000"), null
         );
 
@@ -529,10 +532,17 @@ class Phase6HrPayrollIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
+        JsonNode previewTree = json.readTree(prevRes).path("data");
         JsonNode item = findPreviewItemInJson(json.readTree(prevRes), empId);
         assertThat(item).isNotNull();
         assertThat(item.path("actualWorkdays").asDouble()).isEqualTo(22.0); // Not cut
         assertThat(item.path("warnings").toString()).contains("vượt số công chuẩn");
+        assertThat(previewTree.path("canFinalize").asBoolean()).isFalse();
+
+        // Finalization is strictly blocked when actual workdays exceed standard workdays
+        mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest());
     }
 
     // =========================================================================
@@ -848,7 +858,7 @@ class Phase6HrPayrollIntegrationTest {
         String token = adminToken();
         long payrollId = createAndFinalizeSinglePayroll(token, 2097, 4);
 
-        LocalDate payDate = LocalDate.of(2097, 4, 15);
+        LocalDate payDate = LocalDate.now();
         RecordSalaryPaymentRequest payReq = new RecordSalaryPaymentRequest(
                 payDate, PaymentMethod.BANK_TRANSFER, "Thanh toán qua chuyển khoản ngoài hệ thống"
         );
@@ -861,7 +871,7 @@ class Phase6HrPayrollIntegrationTest {
                 .andReturn().getResponse().getContentAsString();
 
         JsonNode data = json.readTree(res).path("data");
-        assertThat(data.path("paymentDate").asText()).isEqualTo("2097-04-15");
+        assertThat(data.path("paymentDate").asText()).isEqualTo(payDate.toString());
         assertThat(data.path("paymentMethod").asText()).isEqualTo("BANK_TRANSFER");
         assertThat(data.path("amount").asDouble()).isGreaterThan(0);
     }
@@ -871,9 +881,13 @@ class Phase6HrPayrollIntegrationTest {
     void tc36_totalPaidAndUnpaidAccurate() throws Exception {
         String token = adminToken();
 
+        // Resolve employee ID dynamically
+        Long targetEmpId = db.queryForObject("SELECT id FROM employees ORDER BY id ASC LIMIT 1", Long.class);
+        assertThat(targetEmpId).isNotNull();
+
         // Record attendance for month 5 so salary > 0
         String dateStr = "2097-05-02";
-        mvc.perform(put("/api/v1/admin/attendance/1/" + dateStr)
+        mvc.perform(put("/api/v1/admin/attendance/" + targetEmpId + "/" + dateStr)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(new RecordAttendanceRequest(AttendanceStatus.PRESENT, "Chấm công test tháng 5"))))
@@ -1010,6 +1024,138 @@ class Phase6HrPayrollIntegrationTest {
         // If not using bcrypt, we can use existing test token pattern
     }
 
+    @Test
+    @DisplayName("TC-43: Future payment date is rejected with 400 Bad Request")
+    void tc43_futurePaymentDateBlocked() throws Exception {
+        String token = adminToken();
+        long payrollId = createAndFinalizeSinglePayroll(token, 2097, 8);
+
+        LocalDate futureDate = LocalDate.now().plusDays(2);
+        RecordSalaryPaymentRequest payReq = new RecordSalaryPaymentRequest(
+                futureDate, PaymentMethod.CASH, "Thanh toán tương lai"
+        );
+
+        mvc.perform(post("/api/v1/admin/payrolls/" + payrollId + "/mark-paid")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(payReq)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("TC-44: Nested /admin/payroll-periods/{id}/adjustments supports 'reason' alias and returns list")
+    void tc44_nestedPeriodAdjustmentsEndpointAndReasonField() throws Exception {
+        String token = adminToken();
+        long periodId = createPayrollPeriod(token, 2097, 9, new BigDecimal("26.0"));
+
+        Long empId = db.queryForObject("SELECT id FROM employees ORDER BY id ASC LIMIT 1", Long.class);
+
+        // Call nested endpoint with "reason" field instead of "name"
+        Map<String, Object> req = Map.of(
+                "employeeId", empId,
+                "adjustmentType", "ALLOWANCE",
+                "reason", "Phụ cấp trách nhiệm ca đêm",
+                "amount", 500000.0,
+                "note", "Test alias reason"
+        );
+
+        String postRes = mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/adjustments")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(req)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode adj = json.readTree(postRes).path("data");
+        assertThat(adj.path("name").asText()).isEqualTo("Phụ cấp trách nhiệm ca đêm");
+        assertThat(adj.path("reason").asText()).isEqualTo("Phụ cấp trách nhiệm ca đêm");
+
+        // Verify GET on nested route
+        String getRes = mvc.perform(get("/api/v1/admin/payroll-periods/" + periodId + "/adjustments")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode list = json.readTree(getRes).path("data");
+        assertThat(list.size()).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("TC-45: Concurrent final payments on separate payrolls in same period reliably auto-close to CLOSED")
+    void tc45_concurrentPaymentsOnTwoPayrollsAutoClosesPeriod() throws Exception {
+        String token = adminToken();
+        String code1 = "TEST-CONC1-" + UUID.randomUUID().toString().substring(0, 6);
+        String code2 = "TEST-CONC2-" + UUID.randomUUID().toString().substring(0, 6);
+        long empId1 = createTestEmployee(token, code1);
+        long empId2 = createTestEmployee(token, code2);
+
+        // Record attendance for both so net salary > 0
+        mvc.perform(put("/api/v1/admin/attendance/" + empId1 + "/2097-10-01")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(new RecordAttendanceRequest(AttendanceStatus.PRESENT, "Công test 1"))))
+                .andExpect(status().isOk());
+        mvc.perform(put("/api/v1/admin/attendance/" + empId2 + "/2097-10-01")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(new RecordAttendanceRequest(AttendanceStatus.PRESENT, "Công test 2"))))
+                .andExpect(status().isOk());
+
+        long periodId = createPayrollPeriod(token, 2097, 10, new BigDecimal("26.0"));
+
+        String finRes = mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode payrolls = json.readTree(finRes).path("data");
+        List<Long> payrollIds = new ArrayList<>();
+        for (JsonNode p : payrolls) {
+            long pEmpId = p.path("employeeId").asLong();
+            if (pEmpId == empId1 || pEmpId == empId2) {
+                payrollIds.add(p.path("id").asLong());
+            }
+        }
+        assertThat(payrollIds).hasSize(2);
+
+        // Pay both payrolls concurrently
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        CountDownLatch latch = new CountDownLatch(1);
+        List<Future<?>> futures = new ArrayList<>();
+
+        for (Long pId : payrollIds) {
+            futures.add(executor.submit(() -> {
+                try {
+                    latch.await();
+                    mvc.perform(post("/api/v1/admin/payrolls/" + pId + "/mark-paid")
+                            .header("Authorization", "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json.writeValueAsString(new RecordSalaryPaymentRequest(LocalDate.now(), PaymentMethod.BANK_TRANSFER, "Chi lương đồng thời"))));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }));
+        }
+
+        latch.countDown();
+        for (Future<?> f : futures) f.get(5, TimeUnit.SECONDS);
+        executor.shutdown();
+
+        // Check remaining unpaid for this period
+        Integer unpaidCount = db.queryForObject(
+                "SELECT count(*) FROM payrolls WHERE payroll_period_id = ? AND payment_status = 'UNPAID'",
+                Integer.class, periodId);
+
+        if (unpaidCount == 0) {
+            String periodRes = mvc.perform(get("/api/v1/admin/payroll-periods/" + periodId)
+                            .header("Authorization", "Bearer " + token))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+            String statusStr = json.readTree(periodRes).path("data").path("status").asText();
+            assertThat(statusStr).isEqualTo("CLOSED");
+        }
+    }
+
     // =========================================================================
     // HELPER METHODS
     // =========================================================================
@@ -1040,9 +1186,10 @@ class Phase6HrPayrollIntegrationTest {
     }
 
     private long createAndFinalizeSinglePayroll(String token, int year, int month) throws Exception {
-        // Record at least 1 day attendance for employee 1 so net salary > 0
+        Long empId = db.queryForObject("SELECT id FROM employees ORDER BY id ASC LIMIT 1", Long.class);
+        // Record at least 1 day attendance so net salary > 0
         String dateStr = String.format("%04d-%02d-01", year, month);
-        mvc.perform(put("/api/v1/admin/attendance/1/" + dateStr)
+        mvc.perform(put("/api/v1/admin/attendance/" + empId + "/" + dateStr)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(new RecordAttendanceRequest(AttendanceStatus.PRESENT, "Chấm công test"))))

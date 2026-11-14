@@ -87,9 +87,16 @@ public class AttendanceService {
             int absentDays = 0;
             BigDecimal totalUnits = BigDecimal.ZERO;
             Map<Integer, AttendanceDto> dailyRecords = new HashMap<>();
+            Map<Integer, AttendanceStatus> dailyStatusMap = new HashMap<>();
+            Map<Integer, String> dailyNoteMap = new HashMap<>();
 
             for (Attendance a : empRecords) {
-                dailyRecords.put(a.getWorkDate().getDayOfMonth(), AttendanceDto.fromEntity(a));
+                int day = a.getWorkDate().getDayOfMonth();
+                dailyRecords.put(day, AttendanceDto.fromEntity(a));
+                dailyStatusMap.put(day, a.getAttendanceStatus());
+                if (a.getNote() != null && !a.getNote().isBlank()) {
+                    dailyNoteMap.put(day, a.getNote());
+                }
                 if (a.getAttendanceStatus() == AttendanceStatus.PRESENT) {
                     presentDays++;
                 } else if (a.getAttendanceStatus() == AttendanceStatus.HALF_DAY) {
@@ -115,7 +122,9 @@ public class AttendanceService {
                     absentDays,
                     totalUnits,
                     unrecordedDays,
-                    dailyRecords
+                    dailyRecords,
+                    dailyStatusMap,
+                    dailyNoteMap
             ));
         }
 
@@ -166,7 +175,7 @@ public class AttendanceService {
     }
 
     private void checkPeriodNotFinalized(int year, int month) {
-        Optional<PayrollPeriod> periodOpt = payrollPeriodRepository.findByYearAndMonth(year, month);
+        Optional<PayrollPeriod> periodOpt = payrollPeriodRepository.findByYearAndMonthForUpdate(year, month);
         if (periodOpt.isPresent()) {
             PayrollPeriod period = periodOpt.get();
             if (period.getStatus() != PayrollPeriodStatus.DRAFT) {

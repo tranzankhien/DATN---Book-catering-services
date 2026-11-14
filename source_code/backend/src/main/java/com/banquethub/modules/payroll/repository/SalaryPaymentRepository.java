@@ -24,4 +24,7 @@ public interface SalaryPaymentRepository extends JpaRepository<SalaryPayment, Lo
 
     @Query("SELECT COALESCE(SUM(sp.amount), 0) FROM SalaryPayment sp")
     BigDecimal sumTotalPaid();
+
+    @Query("SELECT COALESCE(SUM(sp.amount), 0) FROM SalaryPayment sp WHERE sp.paymentDate >= :startDate AND sp.paymentDate <= :endDate")
+    BigDecimal sumPaidAmountBetween(@Param("startDate") java.time.LocalDate startDate, @Param("endDate") java.time.LocalDate endDate);
 }
