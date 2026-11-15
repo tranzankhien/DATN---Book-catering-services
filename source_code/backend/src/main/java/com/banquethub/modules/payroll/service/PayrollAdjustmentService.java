@@ -90,15 +90,11 @@ public class PayrollAdjustmentService {
 
         PayrollAdjustment saved = adjustmentRepository.save(adjustment);
 
-        try {
-            jdbc.update("""
-                INSERT INTO payroll_adjustment_audits(adjustment_id, employee_id, payroll_period_id, action, adjustment_type, old_amount, new_amount, old_name, new_name, note, actor_name)
-                VALUES (?, ?, ?, 'CREATED', ?, NULL, ?, NULL, ?, ?, ?)
-            """, saved.getId(), saved.getEmployee().getId(), saved.getPayrollPeriod().getId(),
-                saved.getAdjustmentType().name(), saved.getAmount(), saved.getName(), saved.getNote(), adminName);
-        } catch (Exception ex) {
-            log.warn("Không thể lưu audit trail cho khoản điều chỉnh ID {}: {}", saved.getId(), ex.getMessage());
-        }
+        jdbc.update("""
+            INSERT INTO payroll_adjustment_audits(adjustment_id, employee_id, payroll_period_id, action, adjustment_type, old_amount, new_amount, old_name, new_name, note, audit_detail, actor_name)
+            VALUES (?, ?, ?, 'CREATED', ?, NULL, ?, NULL, ?, ?, ?, ?)
+        """, saved.getId(), saved.getEmployee().getId(), saved.getPayrollPeriod().getId(),
+            saved.getAdjustmentType().name(), saved.getAmount(), saved.getName(), saved.getNote(), "Tạo mới khoản điều chỉnh", adminName);
 
         return PayrollAdjustmentDto.fromEntity(saved);
     }
@@ -108,11 +104,11 @@ public class PayrollAdjustmentService {
     }
 
     public PayrollAdjustmentDto updateAdjustment(Long id, UpdatePayrollAdjustmentRequest request, String adminName) {
-        PayrollAdjustment adjustment = adjustmentRepository.findById(id)
+        PayrollAdjustment initial = adjustmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khoản điều chỉnh với ID: " + id));
 
-        // Concurrency protection: lock payroll period row
-        PayrollPeriod period = periodRepository.findByIdForUpdate(adjustment.getPayrollPeriod().getId())
+        // Concurrency protection: lock payroll period row first
+        PayrollPeriod period = periodRepository.findByIdForUpdate(initial.getPayrollPeriod().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỳ lương của khoản điều chỉnh."));
 
         if (period.getStatus() != PayrollPeriodStatus.DRAFT) {
@@ -128,6 +124,10 @@ public class PayrollAdjustmentService {
             throw new BusinessValidationException("Tên hoặc lý do điều chỉnh không được để trống.");
         }
 
+        // Re-read adjustment after acquiring period lock to ensure fresh committed data
+        PayrollAdjustment adjustment = adjustmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khoản điều chỉnh với ID: " + id));
+
         BigDecimal oldAmount = adjustment.getAmount();
         String oldName = adjustment.getName();
 
@@ -137,26 +137,18 @@ public class PayrollAdjustmentService {
 
         String auditLog = String.format("[Sửa bởi %s: %s đ -> %s đ]", adminName, oldAmount, request.amount());
         String userNote = request.note() != null ? request.note().trim() : (adjustment.getNote() != null ? adjustment.getNote() : "");
-        if (!userNote.contains(auditLog)) {
-            adjustment.setNote(userNote.isBlank() ? auditLog : userNote + " | " + auditLog);
-        } else {
-            adjustment.setNote(userNote);
-        }
+        adjustment.setNote(userNote);
 
         log.info("Quản trị viên '{}' đã sửa khoản điều chỉnh ID {}: '{}' ({}) -> '{}' ({})",
                 adminName, id, oldName, oldAmount, name, request.amount());
 
         PayrollAdjustment saved = adjustmentRepository.save(adjustment);
 
-        try {
-            jdbc.update("""
-                INSERT INTO payroll_adjustment_audits(adjustment_id, employee_id, payroll_period_id, action, adjustment_type, old_amount, new_amount, old_name, new_name, note, actor_name)
-                VALUES (?, ?, ?, 'UPDATED', ?, ?, ?, ?, ?, ?, ?)
-            """, id, adjustment.getEmployee().getId(), period.getId(),
-                adjustment.getAdjustmentType().name(), oldAmount, request.amount(), oldName, name, adjustment.getNote(), adminName);
-        } catch (Exception ex) {
-            log.warn("Không thể lưu audit trail cho khoản điều chỉnh ID {}: {}", id, ex.getMessage());
-        }
+        jdbc.update("""
+            INSERT INTO payroll_adjustment_audits(adjustment_id, employee_id, payroll_period_id, action, adjustment_type, old_amount, new_amount, old_name, new_name, note, audit_detail, actor_name)
+            VALUES (?, ?, ?, 'UPDATED', ?, ?, ?, ?, ?, ?, ?, ?)
+        """, id, adjustment.getEmployee().getId(), period.getId(),
+            adjustment.getAdjustmentType().name(), oldAmount, request.amount(), oldName, name, userNote, auditLog, adminName);
 
         return PayrollAdjustmentDto.fromEntity(saved);
     }
@@ -166,29 +158,30 @@ public class PayrollAdjustmentService {
     }
 
     public void deleteAdjustment(Long id, String adminName) {
-        PayrollAdjustment adjustment = adjustmentRepository.findById(id)
+        PayrollAdjustment initial = adjustmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khoản điều chỉnh với ID: " + id));
 
         // Concurrency protection: lock payroll period row
-        PayrollPeriod period = periodRepository.findByIdForUpdate(adjustment.getPayrollPeriod().getId())
+        PayrollPeriod period = periodRepository.findByIdForUpdate(initial.getPayrollPeriod().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỳ lương của khoản điều chỉnh."));
 
         if (period.getStatus() != PayrollPeriodStatus.DRAFT) {
             throw new BusinessValidationException("Kỳ lương đã ở trạng thái " + period.getStatus() + ". Không thể xóa khoản điều chỉnh.");
         }
 
+        // Re-read adjustment after acquiring period lock
+        PayrollAdjustment adjustment = adjustmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khoản điều chỉnh với ID: " + id));
+
         log.info("Quản trị viên '{}' đã xóa khoản điều chỉnh ID {} ({}, {} đ) của nhân viên ID {}",
                 adminName, id, adjustment.getName(), adjustment.getAmount(), adjustment.getEmployee().getId());
 
-        try {
-            jdbc.update("""
-                INSERT INTO payroll_adjustment_audits(adjustment_id, employee_id, payroll_period_id, action, adjustment_type, old_amount, new_amount, old_name, new_name, note, actor_name)
-                VALUES (?, ?, ?, 'DELETED', ?, ?, NULL, ?, NULL, ?, ?)
-            """, id, adjustment.getEmployee().getId(), period.getId(),
-                adjustment.getAdjustmentType().name(), adjustment.getAmount(), adjustment.getName(), "Xóa khoản điều chỉnh", adminName);
-        } catch (Exception ex) {
-            log.warn("Không thể lưu audit trail khi xóa khoản điều chỉnh ID {}: {}", id, ex.getMessage());
-        }
+        jdbc.update("""
+            INSERT INTO payroll_adjustment_audits(adjustment_id, employee_id, payroll_period_id, action, adjustment_type, old_amount, new_amount, old_name, new_name, note, audit_detail, actor_name)
+            VALUES (?, ?, ?, 'DELETED', ?, ?, NULL, ?, NULL, ?, ?, ?)
+        """, id, adjustment.getEmployee().getId(), period.getId(),
+            adjustment.getAdjustmentType().name(), adjustment.getAmount(), adjustment.getName(), adjustment.getNote(),
+            String.format("[Xóa bởi %s: %s đ]", adminName, adjustment.getAmount()), adminName);
 
         adjustmentRepository.delete(adjustment);
     }

@@ -266,27 +266,27 @@ public class PayrollPeriodService {
         }
 
         // Integrity check: verify that preview data matches what the admin reviewed
-        if (request != null) {
-            if (request.previewHash() != null && !request.previewHash().isBlank() &&
-                    !preview.previewHash().equals(request.previewHash())) {
-                throw new BusinessValidationException(
-                        "Bảng lương đã bị thay đổi chi tiết từng nhân viên (mức lương, công hoặc phụ cấp) kể từ lần xem trước gần nhất. Vui lòng tải lại bản xem trước để rà soát trước khi chốt."
-                );
-            }
-            if (request.expectedTotalNetSalary() != null &&
-                    preview.totalNetSalary().compareTo(request.expectedTotalNetSalary()) != 0) {
-                throw new BusinessValidationException(String.format(
-                        "Số liệu bảng lương đã bị thay đổi bởi quản trị viên khác kể từ lần xem trước gần nhất (Thực lĩnh xem trước: %s đ, thực tế hiện tại: %s đ). Vui lòng tải lại bản xem trước để rà soát trước khi chốt.",
-                        request.expectedTotalNetSalary(), preview.totalNetSalary()
-                ));
-            }
-            if (request.expectedEmployeeCount() != null &&
-                    preview.items().size() != request.expectedEmployeeCount()) {
-                throw new BusinessValidationException(String.format(
-                        "Số lượng nhân viên trong bảng lương đã thay đổi (Xem trước: %d, thực tế: %d). Vui lòng tải lại bản xem trước.",
-                        request.expectedEmployeeCount(), preview.items().size()
-                ));
-            }
+        if (request == null || request.previewHash() == null || request.previewHash().isBlank()) {
+            throw new BusinessValidationException("Mã xác nhận bản xem trước (previewHash) là bắt buộc khi chốt kỳ lương. Vui lòng tải lại bản xem trước để xác nhận.");
+        }
+        if (!preview.previewHash().equals(request.previewHash())) {
+            throw new BusinessValidationException(
+                    "Bảng lương đã bị thay đổi chi tiết từng nhân viên (mức lương, công, phụ cấp hoặc khấu trừ) kể từ lần xem trước gần nhất. Vui lòng tải lại bản xem trước để rà soát trước khi chốt."
+            );
+        }
+        if (request.expectedTotalNetSalary() != null &&
+                preview.totalNetSalary().compareTo(request.expectedTotalNetSalary()) != 0) {
+            throw new BusinessValidationException(String.format(
+                    "Số liệu bảng lương đã bị thay đổi bởi quản trị viên khác kể từ lần xem trước gần nhất (Thực lĩnh xem trước: %s đ, thực tế hiện tại: %s đ). Vui lòng tải lại bản xem trước để rà soát trước khi chốt.",
+                    request.expectedTotalNetSalary(), preview.totalNetSalary()
+            ));
+        }
+        if (request.expectedEmployeeCount() != null &&
+                preview.items().size() != request.expectedEmployeeCount()) {
+            throw new BusinessValidationException(String.format(
+                    "Số lượng nhân viên trong bảng lương đã thay đổi (Xem trước: %d, thực tế: %d). Vui lòng tải lại bản xem trước.",
+                    request.expectedEmployeeCount(), preview.items().size()
+            ));
         }
 
         OffsetDateTime now = OffsetDateTime.now(VN_ZONE);
@@ -372,8 +372,13 @@ public class PayrollPeriodService {
         StringBuilder sb = new StringBuilder();
         for (PayrollPeriodPreviewDto.PayrollPreviewItemDto it : sorted) {
             sb.append(it.employeeId()).append(':')
-              .append(it.actualWorkdays() != null ? it.actualWorkdays().stripTrailingZeros().toPlainString() : "0").append(':')
-              .append(it.netSalary() != null ? it.netSalary().stripTrailingZeros().toPlainString() : "0").append(';');
+              .append(formatDecimal(it.baseSalary())).append(':')
+              .append(formatDecimal(it.standardWorkdays())).append(':')
+              .append(formatDecimal(it.actualWorkdays())).append(':')
+              .append(formatDecimal(it.calculatedSalary())).append(':')
+              .append(formatDecimal(it.totalAllowances())).append(':')
+              .append(formatDecimal(it.totalDeductions())).append(':')
+              .append(formatDecimal(it.netSalary())).append(';');
         }
         try {
             java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
@@ -382,5 +387,9 @@ public class PayrollPeriodService {
         } catch (Exception e) {
             return Integer.toHexString(sb.toString().hashCode());
         }
+    }
+
+    private static String formatDecimal(BigDecimal val) {
+        return val != null ? val.stripTrailingZeros().toPlainString() : "0";
     }
 }

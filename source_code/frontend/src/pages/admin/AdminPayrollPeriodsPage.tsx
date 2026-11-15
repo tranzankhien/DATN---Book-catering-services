@@ -134,6 +134,10 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
 
   const handleFinalize = async () => {
     if (!previewPeriodId) return;
+    if (!previewData?.previewHash) {
+      showToast('Dữ liệu xem trước chưa sẵn sàng hoặc thiếu mã xác nhận (previewHash). Vui lòng tải lại bản xem trước.', 'error');
+      return;
+    }
     if (
       !window.confirm(
         'XÁC NHẬN CHỐT SỔ KỲ LƯƠNG?\nSau khi chốt sổ, toàn bộ ngày công, phụ cấp, giảm trừ và mức lương thực lĩnh sẽ được đóng băng snapshot vĩnh viễn. Kỳ lương sẽ chuyển sang trạng thái chờ chi trả.'

@@ -224,28 +224,45 @@ export function extractAiMenuParameters(text: string): ExtractedAiMenuParams {
     }
   }
 
-  // Priority B: Total guests stated (e.g., "100 khách", "tiệc 30 người")
-  // If guestsPerTable is not explicitly defined yet, compute guestsPerTable = totalGuests / tableCount
-  const totalGuestsRegex = /(?:khoảng|tầm|tổng cộng|tổng|cho|tiệc)?\s*(\d{1,4})\s*(?:người|khách)\b/i;
-  const matchTotal = raw.match(totalGuestsRegex);
-  if (matchTotal) {
-    const total = parseInt(matchTotal[1], 10);
+  // Priority B: Total guests stated (e.g., "100 khách", "tiệc 30 người", "tổng 25 khách")
+  // 1. Explicit total guest indicator
+  const explicitTotalRegex = /(?:tổng\s*cộng|tổng\s*số|tổng|tiệc|quy\s*mô|cho|phục\s*vụ)\s*(?:khoảng|tầm)?\s*(\d{1,4})\s*(?:người|khách)\b/i;
+  const matchExplicitTotal = raw.match(explicitTotalRegex);
+  if (matchExplicitTotal) {
+    const total = parseInt(matchExplicitTotal[1], 10);
     if (total > 0 && total <= 5000) {
       result.totalGuests = total;
+    }
+  }
 
-      // If we don't have explicit guestsPerTable yet:
-      if (!result.guestsPerTable) {
-        if (result.tableCount && result.tableCount > 0) {
-          // Standard banquet formula: guests per table = Math.round(total / tables)
-          const computed = Math.round(total / result.tableCount);
-          result.guestsPerTable = Math.max(1, Math.min(50, computed));
-          result.detectedFields.guestsPerTable = true;
-        } else if (total <= 20) {
-          // Small party, could be 1 table of 'total' guests
-          result.guestsPerTable = total;
-          result.detectedFields.guestsPerTable = true;
-        }
+  // 2. Fallback: general "X khách/người" only if not attached to a per-table clause (e.g. avoiding "6 người/bàn")
+  if (!result.totalGuests) {
+    const sanitizedForTotal = raw
+      .replace(explicitPerTableRegex1, ' ')
+      .replace(explicitPerTableRegex2, ' ')
+      .replace(explicitPerTableRegex3, ' ');
+
+    const generalTotalRegex = /(?:khoảng|tầm)?\s*(\d{1,4})\s*(?:người|khách)\b/i;
+    const matchGeneral = sanitizedForTotal.match(generalTotalRegex);
+    if (matchGeneral) {
+      const total = parseInt(matchGeneral[1], 10);
+      if (total > 0 && total <= 5000) {
+        result.totalGuests = total;
       }
+    }
+  }
+
+  // If guestsPerTable is not explicitly defined yet, compute guestsPerTable = totalGuests / tableCount
+  if (result.totalGuests && !result.guestsPerTable) {
+    if (result.tableCount && result.tableCount > 0) {
+      // Standard banquet formula: guests per table = Math.round(total / tables)
+      const computed = Math.round(result.totalGuests / result.tableCount);
+      result.guestsPerTable = Math.max(1, Math.min(50, computed));
+      result.detectedFields.guestsPerTable = true;
+    } else if (result.totalGuests <= 20) {
+      // Small party, could be 1 table of 'total' guests
+      result.guestsPerTable = result.totalGuests;
+      result.detectedFields.guestsPerTable = true;
     }
   }
 

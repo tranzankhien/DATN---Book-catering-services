@@ -359,9 +359,7 @@ class Phase6HrPayrollIntegrationTest {
                 .andExpect(status().isOk());
 
         // Finalize period
-        mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
+        finalizePeriodWithPreview(periodId, token).andExpect(status().isOk());
 
         // Attempt to edit attendance in finalized month must be rejected
         mvc.perform(put("/api/v1/admin/attendance/" + empId + "/2095-06-02")
@@ -621,9 +619,7 @@ class Phase6HrPayrollIntegrationTest {
                 .andExpect(status().isCreated());
 
         // Finalize period
-        String finRes = mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
+        String finRes = finalizePeriodWithPreview(periodId, token).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         JsonNode payrollList = json.readTree(finRes).path("data");
@@ -645,14 +641,10 @@ class Phase6HrPayrollIntegrationTest {
         String token = adminToken();
         long periodId = createPayrollPeriod(token, 2096, 5, new BigDecimal("26.0"));
 
-        mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
+        finalizePeriodWithPreview(periodId, token).andExpect(status().isOk());
 
         // Second call must fail
-        mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().is4xxClientError());
+        finalizePeriodWithPreview(periodId, token).andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -665,9 +657,7 @@ class Phase6HrPayrollIntegrationTest {
         long periodId = createPayrollPeriod(token, 2096, 6, new BigDecimal("26.0"));
 
         // Finalize period with base salary 9.000.000
-        mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
+        finalizePeriodWithPreview(periodId, token).andExpect(status().isOk());
 
         // Now update employee base salary to 12.000.000
         UpdateEmployeeRequest updateReq = new UpdateEmployeeRequest(
@@ -700,9 +690,7 @@ class Phase6HrPayrollIntegrationTest {
 
         long periodId = createPayrollPeriod(token, 2096, 7, new BigDecimal("26.0"));
 
-        mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
+        finalizePeriodWithPreview(periodId, token).andExpect(status().isOk());
 
         // Adding adjustment must fail
         CreatePayrollAdjustmentRequest adj = new CreatePayrollAdjustmentRequest(
@@ -721,6 +709,17 @@ class Phase6HrPayrollIntegrationTest {
         String token = adminToken();
         long periodId = createPayrollPeriod(token, 2096, 8, new BigDecimal("26.0"));
 
+        String prevRes = mvc.perform(get("/api/v1/admin/payroll-periods/" + periodId + "/preview")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        JsonNode prevData = json.readTree(prevRes).path("data");
+        String finalizePayload = json.writeValueAsString(new FinalizePayrollPeriodRequest(
+                new BigDecimal(prevData.path("totalNetSalary").asText()),
+                prevData.path("totalEmployees").asInt(),
+                prevData.path("previewHash").asText()
+        ));
+
         int threads = 4;
         ExecutorService executor = Executors.newFixedThreadPool(threads);
         CountDownLatch latch = new CountDownLatch(1);
@@ -732,7 +731,9 @@ class Phase6HrPayrollIntegrationTest {
                 try {
                     latch.await();
                     var resp = mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
-                            .header("Authorization", "Bearer " + token));
+                            .header("Authorization", "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(finalizePayload));
                     if (resp.andReturn().getResponse().getStatus() == 200) {
                         successCount.incrementAndGet();
                     }
@@ -898,9 +899,7 @@ class Phase6HrPayrollIntegrationTest {
         long periodId = createPayrollPeriod(token, 2097, 5, new BigDecimal("26.0"));
 
         // Finalize period
-        String finRes = mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
+        String finRes = finalizePeriodWithPreview(periodId, token).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         JsonNode payrolls = json.readTree(finRes).path("data");
@@ -955,9 +954,7 @@ class Phase6HrPayrollIntegrationTest {
         long otherEmpId = createTestEmployee(aToken, code);
 
         long periodId = createPayrollPeriod(aToken, 2098, 1, new BigDecimal("26.0"));
-        String finRes = mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
-                        .header("Authorization", "Bearer " + aToken))
-                .andExpect(status().isOk())
+        String finRes = finalizePeriodWithPreview(periodId, aToken).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         JsonNode payrollList = json.readTree(finRes).path("data");
@@ -1105,9 +1102,7 @@ class Phase6HrPayrollIntegrationTest {
 
         long periodId = createPayrollPeriod(token, 2097, 10, new BigDecimal("26.0"));
 
-        String finRes = mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
+        String finRes = finalizePeriodWithPreview(periodId, token).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         JsonNode payrolls = json.readTree(finRes).path("data");
@@ -1209,15 +1204,23 @@ class Phase6HrPayrollIntegrationTest {
         int empCount = prevData.path("totalEmployees").asInt();
 
         // 1. Try to finalize with mismatched totalNet (e.g. + 100,000 VND) -> Rejected 400
-        FinalizePayrollPeriodRequest badRequest = new FinalizePayrollPeriodRequest(totalNet.add(new BigDecimal("100000")), empCount);
+        FinalizePayrollPeriodRequest badRequest = new FinalizePayrollPeriodRequest(totalNet.add(new BigDecimal("100000")), empCount, prevData.path("previewHash").asText());
         mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(badRequest)))
                 .andExpect(status().isBadRequest());
 
-        // 2. Finalize with matching checksum values -> Succeeds 200
-        FinalizePayrollPeriodRequest goodRequest = new FinalizePayrollPeriodRequest(totalNet, empCount);
+        // 2. Try to finalize without previewHash -> Rejected 400
+        FinalizePayrollPeriodRequest noHashRequest = new FinalizePayrollPeriodRequest(totalNet, empCount, null);
+        mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(noHashRequest)))
+                .andExpect(status().isBadRequest());
+
+        // 3. Finalize with matching checksum values and valid previewHash -> Succeeds 200
+        FinalizePayrollPeriodRequest goodRequest = new FinalizePayrollPeriodRequest(totalNet, empCount, prevData.path("previewHash").asText());
         mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1297,16 +1300,41 @@ class Phase6HrPayrollIntegrationTest {
         String originalHash = prevData.path("previewHash").asText();
         assertThat(originalHash).isNotEmpty();
 
-        // Pass a stale / mismatched hash (simulating line items modified after preview)
-        FinalizePayrollPeriodRequest badHashRequest = new FinalizePayrollPeriodRequest(totalNet, empCount, "tampered-or-outdated-hash");
+        // Add 100k allowance and 100k deduction for an employee: totalNet remains identical!
+        Long empId = db.queryForObject("SELECT id FROM employees ORDER BY id ASC LIMIT 1", Long.class);
+        mvc.perform(post("/api/v1/admin/payroll-adjustments")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(new CreatePayrollAdjustmentRequest(empId, periodId, AdjustmentType.ALLOWANCE, "Thưởng cân bằng", new BigDecimal("100000"), null))))
+                .andExpect(status().isCreated());
+        mvc.perform(post("/api/v1/admin/payroll-adjustments")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(new CreatePayrollAdjustmentRequest(empId, periodId, AdjustmentType.DEDUCTION, "Phạt cân bằng", new BigDecimal("100000"), null))))
+                .andExpect(status().isCreated());
+
+        // Get new preview: total net is unchanged, but previewHash must have changed
+        String newPrevRes = mvc.perform(get("/api/v1/admin/payroll-periods/" + periodId + "/preview")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        JsonNode newPrevData = json.readTree(newPrevRes).path("data");
+        BigDecimal newTotalNet = new BigDecimal(newPrevData.path("totalNetSalary").asText());
+        String newHash = newPrevData.path("previewHash").asText();
+
+        assertThat(newTotalNet).isEqualByComparingTo(totalNet);
+        assertThat(newHash).isNotEqualTo(originalHash);
+
+        // Finalizing with stale originalHash must be rejected
+        FinalizePayrollPeriodRequest staleHashRequest = new FinalizePayrollPeriodRequest(totalNet, empCount, originalHash);
         mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(badHashRequest)))
+                        .content(json.writeValueAsString(staleHashRequest)))
                 .andExpect(status().isBadRequest());
 
-        // Finalize with valid hash succeeds
-        FinalizePayrollPeriodRequest validRequest = new FinalizePayrollPeriodRequest(totalNet, empCount, originalHash);
+        // Finalize with new valid hash succeeds
+        FinalizePayrollPeriodRequest validRequest = new FinalizePayrollPeriodRequest(newTotalNet, empCount, newHash);
         mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1317,6 +1345,22 @@ class Phase6HrPayrollIntegrationTest {
     // =========================================================================
     // HELPER METHODS
     // =========================================================================
+
+    private org.springframework.test.web.servlet.ResultActions finalizePeriodWithPreview(Long periodId, String token) throws Exception {
+        String prevRes = mvc.perform(get("/api/v1/admin/payroll-periods/" + periodId + "/preview")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        JsonNode prevData = json.readTree(prevRes).path("data");
+        BigDecimal totalNet = new BigDecimal(prevData.path("totalNetSalary").asText());
+        int empCount = prevData.path("totalEmployees").asInt();
+        String hash = prevData.path("previewHash").asText();
+        FinalizePayrollPeriodRequest req = new FinalizePayrollPeriodRequest(totalNet, empCount, hash);
+        return mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(req)));
+    }
 
     private long createTestEmployee(String token, String code) throws Exception {
         CreateEmployeeRequest req = new CreateEmployeeRequest(
@@ -1354,9 +1398,7 @@ class Phase6HrPayrollIntegrationTest {
                 .andExpect(status().isOk());
 
         long periodId = createPayrollPeriod(token, year, month, new BigDecimal("26.0"));
-        String finRes = mvc.perform(post("/api/v1/admin/payroll-periods/" + periodId + "/finalize")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
+        String finRes = finalizePeriodWithPreview(periodId, token).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         JsonNode list = json.readTree(finRes).path("data");

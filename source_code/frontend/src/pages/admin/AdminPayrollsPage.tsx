@@ -47,6 +47,7 @@ export const AdminPayrollsPage: React.FC = () => {
   const [periods, setPeriods] = useState<PayrollPeriodDto[]>([]);
   const [payrolls, setPayrolls] = useState<PayrollDto[]>([]);
   const [periodSummary, setPeriodSummary] = useState<PayrollSummaryDto | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [statusFilter, setStatusFilter] = useState<'ALL' | PaymentStatus>('ALL');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -91,6 +92,7 @@ export const AdminPayrollsPage: React.FC = () => {
 
   const fetchPeriodSummary = async (period: PayrollPeriodDto, reqId: number) => {
     try {
+      setSummaryLoading(true);
       const summary = await employeeService.getPayrollSummary(period.year, period.month);
       if (reqId === activeRequestIdRef.current) {
         setPeriodSummary(summary);
@@ -98,6 +100,10 @@ export const AdminPayrollsPage: React.FC = () => {
     } catch {
       if (reqId === activeRequestIdRef.current) {
         setPeriodSummary(null);
+      }
+    } finally {
+      if (reqId === activeRequestIdRef.current) {
+        setSummaryLoading(false);
       }
     }
   };
@@ -136,6 +142,7 @@ export const AdminPayrollsPage: React.FC = () => {
 
   useEffect(() => {
     if (selectedPeriodId) {
+      setPeriodSummary(null);
       fetchPayrolls();
       setSearchParams({ periodId: selectedPeriodId });
       const current = periods.find((p) => String(p.id) === selectedPeriodId);
@@ -155,22 +162,34 @@ export const AdminPayrollsPage: React.FC = () => {
     if (selectedPeriod && selectedPeriod.totalFinalizedAmount != null) {
       return selectedPeriod.totalFinalizedAmount;
     }
-    return payrolls.reduce((s, p) => s + (p.netSalary || 0), 0);
-  }, [periodSummary, selectedPeriod, payrolls]);
+    return null;
+  }, [periodSummary, selectedPeriod]);
 
   const totalPaid = useMemo(() => {
     if (periodSummary && periodSummary.totalPaidAmount != null) {
       return periodSummary.totalPaidAmount;
     }
-    return payrolls.filter((p) => p.paymentStatus === 'PAID').reduce((s, p) => s + (p.netSalary || 0), 0);
-  }, [periodSummary, payrolls]);
+    if (selectedPeriod) {
+      if (selectedPeriod.paidCount === 0) return 0;
+      if (selectedPeriod.unpaidCount === 0 && selectedPeriod.totalFinalizedAmount != null) {
+        return selectedPeriod.totalFinalizedAmount;
+      }
+    }
+    return null;
+  }, [periodSummary, selectedPeriod]);
 
   const totalUnpaid = useMemo(() => {
     if (periodSummary && periodSummary.totalUnpaidAmount != null) {
       return periodSummary.totalUnpaidAmount;
     }
-    return payrolls.filter((p) => p.paymentStatus === 'UNPAID').reduce((s, p) => s + (p.netSalary || 0), 0);
-  }, [periodSummary, payrolls]);
+    if (selectedPeriod) {
+      if (selectedPeriod.unpaidCount === 0) return 0;
+      if (selectedPeriod.paidCount === 0 && selectedPeriod.totalFinalizedAmount != null) {
+        return selectedPeriod.totalFinalizedAmount;
+      }
+    }
+    return null;
+  }, [periodSummary, selectedPeriod]);
 
   const openPayModal = (p: PayrollDto) => {
     if (selectedPeriodId && p.payrollPeriodId !== Number(selectedPeriodId)) {
@@ -258,7 +277,13 @@ export const AdminPayrollsPage: React.FC = () => {
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Tổng quỹ lương thực lĩnh</p>
             <p className="text-2xl font-extrabold text-stone-900 mt-0.5">
-              {new Intl.NumberFormat('vi-VN').format(totalNet)} <span className="text-xs font-normal text-stone-500">đ</span>
+              {summaryLoading ? (
+                <span className="text-stone-400 font-normal text-base animate-pulse">Đang tải...</span>
+              ) : totalNet != null ? (
+                <>{new Intl.NumberFormat('vi-VN').format(totalNet)} <span className="text-xs font-normal text-stone-500">đ</span></>
+              ) : (
+                <span className="text-stone-400 font-normal text-base">— đ</span>
+              )}
             </p>
           </div>
         </div>
@@ -270,7 +295,13 @@ export const AdminPayrollsPage: React.FC = () => {
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Đã giải ngân chi trả</p>
             <p className="text-2xl font-extrabold text-emerald-700 mt-0.5">
-              {new Intl.NumberFormat('vi-VN').format(totalPaid)} <span className="text-xs font-normal text-stone-500">đ</span>
+              {summaryLoading ? (
+                <span className="text-stone-400 font-normal text-base animate-pulse">Đang tải...</span>
+              ) : totalPaid != null ? (
+                <>{new Intl.NumberFormat('vi-VN').format(totalPaid)} <span className="text-xs font-normal text-stone-500">đ</span></>
+              ) : (
+                <span className="text-stone-400 font-normal text-base">— đ</span>
+              )}
             </p>
           </div>
         </div>
@@ -282,7 +313,13 @@ export const AdminPayrollsPage: React.FC = () => {
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Chưa thanh toán (Công nợ)</p>
             <p className="text-2xl font-extrabold text-rose-700 mt-0.5">
-              {new Intl.NumberFormat('vi-VN').format(totalUnpaid)} <span className="text-xs font-normal text-stone-500">đ</span>
+              {summaryLoading ? (
+                <span className="text-stone-400 font-normal text-base animate-pulse">Đang tải...</span>
+              ) : totalUnpaid != null ? (
+                <>{new Intl.NumberFormat('vi-VN').format(totalUnpaid)} <span className="text-xs font-normal text-stone-500">đ</span></>
+              ) : (
+                <span className="text-stone-400 font-normal text-base">— đ</span>
+              )}
             </p>
           </div>
         </div>

@@ -368,6 +368,12 @@ export const CheckoutPage: React.FC = () => {
       const errMsg = extractErrorMessage(err);
       setError(errMsg);
       showToast(errMsg, 'error');
+      // If price changed or drifted, refresh quote immediately so user can see and confirm with latest price
+      if (errMsg.toLowerCase().includes('giá') || errMsg.toLowerCase().includes('thay đổi')) {
+        sessionStorage.removeItem(IDEMPOTENCY_STORAGE_KEY);
+        handleTableCountChange(tableCount, true);
+        setError('Báo giá món ăn đã có cập nhật từ nhà hàng. Bảng tính đã được tự động làm mới, quý khách vui lòng kiểm tra lại tổng tiền bên dưới và nhấn Xác nhận đặt tiệc.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -713,6 +719,29 @@ export const CheckoutPage: React.FC = () => {
                       • {msg}
                     </div>
                   ))}
+                </div>
+              )}
+
+              {/* Order Submission Error / Price Drift Alert */}
+              {error && preview && (
+                <div className="rounded-xl bg-amber-50 border border-amber-300 p-3.5 text-xs text-amber-900 space-y-2">
+                  <div className="font-bold flex items-center gap-1.5 text-amber-900">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                    <span>Lưu ý đơn hàng / báo giá:</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-amber-800">{error}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sessionStorage.removeItem(IDEMPOTENCY_STORAGE_KEY);
+                      handleTableCountChange(tableCount, true);
+                      setError(null);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 text-white font-semibold text-xs cursor-pointer transition-colors shadow-2xs"
+                  >
+                    <RotateCw className="h-3.5 w-3.5" />
+                    <span>Tải lại báo giá mới nhất</span>
+                  </button>
                 </div>
               )}
 

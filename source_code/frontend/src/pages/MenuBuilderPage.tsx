@@ -164,7 +164,7 @@ export const MenuBuilderPage: React.FC = () => {
     loadCatalogAndDraft();
   }, [menuIdParam]);
 
-  // Save draft to sessionStorage whenever selectedItems or tableCount change
+  // Save draft to sessionStorage whenever selectedItems, tableCount, or guestCount change
   useEffect(() => {
     if (!isRestored) return;
     const dataToSave = {
@@ -173,9 +173,10 @@ export const MenuBuilderPage: React.FC = () => {
         quantityPerTable: it.quantityPerTable,
       })),
       tableCount,
+      guestCount,
     };
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-  }, [isRestored, selectedItems, tableCount]);
+  }, [isRestored, selectedItems, tableCount, guestCount]);
 
   // Real-time Preview API Debounced with Stale Response Suppression
   const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

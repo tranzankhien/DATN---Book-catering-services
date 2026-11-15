@@ -185,11 +185,13 @@ public class PaymentService {
         Order order = lockOrder(matching.getFirst()[1]);
         var payment = payments.lockById(matching.getFirst()[0]).orElseThrow();
         if ("SUCCESS".equals(payment.getStatus())) {
-            String note = "SePay thông báo giao dịch đã ghi nhận bị đảo. Cần kiểm tra thủ công.";
-            if (!note.equals(payment.getFailureReason())) {
-                payment.setFailureReason(note);
-                history.save(new OrderStatusHistory(order, order.getOrderStatus(), order.getOrderStatus(), null, "SEPAY", note));
-            }
+            String note = "SePay thông báo giao dịch đã thanh toán bị đảo/hủy. Cần rà soát thủ công.";
+            payment.setResponseCode("00");
+            payment.setTransactionStatus("02");
+            payment.setStatus("REVIEW_REQUIRED");
+            payment.setFailureReason(note);
+            order.setPaymentStatus(PaymentStatus.PAYMENT_REVIEW);
+            history.save(new OrderStatusHistory(order, order.getOrderStatus(), order.getOrderStatus(), null, "SEPAY", note));
         } else if ("PENDING".equals(payment.getStatus())) {
             payment.setResponseCode("00");
             payment.setTransactionStatus("02");

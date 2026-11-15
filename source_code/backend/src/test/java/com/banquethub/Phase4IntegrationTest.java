@@ -283,6 +283,33 @@ class Phase4IntegrationTest {
         settled(f);
     }
 
+    @Test void voidNotificationOnSettledPaymentFlagsForAdminReview() throws Exception {
+        Fixture f = fixture();
+        JsonNode attempt = create(f);
+        ipn(notification(f, attempt));
+        settled(f);
+
+        // SePay sends TRANSACTION_VOID for this settled payment
+        var voidPayload = json.createObjectNode();
+        voidPayload.put("notification_type", "TRANSACTION_VOID");
+        var orderNode = voidPayload.putObject("order");
+        orderNode.put("order_invoice_number", attempt.path("transactionReference").asText());
+
+        assertThat(ipn(voidPayload).path("success").asBoolean()).isTrue();
+
+        // Must now be in REVIEW_REQUIRED and order in PAYMENT_REVIEW
+        assertThat(db.queryForObject("SELECT status FROM payment_transactions WHERE id=?", String.class, attempt.path("paymentAttemptId").asLong()))
+            .isEqualTo("REVIEW_REQUIRED");
+        assertThat(db.queryForObject("SELECT payment_status FROM orders WHERE id=?", String.class, f.order))
+            .isEqualTo("PAYMENT_REVIEW");
+
+        // Admin can resolve via CLOSE_MANUALLY
+        resolve(attempt.path("paymentAttemptId").asLong(), token("admin@banquethub.vn", "Admin@123"), "CLOSE_MANUALLY")
+            .andExpect(status().isOk());
+        assertThat(db.queryForObject("SELECT payment_status FROM orders WHERE id=?", String.class, f.order))
+            .isEqualTo("UNPAID");
+    }
+
     @Test void paymentCannotOutliveEventAndSchedulerExpiresAttempt() throws Exception {
         Fixture f = fixture();
         OffsetDateTime event = OffsetDateTime.now().plusMinutes(5).withNano(0);
