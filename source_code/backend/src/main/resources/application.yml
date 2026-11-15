@@ -72,7 +72,7 @@ app:
     secret: ${APP_JWT_SECRET:BanquetHub_Local_Jwt_Secret_Key_2026_For_HS256_Signing_Min32Bytes}
     expiration-ms: ${APP_JWT_EXPIRATION_MS:86400000}
   cors:
-    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174}
   gemini:
     api-key: ${GEMINI_API_KEY:}
     model: ${GEMINI_MODEL:gemini-flash-lite-latest}
