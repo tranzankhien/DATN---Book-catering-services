@@ -130,6 +130,47 @@ export const PublicLayout: React.FC = () => {
             >
               Món tiệc
             </NavLink>
+
+            {user?.role === 'ROLE_EMPLOYEE' && (
+              <div className="flex items-center gap-1 border-l border-stone-200 pl-2 ml-1">
+                <NavLink
+                  to="/employee/orders"
+                  className={({ isActive }) =>
+                    `rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
+                      isActive
+                        ? 'bg-amber-100/90 text-amber-950 font-bold border border-amber-200'
+                        : 'text-amber-900 hover:text-amber-950 hover:bg-amber-50/70'
+                    }`
+                  }
+                >
+                  Điều phối bếp
+                </NavLink>
+                <NavLink
+                  to="/employee/attendance"
+                  className={({ isActive }) =>
+                    `rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
+                      isActive
+                        ? 'bg-amber-100/90 text-amber-950 font-bold border border-amber-200'
+                        : 'text-amber-900 hover:text-amber-950 hover:bg-amber-50/70'
+                    }`
+                  }
+                >
+                  Chấm công
+                </NavLink>
+                <NavLink
+                  to="/employee/payrolls"
+                  className={({ isActive }) =>
+                    `rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
+                      isActive
+                        ? 'bg-amber-100/90 text-amber-950 font-bold border border-amber-200'
+                        : 'text-amber-900 hover:text-amber-950 hover:bg-amber-50/70'
+                    }`
+                  }
+                >
+                  Phiếu lương
+                </NavLink>
+              </div>
+            )}
           </nav>
 
           {/* User Auth Section */}
@@ -293,6 +334,37 @@ export const PublicLayout: React.FC = () => {
             <div className="border-t border-stone-100 pt-2 flex flex-col gap-2">
               {isAuthenticated && user ? (
                 <>
+                  {user.role === 'ROLE_EMPLOYEE' && (
+                    <div className="space-y-1.5 pt-1 border-t border-stone-100">
+                      <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-amber-800">
+                        Phân hệ nhân viên
+                      </div>
+                      <Link
+                        to="/employee/orders"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-lg bg-stone-50 px-3 py-2 text-xs font-semibold text-stone-800 hover:bg-amber-50"
+                      >
+                        <ShieldCheck className="h-4 w-4 text-amber-800" />
+                        <span>Lịch điều phối bếp</span>
+                      </Link>
+                      <Link
+                        to="/employee/attendance"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-lg bg-stone-50 px-3 py-2 text-xs font-semibold text-stone-800 hover:bg-amber-50"
+                      >
+                        <CalendarCheck className="h-4 w-4 text-amber-800" />
+                        <span>Chấm công của tôi</span>
+                      </Link>
+                      <Link
+                        to="/employee/payrolls"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-lg bg-stone-50 px-3 py-2 text-xs font-semibold text-stone-800 hover:bg-amber-50"
+                      >
+                        <Receipt className="h-4 w-4 text-amber-800" />
+                        <span>Phiếu lương của tôi</span>
+                      </Link>
+                    </div>
+                  )}
                   {user.role === 'ROLE_ADMIN' && (
                     <Link
                       to="/admin/catalog"
