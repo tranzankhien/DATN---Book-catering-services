@@ -12,6 +12,7 @@ import {
   EyeOff,
   Sparkles,
   CheckCircle2,
+  Briefcase,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
@@ -52,6 +53,8 @@ export const LoginPage: React.FC = () => {
         navigate(fromPath, { replace: true });
       } else if (loggedInUser.role === 'ROLE_ADMIN') {
         navigate('/admin/catalog', { replace: true });
+      } else if (loggedInUser.role === 'ROLE_EMPLOYEE') {
+        navigate('/employee/attendance', { replace: true });
       } else {
         navigate('/dishes', { replace: true });
       }
@@ -202,22 +205,30 @@ export const LoginPage: React.FC = () => {
             <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500">
               Tài khoản trải nghiệm mẫu:
             </p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => fillDemoAccount('admin@banquethub.vn', 'Admin@123')}
-                className="flex items-center justify-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-amber-500 transition-colors cursor-pointer shadow-xs"
+                className="flex items-center justify-center gap-1.5 rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-amber-500 transition-colors cursor-pointer shadow-xs"
               >
-                <ShieldCheck className="h-3.5 w-3.5 text-amber-700" />
-                <span>Tài khoản quản lý</span>
+                <ShieldCheck className="h-3.5 w-3.5 text-amber-700 shrink-0" />
+                <span className="truncate">Tài khoản quản lý</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => fillDemoAccount('employee@banquethub.vn', 'Employee@123')}
+                className="flex items-center justify-center gap-1.5 rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-blue-500 transition-colors cursor-pointer shadow-xs"
+              >
+                <Briefcase className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                <span className="truncate">Tài khoản nhân viên</span>
               </button>
               <button
                 type="button"
                 onClick={() => fillDemoAccount('user@banquethub.vn', 'User@123')}
-                className="flex items-center justify-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-emerald-500 transition-colors cursor-pointer shadow-xs"
+                className="flex items-center justify-center gap-1.5 rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-emerald-500 transition-colors cursor-pointer shadow-xs"
               >
-                <User className="h-3.5 w-3.5 text-emerald-600" />
-                <span>Tài khoản khách hàng</span>
+                <User className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                <span className="truncate">Tài khoản khách hàng</span>
               </button>
             </div>
           </div>
