@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import {
   Receipt,
   Search,
@@ -75,9 +75,12 @@ export const AdminPayrollsPage: React.FC = () => {
         // Pick first finalized period or first period
         const firstFin = allPeriods.find((p) => p.status !== 'DRAFT') || allPeriods[0];
         setSelectedPeriodId(String(firstFin.id));
+      } else if (allPeriods.length === 0) {
+        setLoading(false);
       }
     } catch (err) {
       showToast(extractErrorMessage(err, 'Không thể tải danh sách kỳ lương'), 'error');
+      setLoading(false);
     }
   };
 
@@ -109,7 +112,10 @@ export const AdminPayrollsPage: React.FC = () => {
   };
 
   const fetchPayrolls = async () => {
-    if (!selectedPeriodId) return;
+    if (!selectedPeriodId) {
+      setLoading(false);
+      return;
+    }
     const reqId = ++activeRequestIdRef.current;
     try {
       setLoading(true);
@@ -149,6 +155,10 @@ export const AdminPayrollsPage: React.FC = () => {
       if (current) {
         fetchPeriodSummary(current, activeRequestIdRef.current);
       }
+    } else {
+      setLoading(false);
+      setPayrolls([]);
+      setPeriodSummary(null);
     }
   }, [selectedPeriodId, statusFilter, searchTerm, page, periods]);
 
@@ -257,13 +267,20 @@ export const AdminPayrollsPage: React.FC = () => {
           <select
             value={selectedPeriodId}
             onChange={(e) => setSelectedPeriodId(e.target.value)}
-            className="px-3.5 py-2 text-xs font-bold bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-600/30 text-stone-900 shadow-2xs"
+            disabled={periods.length === 0}
+            className="px-3.5 py-2 text-xs font-bold bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-600/30 text-stone-900 shadow-2xs disabled:bg-stone-100 disabled:text-stone-400"
           >
-            {periods.map((p) => (
-              <option key={p.id} value={p.id}>
-                Tháng {String(p.month).padStart(2, '0')}/{p.year} ({p.status})
-              </option>
-            ))}
+            {periods.length === 0 ? (
+              <option value="">Chưa có kỳ lương nào</option>
+            ) : (
+              periods.map((p) => (
+                <option key={p.id} value={p.id}>
+                  Tháng {String(p.month).padStart(2, '0')}/{p.year} (
+                  {p.status === 'FINALIZED' ? 'Đã chốt sổ' : p.status === 'CLOSED' ? 'Đã đóng kỳ' : 'Dự thảo (Draft)'}
+                  )
+                </option>
+              ))
+            )}
           </select>
         </div>
       </div>
@@ -378,13 +395,47 @@ export const AdminPayrollsPage: React.FC = () => {
             <Loader2 className="h-8 w-8 animate-spin text-amber-700 mb-3" />
             <p className="text-sm font-medium">Đang tải bảng lương...</p>
           </div>
+        ) : periods.length === 0 ? (
+          <div className="py-16 text-center text-stone-500">
+            <Calendar className="h-12 w-12 mx-auto text-stone-300 mb-3" />
+            <p className="text-base font-semibold text-stone-700">Chưa có kỳ tính lương nào trong hệ thống</p>
+            <p className="text-xs text-stone-400 mt-1 max-w-md mx-auto">
+              Hệ thống chưa có kỳ tính lương nào. Vui lòng chuyển qua menu &quot;Kỳ tính lương &amp; chốt số&quot; để tạo kỳ lương và chốt số trước khi xem bảng lương chính thức.
+            </p>
+            <div className="mt-4">
+              <Link
+                to="/admin/payroll-periods"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-amber-700 text-white hover:bg-amber-800 transition-colors shadow-2xs"
+              >
+                Đến trang Kỳ tính lương &amp; chốt số
+              </Link>
+            </div>
+          </div>
+        ) : !selectedPeriodId ? (
+          <div className="py-16 text-center text-stone-500">
+            <Filter className="h-12 w-12 mx-auto text-stone-300 mb-3" />
+            <p className="text-base font-semibold text-stone-700">Vui lòng chọn một kỳ lương</p>
+            <p className="text-xs text-stone-400 mt-1">
+              Chọn kỳ lương ở danh sách góc trên bên phải để theo dõi và giải ngân chi trả bảng lương.
+            </p>
+          </div>
         ) : filteredPayrolls.length === 0 ? (
           <div className="py-16 text-center text-stone-500">
             <Receipt className="h-12 w-12 mx-auto text-stone-300 mb-3" />
             <p className="text-base font-semibold text-stone-700">Chưa có bảng lương nào trong kỳ này</p>
             <p className="text-xs text-stone-400 mt-1">
-              Hãy đảm bảo kỳ lương đã được chuyển sang trạng thái "Đã chốt sổ (FINALIZED)".
+              Hãy đảm bảo kỳ lương đã được chuyển sang trạng thái &quot;Đã chốt sổ (FINALIZED)&quot;.
             </p>
+            {selectedPeriod && selectedPeriod.status === 'DRAFT' && (
+              <div className="mt-4">
+                <Link
+                  to="/admin/payroll-periods"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-amber-700 text-white hover:bg-amber-800 transition-colors shadow-2xs"
+                >
+                  Xem trước và chốt sổ kỳ lương này
+                </Link>
+              </div>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
