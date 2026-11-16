@@ -67,109 +67,138 @@ export const PublicLayout: React.FC = () => {
           <Logo size="md" />
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
-            <NavLink
-              to="/"
-              end
-              className={({ isActive }) =>
-                `rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-amber-50 text-amber-900 font-semibold'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/70'
-                }`
-              }
-            >
-              Trang chủ
-            </NavLink>
-            <NavLink
-              to="/menus"
-              className={({ isActive }) =>
-                `rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-amber-50 text-amber-900 font-semibold'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/70'
-                }`
-              }
-            >
-              Thực đơn mẫu
-            </NavLink>
-            <NavLink
-              to="/menu-builder"
-              className={({ isActive }) =>
-                `rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-amber-50 text-amber-900 font-semibold'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/70'
-                }`
-              }
-            >
-              Tự phối thực đơn
-            </NavLink>
-            <NavLink
-              to="/ai-menu"
-              className={({ isActive }) =>
-                `inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-amber-100/80 text-amber-900 font-bold border border-amber-200'
-                    : 'text-amber-800 hover:text-amber-950 hover:bg-amber-50/80 font-semibold'
-                }`
-              }
-            >
-              <Sparkles className="h-4 w-4 text-amber-700" />
-              <span>Gợi ý AI</span>
-            </NavLink>
-            <NavLink
-              to="/dishes"
-              className={({ isActive }) =>
-                `rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-amber-50 text-amber-900 font-semibold'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/70'
-                }`
-              }
-            >
-              Món tiệc
-            </NavLink>
-
-            {user?.role === 'ROLE_EMPLOYEE' && (
-              <div className="flex items-center gap-1 border-l border-stone-200 pl-2 ml-1">
+          <nav className="hidden md:flex items-center gap-1.5 lg:gap-2">
+            {user?.role === 'ROLE_EMPLOYEE' ? (
+              <>
                 <NavLink
                   to="/employee/orders"
                   className={({ isActive }) =>
-                    `rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
+                    `rounded-xl px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap ${
                       isActive
-                        ? 'bg-amber-100/90 text-amber-950 font-bold border border-amber-200'
-                        : 'text-amber-900 hover:text-amber-950 hover:bg-amber-50/70'
+                        ? 'bg-amber-100 text-amber-950 font-bold border border-amber-300/80 shadow-2xs'
+                        : 'text-stone-700 hover:text-stone-900 hover:bg-stone-100/70'
                     }`
                   }
                 >
-                  Điều phối bếp
+                  Lịch điều phối bếp
                 </NavLink>
                 <NavLink
                   to="/employee/attendance"
                   className={({ isActive }) =>
-                    `rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
+                    `rounded-xl px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap ${
                       isActive
-                        ? 'bg-amber-100/90 text-amber-950 font-bold border border-amber-200'
-                        : 'text-amber-900 hover:text-amber-950 hover:bg-amber-50/70'
+                        ? 'bg-amber-100 text-amber-950 font-bold border border-amber-300/80 shadow-2xs'
+                        : 'text-stone-700 hover:text-stone-900 hover:bg-stone-100/70'
                     }`
                   }
                 >
-                  Chấm công
+                  Bảng chấm công
                 </NavLink>
                 <NavLink
                   to="/employee/payrolls"
                   className={({ isActive }) =>
-                    `rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
+                    `rounded-xl px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap ${
                       isActive
-                        ? 'bg-amber-100/90 text-amber-950 font-bold border border-amber-200'
-                        : 'text-amber-900 hover:text-amber-950 hover:bg-amber-50/70'
+                        ? 'bg-amber-100 text-amber-950 font-bold border border-amber-300/80 shadow-2xs'
+                        : 'text-stone-700 hover:text-stone-900 hover:bg-stone-100/70'
                     }`
                   }
                 >
-                  Phiếu lương
+                  Phiếu lương của tôi
                 </NavLink>
-              </div>
+
+                <div className="h-5 w-px bg-stone-200 mx-1" />
+
+                <NavLink
+                  to="/dishes"
+                  className={({ isActive }) =>
+                    `rounded-xl px-3.5 py-2 text-sm font-medium transition-all whitespace-nowrap ${
+                      isActive
+                        ? 'bg-amber-50 text-amber-900 font-semibold'
+                        : 'text-stone-500 hover:text-stone-800 hover:bg-stone-100/60'
+                    }`
+                  }
+                >
+                  Xem món tiệc
+                </NavLink>
+                <NavLink
+                  to="/menus"
+                  className={({ isActive }) =>
+                    `rounded-xl px-3.5 py-2 text-sm font-medium transition-all whitespace-nowrap ${
+                      isActive
+                        ? 'bg-amber-50 text-amber-900 font-semibold'
+                        : 'text-stone-500 hover:text-stone-800 hover:bg-stone-100/60'
+                    }`
+                  }
+                >
+                  Xem thực đơn
+                </NavLink>
+              </>
+            ) : (
+              <>
+                <NavLink
+                  to="/"
+                  end
+                  className={({ isActive }) =>
+                    `rounded-xl px-4 py-2 text-sm font-medium transition-all whitespace-nowrap ${
+                      isActive
+                        ? 'bg-amber-50 text-amber-900 font-semibold'
+                        : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/70'
+                    }`
+                  }
+                >
+                  Trang chủ
+                </NavLink>
+                <NavLink
+                  to="/menus"
+                  className={({ isActive }) =>
+                    `rounded-xl px-4 py-2 text-sm font-medium transition-all whitespace-nowrap ${
+                      isActive
+                        ? 'bg-amber-50 text-amber-900 font-semibold'
+                        : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/70'
+                    }`
+                  }
+                >
+                  Thực đơn mẫu
+                </NavLink>
+                <NavLink
+                  to="/menu-builder"
+                  className={({ isActive }) =>
+                    `rounded-xl px-4 py-2 text-sm font-medium transition-all whitespace-nowrap ${
+                      isActive
+                        ? 'bg-amber-50 text-amber-900 font-semibold'
+                        : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/70'
+                    }`
+                  }
+                >
+                  Tự phối thực đơn
+                </NavLink>
+                <NavLink
+                  to="/ai-menu"
+                  className={({ isActive }) =>
+                    `inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium transition-all whitespace-nowrap ${
+                      isActive
+                        ? 'bg-amber-100/80 text-amber-900 font-bold border border-amber-200'
+                        : 'text-amber-800 hover:text-amber-950 hover:bg-amber-50/80 font-semibold'
+                    }`
+                  }
+                >
+                  <Sparkles className="h-4 w-4 text-amber-700" />
+                  <span>Gợi ý AI</span>
+                </NavLink>
+                <NavLink
+                  to="/dishes"
+                  className={({ isActive }) =>
+                    `rounded-xl px-4 py-2 text-sm font-medium transition-all whitespace-nowrap ${
+                      isActive
+                        ? 'bg-amber-50 text-amber-900 font-semibold'
+                        : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/70'
+                    }`
+                  }
+                >
+                  Món tiệc
+                </NavLink>
+              </>
             )}
           </nav>
 

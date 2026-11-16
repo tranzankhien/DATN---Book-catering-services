@@ -40,7 +40,7 @@ export const EmployeeMyPayrollsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
       {/* Header */}
       <div className="border-b border-stone-200 pb-5">
         <h1 className="text-2xl font-bold tracking-tight text-stone-900 flex items-center gap-2.5">

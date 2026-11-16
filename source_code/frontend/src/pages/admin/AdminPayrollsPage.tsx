@@ -248,7 +248,7 @@ export const AdminPayrollsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-[1720px] mx-auto space-y-6 animate-fade-up-1">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 pb-5">
         <div>

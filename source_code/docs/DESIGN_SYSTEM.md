@@ -112,13 +112,18 @@ Tài liệu quy chuẩn toàn diện về hệ thống thiết kế giao diện 
 
 ### 2.5 Cấu Trúc Khung Khổ & Bố Cục (Container Layout)
 
-- **Giao diện Khách hàng (Public Layout)**:
-  - Chiều rộng tối đa: `mx-auto max-w-7xl px-4 sm:px-6 lg:px-8`.
+- **Giao diện Khách hàng & Nhân viên (Public & Employee Layout)**:
+  - Chiều rộng tối đa quy chuẩn: `mx-auto max-w-7xl px-4 sm:px-6 lg:px-8`.
   - Spacing giữa các khối chính: `space-y-8` (32px).
+  - **Quy chuẩn Header Navigation**:
+    - Mọi liên kết trên thanh điều hướng bắt buộc phải có thuộc tính `whitespace-nowrap` để triệt tiêu hoàn toàn lỗi vỡ dòng / chữ bị bẻ đôi dòng ("Trang" / "chủ", "Thực đơn" / "mẫu", "Chấm" / "công").
+    - **Phân tách điều hướng thông minh theo vai trò người dùng (Role-Adaptive Navigation)**:
+      - *Khách vãng lai & Khách hàng (`ROLE_USER`)*: Hiển thị bộ điều hướng khám phá ẩm thực (Trang chủ, Thực đơn mẫu, Tự phối thực đơn, Gợi ý AI, Món tiệc).
+      - *Nhân viên (`ROLE_EMPLOYEE`)*: Thanh Header tự động chuyển sang Không gian làm việc chuyên nghiệp (Lịch điều phối bếp, Bảng chấm công, Phiếu lương của tôi) kèm lối tắt tra cứu món tiệc / thực đơn, đảm bảo không gian hiển thị rộng rãi, không bị nhồi nhét 8-9 menu gây chật chội.
 - **Giao diện Quản trị (Admin Layout)**:
-  - Chiều rộng tối đa: `w-full max-w-[1720px] mx-auto space-y-6`.
+  - Chiều rộng tối đa quy chuẩn: `w-full max-w-[1720px] mx-auto space-y-6`.
   - Sidebar: Hỗ trợ 2 chế độ: Ghim cố định (`w-64`) hoặc Rail thu gọn (`w-20`) có tính năng rê chuột mở rộng thông minh (`hover-to-expand`).
-  - Viewport chính: Tự động co giãn theo sidebar, không gây nhảy layout.
+  - Viewport chính: Tự động co giãn theo sidebar, các trang con đồng bộ wrapper `w-full max-w-[1720px] mx-auto space-y-6` không gây nhảy layout.
 
 ---
 
@@ -145,3 +150,12 @@ Tài liệu quy chuẩn toàn diện về hệ thống thiết kế giao diện 
 | **Admin Giữ chỗ kho** | `/admin/inventory/reservations` | 4 thẻ KPI điều hành, 2 tab Khả dụng & Lịch sử giữ kho, công thức rõ ràng. |
 | **Admin Phiếu nhập** | `/admin/inventory/receipts` | Bảng quản lý phiếu nhập, xuất PDF chuẩn hóa. |
 | **Admin Nhà cung cấp** | `/admin/suppliers` | Modal thêm/sửa NCC portal ra body. |
+| **Admin Hồ sơ nhân viên** | `/admin/employees` | Quản lý mã nhân sự, chức danh, lương cơ bản; gán User ID; container `max-w-[1720px]`. |
+| **Admin Bảng chấm công** | `/admin/attendance` | Ma trận điểm danh 1..N ngày; màu sắc 1.0 (Xanh), 0.5 (Vàng), 0 (Đỏ); khóa sau chốt; container `max-w-[1720px]`. |
+| **Admin Kỳ tính lương & chốt số** | `/admin/payroll-periods` | Mở kỳ lương, Preview dự thảo, chốt số bất biến với hash integrity; container `max-w-[1720px]`. |
+| **Admin Bảng lương nhân viên** | `/admin/payrolls` | Bảng lương chính thức, bóc tách công thức lương theo công thực tế, phụ cấp, khấu trừ, giải ngân; container `max-w-[1720px]`. |
+| **Admin Nhật ký chi trả lương** | `/admin/salary-payments` | Đối soát lịch sử giải ngân chi trả (tiền mặt / chuyển khoản); container `max-w-[1720px]`. |
+| **Employee Lịch điều phối bếp** | `/employee/orders` | Quản lý lịch tiệc bếp, lọc theo ngày tổ chức và trạng thái; container `max-w-7xl`. |
+| **Employee Phiếu chuẩn bị tiệc** | `/employee/orders/:id` | Stepper cập nhật tiến độ bếp, bóc tách định lượng NVL theo bàn; container `max-w-7xl`. |
+| **Employee Chấm công của tôi** | `/employee/attendance` | Lịch sử chấm công theo tháng, KPI tổng công, bảng chi tiết 1..N ngày; container `max-w-7xl`. |
+| **Employee Phiếu lương của tôi** | `/employee/payrolls` | Danh sách phiếu lương điện tử, bóc tách công thức lương, trạng thái giải ngân; container `max-w-7xl`. |
