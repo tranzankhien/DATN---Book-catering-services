@@ -689,40 +689,40 @@ export const AdminPayrollsPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2 border border-stone-200 rounded-2xl p-4">
-                  <div className="flex justify-between text-stone-600">
-                    <span>Mức lương cơ bản hợp đồng:</span>
-                    <span className="font-semibold text-stone-900 tabular-nums">
+                  <div className="flex justify-between items-center text-stone-600 gap-2">
+                    <span className="truncate">Mức lương cơ bản hợp đồng:</span>
+                    <span className="font-semibold text-stone-900 tabular-nums whitespace-nowrap">
                       {new Intl.NumberFormat('vi-VN').format(viewingPayslip.baseSalarySnapshot)} đ
                     </span>
                   </div>
 
-                  <div className="flex justify-between text-stone-600">
-                    <span>Ngày công thực tế / chuẩn:</span>
-                    <span className="font-bold text-stone-900 tabular-nums">
+                  <div className="flex justify-between items-center text-stone-600 gap-2">
+                    <span className="truncate">Ngày công thực tế / chuẩn:</span>
+                    <span className="font-bold text-stone-900 tabular-nums whitespace-nowrap">
                       {viewingPayslip.actualWorkdaysSnapshot} / {viewingPayslip.standardWorkdaysSnapshot} ngày
                     </span>
                   </div>
 
-                  <div className="flex justify-between text-stone-600">
-                    <span>Lương tính theo ngày công:</span>
-                    <span className="font-semibold text-stone-900 tabular-nums">
+                  <div className="flex justify-between items-center text-stone-600 gap-2">
+                    <span className="truncate">Lương tính theo ngày công:</span>
+                    <span className="font-semibold text-stone-900 tabular-nums whitespace-nowrap">
                       {new Intl.NumberFormat('vi-VN').format(viewingPayslip.calculatedSalary)} đ
                     </span>
                   </div>
 
-                  <div className="flex justify-between text-emerald-700 font-medium">
-                    <span>Tổng phụ cấp (+):</span>
-                    <span className="tabular-nums">+{new Intl.NumberFormat('vi-VN').format(viewingPayslip.totalAllowances)} đ</span>
+                  <div className="flex justify-between items-center text-emerald-700 font-medium gap-2">
+                    <span className="truncate">Tổng phụ cấp (+):</span>
+                    <span className="tabular-nums whitespace-nowrap">+{new Intl.NumberFormat('vi-VN').format(viewingPayslip.totalAllowances)} đ</span>
                   </div>
 
-                  <div className="flex justify-between text-rose-700 font-medium">
-                    <span>Tổng khấu trừ (-):</span>
-                    <span className="tabular-nums">-{new Intl.NumberFormat('vi-VN').format(viewingPayslip.totalDeductions)} đ</span>
+                  <div className="flex justify-between items-center text-rose-700 font-medium gap-2">
+                    <span className="truncate">Tổng khấu trừ (-):</span>
+                    <span className="tabular-nums whitespace-nowrap">-{new Intl.NumberFormat('vi-VN').format(viewingPayslip.totalDeductions)} đ</span>
                   </div>
 
-                  <div className="pt-2 border-t border-stone-200 flex justify-between items-center text-sm font-extrabold text-stone-900">
+                  <div className="pt-2 border-t border-stone-200 flex justify-between items-center text-sm font-extrabold text-stone-900 gap-2">
                     <span>LƯƠNG THỰC LĨNH:</span>
-                    <span className="text-amber-800 text-base tabular-nums">
+                    <span className="text-amber-800 text-base tabular-nums whitespace-nowrap">
                       {new Intl.NumberFormat('vi-VN').format(viewingPayslip.netSalary)} đ
                     </span>
                   </div>
