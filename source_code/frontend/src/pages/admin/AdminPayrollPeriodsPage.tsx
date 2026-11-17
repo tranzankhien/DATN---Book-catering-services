@@ -801,13 +801,19 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
                       <label className="block text-[11px] font-semibold text-stone-600 mb-1">Số tiền (VND)</label>
                       <input
                         type="number"
-                        step="10000"
+                        step="1000"
                         min="1000"
                         required
                         value={adjAmount}
                         onChange={(e) => setAdjAmount(e.target.value)}
+                        placeholder="Ví dụ: 500000"
                         className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-600 font-semibold tabular-nums"
                       />
+                      {Number(adjAmount) > 0 && (
+                        <p className="text-[10px] text-stone-500 mt-1 tabular-nums font-medium">
+                          = {new Intl.NumberFormat('vi-VN').format(Number(adjAmount))} đ
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -1014,6 +1020,11 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
                     onChange={(e) => setEditAdjAmount(e.target.value)}
                     className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 font-semibold tabular-nums"
                   />
+                  {Number(editAdjAmount) > 0 && (
+                    <p className="text-[11px] text-stone-500 mt-1 tabular-nums font-medium">
+                      = {new Intl.NumberFormat('vi-VN').format(Number(editAdjAmount))} đ
+                    </p>
+                  )}
                 </div>
 
                 <div>
