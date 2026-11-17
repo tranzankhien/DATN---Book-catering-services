@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Users,
   UserPlus,
@@ -223,7 +224,7 @@ export const AdminEmployeesPage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Tổng nhân sự</p>
-            <p className="text-2xl font-extrabold text-stone-900 mt-0.5">{employees.length}</p>
+            <p className="text-2xl font-extrabold text-stone-900 mt-0.5 tabular-nums">{employees.length}</p>
           </div>
         </div>
 
@@ -233,7 +234,7 @@ export const AdminEmployeesPage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Đang hoạt động</p>
-            <p className="text-2xl font-extrabold text-emerald-700 mt-0.5">
+            <p className="text-2xl font-extrabold text-emerald-700 mt-0.5 tabular-nums">
               {activeCount} <span className="text-xs font-normal text-stone-500">nhân viên</span>
             </p>
           </div>
@@ -245,7 +246,7 @@ export const AdminEmployeesPage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Quỹ lương cơ bản</p>
-            <p className="text-2xl font-extrabold text-stone-900 mt-0.5">
+            <p className="text-2xl font-extrabold text-stone-900 mt-0.5 tabular-nums">
               {new Intl.NumberFormat('vi-VN').format(totalBaseFund)} <span className="text-xs font-normal text-stone-500">đ/tháng</span>
             </p>
           </div>
@@ -360,7 +361,7 @@ export const AdminEmployeesPage: React.FC = () => {
 
                     <td className="py-3.5 px-4 text-xs text-stone-600 space-y-1">
                       {emp.phone && (
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 tabular-nums">
                           <Phone className="h-3 w-3 text-stone-400" /> {emp.phone}
                         </div>
                       )}
@@ -373,19 +374,19 @@ export const AdminEmployeesPage: React.FC = () => {
                     </td>
 
                     <td className="py-3.5 px-4 text-xs text-stone-700">
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 tabular-nums">
                         <Calendar className="h-3.5 w-3.5 text-stone-400" />
                         {emp.hireDate}
                       </div>
                     </td>
 
-                    <td className="py-3.5 px-4 text-right font-semibold text-stone-900">
+                    <td className="py-3.5 px-4 text-right font-semibold text-stone-900 tabular-nums">
                       {new Intl.NumberFormat('vi-VN').format(emp.baseSalary)} đ
                     </td>
 
                     <td className="py-3.5 px-4 text-center">
                       {emp.userId ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold border border-blue-200">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold border border-blue-200 tabular-nums">
                           <UserCheck className="h-3 w-3" /> Đã liên kết (ID: {emp.userId})
                         </span>
                       ) : (
@@ -433,167 +434,169 @@ export const AdminEmployeesPage: React.FC = () => {
       </div>
 
       {/* Create / Edit Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-stone-200 animate-fade-up-1 overflow-y-auto max-h-[90vh]">
-            <div className="flex items-center justify-between pb-4 border-b border-stone-100">
-              <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
-                <Users className="h-5 w-5 text-amber-700" />
-                {editingEmployee ? 'Chỉnh sửa hồ sơ nhân viên' : 'Thêm nhân viên mới'}
-              </h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  Mã nhân viên {editingEmployee ? '(Cố định)' : '(Để trống sẽ tự sinh NV-XXXX)'}
-                </label>
-                <input
-                  type="text"
-                  disabled={!!editingEmployee}
-                  value={formData.employeeCode}
-                  onChange={(e) => setFormData({ ...formData, employeeCode: e.target.value.toUpperCase() })}
-                  placeholder="Ví dụ: NV-001"
-                  className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 disabled:opacity-60"
-                />
+      {isModalOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-stone-950/60 backdrop-blur-xs animate-fade-in">
+            <div className="relative bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-stone-200/90 animate-fade-up-1 overflow-y-auto max-h-[90vh] my-auto">
+              <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+                <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
+                  <Users className="h-5 w-5 text-amber-700" />
+                  {editingEmployee ? 'Chỉnh sửa hồ sơ nhân viên' : 'Thêm nhân viên mới'}
+                </h2>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  Họ và tên <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  placeholder="Ví dụ: Nguyễn Văn An"
-                  className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <form onSubmit={handleSubmit} className="mt-4 space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    Vị trí / Chức vụ <span className="text-rose-500">*</span>
+                    Mã nhân viên {editingEmployee ? '(Cố định)' : '(Để trống sẽ tự sinh NV-XXXX)'}
+                  </label>
+                  <input
+                    type="text"
+                    disabled={!!editingEmployee}
+                    value={formData.employeeCode}
+                    onChange={(e) => setFormData({ ...formData, employeeCode: e.target.value.toUpperCase() })}
+                    placeholder="Ví dụ: NV-001"
+                    className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 disabled:opacity-60 tabular-nums font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    Họ và tên <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
-                    value={formData.position}
-                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                    placeholder="Bếp trưởng, Phục vụ,..."
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    placeholder="Ví dụ: Nguyễn Văn An"
                     className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
                   />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                      Vị trí / Chức vụ <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.position}
+                      onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                      placeholder="Bếp trưởng, Phục vụ,..."
+                      className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                      Ngày vào làm <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={formData.hireDate}
+                      onChange={(e) => setFormData({ ...formData, hireDate: e.target.value })}
+                      className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 tabular-nums"
+                    />
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    Ngày vào làm <span className="text-rose-500">*</span>
+                    Mức lương cơ bản (VND / tháng chuẩn) <span className="text-rose-500">*</span>
                   </label>
                   <input
-                    type="date"
+                    type="number"
                     required
-                    value={formData.hireDate}
-                    onChange={(e) => setFormData({ ...formData, hireDate: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
+                    min="0"
+                    step="10000"
+                    value={formData.baseSalary}
+                    onChange={(e) => setFormData({ ...formData, baseSalary: e.target.value })}
+                    className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 font-semibold text-stone-900 tabular-nums"
                   />
+                  <p className="text-[11px] text-stone-400 mt-1 tabular-nums">
+                    = {new Intl.NumberFormat('vi-VN').format(Number(formData.baseSalary) || 0)} đ/tháng
+                  </p>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  Mức lương cơ bản (VND / tháng chuẩn) <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  step="10000"
-                  value={formData.baseSalary}
-                  onChange={(e) => setFormData({ ...formData, baseSalary: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 font-semibold text-stone-900"
-                />
-                <p className="text-[11px] text-stone-400 mt-1">
-                  = {new Intl.NumberFormat('vi-VN').format(Number(formData.baseSalary) || 0)} đ/tháng
-                </p>
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1">Số điện thoại</label>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="0987654321"
+                      className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 tabular-nums"
+                    />
+                  </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">Số điện thoại</label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="0987654321"
-                    className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
-                  />
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="nhanvien@banquethub.vn"
+                      className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">Email</label>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    User ID hệ thống (Nếu liên kết tài khoản ROLE_EMPLOYEE)
+                  </label>
                   <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="nhanvien@banquethub.vn"
+                    type="number"
+                    value={formData.userId}
+                    onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
+                    placeholder="Để trống nếu nhân viên chưa có tài khoản đăng nhập"
+                    className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 tabular-nums"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">Ghi chú</label>
+                  <textarea
+                    rows={2}
+                    value={formData.note}
+                    onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                    placeholder="Ghi chú về nhân sự, kinh nghiệm, ca làm việc..."
                     className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  User ID hệ thống (Nếu liên kết tài khoản ROLE_EMPLOYEE)
-                </label>
-                <input
-                  type="number"
-                  value={formData.userId}
-                  onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
-                  placeholder="Để trống nếu nhân viên chưa có tài khoản đăng nhập"
-                  className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">Ghi chú</label>
-                <textarea
-                  rows={2}
-                  value={formData.note}
-                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                  placeholder="Ghi chú về nhân sự, kinh nghiệm, ca làm việc..."
-                  className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-100">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors cursor-pointer"
-                >
-                  Hủy bỏ
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl transition-colors shadow-xs cursor-pointer disabled:opacity-60"
-                >
-                  {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                  {editingEmployee ? 'Lưu cập nhật' : 'Tạo hồ sơ nhân viên'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2 text-xs font-semibold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl transition-colors shadow-xs cursor-pointer disabled:opacity-60"
+                  >
+                    {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    {editingEmployee ? 'Lưu cập nhật' : 'Tạo hồ sơ nhân viên'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

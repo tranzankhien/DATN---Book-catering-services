@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   CalendarDays,
   ChevronLeft,
@@ -256,7 +257,7 @@ export const AdminAttendancePage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Nhân sự chấm công</p>
-            <p className="text-2xl font-extrabold text-stone-900 mt-0.5">
+            <p className="text-2xl font-extrabold text-stone-900 mt-0.5 tabular-nums">
               {summaryData?.totalEmployees ?? 0} <span className="text-xs font-normal text-stone-500">người</span>
             </p>
           </div>
@@ -268,7 +269,7 @@ export const AdminAttendancePage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Tổng công thực tế toàn viện</p>
-            <p className="text-2xl font-extrabold text-emerald-700 mt-0.5">
+            <p className="text-2xl font-extrabold text-emerald-700 mt-0.5 tabular-nums">
               {summaryData?.totalCompanyWorkUnits ?? 0} <span className="text-xs font-normal text-stone-500">công</span>
             </p>
           </div>
@@ -386,101 +387,105 @@ export const AdminAttendancePage: React.FC = () => {
       </div>
 
       {/* Edit Single Day Cell Modal */}
-      {selectedCell && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-stone-200 animate-fade-up-1">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <div>
-                <h3 className="font-bold text-stone-900">Chấm công ngày {selectedCell.day}/{month}/{year}</h3>
-                <p className="text-xs text-stone-500 mt-0.5">
-                  {selectedCell.employeeName} ({selectedCell.employeeCode})
-                </p>
+      {selectedCell &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-stone-950/60 backdrop-blur-xs animate-fade-in">
+            <div className="relative bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-stone-200/90 animate-fade-up-1 my-auto">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                <div>
+                  <h3 className="font-bold text-stone-900">
+                    Chấm công ngày <span className="tabular-nums">{selectedCell.day}/{month}/{year}</span>
+                  </h3>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    {selectedCell.employeeName} ({selectedCell.employeeCode})
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSelectedCell(null)}
+                  className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-              <button
-                onClick={() => setSelectedCell(null)}
-                className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
 
-            <form onSubmit={handleSaveCell} className="mt-4 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-2">Trạng thái công</label>
-                <div className="grid grid-cols-3 gap-2">
+              <form onSubmit={handleSaveCell} className="mt-4 space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-2">Trạng thái công</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditStatus('PRESENT')}
+                      className={`py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex flex-col items-center gap-1 ${
+                        editStatus === 'PRESENT'
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                          : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
+                      }`}
+                    >
+                      <span>Đủ ngày</span>
+                      <span className="text-[10px] opacity-90 font-normal tabular-nums">1.0 công</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setEditStatus('HALF_DAY')}
+                      className={`py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex flex-col items-center gap-1 ${
+                        editStatus === 'HALF_DAY'
+                          ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
+                          : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
+                      }`}
+                    >
+                      <span>Nửa ngày</span>
+                      <span className="text-[10px] opacity-90 font-normal tabular-nums">0.5 công</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setEditStatus('ABSENT')}
+                      className={`py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex flex-col items-center gap-1 ${
+                        editStatus === 'ABSENT'
+                          ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
+                          : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
+                      }`}
+                    >
+                      <span>Vắng mặt</span>
+                      <span className="text-[10px] opacity-90 font-normal tabular-nums">0.0 công</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">Ghi chú (Tùy chọn)</label>
+                  <input
+                    type="text"
+                    value={editNote}
+                    onChange={(e) => setEditNote(e.target.value)}
+                    placeholder="Lý do đi trễ, xin nghỉ, làm thêm ca..."
+                    className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
                   <button
                     type="button"
-                    onClick={() => setEditStatus('PRESENT')}
-                    className={`py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex flex-col items-center gap-1 ${
-                      editStatus === 'PRESENT'
-                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                        : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
-                    }`}
+                    onClick={() => setSelectedCell(null)}
+                    className="px-3.5 py-1.5 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl transition-colors cursor-pointer"
                   >
-                    <span>Đủ ngày</span>
-                    <span className="text-[10px] opacity-90 font-normal">1.0 công</span>
+                    Hủy
                   </button>
-
                   <button
-                    type="button"
-                    onClick={() => setEditStatus('HALF_DAY')}
-                    className={`py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex flex-col items-center gap-1 ${
-                      editStatus === 'HALF_DAY'
-                        ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-                        : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
-                    }`}
+                    type="submit"
+                    disabled={savingCell}
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl transition-colors shadow-xs cursor-pointer disabled:opacity-60"
                   >
-                    <span>Nửa ngày</span>
-                    <span className="text-[10px] opacity-90 font-normal">0.5 công</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setEditStatus('ABSENT')}
-                    className={`py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex flex-col items-center gap-1 ${
-                      editStatus === 'ABSENT'
-                        ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
-                        : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
-                    }`}
-                  >
-                    <span>Vắng mặt</span>
-                    <span className="text-[10px] opacity-90 font-normal">0.0 công</span>
+                    {savingCell && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    Lưu chấm công
                   </button>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">Ghi chú (Tùy chọn)</label>
-                <input
-                  type="text"
-                  value={editNote}
-                  onChange={(e) => setEditNote(e.target.value)}
-                  placeholder="Lý do đi trễ, xin nghỉ, làm thêm ca..."
-                  className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
-                <button
-                  type="button"
-                  onClick={() => setSelectedCell(null)}
-                  className="px-3.5 py-1.5 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl transition-colors cursor-pointer"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingCell}
-                  className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl transition-colors shadow-xs cursor-pointer disabled:opacity-60"
-                >
-                  {savingCell && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                  Lưu chấm công
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

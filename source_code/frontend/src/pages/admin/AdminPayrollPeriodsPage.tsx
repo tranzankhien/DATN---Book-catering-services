@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import {
   CalendarRange,
@@ -486,560 +487,570 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
       </div>
 
       {/* CREATE PERIOD MODAL */}
-      {isCreateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 animate-fade-up-1">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <h2 className="text-base font-bold text-stone-900 flex items-center gap-2">
-                <CalendarRange className="h-5 w-5 text-amber-700" />
-                Tạo kỳ tính lương mới
-              </h2>
-              <button
-                onClick={() => setIsCreateOpen(false)}
-                className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreatePeriod} className="mt-4 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">Năm</label>
-                  <input
-                    type="number"
-                    required
-                    value={createYear}
-                    onChange={(e) => setCreateYear(Number(e.target.value))}
-                    className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">Tháng (1 - 12)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="12"
-                    required
-                    value={createMonth}
-                    onChange={(e) => setCreateMonth(Number(e.target.value))}
-                    className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  Số ngày công chuẩn trong tháng <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.5"
-                  min="1"
-                  max="31"
-                  required
-                  value={createStandardDays}
-                  onChange={(e) => setCreateStandardDays(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 font-semibold"
-                />
-                <p className="text-[11px] text-stone-400 mt-1">
-                  Mặc định 26.0 ngày (trừ 4 ngày Chủ nhật trong tháng).
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">Ghi chú kỳ lương</label>
-                <textarea
-                  rows={2}
-                  value={createNote}
-                  onChange={(e) => setCreateNote(e.target.value)}
-                  placeholder="Ghi chú về kỳ lương, kế hoạch thưởng cuối tháng..."
-                  className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={creating}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs disabled:opacity-60"
-                >
-                  {creating && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                  Khởi tạo kỳ lương
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* PREVIEW & FINALIZE MODAL */}
-      {previewPeriodId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-4xl w-full p-6 shadow-2xl border border-stone-200 animate-fade-up-1 max-h-[92vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100 shrink-0">
-              <div>
-                <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
-                  <FileCheck2 className="h-5 w-5 text-amber-700" />
-                  Bảng dự toán tính lương trước khi chốt sổ
-                </h2>
-                {previewData && (
-                  <p className="text-xs text-stone-500 mt-0.5">
-                    Tháng {previewData.month}/{previewData.year} • Công chuẩn: {previewData.standardWorkdays} ngày
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={() => setPreviewPeriodId(null)}
-                className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {loadingPreview ? (
-              <div className="py-24 flex flex-col items-center justify-center text-stone-500">
-                <Loader2 className="h-8 w-8 animate-spin text-amber-700 mb-3" />
-                <p className="text-sm font-medium">Đang tính toán lương tự động theo công và phụ cấp...</p>
-              </div>
-            ) : previewData ? (
-              <div className="flex-1 overflow-y-auto py-4 space-y-4">
-                {previewData.totalWarningsCount > 0 && (
-                  <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3 text-xs">
-                    <AlertTriangle className="h-5 w-5 text-amber-700 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-bold">Có {previewData.totalWarningsCount} cảnh báo cần lưu ý:</p>
-                      <p className="text-amber-800/80 mt-0.5">
-                        Một số nhân viên có số ngày công vượt công chuẩn hoặc có mức lương thực lĩnh âm. Vui lòng kiểm tra kỹ trước khi chốt sổ.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Table */}
-                <div className="border border-stone-200 rounded-2xl overflow-hidden">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-stone-50 font-bold text-stone-600 uppercase text-[10px] border-b border-stone-200">
-                      <tr>
-                        <th className="py-3 px-3">Nhân viên</th>
-                        <th className="py-3 px-3 text-right">Lương cơ bản</th>
-                        <th className="py-3 px-3 text-center">Công thực tế / chuẩn</th>
-                        <th className="py-3 px-3 text-right">Lương theo công</th>
-                        <th className="py-3 px-3 text-right">Phụ cấp (+)</th>
-                        <th className="py-3 px-3 text-right">Khấu trừ (-)</th>
-                        <th className="py-3 px-3 text-right">Thực lĩnh (=)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-stone-100">
-                      {previewData.items.map((it) => (
-                        <tr key={it.employeeId} className="hover:bg-amber-50/20">
-                          <td className="py-2.5 px-3">
-                            <div className="font-bold text-stone-900">{it.employeeName}</div>
-                            <div className="text-[10px] text-stone-500 font-mono">
-                              {it.employeeCode} • {it.position}
-                            </div>
-                            {it.warnings.length > 0 && (
-                              <div className="mt-1 space-y-0.5">
-                                {it.warnings.map((w, idx) => (
-                                  <span
-                                    key={idx}
-                                    className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded"
-                                  >
-                                    <AlertCircle className="h-3 w-3" /> {w}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </td>
-                          <td className="py-2.5 px-3 text-right font-medium text-stone-700">
-                            {new Intl.NumberFormat('vi-VN').format(it.baseSalary)} đ
-                          </td>
-                          <td className="py-2.5 px-3 text-center font-bold text-stone-800">
-                            {it.actualWorkdays} / {it.standardWorkdays}
-                          </td>
-                          <td className="py-2.5 px-3 text-right font-medium text-stone-900">
-                            {new Intl.NumberFormat('vi-VN').format(it.calculatedSalary)} đ
-                          </td>
-                          <td className="py-2.5 px-3 text-right font-medium text-emerald-700">
-                            +{new Intl.NumberFormat('vi-VN').format(it.totalAllowances)} đ
-                          </td>
-                          <td className="py-2.5 px-3 text-right font-medium text-rose-700">
-                            -{new Intl.NumberFormat('vi-VN').format(it.totalDeductions)} đ
-                          </td>
-                          <td className="py-2.5 px-3 text-right font-extrabold text-stone-900">
-                            <span className={it.netSalary < 0 ? 'text-rose-600' : 'text-stone-900'}>
-                              {new Intl.NumberFormat('vi-VN').format(it.netSalary)} đ
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot className="bg-stone-50/90 font-extrabold text-stone-900 border-t border-stone-200">
-                      <tr>
-                        <td className="py-3 px-3">TỔNG TOÀN KỲ</td>
-                        <td className="py-3 px-3 text-right">-</td>
-                        <td className="py-3 px-3 text-center">-</td>
-                        <td className="py-3 px-3 text-right">
-                          {new Intl.NumberFormat('vi-VN').format(previewData.totalCalculatedSalary)} đ
-                        </td>
-                        <td className="py-3 px-3 text-right text-emerald-700">
-                          +{new Intl.NumberFormat('vi-VN').format(previewData.totalAllowances)} đ
-                        </td>
-                        <td className="py-3 px-3 text-right text-rose-700">
-                          -{new Intl.NumberFormat('vi-VN').format(previewData.totalDeductions)} đ
-                        </td>
-                        <td className="py-3 px-3 text-right text-amber-900 text-sm">
-                          {new Intl.NumberFormat('vi-VN').format(previewData.totalNetSalary)} đ
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </div>
-            ) : null}
-
-            {/* Footer */}
-            <div className="pt-3 border-t border-stone-100 flex items-center justify-between shrink-0">
-              <button
-                type="button"
-                onClick={() => setPreviewPeriodId(null)}
-                className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl"
-              >
-                Đóng
-              </button>
-
-              <button
-                type="button"
-                disabled={finalizing || loadingPreview}
-                onClick={handleFinalize}
-                className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs disabled:opacity-60 cursor-pointer"
-              >
-                {finalizing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" /> Đang chốt sổ bảng lương...
-                  </>
-                ) : (
-                  <>
-                    <Lock className="h-4 w-4" /> Xác nhận chốt sổ bảng lương
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ADJUSTMENTS MODAL */}
-      {adjPeriodId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-stone-200 animate-fade-up-1 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100 shrink-0">
-              <div>
+      {isCreateOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-stone-950/60 backdrop-blur-xs animate-fade-in">
+            <div className="relative bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200/90 animate-fade-up-1 my-auto">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
                 <h2 className="text-base font-bold text-stone-900 flex items-center gap-2">
-                  <SlidersHorizontal className="h-5 w-5 text-amber-700" />
-                  Quản lý phụ cấp & giảm trừ kỳ lương
+                  <CalendarRange className="h-5 w-5 text-amber-700" />
+                  Tạo kỳ tính lương mới
                 </h2>
-                <p className="text-xs text-stone-500 mt-0.5">
-                  Thêm thưởng, phụ cấp trách nhiệm, tăng ca hoặc phạt vi phạm, trừ tiền ứng trước khi chốt sổ.
-                </p>
+                <button
+                  onClick={() => setIsCreateOpen(false)}
+                  className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-              <button
-                onClick={() => setAdjPeriodId(null)}
-                className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
 
-            <div className="flex-1 overflow-y-auto py-4 space-y-4">
-              {/* Add Adjustment Form */}
-              <form onSubmit={handleAddAdjustment} className="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-3">
-                <p className="text-xs font-bold text-stone-800">Thêm khoản điều chỉnh mới</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <form onSubmit={handleCreatePeriod} className="mt-4 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-semibold text-stone-600 mb-1">Nhân viên</label>
-                    <select
-                      value={adjEmpId}
-                      onChange={(e) => setAdjEmpId(e.target.value)}
-                      className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-600"
-                    >
-                      {employees.map((e) => (
-                        <option key={e.id} value={e.id}>
-                          {e.fullName} ({e.employeeCode})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-semibold text-stone-600 mb-1">Loại khoản</label>
-                    <select
-                      value={adjType}
-                      onChange={(e) => setAdjType(e.target.value as AdjustmentType)}
-                      className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-600"
-                    >
-                      <option value="ALLOWANCE">Phụ cấp / Thưởng (+)</option>
-                      <option value="DEDUCTION">Khấu trừ / Giảm (-)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-semibold text-stone-600 mb-1">Số tiền (VND)</label>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1">Năm</label>
                     <input
                       type="number"
-                      step="10000"
-                      min="1000"
                       required
-                      value={adjAmount}
-                      onChange={(e) => setAdjAmount(e.target.value)}
-                      className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-600 font-semibold"
+                      value={createYear}
+                      onChange={(e) => setCreateYear(Number(e.target.value))}
+                      className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 tabular-nums"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1">Tháng (1 - 12)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="12"
+                      required
+                      value={createMonth}
+                      onChange={(e) => setCreateMonth(Number(e.target.value))}
+                      className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 tabular-nums"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-stone-600 mb-1">Lý do điều chỉnh</label>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    Số ngày công chuẩn trong tháng <span className="text-rose-500">*</span>
+                  </label>
                   <input
-                    type="text"
+                    type="number"
+                    step="0.5"
+                    min="1"
+                    max="31"
                     required
-                    value={adjReason}
-                    onChange={(e) => setAdjReason(e.target.value)}
-                    placeholder="Ví dụ: Thưởng hoàn thành xuất sắc tiệc cưới, Phụ cấp trách nhiệm..."
-                    className="w-full px-3 py-1.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-600"
+                    value={createStandardDays}
+                    onChange={(e) => setCreateStandardDays(e.target.value)}
+                    className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 font-semibold tabular-nums"
+                  />
+                  <p className="text-[11px] text-stone-400 mt-1">
+                    Mặc định 26.0 ngày (trừ 4 ngày Chủ nhật trong tháng).
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">Ghi chú kỳ lương</label>
+                  <textarea
+                    rows={2}
+                    value={createNote}
+                    onChange={(e) => setCreateNote(e.target.value)}
+                    placeholder="Ghi chú về kỳ lương, kế hoạch thưởng cuối tháng..."
+                    className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
                   />
                 </div>
 
-                <div className="flex justify-end pt-1">
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateOpen(false)}
+                    className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Hủy
+                  </button>
                   <button
                     type="submit"
-                    disabled={addingAdj}
-                    className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs cursor-pointer disabled:opacity-60"
+                    disabled={creating}
+                    className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-60"
                   >
-                    {addingAdj && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                    Thêm khoản điều chỉnh
+                    {creating && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    Khởi tạo kỳ lương
                   </button>
                 </div>
               </form>
+            </div>
+          </div>,
+          document.body
+        )}
 
-              {/* Adjustments List */}
-              <div className="border border-stone-200 rounded-2xl overflow-hidden">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-stone-50 font-bold text-stone-600 uppercase text-[10px] border-b border-stone-200">
-                    <tr>
-                      <th className="py-2.5 px-3">Nhân viên</th>
-                      <th className="py-2.5 px-3">Loại</th>
-                      <th className="py-2.5 px-3 text-right">Số tiền</th>
-                      <th className="py-2.5 px-3">Lý do</th>
-                      <th className="py-2.5 px-3 text-right">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-stone-100">
-                    {adjustments.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="py-8 text-center text-stone-400 italic">
-                          Chưa có khoản phụ cấp hoặc giảm trừ nào trong kỳ này.
-                        </td>
-                      </tr>
-                    ) : (
-                      adjustments.map((a) => (
-                        <tr key={a.id} className="hover:bg-stone-50">
-                          <td className="py-2.5 px-3 font-semibold text-stone-800">
-                            {a.employeeName} ({a.employeeCode})
-                          </td>
-                          <td className="py-2.5 px-3">
-                            {a.adjustmentType === 'ALLOWANCE' ? (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                                + Phụ cấp
+      {/* PREVIEW & FINALIZE MODAL */}
+      {previewPeriodId &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-stone-950/60 backdrop-blur-xs animate-fade-in">
+            <div className="relative bg-white rounded-2xl max-w-4xl w-full p-6 shadow-2xl border border-stone-200/90 animate-fade-up-1 max-h-[92vh] flex flex-col my-auto">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100 shrink-0">
+                <div>
+                  <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
+                    <FileCheck2 className="h-5 w-5 text-amber-700" />
+                    Bảng dự toán tính lương trước khi chốt sổ
+                  </h2>
+                  {previewData && (
+                    <p className="text-xs text-stone-500 mt-0.5 tabular-nums">
+                      Tháng {previewData.month}/{previewData.year} • Công chuẩn: {previewData.standardWorkdays} ngày
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => setPreviewPeriodId(null)}
+                  className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {loadingPreview ? (
+                <div className="py-24 flex flex-col items-center justify-center text-stone-500">
+                  <Loader2 className="h-8 w-8 animate-spin text-amber-700 mb-3" />
+                  <p className="text-sm font-medium">Đang tính toán lương tự động theo công và phụ cấp...</p>
+                </div>
+              ) : previewData ? (
+                <div className="flex-1 overflow-y-auto py-4 space-y-4">
+                  {previewData.totalWarningsCount > 0 && (
+                    <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3 text-xs">
+                      <AlertTriangle className="h-5 w-5 text-amber-700 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-bold">Có {previewData.totalWarningsCount} cảnh báo cần lưu ý:</p>
+                        <p className="text-amber-800/80 mt-0.5">
+                          Một số nhân viên có số ngày công vượt công chuẩn hoặc có mức lương thực lĩnh âm. Vui lòng kiểm tra kỹ trước khi chốt sổ.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Table */}
+                  <div className="border border-stone-200 rounded-2xl overflow-hidden">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-stone-50 font-bold text-stone-600 uppercase text-[10px] border-b border-stone-200">
+                        <tr>
+                          <th className="py-3 px-3">Nhân viên</th>
+                          <th className="py-3 px-3 text-right">Lương cơ bản</th>
+                          <th className="py-3 px-3 text-center">Công thực tế / chuẩn</th>
+                          <th className="py-3 px-3 text-right">Lương theo công</th>
+                          <th className="py-3 px-3 text-right">Phụ cấp (+)</th>
+                          <th className="py-3 px-3 text-right">Khấu trừ (-)</th>
+                          <th className="py-3 px-3 text-right">Thực lĩnh (=)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-stone-100">
+                        {previewData.items.map((it) => (
+                          <tr key={it.employeeId} className="hover:bg-amber-50/20">
+                            <td className="py-2.5 px-3">
+                              <div className="font-bold text-stone-900">{it.employeeName}</div>
+                              <div className="text-[10px] text-stone-500 font-mono tabular-nums">
+                                {it.employeeCode} • {it.position}
+                              </div>
+                              {it.warnings.length > 0 && (
+                                <div className="mt-1 space-y-0.5">
+                                  {it.warnings.map((w, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded"
+                                    >
+                                      <AlertCircle className="h-3 w-3" /> {w}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-medium text-stone-700 tabular-nums">
+                              {new Intl.NumberFormat('vi-VN').format(it.baseSalary)} đ
+                            </td>
+                            <td className="py-2.5 px-3 text-center font-bold text-stone-800 tabular-nums">
+                              {it.actualWorkdays} / {it.standardWorkdays}
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-medium text-stone-900 tabular-nums">
+                              {new Intl.NumberFormat('vi-VN').format(it.calculatedSalary)} đ
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-medium text-emerald-700 tabular-nums">
+                              +{new Intl.NumberFormat('vi-VN').format(it.totalAllowances)} đ
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-medium text-rose-700 tabular-nums">
+                              -{new Intl.NumberFormat('vi-VN').format(it.totalDeductions)} đ
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-extrabold text-stone-900 tabular-nums">
+                              <span className={it.netSalary < 0 ? 'text-rose-600' : 'text-stone-900'}>
+                                {new Intl.NumberFormat('vi-VN').format(it.netSalary)} đ
                               </span>
-                            ) : (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">
-                                - Khấu trừ
-                              </span>
-                            )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot className="bg-stone-50/90 font-extrabold text-stone-900 border-t border-stone-200">
+                        <tr>
+                          <td className="py-3 px-3">TỔNG TOÀN KỲ</td>
+                          <td className="py-3 px-3 text-right">-</td>
+                          <td className="py-3 px-3 text-center">-</td>
+                          <td className="py-3 px-3 text-right tabular-nums">
+                            {new Intl.NumberFormat('vi-VN').format(previewData.totalCalculatedSalary)} đ
                           </td>
-                          <td className="py-2.5 px-3 text-right font-bold text-stone-900">
-                            {new Intl.NumberFormat('vi-VN').format(a.amount)} đ
+                          <td className="py-3 px-3 text-right text-emerald-700 tabular-nums">
+                            +{new Intl.NumberFormat('vi-VN').format(previewData.totalAllowances)} đ
                           </td>
-                          <td className="py-2.5 px-3 text-stone-600 truncate max-w-xs">{a.name || a.reason}</td>
-                          <td className="py-2.5 px-3 text-right space-x-1">
-                            <button
-                              onClick={() => openEditAdjustment(a)}
-                              className="p-1 rounded text-stone-400 hover:text-amber-700 transition-colors inline-block cursor-pointer"
-                              title="Sửa"
-                            >
-                              <SlidersHorizontal className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteAdjustment(a.id)}
-                              className="p-1 rounded text-stone-400 hover:text-rose-600 transition-colors inline-block cursor-pointer"
-                              title="Xóa"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
+                          <td className="py-3 px-3 text-right text-rose-700 tabular-nums">
+                            -{new Intl.NumberFormat('vi-VN').format(previewData.totalDeductions)} đ
+                          </td>
+                          <td className="py-3 px-3 text-right text-amber-900 text-sm tabular-nums">
+                            {new Intl.NumberFormat('vi-VN').format(previewData.totalNetSalary)} đ
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              ) : null}
+
+              {/* Footer */}
+              <div className="pt-3 border-t border-stone-100 flex items-center justify-between shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setPreviewPeriodId(null)}
+                  className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl transition-colors cursor-pointer"
+                >
+                  Đóng
+                </button>
+
+                <button
+                  type="button"
+                  disabled={finalizing || loadingPreview}
+                  onClick={handleFinalize}
+                  className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs transition-colors disabled:opacity-60 cursor-pointer"
+                >
+                  {finalizing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Đang chốt sổ bảng lương...
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-4 w-4" /> Xác nhận chốt sổ bảng lương
+                    </>
+                  )}
+                </button>
               </div>
             </div>
+          </div>,
+          document.body
+        )}
 
-            <div className="pt-3 border-t border-stone-100 flex justify-end shrink-0">
-              <button
-                type="button"
-                onClick={() => setAdjPeriodId(null)}
-                className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl cursor-pointer"
-              >
-                Hoàn tất
-              </button>
+      {/* ADJUSTMENTS MODAL */}
+      {adjPeriodId &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-stone-950/60 backdrop-blur-xs animate-fade-in">
+            <div className="relative bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-stone-200/90 animate-fade-up-1 max-h-[90vh] flex flex-col my-auto">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100 shrink-0">
+                <div>
+                  <h2 className="text-base font-bold text-stone-900 flex items-center gap-2">
+                    <SlidersHorizontal className="h-5 w-5 text-amber-700" />
+                    Quản lý phụ cấp & giảm trừ kỳ lương
+                  </h2>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    Thêm thưởng, phụ cấp trách nhiệm, tăng ca hoặc phạt vi phạm, trừ tiền ứng trước khi chốt sổ.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setAdjPeriodId(null)}
+                  className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto py-4 space-y-4">
+                {/* Add Adjustment Form */}
+                <form onSubmit={handleAddAdjustment} className="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-3">
+                  <p className="text-xs font-bold text-stone-800">Thêm khoản điều chỉnh mới</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-stone-600 mb-1">Nhân viên</label>
+                      <select
+                        value={adjEmpId}
+                        onChange={(e) => setAdjEmpId(e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-600"
+                      >
+                        {employees.map((e) => (
+                          <option key={e.id} value={e.id}>
+                            {e.fullName} ({e.employeeCode})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-stone-600 mb-1">Loại khoản</label>
+                      <select
+                        value={adjType}
+                        onChange={(e) => setAdjType(e.target.value as AdjustmentType)}
+                        className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-600"
+                      >
+                        <option value="ALLOWANCE">Phụ cấp / Thưởng (+)</option>
+                        <option value="DEDUCTION">Khấu trừ / Giảm (-)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-stone-600 mb-1">Số tiền (VND)</label>
+                      <input
+                        type="number"
+                        step="10000"
+                        min="1000"
+                        required
+                        value={adjAmount}
+                        onChange={(e) => setAdjAmount(e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-600 font-semibold tabular-nums"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-stone-600 mb-1">Lý do điều chỉnh</label>
+                    <input
+                      type="text"
+                      required
+                      value={adjReason}
+                      onChange={(e) => setAdjReason(e.target.value)}
+                      placeholder="Ví dụ: Thưởng hoàn thành xuất sắc tiệc cưới, Phụ cấp trách nhiệm..."
+                      className="w-full px-3 py-1.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-600"
+                    />
+                  </div>
+
+                  <div className="flex justify-end pt-1">
+                    <button
+                      type="submit"
+                      disabled={addingAdj}
+                      className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs cursor-pointer transition-colors disabled:opacity-60"
+                    >
+                      {addingAdj && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                      Thêm khoản điều chỉnh
+                    </button>
+                  </div>
+                </form>
+
+                {/* Adjustments List */}
+                <div className="border border-stone-200 rounded-2xl overflow-hidden">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-stone-50 font-bold text-stone-600 uppercase text-[10px] border-b border-stone-200">
+                      <tr>
+                        <th className="py-2.5 px-3">Nhân viên</th>
+                        <th className="py-2.5 px-3">Loại</th>
+                        <th className="py-2.5 px-3 text-right">Số tiền</th>
+                        <th className="py-2.5 px-3">Lý do</th>
+                        <th className="py-2.5 px-3 text-right">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-100">
+                      {adjustments.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-8 text-center text-stone-400 italic">
+                            Chưa có khoản phụ cấp hoặc giảm trừ nào trong kỳ này.
+                          </td>
+                        </tr>
+                      ) : (
+                        adjustments.map((a) => (
+                          <tr key={a.id} className="hover:bg-stone-50">
+                            <td className="py-2.5 px-3 font-semibold text-stone-800">
+                              {a.employeeName} <span className="text-[10px] text-stone-500 font-mono tabular-nums">({a.employeeCode})</span>
+                            </td>
+                            <td className="py-2.5 px-3">
+                              {a.adjustmentType === 'ALLOWANCE' ? (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                  + Phụ cấp
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">
+                                  - Khấu trừ
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-bold text-stone-900 tabular-nums">
+                              {new Intl.NumberFormat('vi-VN').format(a.amount)} đ
+                            </td>
+                            <td className="py-2.5 px-3 text-stone-600 truncate max-w-xs">{a.name || a.reason}</td>
+                            <td className="py-2.5 px-3 text-right space-x-1">
+                              <button
+                                onClick={() => openEditAdjustment(a)}
+                                className="p-1 rounded text-stone-400 hover:text-amber-700 transition-colors inline-block cursor-pointer"
+                                title="Sửa"
+                              >
+                                <SlidersHorizontal className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteAdjustment(a.id)}
+                                className="p-1 rounded text-stone-400 hover:text-rose-600 transition-colors inline-block cursor-pointer"
+                                title="Xóa"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-stone-100 flex justify-end shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setAdjPeriodId(null)}
+                  className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl transition-colors cursor-pointer"
+                >
+                  Hoàn tất
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
 
       {/* EDIT PERIOD MODAL (DRAFT ONLY) */}
-      {editingPeriod && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 animate-fade-up-1">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <h2 className="text-base font-bold text-stone-900 flex items-center gap-2">
-                <CalendarRange className="h-5 w-5 text-amber-700" />
-                Cập nhật kỳ lương Tháng {editingPeriod.month}/{editingPeriod.year}
-              </h2>
-              <button
-                onClick={() => setEditingPeriod(null)}
-                className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleUpdatePeriod} className="mt-4 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  Số ngày công chuẩn trong tháng <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.5"
-                  min="1"
-                  max="31"
-                  required
-                  value={editStandardDays}
-                  onChange={(e) => setEditStandardDays(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 font-semibold"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">Ghi chú</label>
-                <textarea
-                  rows={2}
-                  value={editPeriodNote}
-                  onChange={(e) => setEditPeriodNote(e.target.value)}
-                  placeholder="Ghi chú về kỳ lương..."
-                  className="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
+      {editingPeriod &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-stone-950/60 backdrop-blur-xs animate-fade-in">
+            <div className="relative bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200/90 animate-fade-up-1 my-auto">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                <h2 className="text-base font-bold text-stone-900 flex items-center gap-2">
+                  <CalendarRange className="h-5 w-5 text-amber-700" />
+                  Cập nhật kỳ lương Tháng {editingPeriod.month}/{editingPeriod.year}
+                </h2>
                 <button
-                  type="button"
                   onClick={() => setEditingPeriod(null)}
-                  className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl cursor-pointer"
+                  className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
                 >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={updatingPeriod}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs cursor-pointer disabled:opacity-60"
-                >
-                  {updatingPeriod && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                  Lưu thay đổi
+                  <X className="h-5 w-5" />
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+
+              <form onSubmit={handleUpdatePeriod} className="mt-4 space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    Số ngày công chuẩn trong tháng <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="1"
+                    max="31"
+                    required
+                    value={editStandardDays}
+                    onChange={(e) => setEditStandardDays(e.target.value)}
+                    className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 font-semibold tabular-nums"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">Ghi chú</label>
+                  <textarea
+                    rows={2}
+                    value={editPeriodNote}
+                    onChange={(e) => setEditPeriodNote(e.target.value)}
+                    placeholder="Ghi chú về kỳ lương..."
+                    className="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
+                  <button
+                    type="button"
+                    onClick={() => setEditingPeriod(null)}
+                    className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={updatingPeriod}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-60"
+                  >
+                    {updatingPeriod && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    Lưu thay đổi
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
 
       {/* EDIT ADJUSTMENT MODAL */}
-      {editingAdj && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 animate-fade-up-1">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <h2 className="text-base font-bold text-stone-900 flex items-center gap-2">
-                <SlidersHorizontal className="h-5 w-5 text-amber-700" />
-                Sửa khoản điều chỉnh ({editingAdj.employeeName})
-              </h2>
-              <button
-                onClick={() => setEditingAdj(null)}
-                className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleUpdateAdjustment} className="mt-4 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  Số tiền (VNĐ) <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  min="1000"
-                  step="1000"
-                  required
-                  value={editAdjAmount}
-                  onChange={(e) => setEditAdjAmount(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 font-semibold"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  Lý do / Tên khoản <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={editAdjReason}
-                  onChange={(e) => setEditAdjReason(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
+      {editingAdj &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-stone-950/60 backdrop-blur-xs animate-fade-in">
+            <div className="relative bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200/90 animate-fade-up-1 my-auto">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                <h2 className="text-base font-bold text-stone-900 flex items-center gap-2">
+                  <SlidersHorizontal className="h-5 w-5 text-amber-700" />
+                  Sửa khoản điều chỉnh ({editingAdj.employeeName})
+                </h2>
                 <button
-                  type="button"
                   onClick={() => setEditingAdj(null)}
-                  className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl cursor-pointer"
+                  className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
                 >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={updatingAdj}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs cursor-pointer disabled:opacity-60"
-                >
-                  {updatingAdj && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                  Cập nhật
+                  <X className="h-5 w-5" />
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+
+              <form onSubmit={handleUpdateAdjustment} className="mt-4 space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    Số tiền (VNĐ) <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="1000"
+                    step="1000"
+                    required
+                    value={editAdjAmount}
+                    onChange={(e) => setEditAdjAmount(e.target.value)}
+                    className="w-full px-3.5 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 font-semibold tabular-nums"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    Lý do / Tên khoản <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editAdjReason}
+                    onChange={(e) => setEditAdjReason(e.target.value)}
+                    className="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
+                  <button
+                    type="button"
+                    onClick={() => setEditingAdj(null)}
+                    className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={updatingAdj}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-60"
+                  >
+                    {updatingAdj && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    Cập nhật
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

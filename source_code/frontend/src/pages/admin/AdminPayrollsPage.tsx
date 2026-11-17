@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
   Receipt,
@@ -293,7 +294,7 @@ export const AdminPayrollsPage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Tổng quỹ lương thực lĩnh</p>
-            <p className="text-2xl font-extrabold text-stone-900 mt-0.5">
+            <p className="text-2xl font-extrabold text-stone-900 mt-0.5 tabular-nums">
               {summaryLoading ? (
                 <span className="text-stone-400 font-normal text-base animate-pulse">Đang tải...</span>
               ) : totalNet != null ? (
@@ -311,7 +312,7 @@ export const AdminPayrollsPage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Đã giải ngân chi trả</p>
-            <p className="text-2xl font-extrabold text-emerald-700 mt-0.5">
+            <p className="text-2xl font-extrabold text-emerald-700 mt-0.5 tabular-nums">
               {summaryLoading ? (
                 <span className="text-stone-400 font-normal text-base animate-pulse">Đang tải...</span>
               ) : totalPaid != null ? (
@@ -329,7 +330,7 @@ export const AdminPayrollsPage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Chưa thanh toán (Công nợ)</p>
-            <p className="text-2xl font-extrabold text-rose-700 mt-0.5">
+            <p className="text-2xl font-extrabold text-rose-700 mt-0.5 tabular-nums">
               {summaryLoading ? (
                 <span className="text-stone-400 font-normal text-base animate-pulse">Đang tải...</span>
               ) : totalUnpaid != null ? (
@@ -359,7 +360,7 @@ export const AdminPayrollsPage: React.FC = () => {
           <span className="text-xs font-medium text-stone-500 flex items-center gap-1">
             <Filter className="h-3.5 w-3.5" /> Lọc trạng thái:
           </span>
-          <div className="inline-flex rounded-xl bg-stone-100 p-1 border border-stone-200/60 text-xs font-medium">
+          <div className="inline-flex rounded-xl bg-stone-100 p-1 border border-stone-200/60 text-xs font-medium tabular-nums">
             <button
               onClick={() => setStatusFilter('ALL')}
               className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
@@ -458,32 +459,32 @@ export const AdminPayrollsPage: React.FC = () => {
                   <tr key={p.id} className="hover:bg-amber-50/20 transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-stone-900">{p.employeeNameSnapshot}</div>
-                      <span className="font-mono text-[11px] text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded">
+                      <span className="font-mono text-[11px] text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded tabular-nums">
                         {p.employeeCodeSnapshot}
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 text-right font-medium text-stone-700">
+                    <td className="py-3.5 px-4 text-right font-medium text-stone-700 tabular-nums">
                       {new Intl.NumberFormat('vi-VN').format(p.baseSalarySnapshot)} đ
                     </td>
 
-                    <td className="py-3.5 px-4 text-center font-bold text-stone-800">
+                    <td className="py-3.5 px-4 text-center font-bold text-stone-800 tabular-nums">
                       {p.actualWorkdaysSnapshot} / {p.standardWorkdaysSnapshot}
                     </td>
 
-                    <td className="py-3.5 px-4 text-right font-medium text-stone-900">
+                    <td className="py-3.5 px-4 text-right font-medium text-stone-900 tabular-nums">
                       {new Intl.NumberFormat('vi-VN').format(p.calculatedSalary)} đ
                     </td>
 
-                    <td className="py-3.5 px-4 text-right font-medium text-emerald-700">
+                    <td className="py-3.5 px-4 text-right font-medium text-emerald-700 tabular-nums">
                       +{new Intl.NumberFormat('vi-VN').format(p.totalAllowances)} đ
                     </td>
 
-                    <td className="py-3.5 px-4 text-right font-medium text-rose-700">
+                    <td className="py-3.5 px-4 text-right font-medium text-rose-700 tabular-nums">
                       -{new Intl.NumberFormat('vi-VN').format(p.totalDeductions)} đ
                     </td>
 
-                    <td className="py-3.5 px-4 text-right font-extrabold text-stone-900 text-sm">
+                    <td className="py-3.5 px-4 text-right font-extrabold text-stone-900 text-sm tabular-nums">
                       {new Intl.NumberFormat('vi-VN').format(p.netSalary)} đ
                     </td>
 
@@ -494,7 +495,7 @@ export const AdminPayrollsPage: React.FC = () => {
                             <CheckCircle2 className="h-3 w-3" /> Đã chi trả
                           </span>
                           {p.paymentDate && (
-                            <span className="text-[10px] text-stone-400 mt-0.5">
+                            <span className="text-[10px] text-stone-400 mt-0.5 tabular-nums">
                               {p.paymentDate} • {p.paymentMethod === 'BANK_TRANSFER' ? 'CK' : 'Tiền mặt'}
                             </span>
                           )}
@@ -559,195 +560,199 @@ export const AdminPayrollsPage: React.FC = () => {
       </div>
 
       {/* MARK PAID MODAL */}
-      {payingPayroll && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 animate-fade-up-1">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <h2 className="text-base font-bold text-stone-900 flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-amber-700" />
-                Ghi nhận chi trả lương
-              </h2>
-              <button
-                onClick={() => setPayingPayroll(null)}
-                className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleMarkPaid} className="mt-4 space-y-4 text-xs">
-              <div className="p-3.5 bg-stone-50 rounded-2xl border border-stone-200 space-y-1">
-                <p className="font-bold text-sm text-stone-900">{payingPayroll.employeeNameSnapshot}</p>
-                <p className="text-stone-500 font-mono">Mã NV: {payingPayroll.employeeCodeSnapshot}</p>
-                <div className="pt-2 flex items-center justify-between border-t border-stone-200 mt-2">
-                  <span className="font-semibold text-stone-700">Số tiền giải ngân:</span>
-                  <span className="font-extrabold text-amber-800 text-base">
-                    {new Intl.NumberFormat('vi-VN').format(payingPayroll.netSalary)} đ
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-stone-700 mb-1">Phương thức chi trả</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPayMethod('BANK_TRANSFER')}
-                    className={`py-2 px-3 rounded-xl font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                      payMethod === 'BANK_TRANSFER'
-                        ? 'bg-amber-700 text-white border-amber-700 shadow-2xs'
-                        : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
-                    }`}
-                  >
-                    <Building2 className="h-4 w-4" /> Chuyển khoản
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPayMethod('CASH')}
-                    className={`py-2 px-3 rounded-xl font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                      payMethod === 'CASH'
-                        ? 'bg-amber-700 text-white border-amber-700 shadow-2xs'
-                        : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
-                    }`}
-                  >
-                    <Wallet className="h-4 w-4" /> Tiền mặt
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-stone-700 mb-1">Ngày chi trả</label>
-                <input
-                  type="date"
-                  required
-                  max={getLocalTodayDateString()}
-                  value={payDate}
-                  onChange={(e) => setPayDate(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-stone-700 mb-1">Ghi chú thanh toán</label>
-                <input
-                  type="text"
-                  value={payNote}
-                  onChange={(e) => setPayNote(e.target.value)}
-                  placeholder="Ghi chú giao dịch, số UNC ngân hàng..."
-                  className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
+      {payingPayroll &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-stone-950/60 backdrop-blur-xs animate-fade-in">
+            <div className="relative bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200/90 animate-fade-up-1 my-auto">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                <h2 className="text-base font-bold text-stone-900 flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-amber-700" />
+                  Ghi nhận chi trả lương
+                </h2>
                 <button
-                  type="button"
                   onClick={() => setPayingPayroll(null)}
-                  className="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold"
+                  className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
                 >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={submittingPay}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-2xs disabled:opacity-60 cursor-pointer"
-                >
-                  {submittingPay && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                  Xác nhận chi trả
+                  <X className="h-5 w-5" />
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+
+              <form onSubmit={handleMarkPaid} className="mt-4 space-y-4 text-xs">
+                <div className="p-3.5 bg-stone-50 rounded-2xl border border-stone-200 space-y-1">
+                  <p className="font-bold text-sm text-stone-900">{payingPayroll.employeeNameSnapshot}</p>
+                  <p className="text-stone-500 font-mono tabular-nums">Mã NV: {payingPayroll.employeeCodeSnapshot}</p>
+                  <div className="pt-2 flex items-center justify-between border-t border-stone-200 mt-2">
+                    <span className="font-semibold text-stone-700">Số tiền giải ngân:</span>
+                    <span className="font-extrabold text-amber-800 text-base tabular-nums">
+                      {new Intl.NumberFormat('vi-VN').format(payingPayroll.netSalary)} đ
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">Phương thức chi trả</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPayMethod('BANK_TRANSFER')}
+                      className={`py-2 px-3 rounded-xl font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        payMethod === 'BANK_TRANSFER'
+                          ? 'bg-amber-700 text-white border-amber-700 shadow-2xs'
+                          : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
+                      }`}
+                    >
+                      <Building2 className="h-4 w-4" /> Chuyển khoản
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPayMethod('CASH')}
+                      className={`py-2 px-3 rounded-xl font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        payMethod === 'CASH'
+                          ? 'bg-amber-700 text-white border-amber-700 shadow-2xs'
+                          : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
+                      }`}
+                    >
+                      <Wallet className="h-4 w-4" /> Tiền mặt
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">Ngày chi trả</label>
+                  <input
+                    type="date"
+                    required
+                    max={getLocalTodayDateString()}
+                    value={payDate}
+                    onChange={(e) => setPayDate(e.target.value)}
+                    className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 tabular-nums"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">Ghi chú thanh toán</label>
+                  <input
+                    type="text"
+                    value={payNote}
+                    onChange={(e) => setPayNote(e.target.value)}
+                    placeholder="Ghi chú giao dịch, số UNC ngân hàng..."
+                    className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100">
+                  <button
+                    type="button"
+                    onClick={() => setPayingPayroll(null)}
+                    className="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold transition-colors cursor-pointer"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submittingPay}
+                    className="inline-flex items-center gap-1.5 px-5 py-2 font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-2xs transition-colors disabled:opacity-60 cursor-pointer"
+                  >
+                    {submittingPay && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    Xác nhận chi trả
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
 
       {/* VIEW PAYSLIP MODAL */}
-      {viewingPayslip && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 animate-fade-up-1">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <div>
-                <h3 className="font-extrabold text-stone-900 text-base">PHIẾU LƯƠNG NHÂN VIÊN</h3>
-                <p className="text-xs text-stone-400 font-mono mt-0.5">BanquetHub HR & Payroll System</p>
+      {viewingPayslip &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-stone-950/60 backdrop-blur-xs animate-fade-in">
+            <div className="relative bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200/90 animate-fade-up-1 my-auto">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                <div>
+                  <h3 className="font-extrabold text-stone-900 text-base">PHIẾU LƯƠNG NHÂN VIÊN</h3>
+                  <p className="text-xs text-stone-400 font-mono mt-0.5">BanquetHub HR & Payroll System</p>
+                </div>
+                <button
+                  onClick={() => setViewingPayslip(null)}
+                  className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-              <button
-                onClick={() => setViewingPayslip(null)}
-                className="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
+
+              <div className="py-4 space-y-3 text-xs">
+                <div className="p-3 bg-stone-50 rounded-2xl border border-stone-200 space-y-1">
+                  <p className="font-bold text-stone-900 text-sm">{viewingPayslip.employeeNameSnapshot}</p>
+                  <p className="text-stone-500 font-mono tabular-nums">Mã số nhân viên: {viewingPayslip.employeeCodeSnapshot}</p>
+                </div>
+
+                <div className="space-y-2 border border-stone-200 rounded-2xl p-4">
+                  <div className="flex justify-between text-stone-600">
+                    <span>Mức lương cơ bản hợp đồng:</span>
+                    <span className="font-semibold text-stone-900 tabular-nums">
+                      {new Intl.NumberFormat('vi-VN').format(viewingPayslip.baseSalarySnapshot)} đ
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-stone-600">
+                    <span>Ngày công thực tế / chuẩn:</span>
+                    <span className="font-bold text-stone-900 tabular-nums">
+                      {viewingPayslip.actualWorkdaysSnapshot} / {viewingPayslip.standardWorkdaysSnapshot} ngày
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-stone-600">
+                    <span>Lương tính theo ngày công:</span>
+                    <span className="font-semibold text-stone-900 tabular-nums">
+                      {new Intl.NumberFormat('vi-VN').format(viewingPayslip.calculatedSalary)} đ
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-emerald-700 font-medium">
+                    <span>Tổng phụ cấp (+):</span>
+                    <span className="tabular-nums">+{new Intl.NumberFormat('vi-VN').format(viewingPayslip.totalAllowances)} đ</span>
+                  </div>
+
+                  <div className="flex justify-between text-rose-700 font-medium">
+                    <span>Tổng khấu trừ (-):</span>
+                    <span className="tabular-nums">-{new Intl.NumberFormat('vi-VN').format(viewingPayslip.totalDeductions)} đ</span>
+                  </div>
+
+                  <div className="pt-2 border-t border-stone-200 flex justify-between items-center text-sm font-extrabold text-stone-900">
+                    <span>LƯƠNG THỰC LĨNH:</span>
+                    <span className="text-amber-800 text-base tabular-nums">
+                      {new Intl.NumberFormat('vi-VN').format(viewingPayslip.netSalary)} đ
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-stone-50 border border-stone-200 text-stone-600 space-y-1">
+                  <p className="font-semibold text-stone-800">Trạng thái thanh toán:</p>
+                  {viewingPayslip.paymentStatus === 'PAID' ? (
+                    <p className="text-emerald-700 font-bold tabular-nums">
+                      ✓ Đã thanh toán ngày {viewingPayslip.paymentDate} ({viewingPayslip.paymentMethod === 'BANK_TRANSFER' ? 'Chuyển khoản' : 'Tiền mặt'})
+                    </p>
+                  ) : (
+                    <p className="text-rose-600 font-bold">⏳ Chưa thanh toán (Chờ chi trả)</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-stone-100 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setViewingPayslip(null)}
+                  className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl transition-colors cursor-pointer"
+                >
+                  Đóng
+                </button>
+              </div>
             </div>
-
-            <div className="py-4 space-y-3 text-xs">
-              <div className="p-3 bg-stone-50 rounded-2xl border border-stone-200 space-y-1">
-                <p className="font-bold text-stone-900 text-sm">{viewingPayslip.employeeNameSnapshot}</p>
-                <p className="text-stone-500 font-mono">Mã số nhân viên: {viewingPayslip.employeeCodeSnapshot}</p>
-              </div>
-
-              <div className="space-y-2 border border-stone-200 rounded-2xl p-4">
-                <div className="flex justify-between text-stone-600">
-                  <span>Mức lương cơ bản hợp đồng:</span>
-                  <span className="font-semibold text-stone-900">
-                    {new Intl.NumberFormat('vi-VN').format(viewingPayslip.baseSalarySnapshot)} đ
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-stone-600">
-                  <span>Ngày công thực tế / chuẩn:</span>
-                  <span className="font-bold text-stone-900">
-                    {viewingPayslip.actualWorkdaysSnapshot} / {viewingPayslip.standardWorkdaysSnapshot} ngày
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-stone-600">
-                  <span>Lương tính theo ngày công:</span>
-                  <span className="font-semibold text-stone-900">
-                    {new Intl.NumberFormat('vi-VN').format(viewingPayslip.calculatedSalary)} đ
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-emerald-700 font-medium">
-                  <span>Tổng phụ cấp (+):</span>
-                  <span>+{new Intl.NumberFormat('vi-VN').format(viewingPayslip.totalAllowances)} đ</span>
-                </div>
-
-                <div className="flex justify-between text-rose-700 font-medium">
-                  <span>Tổng khấu trừ (-):</span>
-                  <span>-{new Intl.NumberFormat('vi-VN').format(viewingPayslip.totalDeductions)} đ</span>
-                </div>
-
-                <div className="pt-2 border-t border-stone-200 flex justify-between items-center text-sm font-extrabold text-stone-900">
-                  <span>LƯƠNG THỰC LĨNH:</span>
-                  <span className="text-amber-800 text-base">
-                    {new Intl.NumberFormat('vi-VN').format(viewingPayslip.netSalary)} đ
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-2xl bg-stone-50 border border-stone-200 text-stone-600 space-y-1">
-                <p className="font-semibold text-stone-800">Trạng thái thanh toán:</p>
-                {viewingPayslip.paymentStatus === 'PAID' ? (
-                  <p className="text-emerald-700 font-bold">
-                    ✓ Đã thanh toán ngày {viewingPayslip.paymentDate} ({viewingPayslip.paymentMethod})
-                  </p>
-                ) : (
-                  <p className="text-rose-600 font-bold">⏳ Chưa thanh toán (Chờ chi trả)</p>
-                )}
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-stone-100 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setViewingPayslip(null)}
-                className="px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 rounded-xl"
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

@@ -83,7 +83,7 @@ export const AdminSalaryPaymentsPage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Tổng giải ngân lương</p>
-            <p className="text-2xl font-extrabold text-stone-900 mt-0.5">
+            <p className="text-2xl font-extrabold text-stone-900 mt-0.5 tabular-nums">
               {new Intl.NumberFormat('vi-VN').format(totalAmount)} <span className="text-xs font-normal text-stone-500">đ</span>
             </p>
           </div>
@@ -95,7 +95,7 @@ export const AdminSalaryPaymentsPage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Chuyển khoản ngân hàng</p>
-            <p className="text-2xl font-extrabold text-blue-700 mt-0.5">
+            <p className="text-2xl font-extrabold text-blue-700 mt-0.5 tabular-nums">
               {new Intl.NumberFormat('vi-VN').format(bankTransferTotal)} <span className="text-xs font-normal text-stone-500">đ</span>
             </p>
           </div>
@@ -107,7 +107,7 @@ export const AdminSalaryPaymentsPage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Tiền mặt tại quỹ</p>
-            <p className="text-2xl font-extrabold text-emerald-700 mt-0.5">
+            <p className="text-2xl font-extrabold text-emerald-700 mt-0.5 tabular-nums">
               {new Intl.NumberFormat('vi-VN').format(cashTotal)} <span className="text-xs font-normal text-stone-500">đ</span>
             </p>
           </div>
@@ -126,7 +126,7 @@ export const AdminSalaryPaymentsPage: React.FC = () => {
             className="w-full pl-10 pr-4 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
           />
         </div>
-        <div className="text-xs text-stone-500 font-semibold">
+        <div className="text-xs text-stone-500 font-semibold tabular-nums">
           Tổng số giao dịch: {filteredPayments.length}
         </div>
       </div>
@@ -164,19 +164,19 @@ export const AdminSalaryPaymentsPage: React.FC = () => {
               <tbody className="divide-y divide-stone-100">
                 {filteredPayments.map((pay) => (
                   <tr key={pay.id} className="hover:bg-amber-50/20 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-stone-700">
+                    <td className="py-3.5 px-4 font-mono font-bold text-stone-700 tabular-nums">
                       #{String(pay.id).padStart(5, '0')}
                     </td>
 
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-stone-900">{pay.employeeName}</div>
-                      <span className="font-mono text-[11px] text-stone-500 bg-stone-100 px-1 rounded">
+                      <span className="font-mono text-[11px] text-stone-500 bg-stone-100 px-1 rounded tabular-nums">
                         {pay.employeeCode}
                       </span>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1 font-semibold text-stone-800">
+                      <span className="inline-flex items-center gap-1 font-semibold text-stone-800 tabular-nums">
                         <Calendar className="h-3 w-3 text-stone-400" />
                         {pay.periodMonth
                           ? `Tháng ${String(pay.periodMonth).padStart(2, '0')}/${pay.periodYear}`
@@ -184,7 +184,7 @@ export const AdminSalaryPaymentsPage: React.FC = () => {
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 text-right font-extrabold text-stone-900 text-sm">
+                    <td className="py-3.5 px-4 text-right font-extrabold text-stone-900 text-sm tabular-nums">
                       {new Intl.NumberFormat('vi-VN').format(pay.amount)} đ
                     </td>
 
@@ -200,7 +200,7 @@ export const AdminSalaryPaymentsPage: React.FC = () => {
                       )}
                     </td>
 
-                    <td className="py-3.5 px-4 font-medium text-stone-700">
+                    <td className="py-3.5 px-4 font-medium text-stone-700 tabular-nums">
                       {pay.paymentDate}
                     </td>
 
