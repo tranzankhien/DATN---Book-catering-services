@@ -51,7 +51,7 @@ public class AdminReportsController {
     // REVENUE REPORTS
     // ==========================================
 
-    @GetMapping("/revenue")
+    @GetMapping({"/revenue", "/revenue/summary"})
     public ResponseEntity<ApiResponse<RevenueSummaryResponse>> getRevenue(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
@@ -85,7 +85,7 @@ public class AdminReportsController {
         return ResponseEntity.ok(ApiResponse.success(dishes, "Tải danh sách món bán chạy thành công"));
     }
 
-    @GetMapping("/revenue/orders")
+    @GetMapping({"/revenue/orders", "/revenue/paid-orders"})
     public ResponseEntity<ApiResponse<Page<PaidOrderReportDto>>> getPaidOrders(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
@@ -102,7 +102,7 @@ public class AdminReportsController {
     // INVENTORY REPORTS
     // ==========================================
 
-    @GetMapping("/inventory")
+    @GetMapping({"/inventory", "/inventory/overview"})
     public ResponseEntity<ApiResponse<InventoryReportResponse>> getInventory(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
@@ -119,7 +119,7 @@ public class AdminReportsController {
         return ResponseEntity.ok(ApiResponse.success(list, "Tải định giá tồn kho thành công"));
     }
 
-    @GetMapping("/inventory/purchases")
+    @GetMapping({"/inventory/purchases", "/inventory/supplier-purchases"})
     public ResponseEntity<ApiResponse<List<SupplierPurchaseDto>>> getSupplierPurchases(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
@@ -134,7 +134,7 @@ public class AdminReportsController {
     // PAYROLL REPORTS
     // ==========================================
 
-    @GetMapping("/payroll")
+    @GetMapping({"/payroll", "/payroll/overview"})
     public ResponseEntity<ApiResponse<PayrollReportResponse>> getPayroll(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
@@ -145,7 +145,7 @@ public class AdminReportsController {
         return ResponseEntity.ok(ApiResponse.success(data, "Tải báo cáo chi phí lương thành công"));
     }
 
-    @GetMapping("/payroll/trend")
+    @GetMapping({"/payroll/trend", "/payroll/monthly-trend"})
     public ResponseEntity<ApiResponse<List<TimeSeriesPoint>>> getPayrollTrend(
             @RequestParam(defaultValue = "6") int months
     ) {
@@ -168,7 +168,7 @@ public class AdminReportsController {
         return ResponseEntity.ok(ApiResponse.success(data, "Tải báo cáo lợi nhuận ước tính thành công"));
     }
 
-    @GetMapping("/profit/trend")
+    @GetMapping({"/profit/trend", "/profit/monthly-trend"})
     public ResponseEntity<ApiResponse<List<TimeSeriesPoint>>> getProfitTrend(
             @RequestParam(defaultValue = "6") int months
     ) {
@@ -180,7 +180,7 @@ public class AdminReportsController {
     // CASH FLOW REPORTS
     // ==========================================
 
-    @GetMapping("/cashflow")
+    @GetMapping({"/cashflow", "/cash-flow"})
     public ResponseEntity<ApiResponse<CashFlowReportResponse>> getCashFlow(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
@@ -195,18 +195,23 @@ public class AdminReportsController {
     // CSV EXPORT
     // ==========================================
 
-    @GetMapping("/export")
+    @GetMapping({"/export", "/export/{typePath}"})
     public ResponseEntity<byte[]> exportCsv(
-            @RequestParam String type,
+            @PathVariable(required = false) String typePath,
+            @RequestParam(required = false) String type,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
+        String resolvedType = typePath != null && !typePath.isBlank() ? typePath : type;
+        if (resolvedType == null || resolvedType.isBlank()) {
+            resolvedType = "revenue";
+        }
         LocalDate end = endDate != null ? endDate : LocalDate.now(VN_ZONE);
         LocalDate start = startDate != null ? startDate : end.withDayOfMonth(1);
-        byte[] csvData = reportExportService.exportCsv(type, start, end);
+        byte[] csvData = reportExportService.exportCsv(resolvedType, start, end);
 
         String filename = String.format("banquethub_report_%s_%s.csv",
-                type.toLowerCase(), LocalDate.now(VN_ZONE).format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+                resolvedType.toLowerCase(), LocalDate.now(VN_ZONE).format(DateTimeFormatter.ofPattern("yyyyMMdd")));
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")

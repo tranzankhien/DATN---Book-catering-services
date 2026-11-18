@@ -38,7 +38,7 @@ public class AdminDashboardController {
         return ResponseEntity.ok(ApiResponse.success(data, "Tải tổng quan kinh doanh thành công"));
     }
 
-    @GetMapping("/revenue-trend")
+    @GetMapping({"/revenue-trend", "/revenue-chart"})
     public ResponseEntity<ApiResponse<List<TimeSeriesPoint>>> getRevenueTrend(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
@@ -49,7 +49,7 @@ public class AdminDashboardController {
         return ResponseEntity.ok(ApiResponse.success(trend, "Tải xu hướng doanh thu thành công"));
     }
 
-    @GetMapping("/order-status")
+    @GetMapping({"/order-status", "/order-status-stats"})
     public ResponseEntity<ApiResponse<List<OrderStatusStatDto>>> getOrderStatus(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
@@ -60,7 +60,7 @@ public class AdminDashboardController {
         return ResponseEntity.ok(ApiResponse.success(distribution, "Tải phân bố trạng thái đơn hàng thành công"));
     }
 
-    @GetMapping("/cost-breakdown")
+    @GetMapping({"/cost-breakdown", "/cost-structure"})
     public ResponseEntity<ApiResponse<List<CostBreakdownDto>>> getCostBreakdown(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate

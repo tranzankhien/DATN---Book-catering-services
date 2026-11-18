@@ -75,6 +75,11 @@ public class GlobalExceptionHandler {
         return buildError(HttpStatus.FORBIDDEN, "FORBIDDEN", "Bạn không có quyền truy cập tài nguyên này", request.getRequestURI(), null);
     }
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException ex, HttpServletRequest request) {
+        return buildError(HttpStatus.NOT_FOUND, "NOT_FOUND", "Không tìm thấy tài nguyên: " + request.getRequestURI(), request.getRequestURI(), null);
+    }
+
     @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
     public ResponseEntity<ApiErrorResponse> handleResponseStatus(org.springframework.web.server.ResponseStatusException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
