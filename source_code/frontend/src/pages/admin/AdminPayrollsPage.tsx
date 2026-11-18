@@ -149,9 +149,11 @@ export const AdminPayrollsPage: React.FC = () => {
 
   useEffect(() => {
     if (selectedPeriodId) {
+      if (searchParams.get('periodId') !== selectedPeriodId) {
+        setSearchParams({ periodId: selectedPeriodId }, { replace: true });
+      }
       setPeriodSummary(null);
       fetchPayrolls();
-      setSearchParams({ periodId: selectedPeriodId });
       const current = periods.find((p) => String(p.id) === selectedPeriodId);
       if (current) {
         fetchPeriodSummary(current, activeRequestIdRef.current);
@@ -161,7 +163,16 @@ export const AdminPayrollsPage: React.FC = () => {
       setPayrolls([]);
       setPeriodSummary(null);
     }
-  }, [selectedPeriodId, statusFilter, searchTerm, page, periods]);
+  }, [selectedPeriodId, statusFilter, searchTerm, page]);
+
+  useEffect(() => {
+    if (selectedPeriodId && periods.length > 0) {
+      const current = periods.find((p) => String(p.id) === selectedPeriodId);
+      if (current && !periodSummary) {
+        fetchPeriodSummary(current, activeRequestIdRef.current);
+      }
+    }
+  }, [periods]);
 
   const filteredPayrolls = payrolls;
 

@@ -90,6 +90,9 @@ public class Order {
     @Column(name = "payment_status", nullable = false, length = 30)
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
 
+    @Column(name = "paid_at")
+    private OffsetDateTime paidAt;
+
     @Column(name = "payment_expires_at", nullable = false)
     private OffsetDateTime paymentExpiresAt;
 
@@ -352,5 +355,13 @@ public class Order {
 
     public void setIsCustomItems(Boolean isCustomItems) {
         this.isCustomItems = isCustomItems;
+    }
+
+    public OffsetDateTime getPaidAt() {
+        return paidAt;
+    }
+
+    public void setPaidAt(OffsetDateTime paidAt) {
+        this.paidAt = paidAt;
     }
 }

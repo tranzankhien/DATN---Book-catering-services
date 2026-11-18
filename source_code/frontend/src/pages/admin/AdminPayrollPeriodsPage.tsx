@@ -805,8 +805,8 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
                       <label className="block text-[11px] font-semibold text-stone-600 mb-1">Số tiền (VND)</label>
                       <input
                         type="number"
-                        step="1000"
-                        min="1000"
+                        step="any"
+                        min="0"
                         required
                         value={adjAmount}
                         onChange={(e) => setAdjAmount(e.target.value)}
@@ -1019,8 +1019,8 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
                   </label>
                   <input
                     type="number"
-                    min="1000"
-                    step="1000"
+                    min="0"
+                    step="any"
                     required
                     value={editAdjAmount}
                     onChange={(e) => setEditAdjAmount(e.target.value)}

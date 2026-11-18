@@ -53,6 +53,15 @@ import { AdminSalaryPaymentsPage } from '../pages/admin/AdminSalaryPaymentsPage'
 import { EmployeeMyAttendancePage } from '../pages/employee/EmployeeMyAttendancePage';
 import { EmployeeMyPayrollsPage } from '../pages/employee/EmployeeMyPayrollsPage';
 
+// Phase 7 Business Dashboard & Reports
+import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
+import { AdminRevenueReportPage } from '../pages/admin/AdminRevenueReportPage';
+import { AdminInventoryReportPage } from '../pages/admin/AdminInventoryReportPage';
+import { AdminExpensesPage } from '../pages/admin/AdminExpensesPage';
+import { AdminPayrollReportPage } from '../pages/admin/AdminPayrollReportPage';
+import { AdminProfitReportPage } from '../pages/admin/AdminProfitReportPage';
+import { AdminCashFlowReportPage } from '../pages/admin/AdminCashFlowReportPage';
+
 export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
@@ -168,6 +177,15 @@ export const AppRouter: React.FC = () => {
           <Route path="payroll-periods" element={<AdminPayrollPeriodsPage />} />
           <Route path="payrolls" element={<AdminPayrollsPage />} />
           <Route path="salary-payments" element={<AdminSalaryPaymentsPage />} />
+
+          {/* Phase 7 Business Dashboard & Reports */}
+          <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="expenses" element={<AdminExpensesPage />} />
+          <Route path="reports/revenue" element={<AdminRevenueReportPage />} />
+          <Route path="reports/inventory" element={<AdminInventoryReportPage />} />
+          <Route path="reports/payroll" element={<AdminPayrollReportPage />} />
+          <Route path="reports/profit" element={<AdminProfitReportPage />} />
+          <Route path="reports/cashflow" element={<AdminCashFlowReportPage />} />
         </Route>
 
         {/* Fallback */}

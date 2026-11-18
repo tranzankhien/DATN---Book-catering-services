@@ -46,17 +46,20 @@ public class StockReceiptService {
     private final SupplierRepository supplierRepository;
     private final IngredientRepository ingredientRepository;
     private final StockMovementRepository stockMovementRepository;
+    private final com.banquethub.modules.inventory.repository.SupplierPaymentRepository supplierPaymentRepository;
 
     public StockReceiptService(
             StockReceiptRepository stockReceiptRepository,
             SupplierRepository supplierRepository,
             IngredientRepository ingredientRepository,
-            StockMovementRepository stockMovementRepository
+            StockMovementRepository stockMovementRepository,
+            com.banquethub.modules.inventory.repository.SupplierPaymentRepository supplierPaymentRepository
     ) {
         this.stockReceiptRepository = stockReceiptRepository;
         this.supplierRepository = supplierRepository;
         this.ingredientRepository = ingredientRepository;
         this.stockMovementRepository = stockMovementRepository;
+        this.supplierPaymentRepository = supplierPaymentRepository;
     }
 
     @Transactional(readOnly = true)
@@ -251,6 +254,17 @@ public class StockReceiptService {
         }
 
         StockReceipt saved = stockReceiptRepository.save(receipt);
+
+        // Ghi nhận lịch sử chi trả cho nhà cung cấp (SupplierPayment)
+        com.banquethub.modules.inventory.entity.SupplierPayment sp = new com.banquethub.modules.inventory.entity.SupplierPayment();
+        sp.setStockReceipt(saved);
+        sp.setSupplier(saved.getSupplier());
+        sp.setAmount(saved.getTotalAmount());
+        sp.setPaymentDate(LocalDate.now(VN_ZONE));
+        sp.setPaymentMethod("BANK_TRANSFER");
+        sp.setNote(paymentRequest.getPaymentNote());
+        supplierPaymentRepository.save(sp);
+
         return StockReceiptResponse.fromEntity(saved, true);
     }
 

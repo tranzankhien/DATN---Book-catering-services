@@ -272,6 +272,7 @@ public class PaymentService {
         payment.setStatus("SUCCESS");
         payment.setFailureReason(null);
         order.setPaymentStatus(PaymentStatus.PAID);
+        order.setPaidAt(paidAt);
         order.setOrderStatus(OrderStatus.PAID);
         history.save(new OrderStatusHistory(order,previous,OrderStatus.PAID,actor,actor==null?"SEPAY":actor.getFullName(),historyNote));
         email.enqueue(order,"PAYMENT_CONFIRMED");

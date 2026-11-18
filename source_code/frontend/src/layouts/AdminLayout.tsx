@@ -27,6 +27,9 @@ import {
   CalendarRange,
   Banknote,
   UserCheck,
+  TrendingUp,
+  PieChart,
+  Activity,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
@@ -569,6 +572,184 @@ export const AdminLayout: React.FC = () => {
                     {!isOpen && (
                       <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Nhật ký chi trả lương
+                      </div>
+                    )}
+                  </NavLink>
+                </nav>
+              </div>
+
+              {/* Phase 7: Báo cáo & Phân tích kinh doanh */}
+              <div>
+                {isOpen && (
+                  <p className="px-2.5 mb-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-400 whitespace-nowrap">
+                    Báo cáo & Phân tích
+                  </p>
+                )}
+                <nav className="space-y-1">
+                  <NavLink
+                    to="/admin/dashboard"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Bảng điều khiển kinh doanh' : undefined}
+                  >
+                    <TrendingUp className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Dashboard kinh doanh</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Dashboard kinh doanh
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/reports/revenue"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Báo cáo doanh thu' : undefined}
+                  >
+                    <BarChart3 className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Báo cáo doanh thu</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Báo cáo doanh thu
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/reports/inventory"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Báo cáo kho & giá vốn' : undefined}
+                  >
+                    <Warehouse className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Báo cáo kho & giá vốn</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Báo cáo kho & giá vốn
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/expenses"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Chi phí vận hành khác' : undefined}
+                  >
+                    <Receipt className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Chi phí vận hành khác</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Chi phí vận hành khác
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/reports/payroll"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Báo cáo chi phí lương' : undefined}
+                  >
+                    <Users className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Báo cáo chi phí lương</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Báo cáo chi phí lương
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/reports/profit"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Báo cáo lợi nhuận ước tính' : undefined}
+                  >
+                    <PieChart className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Báo cáo lợi nhuận</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Báo cáo lợi nhuận
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/reports/cashflow"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Dòng tiền mô phỏng' : undefined}
+                  >
+                    <Activity className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Dòng tiền mô phỏng</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Dòng tiền mô phỏng
                       </div>
                     )}
                   </NavLink>

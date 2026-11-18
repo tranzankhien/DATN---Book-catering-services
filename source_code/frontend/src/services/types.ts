@@ -810,3 +810,209 @@ export interface PayrollSummaryDto {
   totalRecordedWorkdays: number;
   monthlyMetrics: MonthlyPayrollMetricDto[];
 }
+
+// =========================================================================
+// PHASE 7: BUSINESS REPORTING, EXPENSES & ANALYTICS TYPES
+// =========================================================================
+
+export type ExpenseCategory =
+  | 'RENT'
+  | 'UTILITIES'
+  | 'MARKETING'
+  | 'MAINTENANCE'
+  | 'OFFICE_SUPPLIES'
+  | 'TAX_FEE'
+  | 'OTHER';
+
+export type ExpensePaymentStatus = 'UNPAID' | 'PAID';
+
+export interface ExpenseRequest {
+  expenseCode?: string;
+  name: string;
+  category: ExpenseCategory;
+  amount: number;
+  incurredDate: string;
+  paymentStatus?: ExpensePaymentStatus;
+  paidAt?: string | null;
+  note?: string | null;
+}
+
+export interface ExpenseResponse {
+  id: number;
+  expenseCode: string;
+  name: string;
+  category: ExpenseCategory;
+  categoryName: string;
+  amount: number;
+  incurredDate: string;
+  paymentStatus: ExpensePaymentStatus;
+  paidAt?: string | null;
+  note?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExpenseSummaryResponse {
+  totalCount: number;
+  totalAmount: number;
+  totalPaidAmount: number;
+  totalUnpaidAmount: number;
+}
+
+export interface TimeSeriesPoint {
+  date: string;
+  value: number;
+  secondaryValue?: number | null;
+  label?: string | null;
+}
+
+export interface OrderStatusStatDto {
+  status: string;
+  statusLabel?: string;
+  count: number;
+  totalAmount: number;
+}
+
+export interface CostBreakdownDto {
+  category: string;
+  label: string;
+  amount: number;
+  percentage: number;
+}
+
+export interface DashboardAlertDto {
+  severity: 'INFO' | 'WARNING' | 'DANGER';
+  type: string;
+  title: string;
+  message: string;
+  actionUrl: string;
+}
+
+export interface DashboardOverviewResponse {
+  totalOrders: number;
+  ordersGrowthPct?: number | null;
+  paidRevenue: number;
+  revenueGrowthPct?: number | null;
+  materialCost: number;
+  grossProfit: number;
+  grossMargin: number;
+  internalPayrollCost: number;
+  operatingExpenses: number;
+  estimatedNetProfit: number;
+  netMargin: number;
+  averageOrderValue: number;
+  confirmedPurchasesAmount: number;
+  estimatedInventoryValuation: number;
+  lowStockCount: number;
+  outstandingSupplierDebt: number;
+  unpaidPayrollDebt: number;
+  startDate: string;
+  endDate: string;
+}
+
+export interface TopDishReportDto {
+  dishId: number;
+  dishName: string;
+  dishCode: string;
+  categoryName: string;
+  totalPortionsSold: number;
+  totalRevenue: number;
+}
+
+export interface PaidOrderReportDto {
+  orderId: number;
+  orderCode: string;
+  customerName: string;
+  customerPhone: string;
+  eventDateTime: string;
+  paidAt: string;
+  tableCount: number;
+  totalAmount: number;
+  materialCost: number;
+  grossProfit: number;
+  grossMargin: number;
+}
+
+export interface RevenueSummaryResponse {
+  paidRevenue: number;
+  paidOrdersCount: number;
+  averageOrderValue: number;
+  previousPeriodRevenue: number;
+  revenueGrowthPct?: number | null;
+  dailyTrends: TimeSeriesPoint[];
+}
+
+export interface InventoryReportResponse {
+  totalIngredientsCount: number;
+  estimatedInventoryValuation: number;
+  lowStockCount: number;
+  confirmedPurchasesAmount: number;
+  totalConsumedCost: number;
+}
+
+export interface IngredientValuationDto {
+  ingredientId: number;
+  name: string;
+  unit: string;
+  currentStock: number;
+  avgUnitCost: number;
+  totalValue: number;
+  minStockThreshold: number;
+  lowStock: boolean;
+}
+
+export interface SupplierPurchaseDto {
+  supplierId: number;
+  supplierName: string;
+  supplierPhone: string;
+  confirmedReceiptsCount: number;
+  totalPurchasedAmount: number;
+  totalPaidAmount: number;
+  outstandingDebt: number;
+}
+
+export interface PayrollReportResponse {
+  activeEmployeesCount: number;
+  finalizedPeriodsCount: number;
+  totalFinalizedNetSalary: number;
+  totalPaidSalary: number;
+  outstandingPayrollDebt: number;
+  totalAllowances: number;
+  totalDeductions: number;
+}
+
+export interface MonthlyProfitBreakdownDto {
+  monthKey: string;
+  revenue: number;
+  cogs: number;
+  grossProfit: number;
+  payroll: number;
+  expenses: number;
+  netProfit: number;
+}
+
+export interface ProfitReportResponse {
+  paidRevenue: number;
+  materialCost: number;
+  grossProfit: number;
+  grossMargin: number;
+  internalPayrollCost: number;
+  operatingExpenses: number;
+  estimatedNetProfit: number;
+  netMargin: number;
+  monthlyBreakdowns: MonthlyProfitBreakdownDto[];
+}
+
+export interface CashFlowReportResponse {
+  inflows: number;
+  outflows: number;
+  netCashFlow: number;
+  supplierPayments: number;
+  salaryPayments: number;
+  paidOperatingExpenses: number;
+  unpaidSupplierDebt: number;
+  unpaidSalaryDebt: number;
+  unpaidOperatingExpenses: number;
+  dailyPoints: TimeSeriesPoint[];
+}
+
