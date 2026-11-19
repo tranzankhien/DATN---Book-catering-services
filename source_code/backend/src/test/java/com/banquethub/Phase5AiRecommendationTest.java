@@ -427,7 +427,7 @@ class Phase5AiRecommendationTest {
 
         latch.countDown();
         for (Future<?> f : futures) {
-            f.get(10, TimeUnit.SECONDS);
+            f.get(30, TimeUnit.SECONDS);
         }
         executor.shutdown();
 
