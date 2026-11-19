@@ -11,10 +11,10 @@ Tài liệu này theo dõi tiến độ triển khai dự án **BanquetHub (MVP)
 | **Phase 1** | Thiết lập nền tảng, PostgreSQL 17, Auth (JWT/RBAC), Danh mục món & Định lượng công thức | **Đã hoàn thành** | `FR-AUT-01`, `FR-AUT-03`, `FR-CAT-01`, `FR-CAT-02`, `FR-REC-01`, `FR-REC-02`, `FR-INV-01`, `BR-01`–`BR-03` |
 | **Phase 2** | Quản lý kho, nhà cung cấp, nhập hàng, giá vốn bình quân di động và xuất PDF phiếu nhập | **Đã hoàn thành** | `FR-SUP-01`–`FR-SUP-03`, `FR-INV-02`, `FR-INV-03`, `FR-INV-05`, `FR-INV-06`, `BR-06`, `BR-07`, `BR-11` |
 | **Phase 3** | Thực đơn mẫu, tạo thực đơn, đặt tiệc, giữ tồn 15 phút và quản lý đơn hàng | **Đã hoàn thành** | `FR-CAT-03`, `FR-CAT-04`, `FR-REC-03`, `FR-ORD-01`–`FR-ORD-05`, `FR-PAY-04`, `BR-01`–`BR-16` |
-| **Phase 4** | Tích hợp SePay Sandbox, trừ kho một lần khi thanh toán, gửi email xác nhận | Kế hoạch tiếp theo | `FR-PAY-01`–`FR-PAY-03`, `FR-INV-04`, `FR-NOT-01`, `FR-NOT-02`, `BR-05`, `BR-08`, `BR-12` |
-| **Phase 5** | Tích hợp Gemini API gợi ý tối đa 03 phương án thực đơn từ catalog | Chờ triển khai | `FR-AI-01`–`FR-AI-04`, `NFR-07` |
-| **Phase 6** | Quản lý nhân viên, chấm công theo ngày, phụ cấp/khấu trừ và bảng lương tháng | Chờ triển khai | `FR-EMP-01`, `FR-HR-01`–`FR-HR-05`, `BR-10`, `BR-11` |
-| **Phase 7** | Dashboard doanh thu, giá vốn, chi phí vận hành, lợi nhuận tạm tính, dòng tiền & nghiệm thu AT-01..AT-20 | Chờ triển khai | `FR-RPT-01`–`FR-RPT-07`, `BR-09`, `AT-01`–`AT-20` |
+| **Phase 4** | Tích hợp SePay/VNPay Sandbox, trừ kho một lần khi thanh toán, chốt COGS, gửi email | **Đã hoàn thành** | `FR-PAY-01`–`FR-PAY-03`, `FR-INV-04`, `FR-NOT-01`, `FR-NOT-02`, `BR-05`, `BR-08`, `BR-12` |
+| **Phase 5** | Tích hợp Gemini API gợi ý tối đa 03 phương án thực đơn từ catalog & fallback | **Đã hoàn thành** | `FR-AI-01`–`FR-AI-04`, `NFR-07` |
+| **Phase 6** | Quản lý nhân sự, chấm công theo ngày, phụ cấp/khấu trừ, bảng lương & cổng nhân viên | **Đã hoàn thành** | `FR-EMP-01`, `FR-HR-01`–`FR-HR-05`, `BR-10`, `BR-11` |
+| **Phase 7** | Dashboard kinh doanh, phân tích doanh thu, chi phí, lợi nhuận, dòng tiền & xuất CSV | **Đã hoàn thành** | `FR-RPT-01`–`FR-RPT-07`, `BR-09`, `AT-01`–`AT-20` |
 
 ---
 
@@ -108,3 +108,27 @@ Phase 4 triển khai SePay Sandbox, xuất kho, email và tiến độ phục v�
   - 39 / 39 test cases tự động Phase 6 đạt tỷ lệ **100% PASS**.
   - Toàn bộ suite hồi quy 139 / 139 test cases backend (Phase 1 đến Phase 6) đều **100% PASS**.
   - Frontend typecheck và build production: **0 lỗi**.
+
+---
+
+## Phase 7 – Báo cáo Quản trị, Phân tích Doanh thu, Chi phí & Lợi nhuận (Hoàn thành)
+- **Bảng điều khiển kinh doanh trung tâm (Admin Dashboard)**:
+  - Doanh thu đơn đã thanh toán theo ngày thanh toán (loại trừ đơn nháp, đơn hủy, đơn hết hạn).
+  - Giá vốn nguyên liệu tiêu hao (COGS) dựa trên snapshot thực tế khi xuất kho đơn hàng.
+  - Lợi nhuận gộp và biên lợi nhuận gộp theo kỳ chọn lọc.
+  - Lợi nhuận ước tính (EBITDA ước tính) sau khi trừ chi phí lương nội bộ đã chốt và chi phí vận hành khác.
+  - Giá trị đơn trung bình (AOV), biểu đồ xu hướng doanh thu theo ngày/tháng, cơ cấu chi phí, cảnh báo tồn kho và công nợ.
+- **Quản lý Chi phí Vận hành (Operating Expenses)**:
+  - CRUD ghi nhận chi phí ngoài kho và ngoài lương: mặt bằng, điện nước, internet, marketing, sửa chữa, vệ sinh.
+  - Lọc theo danh mục và kỳ phát sinh chi phí.
+- **Hệ thống Báo cáo Đối soát Chuyên sâu**:
+  - Báo cáo chi tiết doanh thu và danh sách đơn đã thanh toán (`/admin/reports/revenue`).
+  - Báo cáo kho, tiêu hao nguyên liệu và công nợ mua hàng nhà cung cấp (`/admin/reports/inventory`).
+  - Báo cáo quỹ lương nhân sự và giải ngân chi trả (`/admin/reports/payroll`).
+  - Báo cáo Lợi nhuận gộp & ước tính theo tháng (`/admin/reports/profit`).
+  - Báo cáo Dòng tiền vào/ra đã ghi nhận (`/admin/reports/cashflow`).
+  - Xuất dữ liệu báo cáo sang tệp CSV định dạng chuẩn Excel với UTF-8 BOM.
+- **Kiểm thử & Chất lượng**:
+  - 10 / 10 test cases integration Phase 7 đạt tỷ lệ **100% PASS**.
+  - Tổng cộng toàn bộ suite hệ thống: **157 / 157 test cases** backend đạt tỷ lệ **100% PASS**.
+  - Frontend TypeScript và Vite build production: **0 lỗi**.
