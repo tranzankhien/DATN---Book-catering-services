@@ -30,7 +30,7 @@ import type {
 } from '../services/types';
 import { extractErrorMessage } from '../services/apiClient';
 import { formatVnd } from '../hooks/useFormatters';
-import { DEFAULT_DISH_IMAGE, handleImageError } from '../lib/imageConstants';
+import { DEFAULT_DISH_IMAGE, DEFAULT_MENU_IMAGE, handleImageError } from '../lib/imageConstants';
 import { extractAiMenuParameters } from '../utils/aiMenuParser';
 
 const EVENT_TYPE_OPTIONS = [
@@ -248,51 +248,62 @@ export const AiMenuPage: React.FC = () => {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8 animate-fade-up-1">
-      {/* Top Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-stone-500 font-medium">
-        <Link to="/" className="hover:text-stone-900 transition-colors">
-          Trang chủ
-        </Link>
-        <span>/</span>
-        <span className="font-semibold text-stone-900">Gợi ý thực đơn AI</span>
-      </nav>
-
-      {/* Hero Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200 pb-6">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-amber-700">
-            <Sparkles className="h-4 w-4" />
-            <span>Trợ lý ẩm thực yến tiệc</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight mt-1">
-            AI gợi ý thực đơn cho bữa tiệc của bạn
-          </h1>
-          <p className="text-xs sm:text-sm text-stone-600 mt-1 max-w-2xl leading-relaxed">
-            Nhập mô tả nhu cầu bằng ngôn ngữ tự nhiên. Hệ thống kết hợp trí tuệ nhân tạo Gemini cùng dữ liệu tồn kho thực tế để gợi ý tối đa 3 phương án thực đơn tối ưu chi phí và khẩu vị.
-          </p>
-        </div>
-
-        {!isAuthenticated && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 shrink-0 flex items-center gap-3">
-            <Info className="h-5 w-5 text-amber-700 shrink-0" />
-            <div className="text-xs">
-              <p className="font-bold text-stone-900">Yêu cầu đăng nhập</p>
-              <p className="text-stone-600">Đăng nhập tài khoản để nhận gợi ý từ AI.</p>
-              <Link
-                to="/login?redirect=/ai-menu"
-                className="mt-1.5 inline-flex items-center gap-1 font-bold text-amber-800 hover:text-amber-900 underline"
-              >
-                Đăng nhập ngay <ChevronRight className="h-3 w-3" />
-              </Link>
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
+      {/* Header Banner - Sang trọng đồng bộ với hệ thống giao diện BanquetHub */}
+      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900">
+              <Sparkles className="h-3.5 w-3.5 text-amber-600" />
+              <span>Trợ lý ẩm thực yến tiệc AI Gemini</span>
             </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+              AI gợi ý thực đơn tiệc thông minh
+            </h1>
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              Nhập mô tả bữa tiệc bằng ngôn ngữ tự nhiên. Trí tuệ nhân tạo Gemini kết hợp với cơ sở dữ liệu định mức món ăn và tồn kho nguyên liệu thực tế tại BanquetHub để gợi ý các set menu tối ưu chi phí, ngon miệng và sẵn sàng phục vụ.
+            </p>
           </div>
-        )}
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+            {!isAuthenticated ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 flex items-center gap-3">
+                <Info className="h-4 w-4 text-amber-700 shrink-0" />
+                <div className="text-xs">
+                  <span className="font-semibold text-stone-800">Cần đăng nhập thành viên</span>
+                  <Link
+                    to="/login?redirect=/ai-menu"
+                    className="ml-2 font-bold text-amber-800 hover:underline inline-flex items-center gap-0.5"
+                  >
+                    Đăng nhập ngay <ChevronRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2.5 bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-xs text-stone-700">
+                <ChefHat className="h-4 w-4 text-amber-700 shrink-0" />
+                <span className="font-medium">Tự động đối soát tồn kho nguyên liệu</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Main Input Form */}
       <section className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="border-b border-stone-100 pb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-amber-700" />
+              <h2 className="text-base sm:text-lg font-bold text-stone-900 tracking-tight">
+                Thiết lập thông tin & Nhu cầu tổ chức tiệc
+              </h2>
+            </div>
+            <span className="text-xs text-stone-500 font-medium hidden sm:inline-block">
+              Tự động trích xuất số bàn, khách và ngân sách
+            </span>
+          </div>
+
           {/* Requirement Description Textarea */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -311,10 +322,51 @@ export const AiMenuPage: React.FC = () => {
               placeholder="Ví dụ: Tôi muốn tổ chức tiệc sinh nhật 5 bàn, 6 người mỗi bàn, ngân sách 1.500.000đ/bàn, thích món Việt, ít cay, có món khai vị thanh đạm và tráng miệng..."
               value={requestText}
               onChange={(e) => handleRequestTextChange(e.target.value)}
-              className="w-full rounded-xl border border-stone-300 bg-stone-50/50 p-3.5 text-xs sm:text-sm text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-xs"
+              className="w-full rounded-xl border border-stone-300 bg-white p-3.5 text-xs sm:text-sm text-stone-900 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none transition-colors shadow-2xs"
             />
+
+            {/* Quick Sample Prompts */}
+            <div className="flex items-center gap-2 flex-wrap pt-1">
+              <span className="text-[11px] font-semibold text-stone-500 flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-amber-600" /> Gợi ý mẫu:
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  handleRequestTextChange(
+                    'Tiệc sinh nhật 5 bàn, 6 người mỗi bàn, ngân sách 1.500.000đ/bàn, thích hải sản tươi ngon, món thanh đạm, ít cay'
+                  )
+                }
+                className="text-[11px] font-medium bg-stone-50 hover:bg-amber-50 hover:text-amber-900 hover:border-amber-300 text-stone-700 border border-stone-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+              >
+                🎂 Sinh nhật 5 bàn (1.500.000đ/bàn)
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  handleRequestTextChange(
+                    'Liên hoan công ty 10 bàn, 10 người mỗi bàn, ngân sách 2.000.000đ/bàn, món ăn phong phú, có món lẩu và tráng miệng'
+                  )
+                }
+                className="text-[11px] font-medium bg-stone-50 hover:bg-amber-50 hover:text-amber-900 hover:border-amber-300 text-stone-700 border border-stone-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+              >
+                🏢 Liên hoan công ty 10 bàn
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  handleRequestTextChange(
+                    'Tiệc gia đình ấm cúng 3 bàn, 8 người mỗi bàn, ngân sách 1.200.000đ/bàn, món Việt truyền thống'
+                  )
+                }
+                className="text-[11px] font-medium bg-stone-50 hover:bg-amber-50 hover:text-amber-900 hover:border-amber-300 text-stone-700 border border-stone-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+              >
+                🏡 Tiệc gia đình 3 bàn
+              </button>
+            </div>
+
             {detectedSummary && (
-              <div className="flex items-center gap-1.5 text-[11px] text-amber-800 bg-amber-50/80 border border-amber-200/80 px-3 py-1.5 rounded-lg animate-fade-in">
+              <div className="flex items-center gap-1.5 text-[11px] text-amber-800 bg-amber-50/80 border border-amber-200/80 px-3 py-1.5 rounded-lg animate-fade-in mt-1.5">
                 <Sparkles className="h-3.5 w-3.5 text-amber-700 shrink-0" />
                 <span>
                   Đã tự động nhận diện từ mô tả: <strong>{detectedSummary}</strong>
@@ -623,26 +675,40 @@ export const AiMenuPage: React.FC = () => {
               {response.suggestions.map((suggestion, idx) => {
                 const isWithinBudget = suggestion.budgetStatus === 'WITHIN_BUDGET';
                 const isStockAvailable = suggestion.availabilityStatus === 'AVAILABLE';
+                const heroImage =
+                  suggestion.items.find((it) => it.dishImageUrl || it.imageUrl)?.dishImageUrl ||
+                  DEFAULT_MENU_IMAGE;
 
                 return (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-stone-200/90 bg-white shadow-xs flex flex-col h-full overflow-hidden hover:border-amber-300 transition-colors"
+                    className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-xs hover:border-amber-400 hover:shadow-lg transition-all duration-300 h-full"
                   >
-                    {/* Card Header */}
-                    <div className="p-5 sm:p-6 border-b border-stone-100 space-y-3 bg-stone-50/40">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg">
+                    {/* Hero Image Banner with Floating Badges */}
+                    <div className="relative h-44 bg-stone-900 overflow-hidden select-none shrink-0">
+                      <img
+                        src={heroImage}
+                        alt={suggestion.name}
+                        onError={handleImageError}
+                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-stone-950/95 via-stone-950/45 to-stone-950/15 pointer-events-none" />
+
+                      {/* Top Badges */}
+                      <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-amber-300 bg-stone-950/85 backdrop-blur-md px-2.5 py-1 rounded-lg border border-amber-500/30 shadow-xs tabular-nums">
                           Phương án {idx + 1}
                         </span>
-                        <div className="flex items-center gap-1.5">
+
+                        <div className="flex items-center gap-1.5 flex-wrap justify-end">
                           <span
-                            className={`text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
+                            className={`text-[11px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-md border ${
                               isWithinBudget
-                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                ? 'bg-emerald-950/85 text-emerald-200 border-emerald-500/40'
                                 : suggestion.budgetStatus === 'OVER_BUDGET'
-                                ? 'bg-amber-50 text-amber-800 border-amber-200'
-                                : 'bg-stone-100 text-stone-600 border-stone-200'
+                                ? 'bg-amber-950/85 text-amber-200 border-amber-500/40'
+                                : 'bg-stone-900/85 text-stone-300 border-white/20'
                             }`}
                           >
                             {isWithinBudget
@@ -653,10 +719,10 @@ export const AiMenuPage: React.FC = () => {
                           </span>
 
                           <span
-                            className={`text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
+                            className={`text-[11px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-md border ${
                               isStockAvailable
-                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                                : 'bg-rose-50 text-rose-800 border-rose-200'
+                                ? 'bg-emerald-950/85 text-emerald-200 border-emerald-500/40'
+                                : 'bg-rose-950/85 text-rose-200 border-rose-500/40'
                             }`}
                           >
                             {isStockAvailable ? 'Đủ nguyên liệu' : 'Thiếu nguyên liệu'}
@@ -664,40 +730,47 @@ export const AiMenuPage: React.FC = () => {
                         </div>
                       </div>
 
-                      <h3 className="text-base sm:text-lg font-bold text-stone-900 tracking-tight leading-snug">
-                        {suggestion.name || `Bộ thực đơn đề xuất #${idx + 1}`}
-                      </h3>
-
-                      {suggestion.reason && (
-                        <p className="text-xs text-stone-600 leading-relaxed font-normal">
-                          {suggestion.reason}
+                      {/* Title & Set info over banner */}
+                      <div className="absolute bottom-3 left-4 right-4 z-10 text-white">
+                        <h3 className="font-bold text-base sm:text-lg text-white group-hover:text-amber-300 transition-colors line-clamp-1 drop-shadow-sm">
+                          {suggestion.name || `Bộ thực đơn đề xuất #${idx + 1}`}
+                        </h3>
+                        <p className="text-[11px] text-stone-300 mt-0.5">
+                          Set {suggestion.items.length} món • Phục vụ {suggestion.tableCount || tableCount} bàn
                         </p>
-                      )}
-
-                      {/* Price Summary */}
-                      <div className="pt-2 flex items-baseline justify-between border-t border-stone-200/70">
-                        <div>
-                          <span className="text-[11px] text-stone-500 font-medium block">Đơn giá 1 bàn</span>
-                          <p className="text-lg font-bold text-amber-900 tracking-tight tabular-nums">
-                            {formatVnd(suggestion.totalPerTable)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-[11px] text-stone-500 font-medium block">
-                            Tổng tiệc ({suggestion.tableCount || tableCount} bàn)
-                          </span>
-                          <p className="text-sm font-bold text-stone-800 tabular-nums">
-                            {formatVnd(suggestion.totalOrderAmount)}
-                          </p>
-                        </div>
                       </div>
                     </div>
 
+                    {/* Price Summary */}
+                    <div className="p-4 bg-amber-50/40 border-b border-stone-200/80 flex items-baseline justify-between shrink-0">
+                      <div>
+                        <span className="text-[11px] text-stone-500 font-medium block">Đơn giá 1 bàn</span>
+                        <p className="text-xl font-extrabold text-amber-900 tracking-tight tabular-nums">
+                          {formatVnd(suggestion.totalPerTable)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[11px] text-stone-500 font-medium block">
+                          Tổng tiệc ({suggestion.tableCount || tableCount} bàn)
+                        </span>
+                        <p className="text-sm font-bold text-stone-800 tabular-nums">
+                          {formatVnd(suggestion.totalOrderAmount)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Reason text */}
+                    {suggestion.reason && (
+                      <div className="px-4 py-2.5 bg-stone-50/60 border-b border-stone-100 text-xs text-stone-600 leading-relaxed italic shrink-0">
+                        "{suggestion.reason}"
+                      </div>
+                    )}
+
                     {/* Dishes Item List */}
-                    <div className="p-4 sm:p-5 flex-1 space-y-2.5 divide-y divide-stone-100 max-h-80 overflow-y-auto scrollbar-thin">
+                    <div className="p-4 flex-1 space-y-2.5 divide-y divide-stone-100 max-h-80 overflow-y-auto scrollbar-thin">
                       {suggestion.items.map((item, itemIdx) => (
                         <div key={item.dishId || itemIdx} className="pt-2.5 first:pt-0 flex items-center justify-between gap-3 text-xs">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
                             <div className="h-10 w-10 rounded-lg overflow-hidden bg-stone-100 border border-stone-200 shrink-0">
                               <img
                                 src={item.dishImageUrl || item.imageUrl || DEFAULT_DISH_IMAGE}
@@ -708,7 +781,7 @@ export const AiMenuPage: React.FC = () => {
                             </div>
                             <div className="min-w-0">
                               <p className="font-bold text-stone-900 truncate">{item.dishName}</p>
-                              <span className="text-[11px] text-stone-400 block truncate">
+                              <span className="text-[11px] text-stone-500 block truncate">
                                 {item.categoryName} • {formatVnd(item.unitPrice)} / phần
                               </span>
                             </div>
@@ -727,7 +800,7 @@ export const AiMenuPage: React.FC = () => {
                     </div>
 
                     {/* Card Bottom CTA */}
-                    <div className="p-4 sm:p-5 border-t border-stone-100 bg-stone-50/50 mt-auto">
+                    <div className="p-4 border-t border-stone-100 bg-stone-50/60 mt-auto shrink-0">
                       {suggestion.availabilityStatus !== 'AVAILABLE' ? (
                         <div className="rounded-xl border border-rose-200 bg-rose-50/80 p-3 text-center">
                           <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-rose-800">
@@ -752,7 +825,7 @@ export const AiMenuPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleSelectMenuAndCustomize(suggestion)}
-                          className="w-full inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                          className="w-full inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold shadow-xs hover:shadow-md transition-all cursor-pointer"
                         >
                           <Utensils className="h-4 w-4" />
                           <span>Chọn thực đơn này & Tùy biến</span>

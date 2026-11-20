@@ -313,26 +313,40 @@ export const AdminUsersPage: React.FC = () => {
     switch (role) {
       case 'ROLE_ADMIN':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 text-xs font-semibold">
-            <Shield className="h-3 w-3 text-purple-600" />
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1 text-xs font-semibold whitespace-nowrap">
+            <Shield className="h-3.5 w-3.5 text-purple-600 shrink-0" />
             <span>Quản trị viên</span>
           </span>
         );
       case 'ROLE_EMPLOYEE':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 text-xs font-semibold">
-            <Briefcase className="h-3 w-3 text-blue-600" />
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 text-xs font-semibold whitespace-nowrap">
+            <Briefcase className="h-3.5 w-3.5 text-blue-600 shrink-0" />
             <span>Nhân viên</span>
           </span>
         );
       case 'ROLE_USER':
       default:
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-xs font-semibold">
-            <Users className="h-3 w-3 text-emerald-600" />
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 text-xs font-semibold whitespace-nowrap">
+            <Users className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
             <span>Khách hàng</span>
           </span>
         );
+    }
+  };
+
+  const formatSimpleDate = (isoStr?: string | null) => {
+    if (!isoStr) return '—';
+    try {
+      const d = new Date(isoStr);
+      return d.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+    } catch {
+      return isoStr;
     }
   };
 
@@ -353,7 +367,7 @@ export const AdminUsersPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="w-full max-w-[1720px] mx-auto space-y-6 animate-fade-up-1">
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-stone-200">
         <div>
@@ -477,24 +491,20 @@ export const AdminUsersPage: React.FC = () => {
       {/* Users Data Table */}
       <div className="bg-white rounded-2xl border border-stone-200 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-xs border-collapse min-w-[880px]">
             <thead>
               <tr className="bg-stone-50 border-b border-stone-200 text-stone-600 font-semibold uppercase tracking-wider text-[11px]">
-                <th className="py-3 px-4">Tài khoản & Email</th>
-                <th className="py-3 px-4">Số điện thoại</th>
-                <th className="py-3 px-4">Vai trò</th>
-                <th className="py-3 px-4">Liên kết nhân sự</th>
-                <th className="py-3 px-4 text-center">Đơn hàng</th>
-                <th className="py-3 px-4 text-center">Trạng thái</th>
-                <th className="py-3 px-4">Lần đăng nhập cuối</th>
-                <th className="py-3 px-4">Ngày tạo</th>
-                <th className="py-3 px-4 text-right">Thao tác</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Tài khoản & Liên hệ</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Vai trò</th>
+                <th className="py-3.5 px-4 text-center whitespace-nowrap">Trạng thái</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Hoạt động & Ngày tạo</th>
+                <th className="py-3.5 px-4 text-right whitespace-nowrap">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-stone-400">
+                  <td colSpan={5} className="py-12 text-center text-stone-400">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber-600 border-t-transparent" />
                       <span>Đang tải danh sách tài khoản...</span>
@@ -503,7 +513,7 @@ export const AdminUsersPage: React.FC = () => {
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-stone-400">
+                  <td colSpan={5} className="py-12 text-center text-stone-400">
                     <Users className="h-8 w-8 mx-auto text-stone-300 mb-2" />
                     <p className="font-medium text-stone-600">Không tìm thấy tài khoản nào</p>
                     <p className="text-[11px] text-stone-400 mt-1">Thử thay đổi từ khóa hoặc bộ lọc tìm kiếm.</p>
@@ -515,71 +525,82 @@ export const AdminUsersPage: React.FC = () => {
                   return (
                     <tr key={u.id} className="hover:bg-amber-50/30 transition-colors">
                       <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="h-8 w-8 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center font-bold text-stone-600 shrink-0">
+                        <div className="flex items-start gap-3">
+                          <div className="h-9 w-9 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center font-bold text-stone-700 shrink-0 mt-0.5">
                             {u.fullName.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-stone-900 truncate">{u.fullName}</span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-bold text-stone-900 text-sm">{u.fullName}</span>
                               {isCurrent && (
-                                <span className="rounded bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.2 border border-amber-200">
+                                <span className="rounded bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.2 border border-amber-200 whitespace-nowrap">
                                   Bạn
                                 </span>
                               )}
                             </div>
-                            <span className="text-[11px] text-stone-500 truncate block">{u.email}</span>
+                            <div className="flex items-center gap-1.5 text-xs text-stone-500 flex-wrap mt-0.5">
+                              <span className="font-mono">{u.email}</span>
+                              {u.phone && (
+                                <>
+                                  <span className="text-stone-300">•</span>
+                                  <span className="font-mono text-stone-600">SĐT: {u.phone}</span>
+                                </>
+                              )}
+                            </div>
+
+                            {u.employeeCode && (
+                              <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-md bg-stone-100/80 text-stone-700 border border-stone-200 px-2 py-0.5 text-[10px] font-medium whitespace-nowrap">
+                                <Briefcase className="h-3 w-3 text-amber-700 shrink-0" />
+                                <span>Hồ sơ NV:</span>
+                                <span className="font-mono font-bold text-amber-800">{u.employeeCode}</span>
+                                {u.employeePosition && (
+                                  <>
+                                    <span className="text-stone-300">•</span>
+                                    <span className="truncate max-w-44 text-stone-600">{u.employeePosition}</span>
+                                  </>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4 font-mono text-stone-700">
-                        {u.phone || <span className="text-stone-300">—</span>}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        {getRoleBadge(u.role)}
                       </td>
 
-                      <td className="py-3.5 px-4">{getRoleBadge(u.role)}</td>
-
-                      <td className="py-3.5 px-4">
-                        {u.employeeCode ? (
-                          <div className="inline-flex items-center gap-1 rounded-md bg-stone-100 text-stone-800 border border-stone-200/80 px-2 py-0.5 text-[11px]">
-                            <span className="font-mono font-bold text-amber-800">{u.employeeCode}</span>
-                            <span className="text-stone-400">•</span>
-                            <span className="truncate max-w-28">{u.employeePosition}</span>
-                          </div>
-                        ) : (
-                          <span className="text-stone-300">—</span>
-                        )}
-                      </td>
-
-                      <td className="py-3.5 px-4 text-center">
-                        <span className="inline-block rounded-full bg-stone-100 text-stone-700 font-semibold px-2 py-0.5 text-xs">
-                          {u.orderCount}
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         {u.active ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 whitespace-nowrap">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                             <span>Hoạt động</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
-                            <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200 whitespace-nowrap">
+                            <span className="h-1.5 w-1.5 rounded-full bg-rose-500 shrink-0" />
                             <span>Đã khóa</span>
                           </span>
                         )}
                       </td>
 
-                      <td className="py-3.5 px-4 text-stone-500 text-[11px]">
-                        {formatDate(u.lastLoginAt)}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <div>
+                          {u.orderCount > 0 ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-900 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md whitespace-nowrap">
+                              <ShoppingBag className="h-3 w-3 text-amber-700 shrink-0" />
+                              <span>{u.orderCount} đơn tiệc</span>
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-stone-400">0 đơn tiệc</span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-stone-500 flex items-center gap-1 mt-1">
+                          <Clock className="h-3 w-3 text-stone-400 shrink-0" />
+                          <span>Tạo {formatSimpleDate(u.createdAt)}</span>
+                        </div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-stone-500 text-[11px]">
-                        {formatDate(u.createdAt)}
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right">
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
