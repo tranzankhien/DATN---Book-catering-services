@@ -62,6 +62,10 @@ import { AdminPayrollReportPage } from '../pages/admin/AdminPayrollReportPage';
 import { AdminProfitReportPage } from '../pages/admin/AdminProfitReportPage';
 import { AdminCashFlowReportPage } from '../pages/admin/AdminCashFlowReportPage';
 
+// User & Account Management Pages
+import { AdminUsersPage } from '../pages/admin/AdminUsersPage';
+import { UserProfilePage } from '../pages/UserProfilePage';
+
 export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
@@ -147,6 +151,16 @@ export const AppRouter: React.FC = () => {
               </ProtectedRoute>
             }
           />
+
+          {/* User Profile & Security */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute allowedRoles={['ROLE_USER', 'ROLE_EMPLOYEE', 'ROLE_ADMIN']}>
+                <UserProfilePage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         {/* Protected Admin Area */}
@@ -186,6 +200,10 @@ export const AppRouter: React.FC = () => {
           <Route path="reports/payroll" element={<AdminPayrollReportPage />} />
           <Route path="reports/profit" element={<AdminProfitReportPage />} />
           <Route path="reports/cashflow" element={<AdminCashFlowReportPage />} />
+
+          {/* Account Management & Profile */}
+          <Route path="users" element={<AdminUsersPage />} />
+          <Route path="profile" element={<UserProfilePage />} />
         </Route>
 
         {/* Fallback */}

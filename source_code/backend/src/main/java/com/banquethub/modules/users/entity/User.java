@@ -43,6 +43,9 @@ public class User {
     @Column(name = "active", nullable = false)
     private boolean active = true;
 
+    @Column(name = "last_login_at")
+    private OffsetDateTime lastLoginAt;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -120,6 +123,14 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public OffsetDateTime getLastLoginAt() {
+        return lastLoginAt;
+    }
+
+    public void setLastLoginAt(OffsetDateTime lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
     }
 
     public OffsetDateTime getCreatedAt() {

@@ -271,3 +271,51 @@ POST /api/v1/payments/sepay/create, POST /payments/sepay/ipn, GET /orders/{id}/p
 - **`GET /api/v1/employee/me/attendance?year=YYYY&month=MM`**: Xem lịch sử chấm công và tổng ngày công của chính mình.
 - **`GET /api/v1/employee/me/payrolls`**: Xem danh sách các phiếu lương chính thức đã chốt sổ của chính mình.
 - **`GET /api/v1/employee/me/payrolls/{payrollId}`**: Xem chi tiết phiếu lương (bị chặn 403 Forbidden nếu cố tình xem phiếu lương của người khác).
+
+---
+
+## Phân hệ Quản lý Tài khoản & Hồ sơ Cá nhân (User Account Management)
+
+### 1. Quản lý Tài khoản Dành cho Quản trị viên (Admin User Management - `ROLE_ADMIN`)
+- **`GET /api/v1/admin/users`**: Lấy danh sách tài khoản kèm tìm kiếm (tên, email, SĐT), lọc theo vai trò (`role: ROLE_USER|ROLE_EMPLOYEE|ROLE_ADMIN`), trạng thái (`active: true|false`) và phân trang (`page`, `size`, `sortBy`, `sortDirection`).
+- **`GET /api/v1/admin/users/{id}`**: Xem chi tiết hồ sơ tài khoản, thống kê số đơn hàng đã đặt, tổng tiền tiệc đã chi trả, danh sách 5 đơn hàng gần nhất và thông tin hồ sơ nhân viên liên kết.
+- **`GET /api/v1/admin/users/unlinked-employees`**: Danh sách hồ sơ nhân viên chưa được liên kết với bất kỳ tài khoản đăng nhập nào (kèm tùy chọn `includeUserId`).
+- **`POST /api/v1/admin/users`**: Tạo tài khoản người dùng mới và phân quyền (`fullName`, `email`, `password`, `phone`, `role`, `active`, `employeeId` nếu là EMPLOYEE).
+- **`PUT /api/v1/admin/users/{id}`**: Cập nhật thông tin cá nhân, phân lại vai trò hoặc điều chỉnh hồ sơ nhân sự liên kết. Chặn tự hạ quyền của chính mình và chặn hạ quyền Admin cuối cùng.
+- **`PATCH /api/v1/admin/users/{id}/status`**: Khóa hoặc mở khóa tài khoản (`active: boolean`, `reason: string`). Chặn tự khóa chính mình và chặn khóa Admin cuối cùng. Tài khoản bị khóa sẽ bị chấm dứt phiên làm việc và không thể đăng nhập.
+- **`POST /api/v1/admin/users/{id}/reset-password`**: Đặt lại mật khẩu an toàn (`newPassword` tùy chọn; nếu để trống hệ thống tự sinh mật khẩu ngẫu nhiên mạnh và trả về để Admin gửi cho người dùng).
+- **`DELETE /api/v1/admin/users/{id}`**: Xóa vĩnh viễn tài khoản. Chặn tự xóa chính mình, chặn xóa Admin cuối cùng và chặn xóa tài khoản đã phát sinh đơn hàng hoặc hồ sơ nhân sự (trả về lỗi yêu cầu dùng tính năng Khóa).
+
+### 2. Thông tin Cá nhân & Đổi Mật khẩu Người dùng (User Profile & Security - Authenticated)
+- **`GET /api/v1/users/profile`** (alias `/api/v1/auth/profile`): Xem thông tin cá nhân của tài khoản đang đăng nhập (họ tên, email, SĐT, vai trò, trạng thái, ngày tạo, lần đăng nhập cuối).
+- **`PUT /api/v1/users/profile`** (alias `/api/v1/auth/profile`): Chỉnh sửa họ tên, số điện thoại của chính mình. Người dùng không thể tự thay đổi vai trò hay trạng thái tài khoản.
+- **`POST /api/v1/users/change-password`** (alias `/api/v1/auth/change-password`): Đổi mật khẩu tài khoản (`currentPassword`, `newPassword`, `confirmPassword`). Xác thực mật khẩu cũ bằng BCrypt và chặn đặt mật khẩu mới trùng mật khẩu cũ.
+
+---
+
+## Phân hệ Báo cáo Quản trị & Dashboard Kinh doanh (Phase 7 BI & Reporting - `ROLE_ADMIN`)
+
+### 1. Dashboard Kinh doanh Tổng quan
+- **`GET /api/v1/admin/dashboard/overview`**: Thống kê các chỉ số KPI: Doanh thu đã thanh toán, Giá vốn nguyên liệu (COGS), Lợi nhuận gộp, Lợi nhuận ước tính (EBITDA), Giá trị trung bình đơn (AOV).
+- **`GET /api/v1/admin/dashboard/revenue-chart`** (alias `/revenue-trend`): Dữ liệu biểu đồ doanh thu theo ngày/tháng/năm.
+- **`GET /api/v1/admin/dashboard/order-status-stats`** (alias `/order-status`): Cơ cấu đơn hàng theo trạng thái.
+- **`GET /api/v1/admin/dashboard/cost-structure`** (alias `/cost-breakdown`): Cơ cấu chi phí trong kỳ (Giá vốn, Lương, Chi phí vận hành khác).
+- **`GET /api/v1/admin/dashboard/alerts`**: Cảnh báo kho dưới định mức và các chỉ số vận hành cần chú ý.
+
+### 2. Báo cáo Chi tiết & Dòng tiền
+- **`GET /api/v1/admin/reports/revenue/summary`**: Báo cáo tổng hợp doanh thu theo kỳ.
+- **`GET /api/v1/admin/reports/revenue/paid-orders`**: Danh sách chi tiết các đơn hàng đã thanh toán thành công.
+- **`GET /api/v1/admin/reports/inventory/overview`**: Báo cáo tổng quan giá trị nhập kho, tiêu hao và tồn kho.
+- **`GET /api/v1/admin/reports/inventory/supplier-purchases`**: Báo cáo công nợ và lịch sử mua hàng theo nhà cung cấp.
+- **`GET /api/v1/admin/reports/payroll/overview`**: Báo cáo tổng quỹ lương và tình hình giải ngân.
+- **`GET /api/v1/admin/reports/payroll/monthly-trend`**: Xu hướng chi phí lương theo các tháng.
+- **`GET /api/v1/admin/reports/profit`**: Báo cáo kết quả hoạt động kinh doanh (P&L) và lợi nhuận ước tính.
+- **`GET /api/v1/admin/reports/cash-flow`**: Báo cáo lưu chuyển tiền tệ (Dòng tiền vào/ra đã ghi nhận).
+- **`GET /api/v1/admin/reports/export/{typePath}`**: Xuất dữ liệu báo cáo sang tệp CSV Excel chuẩn UTF-8 BOM.
+
+### 3. Quản lý Chi phí Vận hành Khác (Operating Expenses - `ROLE_ADMIN`)
+- **`GET /api/v1/admin/expenses`**: Lấy danh sách chi phí vận hành (lọc theo khoảng ngày, danh mục chi phí, phân trang).
+- **`POST /api/v1/admin/expenses`**: Thêm khoản chi phí vận hành mới (`category`, `amount`, `expenseDate`, `paymentMethod`, `description`, `receiptUrl`).
+- **`PUT /api/v1/admin/expenses/{id}`**: Cập nhật thông tin chi phí vận hành.
+- **`DELETE /api/v1/admin/expenses/{id}`**: Xóa khoản chi phí vận hành.
+

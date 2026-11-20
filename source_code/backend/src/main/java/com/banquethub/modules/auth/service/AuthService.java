@@ -55,7 +55,7 @@ public class AuthService {
         return new AuthResponse(token, jwtTokenProvider.getExpirationMs(), UserResponse.fromEntity(saved));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         String normalizedEmail = request.getEmail().trim().toLowerCase();
         User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
@@ -68,6 +68,9 @@ public class AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new BadCredentialsException("Email hoặc mật khẩu không chính xác");
         }
+
+        user.setLastLoginAt(java.time.OffsetDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")));
+        userRepository.save(user);
 
         CustomUserDetails userDetails = new CustomUserDetails(user);
         String token = jwtTokenProvider.generateToken(userDetails);

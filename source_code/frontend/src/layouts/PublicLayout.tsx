@@ -238,6 +238,15 @@ export const PublicLayout: React.FC = () => {
                       <span>Đơn đặt tiệc của tôi</span>
                     </Link>
 
+                    <Link
+                      to="/profile"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-stone-700 hover:bg-amber-50 hover:text-amber-900 transition-colors"
+                    >
+                      <UserCircle2 className="h-4 w-4 text-amber-800" />
+                      <span>Hồ sơ & Đổi mật khẩu</span>
+                    </Link>
+
                     {user.role === 'ROLE_EMPLOYEE' && (
                       <>
                         <Link

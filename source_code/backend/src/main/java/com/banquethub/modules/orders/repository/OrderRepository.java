@@ -33,6 +33,12 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     List<Order> findByUserIdOrderByCreatedAtDesc(Long userId);
 
+    List<Order> findTop5ByUserIdOrderByCreatedAtDesc(Long userId);
+
+    boolean existsByUserId(Long userId);
+
+    long countByUserId(Long userId);
+
     List<Order> findByOrderStatusAndPaymentExpiresAtBefore(OrderStatus status, OffsetDateTime time);
 
     @Query("select o.id from Order o where o.orderStatus=:status and o.paymentExpiresAt<:time order by o.id")

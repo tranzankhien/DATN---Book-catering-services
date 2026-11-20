@@ -755,6 +755,40 @@ export const AdminLayout: React.FC = () => {
                   </NavLink>
                 </nav>
               </div>
+
+              {/* Hệ thống & Quản lý tài khoản */}
+              <div>
+                {isOpen && (
+                  <p className="px-2.5 mb-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-400 whitespace-nowrap">
+                    Hệ thống & Phân quyền
+                  </p>
+                )}
+                <nav className="space-y-1">
+                  <NavLink
+                    to="/admin/users"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Quản lý tài khoản' : undefined}
+                  >
+                    <UserCheck className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Quản lý tài khoản</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Quản lý tài khoản
+                      </div>
+                    )}
+                  </NavLink>
+                </nav>
+              </div>
             </div>
           </div>
 
@@ -773,6 +807,14 @@ export const AdminLayout: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-1.5 pt-1">
+                  <Link
+                    to="/admin/profile"
+                    className="inline-flex items-center justify-center gap-1 rounded-lg border border-stone-800 bg-stone-900 px-2 py-1.5 text-[11px] font-semibold text-stone-300 hover:text-white hover:bg-stone-800 transition-colors col-span-2"
+                    title="Hồ sơ cá nhân & Đổi mật khẩu"
+                  >
+                    <UserCheck className="h-3 w-3 text-amber-400" />
+                    <span>Hồ sơ & Đổi mật khẩu</span>
+                  </Link>
                   <Link
                     to="/dishes"
                     className="inline-flex items-center justify-center gap-1 rounded-lg border border-stone-800 bg-stone-900 px-2 py-1.5 text-[11px] font-semibold text-stone-300 hover:text-white hover:bg-stone-800 transition-colors"

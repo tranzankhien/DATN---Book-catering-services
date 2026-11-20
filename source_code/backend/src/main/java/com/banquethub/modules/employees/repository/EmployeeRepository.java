@@ -33,6 +33,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
     @Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END FROM Employee e WHERE e.user.id = :userId")
     boolean existsByUserId(@Param("userId") Long userId);
 
+    Optional<Employee> findByEmailIgnoreCase(String email);
+
+    List<Employee> findByUserIsNull();
+
     List<Employee> findByStatus(EmployeeStatus status);
 
     long countByStatus(EmployeeStatus status);

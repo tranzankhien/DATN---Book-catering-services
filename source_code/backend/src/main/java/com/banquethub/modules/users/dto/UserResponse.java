@@ -13,7 +13,9 @@ public class UserResponse {
     private String phone;
     private Role role;
     private boolean active;
+    private OffsetDateTime lastLoginAt;
     private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
     public UserResponse() {
     }
@@ -26,7 +28,9 @@ public class UserResponse {
         dto.setPhone(user.getPhone());
         dto.setRole(user.getRole());
         dto.setActive(user.isActive());
+        dto.setLastLoginAt(user.getLastLoginAt());
         dto.setCreatedAt(user.getCreatedAt());
+        dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
     }
 
@@ -78,11 +82,27 @@ public class UserResponse {
         this.active = active;
     }
 
+    public OffsetDateTime getLastLoginAt() {
+        return lastLoginAt;
+    }
+
+    public void setLastLoginAt(OffsetDateTime lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
+    }
+
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
