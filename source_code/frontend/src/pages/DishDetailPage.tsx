@@ -9,6 +9,9 @@ import {
   Calculator,
   Check,
   ShieldCheck,
+  ChefHat,
+  Sparkles,
+  AlertCircle,
 } from 'lucide-react';
 import { catalogService } from '../services/catalogService';
 import { extractErrorMessage } from '../services/apiClient';
@@ -207,6 +210,84 @@ export const DishDetailPage: React.FC = () => {
                   <span>Bảng định lượng tiêu hao ↓</span>
                 </a>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CULINARY SPECIFICATIONS & BANQUET OCCASIONS CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Card 1: Hương vị & Quy chuẩn phục vụ */}
+        <div className="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-xs space-y-3.5">
+          <div className="flex items-center gap-2 text-stone-900 font-bold text-sm border-b border-stone-100 pb-2.5">
+            <ChefHat className="h-4 w-4 text-amber-700" />
+            <span>Quy chuẩn & Phong cách phục vụ</span>
+          </div>
+          <div className="space-y-2.5 text-xs text-stone-600">
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-stone-400">Vị trí mâm tiệc:</span>
+              <span className="font-semibold text-stone-800 text-right">{dish.categoryName || 'Món chính'}</span>
+            </div>
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-stone-400">Nhiệt độ phục vụ:</span>
+              <span className="font-semibold text-stone-800 text-right">
+                {dish.categoryName?.includes('Khai vị') || dish.categoryName?.includes('Tráng miệng') ? '8°C - 15°C (Mát giòn)' : '65°C - 75°C (Nóng sốt)'}
+              </span>
+            </div>
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-stone-400">Thời gian chuẩn bị bếp:</span>
+              <span className="font-semibold text-stone-800 text-right">15 - 20 phút trước giờ tiệc</span>
+            </div>
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-stone-400">Khẩu phần đề xuất:</span>
+              <span className="font-semibold text-stone-800 text-right">1 phần dùng cho 10 khách/bàn</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Dịp tiệc phù hợp */}
+        <div className="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-xs space-y-3.5">
+          <div className="flex items-center gap-2 text-stone-900 font-bold text-sm border-b border-stone-100 pb-2.5">
+            <Sparkles className="h-4 w-4 text-amber-700" />
+            <span>Phù hợp với các dịp tiệc</span>
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs">
+            <span className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-800 border border-rose-200/70 font-medium">
+              Tiệc Cưới & Báo Hỷ
+            </span>
+            <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200/70 font-medium">
+              Hội Nghị & Gala Doanh Nghiệp
+            </span>
+            <span className="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200/70 font-medium">
+              Sinh Nhật & Thôi Nôi
+            </span>
+            <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200/70 font-medium">
+              Yến Tiệc Gia Đình
+            </span>
+          </div>
+          <p className="text-[11px] text-stone-500 pt-1 leading-relaxed">
+            Hương vị được cân đối hài hòa, phù hợp với mọi độ tuổi và khẩu vị vùng miền.
+          </p>
+        </div>
+
+        {/* Card 3: Thông tin dinh dưỡng & Lưu ý dị ứng */}
+        <div className="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-xs space-y-3.5">
+          <div className="flex items-center gap-2 text-stone-900 font-bold text-sm border-b border-stone-100 pb-2.5">
+            <AlertCircle className="h-4 w-4 text-amber-700" />
+            <span>Lưu ý thực khách & Dị ứng</span>
+          </div>
+          <div className="space-y-2 text-xs text-stone-600">
+            <div className="rounded-xl bg-stone-50 border border-stone-200/80 p-2.5 space-y-1">
+              <span className="font-semibold text-stone-700 block">Thành phần cần lưu ý:</span>
+              <p className="text-[11px] text-stone-500 leading-relaxed">
+                {dish.recipeItems && dish.recipeItems.length > 0
+                  ? `Chế biến từ các nguyên liệu chính: ${dish.recipeItems.slice(0, 4).map(i => i.ingredientName).join(', ')}...`
+                  : 'Chế biến từ nguyên liệu tự nhiên tươi ngon, an toàn vệ sinh thực phẩm.'}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 font-medium">
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+              <span>100% nguyên liệu tươi mới, không chất bảo quản.</span>
             </div>
           </div>
         </div>

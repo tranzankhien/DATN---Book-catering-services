@@ -14,6 +14,7 @@ import {
   Unlock,
   KeyRound,
   Eye,
+  EyeOff,
   Edit2,
   Trash2,
   X,
@@ -80,6 +81,7 @@ export const AdminUsersPage: React.FC = () => {
     active: true,
     employeeId: null,
   });
+  const [showCreatePassword, setShowCreatePassword] = useState<boolean>(false);
 
   // Edit form state
   const [editForm, setEditForm] = useState<UpdateUserPayload>({
@@ -754,15 +756,26 @@ export const AdminUsersPage: React.FC = () => {
                   <label className="block text-xs font-bold text-stone-700 mb-1">
                     Mật khẩu ban đầu <span className="text-rose-500">*</span>
                   </label>
-                  <input
-                    type="password"
-                    required
-                    minLength={6}
-                    value={createForm.password}
-                    onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-                    placeholder="Tối thiểu 6 ký tự"
-                    className="w-full text-xs rounded-xl border border-stone-200 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showCreatePassword ? 'text' : 'password'}
+                      required
+                      minLength={6}
+                      value={createForm.password}
+                      onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                      placeholder="Tối thiểu 6 ký tự"
+                      className="w-full text-xs rounded-xl border border-stone-200 pl-3.5 pr-10 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCreatePassword(!showCreatePassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 cursor-pointer p-1"
+                      tabIndex={-1}
+                      title={showCreatePassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                    >
+                      {showCreatePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
 

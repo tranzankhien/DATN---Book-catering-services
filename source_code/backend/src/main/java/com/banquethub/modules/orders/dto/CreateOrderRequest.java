@@ -29,6 +29,13 @@ public class CreateOrderRequest {
     @Size(max = 150, message = "Email không được vượt quá 150 ký tự")
     private String customerEmail;
 
+    @Size(max = 120, message = "Tên người liên hệ tại sự kiện không được vượt quá 120 ký tự")
+    private String contactName;
+
+    @Pattern(regexp = "^$|^(0|\\+84)[0-9]{9,10}$", message = "Số điện thoại người liên hệ tại sự kiện không đúng định dạng (10 số)")
+    @Size(max = 25, message = "Số điện thoại người liên hệ không được vượt quá 25 ký tự")
+    private String contactPhone;
+
     @NotNull(message = "Ngày và giờ tổ chức tiệc không được để trống")
     @Future(message = "Thời gian tổ chức tiệc phải là thời điểm trong tương lai")
     private OffsetDateTime eventDateTime;
@@ -91,6 +98,22 @@ public class CreateOrderRequest {
 
     public void setCustomerEmail(String customerEmail) {
         this.customerEmail = customerEmail;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
     }
 
     public OffsetDateTime getEventDateTime() {

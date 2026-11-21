@@ -906,7 +906,7 @@ export const AdminLayout: React.FC = () => {
             </Link>
 
             <a
-              href="http://localhost:8080/swagger-ui.html"
+              href="/swagger-ui.html"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-400 transition-colors shadow-xs"

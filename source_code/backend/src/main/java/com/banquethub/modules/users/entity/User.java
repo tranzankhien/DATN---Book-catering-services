@@ -43,6 +43,15 @@ public class User {
     @Column(name = "active", nullable = false)
     private boolean active = true;
 
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = true;
+
+    @Column(name = "verification_code", length = 20)
+    private String verificationCode;
+
+    @Column(name = "verification_expires_at")
+    private OffsetDateTime verificationExpiresAt;
+
     @Column(name = "last_login_at")
     private OffsetDateTime lastLoginAt;
 
@@ -123,6 +132,30 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+    }
+
+    public OffsetDateTime getVerificationExpiresAt() {
+        return verificationExpiresAt;
+    }
+
+    public void setVerificationExpiresAt(OffsetDateTime verificationExpiresAt) {
+        this.verificationExpiresAt = verificationExpiresAt;
     }
 
     public OffsetDateTime getLastLoginAt() {

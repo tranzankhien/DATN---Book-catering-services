@@ -22,6 +22,8 @@ public class OrderResponse {
     private String customerName;
     private String customerPhone;
     private String customerEmail;
+    private String contactName;
+    private String contactPhone;
     private OffsetDateTime eventDateTime;
     private Integer tableCount;
     private String note;
@@ -56,6 +58,8 @@ public class OrderResponse {
         resp.setCustomerName(order.getCustomerName());
         resp.setCustomerPhone(order.getCustomerPhone());
         resp.setCustomerEmail(order.getCustomerEmail());
+        resp.setContactName(order.getContactName());
+        resp.setContactPhone(order.getContactPhone());
         resp.setEventDateTime(order.getEventDateTime());
         resp.setTableCount(order.getTableCount());
         resp.setNote(order.getNote());
@@ -151,6 +155,22 @@ public class OrderResponse {
 
     public void setCustomerEmail(String customerEmail) {
         this.customerEmail = customerEmail;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
     }
 
     public OffsetDateTime getEventDateTime() {

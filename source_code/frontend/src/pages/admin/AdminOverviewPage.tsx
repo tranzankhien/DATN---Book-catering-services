@@ -59,7 +59,7 @@ export function AdminOverviewPage() {
       to: '/admin/orders?orderStatus=PENDING_PAYMENT&paymentStatus=UNPAID&awaitingPayment=true',
       icon: Clock4,
       iconBg: 'bg-amber-50 text-amber-700',
-      badge: 'Chờ VietQR',
+      badge: 'Chờ SePay',
       badgeClass: 'bg-amber-50 text-amber-800 border-amber-200',
     },
     {

@@ -8,6 +8,8 @@ public class AuthResponse {
     private String tokenType = "Bearer";
     private long expiresInMs;
     private UserResponse user;
+    private boolean emailVerificationRequired;
+    private String devVerificationCode;
 
     public AuthResponse() {
     }
@@ -17,6 +19,31 @@ public class AuthResponse {
         this.tokenType = "Bearer";
         this.expiresInMs = expiresInMs;
         this.user = user;
+    }
+
+    public AuthResponse(String accessToken, long expiresInMs, UserResponse user, boolean emailVerificationRequired, String devVerificationCode) {
+        this.accessToken = accessToken;
+        this.tokenType = "Bearer";
+        this.expiresInMs = expiresInMs;
+        this.user = user;
+        this.emailVerificationRequired = emailVerificationRequired;
+        this.devVerificationCode = devVerificationCode;
+    }
+
+    public boolean isEmailVerificationRequired() {
+        return emailVerificationRequired;
+    }
+
+    public void setEmailVerificationRequired(boolean emailVerificationRequired) {
+        this.emailVerificationRequired = emailVerificationRequired;
+    }
+
+    public String getDevVerificationCode() {
+        return devVerificationCode;
+    }
+
+    public void setDevVerificationCode(String devVerificationCode) {
+        this.devVerificationCode = devVerificationCode;
     }
 
     public String getAccessToken() {

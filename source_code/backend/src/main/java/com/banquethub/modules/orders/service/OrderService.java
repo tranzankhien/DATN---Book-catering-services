@@ -264,6 +264,10 @@ public class OrderService {
         order.setCustomerName(request.getCustomerName().trim());
         order.setCustomerPhone(request.getCustomerPhone().trim());
         order.setCustomerEmail(request.getCustomerEmail().trim());
+        order.setContactName(request.getContactName() != null && !request.getContactName().isBlank()
+                ? request.getContactName().trim() : request.getCustomerName().trim());
+        order.setContactPhone(request.getContactPhone() != null && !request.getContactPhone().isBlank()
+                ? request.getContactPhone().trim() : request.getCustomerPhone().trim());
         order.setEventDateTime(request.getEventDateTime());
         order.setTableCount(tableCount);
         order.setNote(request.getNote());

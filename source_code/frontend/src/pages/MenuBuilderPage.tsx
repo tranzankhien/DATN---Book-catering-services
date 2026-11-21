@@ -9,16 +9,16 @@ import {
   Calendar,
   AlertTriangle,
   CheckCircle2,
-  Sliders,
   ArrowRight,
-  Info,
   RefreshCw,
   Sparkles,
   ShoppingBag,
-  Filter,
   X,
   ShieldCheck,
-  Check,
+  ChefHat,
+  Receipt,
+  Layers,
+  ExternalLink,
 } from 'lucide-react';
 import { catalogService } from '../services/catalogService';
 import { menuService } from '../services/menuService';
@@ -29,7 +29,7 @@ import type {
   OrderPreviewResponseDto,
   CreateOrderItemPayload,
 } from '../services/types';
-import { formatVnd, formatQuantity } from '../hooks/useFormatters';
+import { formatVnd } from '../hooks/useFormatters';
 import { LoadingState, ErrorState } from '../components/StatusStates';
 import { extractErrorMessage } from '../services/apiClient';
 import { DEFAULT_DISH_IMAGE, handleImageError } from '../lib/imageConstants';
@@ -54,20 +54,20 @@ export const MenuBuilderPage: React.FC = () => {
   const [catalogLoading, setCatalogLoading] = useState<boolean>(true);
   const [catalogError, setCatalogError] = useState<string | null>(null);
 
-  // Basket State
+  // Builder State
   const [selectedItems, setSelectedItems] = useState<SelectedDishItem[]>([]);
   const [tableCount, setTableCount] = useState<number>(6);
-  const [guestCount, setGuestCount] = useState<number | undefined>(undefined);
+  const [guestCount, setGuestCount] = useState<number>(60);
   const [isRestored, setIsRestored] = useState<boolean>(false);
 
-  // Preview & Validation State
+  // Preview State
   const [preview, setPreview] = useState<OrderPreviewResponseDto | null>(null);
   const [previewLoading, setPreviewLoading] = useState<boolean>(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
 
-  // Request sequence counter to discard stale out-of-order catalog/menu template responses
   const loadSeqRef = useRef<number>(0);
 
+  // Fetch catalog & template or draft
   const loadCatalogAndDraft = async () => {
     const seq = ++loadSeqRef.current;
     try {
@@ -117,7 +117,7 @@ export const MenuBuilderPage: React.FC = () => {
 
       if (loadSeqRef.current !== seq) return;
 
-      // Check sessionStorage
+      // Check sessionStorage draft
       const saved = sessionStorage.getItem(STORAGE_KEY);
       if (saved) {
         try {
@@ -269,45 +269,101 @@ export const MenuBuilderPage: React.FC = () => {
     navigate(`/checkout?tables=${tableCount}&guests=${computedGuests}`);
   };
 
-  const filteredDishes = useMemo(() => {
-    return dishes.filter((dish) => {
-      if (selectedCategoryId !== undefined && dish.categoryId !== selectedCategoryId) {
-        return false;
+  // Group dishes by category for the structured box view (PITO style)
+  const categoryGroups = useMemo(() => {
+    const targetCategories = selectedCategoryId
+      ? categories.filter((c) => c.id === selectedCategoryId)
+      : categories;
+
+    return targetCategories
+      .map((cat) => {
+        const catDishes = dishes.filter((d) => {
+          if (d.categoryId !== cat.id) return false;
+          if (keyword.trim()) {
+            const kw = keyword.toLowerCase();
+            return (
+              d.name.toLowerCase().includes(kw) ||
+              d.code.toLowerCase().includes(kw) ||
+              (d.description && d.description.toLowerCase().includes(kw))
+            );
+          }
+          return true;
+        });
+
+        const selectedCount = selectedItems.filter((it) => it.dish.categoryId === cat.id).length;
+
+        return {
+          category: cat,
+          dishes: catDishes,
+          selectedCount,
+        };
+      })
+      .filter((group) => group.dishes.length > 0 || (selectedCategoryId !== undefined && group.category.id === selectedCategoryId));
+  }, [categories, dishes, keyword, selectedCategoryId, selectedItems]);
+
+  // Group selected items by category for the order summary sidebar (PITO style)
+  const selectedGroupedByCategory = useMemo(() => {
+    const map = new Map<string, SelectedDishItem[]>();
+    for (const item of selectedItems) {
+      const catName = item.dish.categoryName || 'Món khác';
+      if (!map.has(catName)) {
+        map.set(catName, []);
       }
-      if (keyword.trim()) {
-        const kw = keyword.toLowerCase();
-        return (
-          dish.name.toLowerCase().includes(kw) ||
-          dish.code.toLowerCase().includes(kw) ||
-          (dish.description && dish.description.toLowerCase().includes(kw))
-        );
-      }
-      return true;
-    });
-  }, [dishes, selectedCategoryId, keyword]);
+      map.get(catName)!.push(item);
+    }
+    return Array.from(map.entries());
+  }, [selectedItems]);
+
+  const getSelectedCountForCategory = (catId: number) => {
+    return selectedItems.filter((it) => it.dish.categoryId === catId).length;
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
-      {/* Header Banner */}
+      {/* Header Banner - Inspired by PITO Clean Banquet Hero */}
       <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
+          <div className="space-y-2.5 max-w-2xl">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900">
               <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-              <span>Studio thiết kế thực đơn yến tiệc</span>
+              <span>Studio phối thực đơn yến tiệc độc bản</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
               Tùy biến thực đơn bàn tiệc
             </h1>
             <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-              Tự do chọn các món ưa thích từ danh mục bên trái, thêm vào bàn tiệc và điều chỉnh số lượng phần. Hệ thống tự động tính tổng chi phí và kiểm tra khả dụng tồn kho nguyên liệu theo thời gian thực.
+              Các món ăn được phân chia theo từng danh mục rõ ràng (Khai vị, Món chính, Lẩu & Canh, Tráng miệng, Nước uống). Quý khách dễ dàng lựa chọn khẩu vị riêng cho sự kiện với chi phí và tồn kho tự động kiểm tra theo thời gian thực.
             </p>
+
+            {/* Quick highlight pills */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-stone-600">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-stone-100 font-medium">
+                <ChefHat className="h-3.5 w-3.5 text-amber-700" />
+                Tiêu chuẩn bàn 10 khách
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-medium border border-emerald-200/70">
+                <Receipt className="h-3.5 w-3.5 text-emerald-600" />
+                Xuất hóa đơn VAT
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-900 font-medium border border-amber-200/70">
+                <Layers className="h-3.5 w-3.5 text-amber-700" />
+                Đã chọn: <strong className="ml-0.5">{selectedItems.length} món</strong>
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0">
+            {preview && preview.pricePerTable > 0 && (
+              <div className="text-right">
+                <span className="text-[11px] text-stone-500 font-medium block">Tạm tính 01 bàn:</span>
+                <span className="text-xl sm:text-2xl font-bold text-amber-900 tabular-nums">
+                  {formatVnd(preview.pricePerTable)}
+                </span>
+              </div>
+            )}
             <Link
               to="/menus"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-xs font-semibold text-stone-700 shadow-xs transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-xs font-semibold text-stone-700 shadow-xs transition-colors"
             >
               ← Chọn mẫu thực đơn có sẵn
             </Link>
@@ -317,10 +373,10 @@ export const MenuBuilderPage: React.FC = () => {
 
       {/* Main Workspace: 7 Cols Dishes Catalog, 5 Cols Custom Basket */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* LEFT: DISH CATALOG (7 Cols) */}
-        <div className="lg:col-span-7 space-y-5">
-          {/* Search & Category Pills */}
-          <div className="rounded-2xl border border-stone-200/90 bg-white p-4 shadow-xs space-y-3.5">
+        {/* LEFT: DISH CATALOG ORGANIZED BY CATEGORY BOXES (7 Cols) */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* Search Bar & Sticky Category Pills Navigation */}
+          <div className="rounded-2xl border border-stone-200/90 bg-white p-4 shadow-xs space-y-3.5 sticky top-20 z-20 backdrop-blur-md bg-white/95">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
               <input
@@ -342,37 +398,54 @@ export const MenuBuilderPage: React.FC = () => {
               )}
             </div>
 
-            {/* Category Pills - Scrollable and clean */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-1">
+            {/* Category Pills Navigation with Selected Indicators */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-0.5">
               <button
                 type="button"
                 onClick={() => setSelectedCategoryId(undefined)}
-                className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`rounded-xl px-3.5 py-2 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
                   selectedCategoryId === undefined
                     ? 'bg-amber-700 text-white shadow-xs'
                     : 'bg-stone-100 hover:bg-stone-200/80 text-stone-700'
                 }`}
               >
-                Tất cả ({dishes.length})
+                <span>Tất cả</span>
+                <span className={`text-[11px] px-1.5 py-0.2 rounded-full ${
+                  selectedCategoryId === undefined ? 'bg-amber-800 text-amber-100' : 'bg-stone-200 text-stone-600'
+                }`}>
+                  {dishes.length}
+                </span>
               </button>
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setSelectedCategoryId(cat.id)}
-                  className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                    selectedCategoryId === cat.id
-                      ? 'bg-amber-700 text-white shadow-xs'
-                      : 'bg-stone-100 hover:bg-stone-200/80 text-stone-700'
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
+
+              {categories.map((cat) => {
+                const countSelected = getSelectedCountForCategory(cat.id);
+                const isSelected = selectedCategoryId === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setSelectedCategoryId(cat.id)}
+                    className={`rounded-xl px-3.5 py-2 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-amber-700 text-white shadow-xs'
+                        : 'bg-stone-100 hover:bg-stone-200/80 text-stone-700'
+                    }`}
+                  >
+                    <span>{cat.name}</span>
+                    {countSelected > 0 && (
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                        isSelected ? 'bg-amber-800 text-white' : 'bg-amber-200/80 text-amber-900'
+                      }`}>
+                        Đã chọn {countSelected}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Dish Listings Grid */}
+          {/* Dish Listings Grouped in Category Boxes (PITO Reference Style) */}
           {catalogLoading ? (
             <LoadingState label="Đang tải danh mục món ăn..." />
           ) : catalogError ? (
@@ -382,116 +455,164 @@ export const MenuBuilderPage: React.FC = () => {
                 onRetry={() => loadCatalogAndDraft()}
               />
             </div>
-          ) : filteredDishes.length === 0 ? (
-            <div className="rounded-xl border border-stone-200 bg-white p-8 text-center text-stone-500 text-xs sm:text-sm">
-              Không tìm thấy món ăn nào phù hợp với bộ lọc.
+          ) : categoryGroups.length === 0 ? (
+            <div className="rounded-2xl border border-stone-200 bg-white p-12 text-center text-stone-500 text-xs sm:text-sm space-y-2">
+              <Utensils className="h-8 w-8 mx-auto text-stone-300" />
+              <p className="font-semibold text-stone-700">Không tìm thấy món ăn nào phù hợp.</p>
+              <p className="text-stone-400 text-xs">Vui lòng thử tìm từ khóa khác hoặc bấm chọn "Tất cả".</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {filteredDishes.map((dish) => {
-                const inBasket = selectedItems.find((it) => it.dish.id === dish.id);
-                return (
-                  <article
-                    key={dish.id}
-                    className={`group flex flex-col justify-between overflow-hidden rounded-xl border p-3.5 shadow-xs transition-all duration-200 ${
-                      inBasket
-                        ? 'border-amber-400 bg-amber-50/20 ring-1 ring-amber-400/30'
-                        : 'border-stone-200/90 bg-white hover:border-amber-300 hover:shadow-sm'
-                    }`}
-                  >
-                    <div className="flex gap-3">
-                      <div className="h-20 w-20 rounded-lg overflow-hidden bg-stone-900 shrink-0 border border-stone-200 shadow-2xs relative">
-                        <img
-                          src={dish.imageUrl || DEFAULT_DISH_IMAGE}
-                          alt={dish.name}
-                          onError={handleImageError}
-                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
-                        />
+            <div className="space-y-6">
+              {categoryGroups.map((group) => (
+                <section
+                  key={group.category.id}
+                  id={`cat-section-${group.category.id}`}
+                  className="rounded-2xl border border-stone-200/90 bg-white p-5 sm:p-6 shadow-xs space-y-4"
+                >
+                  {/* Category Box Header with Selection Indicator */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-base font-bold text-stone-900 tracking-tight">
+                          {group.category.name}
+                        </h2>
+                        <span className="text-[11px] font-medium text-stone-400">
+                          ({group.dishes.length} món khả dụng)
+                        </span>
                       </div>
-
-                      <div className="flex-1 min-w-0 space-y-1">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[10px] text-stone-500 font-semibold uppercase bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200/60 tabular-nums">
-                            {dish.code}
-                          </span>
-                          <span className="text-[10px] font-semibold text-amber-900 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md">
-                            {dish.categoryName}
-                          </span>
-                        </div>
-                        <h4 className="font-bold text-stone-900 text-xs sm:text-sm truncate" title={dish.name}>
-                          {dish.name}
-                        </h4>
-                        <div className="text-xs font-bold text-amber-900">
-                          {formatVnd(dish.price)}{' '}
-                          <span className="text-[10px] font-normal text-stone-400">/ phần</span>
-                        </div>
-                      </div>
+                      {group.category.description && (
+                        <p className="text-xs text-stone-500 line-clamp-1">
+                          {group.category.description}
+                        </p>
+                      )}
                     </div>
 
-                    {/* Bottom Action Bar */}
-                    <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between">
-                      {inBasket ? (
-                        <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-semibold">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                          <span>{inBasket.quantityPerTable} phần/bàn</span>
-                        </div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold self-start sm:self-auto border transition-colors">
+                      {group.selectedCount > 0 ? (
+                        <span className="text-emerald-800 bg-emerald-50 border-emerald-200/80 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                          Đã chọn {group.selectedCount} món
+                        </span>
                       ) : (
-                        <span className="text-[11px] text-stone-400">Chưa có trong bàn</span>
+                        <span className="text-stone-500 bg-stone-50 border-stone-200/60 px-2.5 py-0.5 rounded-full">
+                          Chưa chọn món nào
+                        </span>
                       )}
+                    </div>
+                  </div>
 
-                      {inBasket ? (
-                        /* Card Stepper for selected dish */
-                        <div className="flex items-center gap-1 bg-white border border-amber-300 rounded-lg p-0.5 shadow-2xs">
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateQuantity(dish.id, -1)}
-                            className="h-7 w-7 rounded-md hover:bg-stone-100 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
-                            title="Giảm 1 phần"
-                          >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="w-6 text-center font-bold text-xs text-stone-900">
-                            {inBasket.quantityPerTable}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateQuantity(dish.id, 1)}
-                            className="h-7 w-7 rounded-md hover:bg-stone-100 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
-                            title="Tăng 1 phần"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => handleAddDish(dish)}
-                          className="inline-flex items-center gap-1 rounded-lg bg-amber-700 hover:bg-amber-800 text-white px-3 py-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                  {/* Dishes in this Category Box */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {group.dishes.map((dish) => {
+                      const inBasket = selectedItems.find((it) => it.dish.id === dish.id);
+                      return (
+                        <article
+                          key={dish.id}
+                          className={`group flex flex-col justify-between overflow-hidden rounded-xl border p-3 shadow-xs transition-all duration-200 ${
+                            inBasket
+                              ? 'border-amber-500/80 bg-amber-50/20 ring-1 ring-amber-500/30'
+                              : 'border-stone-200 bg-white hover:border-amber-300 hover:shadow-xs'
+                          }`}
                         >
-                          <Plus className="h-3.5 w-3.5" />
-                          <span>Thêm món</span>
-                        </button>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
+                          <div className="flex gap-3">
+                            <div className="h-20 w-20 rounded-lg overflow-hidden bg-stone-100 shrink-0 border border-stone-200 shadow-2xs relative">
+                              <img
+                                src={dish.imageUrl || DEFAULT_DISH_IMAGE}
+                                alt={dish.name}
+                                onError={handleImageError}
+                                className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                loading="lazy"
+                              />
+                            </div>
+
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-[10px] text-stone-500 font-semibold uppercase bg-stone-100 px-1.5 py-0.5 rounded border border-stone-200/60 tabular-nums">
+                                  {dish.code}
+                                </span>
+                              </div>
+                              <h3
+                                className="font-bold text-stone-900 text-xs sm:text-sm line-clamp-1"
+                                title={dish.name}
+                              >
+                                {dish.name}
+                              </h3>
+                              <p className="text-[11px] text-stone-500 line-clamp-1">
+                                {dish.description || 'Chế biến tươi chuẩn vị yến tiệc'}
+                              </p>
+                              <div className="text-xs font-bold text-amber-900 tabular-nums pt-0.5">
+                                {formatVnd(dish.price)}{' '}
+                                <span className="text-[10px] font-normal text-stone-400">/ phần</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Bottom Action Bar */}
+                          <div className="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between">
+                            <Link
+                              to={`/dishes/${dish.id}`}
+                              target="_blank"
+                              className="text-[11px] font-medium text-stone-400 hover:text-stone-700 flex items-center gap-0.5 transition-colors"
+                            >
+                              <span>Xem chi tiết</span>
+                              <ExternalLink className="h-2.5 w-2.5" />
+                            </Link>
+
+                            {inBasket ? (
+                              /* Card Stepper for selected dish */
+                              <div className="flex items-center gap-1 bg-white border border-amber-300 rounded-lg p-0.5 shadow-2xs">
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateQuantity(dish.id, -1)}
+                                  className="h-6 w-6 rounded-md hover:bg-stone-100 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
+                                  title="Giảm 1 phần"
+                                >
+                                  <Minus className="h-3 w-3" />
+                                </button>
+                                <span className="w-5 text-center font-bold text-xs text-stone-900 tabular-nums">
+                                  {inBasket.quantityPerTable}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateQuantity(dish.id, 1)}
+                                  className="h-6 w-6 rounded-md hover:bg-stone-100 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
+                                  title="Tăng 1 phần"
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleAddDish(dish)}
+                                className="inline-flex items-center gap-1 rounded-lg bg-amber-700 hover:bg-amber-800 text-white px-2.5 py-1 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                              >
+                                <Plus className="h-3.5 w-3.5" />
+                                <span>Chọn món</span>
+                              </button>
+                            )}
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+              ))}
             </div>
           )}
         </div>
 
-        {/* RIGHT: BASKET & REALTIME PREVIEW (5 Cols) */}
-        <div className="lg:col-span-5 sticky top-24 space-y-5">
+        {/* RIGHT: TÓM TẮT ĐƠN HÀNG GOM NHÓM THEO PHÂN LOẠI (Matching PITO Reference Image 2) */}
+        <div className="lg:col-span-5 sticky top-20 space-y-5">
           <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-5">
             {/* Basket Header */}
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
               <div className="flex items-center gap-2">
                 <ShoppingBag className="h-5 w-5 text-amber-700" />
-                <h3 className="font-bold text-base text-stone-900 tracking-tight">
-                  Bàn tiệc của bạn
-                </h3>
-                <span className="rounded-full bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 text-xs font-bold">
+                <h2 className="font-bold text-base text-stone-900 tracking-tight">
+                  Tóm tắt đơn hàng
+                </h2>
+                <span className="rounded-full bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 text-xs font-bold tabular-nums">
                   {selectedItems.length} món
                 </span>
               </div>
@@ -509,12 +630,14 @@ export const MenuBuilderPage: React.FC = () => {
             </div>
 
             {/* Table Count Control */}
-            <div className="flex items-center justify-between py-1 bg-stone-50/70 p-3 rounded-xl border border-stone-100">
+            <div className="flex items-center justify-between py-2 bg-stone-50/70 p-3.5 rounded-xl border border-stone-200/80">
               <div>
-                <span className="block text-xs font-semibold text-stone-800 uppercase tracking-wider">
+                <span className="block text-xs font-bold text-stone-800">
                   Quy mô số bàn tiệc:
                 </span>
-                <span className="text-[11px] text-stone-500">1 bàn tiêu chuẩn 10 khách ({tableCount * 10} người)</span>
+                <span className="text-[11px] text-stone-500">
+                  Tiêu chuẩn 10 khách/bàn (~{tableCount * 10} khách)
+                </span>
               </div>
 
               <div className="flex items-center gap-1.5">
@@ -522,6 +645,7 @@ export const MenuBuilderPage: React.FC = () => {
                   type="button"
                   onClick={() => setTableCount((prev) => Math.max(1, prev - 1))}
                   className="h-8 w-8 rounded-lg border border-stone-300 bg-white hover:bg-stone-50 font-bold text-stone-700 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+                  title="Giảm 1 bàn"
                 >
                   <Minus className="h-3.5 w-3.5" />
                 </button>
@@ -531,73 +655,102 @@ export const MenuBuilderPage: React.FC = () => {
                   max="500"
                   value={tableCount}
                   onChange={(e) => setTableCount(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-14 text-center font-bold text-base border border-stone-300 rounded-lg py-1 bg-white focus:border-amber-600 focus:outline-none shadow-xs"
+                  className="w-14 text-center font-bold text-sm border border-stone-300 rounded-lg py-1 bg-white focus:border-amber-600 focus:outline-none shadow-xs"
                 />
                 <button
                   type="button"
                   onClick={() => setTableCount((prev) => prev + 1)}
                   className="h-8 w-8 rounded-lg border border-stone-300 bg-white hover:bg-stone-50 font-bold text-stone-700 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+                  title="Tăng 1 bàn"
                 >
                   <Plus className="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>
 
-            {/* Basket Items List */}
-            {selectedItems.length === 0 ? (
-              <div className="py-12 text-center text-stone-400 space-y-2 border border-dashed border-stone-200 rounded-xl bg-stone-50/50">
-                <Utensils className="h-8 w-8 mx-auto text-stone-300" />
-                <p className="text-xs font-semibold text-stone-600">Bàn tiệc hiện đang trống</p>
-                <p className="text-[11px] text-stone-400 max-w-xs mx-auto">
-                  Nhấn nút "+ Thêm món" từ danh mục bên trái để bắt đầu phối thực đơn.
-                </p>
+            {/* Grouped Selected Dishes List (Matching PITO Reference Layout) */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-stone-800">
+                <Layers className="h-4 w-4 text-amber-700" />
+                <span>Món đã chọn</span>
               </div>
-            ) : (
-              <div className="max-h-72 overflow-y-auto divide-y divide-stone-100 pr-1 scrollbar-thin">
-                {selectedItems.map((item) => (
-                  <div key={item.dish.id} className="py-3 flex items-center justify-between gap-3 text-xs">
-                    <div className="min-w-0 flex-1">
-                      <div className="font-bold text-stone-900 truncate">
-                        {item.dish.name}
-                      </div>
-                      <div className="text-[11px] text-stone-500 mt-0.5">
-                        {formatVnd(item.dish.price)} / phần • Tổng: {item.quantityPerTable * tableCount} phần
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateQuantity(item.dish.id, -1)}
-                        className="h-6 w-6 rounded-lg bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 text-xs font-bold transition-colors cursor-pointer"
-                        title="Giảm 1 phần"
-                      >
-                        <Minus className="h-3 w-3" />
-                      </button>
-                      <span className="w-6 text-center font-bold text-stone-900">
-                        {item.quantityPerTable}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateQuantity(item.dish.id, 1)}
-                        className="h-6 w-6 rounded-lg bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 text-xs font-bold transition-colors cursor-pointer"
-                        title="Tăng 1 phần"
-                      >
-                        <Plus className="h-3 w-3" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveDish(item.dish.id)}
-                        className="h-6 w-6 rounded-lg hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center ml-1 transition-colors cursor-pointer"
-                        title="Xóa món"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
+              {selectedItems.length === 0 ? (
+                <div className="py-10 text-center text-stone-400 space-y-2 border border-dashed border-stone-200 rounded-xl bg-stone-50/50">
+                  <Utensils className="h-8 w-8 mx-auto text-stone-300" />
+                  <p className="text-xs font-semibold text-stone-600">Thực đơn hiện đang trống</p>
+                  <p className="text-[11px] text-stone-400 max-w-xs mx-auto">
+                    Bấm "+ Chọn món" từ các danh mục bên trái để đưa món vào bàn tiệc.
+                  </p>
+                </div>
+              ) : (
+                <div className="max-h-[380px] overflow-y-auto space-y-3 pr-1 scrollbar-thin">
+                  {selectedGroupedByCategory.map(([catName, itemsInCat]) => (
+                    <div
+                      key={catName}
+                      className="rounded-xl border border-stone-200/80 bg-stone-50/60 p-3 space-y-2"
+                    >
+                      {/* Category Header within Basket */}
+                      <div className="flex items-center justify-between text-xs font-bold text-stone-800 border-b border-stone-200/60 pb-1.5">
+                        <span className="text-amber-900">{catName}</span>
+                        <span className="text-[10px] text-stone-500 font-normal">
+                          {itemsInCat.length} món
+                        </span>
+                      </div>
+
+                      {/* Items in this category */}
+                      <div className="divide-y divide-stone-100">
+                        {itemsInCat.map((item) => (
+                          <div
+                            key={item.dish.id}
+                            className="py-2 first:pt-0 last:pb-0 flex items-center justify-between gap-2 text-xs"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-stone-900 truncate" title={item.dish.name}>
+                                {item.dish.name}
+                              </p>
+                              <div className="text-[11px] text-stone-500">
+                                {formatVnd(item.dish.price)} • Tổng: {item.quantityPerTable * tableCount} phần
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateQuantity(item.dish.id, -1)}
+                                className="h-5 w-5 rounded bg-white border border-stone-200 hover:bg-stone-100 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
+                                title="Giảm 1 phần"
+                              >
+                                <Minus className="h-2.5 w-2.5" />
+                              </button>
+                              <span className="w-5 text-center font-bold text-xs text-stone-900 tabular-nums">
+                                {item.quantityPerTable}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateQuantity(item.dish.id, 1)}
+                                className="h-5 w-5 rounded bg-white border border-stone-200 hover:bg-stone-100 flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
+                                title="Tăng 1 phần"
+                              >
+                                <Plus className="h-2.5 w-2.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveDish(item.dish.id)}
+                                className="h-5 w-5 rounded hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center ml-0.5 transition-colors cursor-pointer"
+                                title="Xóa món"
+                              >
+                                <Trash2 className="h-2.5 w-2.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Validation & Stock Warnings */}
             {previewLoading && (
@@ -630,18 +783,22 @@ export const MenuBuilderPage: React.FC = () => {
 
             {/* Price Calculations */}
             {preview && (
-              <div className="rounded-xl bg-stone-50 p-4 border border-stone-100 space-y-2 text-xs">
+              <div className="rounded-xl bg-stone-50 p-4 border border-stone-200/80 space-y-2 text-xs">
                 <div className="flex justify-between text-stone-600">
                   <span>Giá 01 bàn ({selectedItems.length} món):</span>
-                  <span className="font-semibold text-stone-900">{formatVnd(preview.pricePerTable)}</span>
+                  <span className="font-semibold text-stone-900 tabular-nums">
+                    {formatVnd(preview.pricePerTable)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-stone-600">
-                  <span>Số lượng bàn tiệc:</span>
-                  <span className="font-semibold text-stone-900">{preview.tableCount} bàn</span>
+                  <span>Quy mô bàn tiệc:</span>
+                  <span className="font-semibold text-stone-900 tabular-nums">
+                    {preview.tableCount} bàn ({preview.tableCount * 10} khách)
+                  </span>
                 </div>
                 <div className="border-t border-stone-200 pt-2 flex justify-between items-baseline text-sm font-bold text-stone-900">
                   <span>Tổng tiền tạm tính:</span>
-                  <span className="text-xl font-bold text-amber-900">
+                  <span className="text-xl font-bold text-amber-900 tabular-nums">
                     {formatVnd(preview.totalAmount)}
                   </span>
                 </div>
@@ -653,7 +810,7 @@ export const MenuBuilderPage: React.FC = () => {
               type="button"
               disabled={selectedItems.length === 0}
               onClick={handleProceedToCheckout}
-              className={`w-full inline-flex items-center justify-center gap-2 rounded-xl text-xs font-semibold py-3.5 shadow-xs transition-all ${
+              className={`w-full inline-flex items-center justify-center gap-2 rounded-xl text-xs sm:text-sm font-bold py-3.5 shadow-xs transition-all ${
                 selectedItems.length === 0
                   ? 'bg-stone-200 text-stone-400 cursor-not-allowed'
                   : 'bg-amber-700 hover:bg-amber-800 text-white cursor-pointer shadow-sm'

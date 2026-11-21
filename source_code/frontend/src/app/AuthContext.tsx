@@ -1,14 +1,15 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { TOKEN_STORAGE_KEY, USER_STORAGE_KEY } from '../services/apiClient';
 import { authService, type LoginPayload, type RegisterPayload } from '../services/authService';
-import type { UserDto } from '../services/types';
+import type { AuthResponse, UserDto, VerifyEmailPayload } from '../services/types';
 
 export interface AuthContextValue {
   user: UserDto | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (payload: LoginPayload) => Promise<UserDto>;
-  register: (payload: RegisterPayload) => Promise<UserDto>;
+  login: (payload: LoginPayload) => Promise<AuthResponse>;
+  register: (payload: RegisterPayload) => Promise<AuthResponse>;
+  verifyEmail: (payload: VerifyEmailPayload) => Promise<AuthResponse>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
 }
@@ -55,20 +56,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     void refreshProfile();
   }, [refreshProfile]);
 
-  const login = useCallback(async (payload: LoginPayload): Promise<UserDto> => {
+  const login = useCallback(async (payload: LoginPayload): Promise<AuthResponse> => {
     const authRes = await authService.login(payload);
-    localStorage.setItem(TOKEN_STORAGE_KEY, authRes.accessToken);
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(authRes.user));
-    setUser(authRes.user);
-    return authRes.user;
+    if (!authRes.emailVerificationRequired && authRes.accessToken) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, authRes.accessToken);
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(authRes.user));
+      setUser(authRes.user);
+    }
+    return authRes;
   }, []);
 
-  const register = useCallback(async (payload: RegisterPayload): Promise<UserDto> => {
+  const register = useCallback(async (payload: RegisterPayload): Promise<AuthResponse> => {
     const authRes = await authService.register(payload);
-    localStorage.setItem(TOKEN_STORAGE_KEY, authRes.accessToken);
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(authRes.user));
-    setUser(authRes.user);
-    return authRes.user;
+    // Strict: Do NOT store session or authenticate user if email verification is required
+    if (!authRes.emailVerificationRequired && authRes.accessToken) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, authRes.accessToken);
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(authRes.user));
+      setUser(authRes.user);
+    }
+    return authRes;
+  }, []);
+
+  const verifyEmail = useCallback(async (payload: VerifyEmailPayload): Promise<AuthResponse> => {
+    const authRes = await authService.verifyEmail(payload);
+    if (authRes.accessToken) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, authRes.accessToken);
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(authRes.user));
+      setUser(authRes.user);
+    }
+    return authRes;
   }, []);
 
   const logout = useCallback(() => {
@@ -83,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         login,
         register,
+        verifyEmail,
         logout,
         refreshProfile,
       }}

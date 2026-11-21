@@ -51,6 +51,12 @@ public class Order {
     @Column(name = "customer_email", nullable = false, length = 150)
     private String customerEmail;
 
+    @Column(name = "contact_name", length = 120)
+    private String contactName;
+
+    @Column(name = "contact_phone", length = 25)
+    private String contactPhone;
+
     @Column(name = "event_date_time", nullable = false)
     private OffsetDateTime eventDateTime;
 
@@ -203,6 +209,22 @@ public class Order {
 
     public void setCustomerEmail(String customerEmail) {
         this.customerEmail = customerEmail;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
     }
 
     public OffsetDateTime getEventDateTime() {

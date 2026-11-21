@@ -46,7 +46,15 @@ export const LoginPage: React.FC = () => {
 
     setSubmitting(true);
     try {
-      const loggedInUser = await login({ email: email.trim(), password });
+      const authRes = await login({ email: email.trim(), password });
+
+      if (authRes.emailVerificationRequired) {
+        showToast('Tài khoản chưa được xác thực email. Hệ thống đã gửi mã OTP mới tới email của bạn!', 'info');
+        navigate('/register', { state: { email: email.trim(), step: 'VERIFY_OTP' } });
+        return;
+      }
+
+      const loggedInUser = authRes.user;
       showToast(`Kính chào ${loggedInUser.fullName}! Đăng nhập thành công.`, 'success');
 
       if (fromPath) {

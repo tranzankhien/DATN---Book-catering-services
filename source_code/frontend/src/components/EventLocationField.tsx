@@ -31,6 +31,7 @@ function AddressMap({ point, onPick }: { point?: MapPoint; onPick: (point: MapPo
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
   const marker = useRef<Overlay | null>(null);
+  const isMapClick = useRef(false);
   const latest = useRef({ point, onPick });
   const [error, setError] = useState(false);
   latest.current = { point, onPick };
@@ -48,18 +49,25 @@ function AddressMap({ point, onPick }: { point?: MapPoint; onPick: (point: MapPo
         });
         map.current = instance;
         const pin = document.createElement('div');
-        pin.className = 'flex flex-col items-center -translate-x-1/2 -translate-y-full cursor-pointer select-none';
+        pin.style.pointerEvents = 'none';
+        pin.style.userSelect = 'none';
+        pin.className = 'flex flex-col items-center';
         pin.innerHTML = `
-          <div class="px-2.5 py-1 bg-amber-900 text-white text-[11px] font-bold rounded-lg shadow-xl whitespace-nowrap mb-1 border border-amber-700/60">
+          <div class="px-2.5 py-1 bg-amber-950 text-white text-[11px] font-bold rounded-lg shadow-xl whitespace-nowrap mb-1 border border-amber-700/60">
             Sảnh tổ chức tiệc
           </div>
-          <div class="h-4 w-4 rounded-full border-2 border-white bg-amber-600 shadow-lg ring-4 ring-amber-500/30"></div>
+          <svg width="24" height="32" viewBox="0 0 24 32" fill="none" class="drop-shadow-md">
+            <path d="M12 0C5.373 0 0 5.373 0 12C0 21.5 12 32 12 32C12 32 24 21.5 24 12C24 5.373 18.627 0 12 0Z" fill="#b45309"/>
+            <circle cx="12" cy="11" r="4.5" fill="white"/>
+          </svg>
         `;
         pin.setAttribute('aria-label', 'Ghim địa điểm đã chọn');
         marker.current = new Overlay({ element: pin, positioning: 'bottom-center', stopEvent: false });
         instance.addOverlay(marker.current);
         marker.current.setPosition(selected ? center : undefined);
-        instance.on('singleclick', event => {
+        instance.on('click', event => {
+          isMapClick.current = true;
+          marker.current?.setPosition(event.coordinate);
           const [lon, lat] = toLonLat(event.coordinate);
           latest.current.onPick({ lat, lon });
         });
@@ -67,6 +75,12 @@ function AddressMap({ point, onPick }: { point?: MapPoint; onPick: (point: MapPo
         if (active) {
           instance.updateSize();
           window.setTimeout(() => instance.updateSize(), 200);
+        }
+        const ro = new ResizeObserver(() => {
+          instance.updateSize();
+        });
+        if (container.current) {
+          ro.observe(container.current);
         }
       }).catch(() => { if (active) setError(true); });
     return () => {
@@ -84,10 +98,14 @@ function AddressMap({ point, onPick }: { point?: MapPoint; onPick: (point: MapPo
     }
     const center = fromLonLat([point.lon, point.lat]);
     marker.current?.setPosition(center);
-    const view = map.current?.getView();
-    view?.setCenter(center);
-    if (view && (view.getZoom() ?? 0) < 16) view.setZoom(16);
-    map.current?.updateSize();
+    if (!isMapClick.current) {
+      const view = map.current?.getView();
+      if (view) {
+        const targetZoom = Math.max(view.getZoom() ?? 0, 16);
+        view.animate({ center, zoom: targetZoom, duration: 300 });
+      }
+    }
+    isMapClick.current = false;
   }, [point]);
 
   return (
@@ -95,7 +113,7 @@ function AddressMap({ point, onPick }: { point?: MapPoint; onPick: (point: MapPo
       <div
         ref={container}
         aria-label="Bản đồ chọn địa điểm"
-        className="relative isolate h-80 sm:h-96 md:h-[440px] w-full rounded-2xl border-2 border-stone-200/90 shadow-sm overflow-hidden bg-stone-100"
+        className="relative isolate h-80 sm:h-96 md:h-[440px] w-full rounded-2xl border-2 border-stone-200/90 shadow-sm overflow-hidden bg-stone-100 cursor-crosshair"
       />
       <div className="flex flex-wrap items-center justify-between text-xs text-stone-500 px-1 gap-2">
         <span className="flex items-center gap-1.5 font-medium text-stone-600">
@@ -107,9 +125,9 @@ function AddressMap({ point, onPick }: { point?: MapPoint; onPick: (point: MapPo
             className="inline-flex items-center gap-1 font-semibold text-amber-900 hover:text-amber-700 underline transition-colors"
             target="_blank"
             rel="noreferrer"
-            href={`https://www.openstreetmap.org/?mlat=${point.lat}&mlon=${point.lon}#map=17/${point.lat}/${point.lon}`}
+            href={`https://www.google.com/maps?q=${point.lat},${point.lon}`}
           >
-            <span>Mở trên OpenStreetMap</span>
+            <span>Mở trên Google Maps</span>
             <ExternalLink className="h-3 w-3" />
           </a>
         )}
@@ -168,16 +186,21 @@ export function EventLocationField({ value, point, onChange }: {
     reverse.current = controller;
     setSearch('');
     setOptions([]);
-    onChange('', selected);
-    setStatus('Đang xác định tên địa chỉ tại điểm đã ghim…');
+    const tempCoordText = `Vị trí đã ghim (${selected.lat.toFixed(4)}, ${selected.lon.toFixed(4)})`;
+    onChange(tempCoordText, selected);
+    setStatus('Đang xác định địa chỉ chi tiết tại điểm đã ghim…');
     try {
       const [match] = await places('/reverse', { lat: String(selected.lat), lon: String(selected.lon), limit: '1' },
         AbortSignal.any([controller.signal, AbortSignal.timeout(7000)]));
       if (controller.signal.aborted) return;
-      if (match) onChange(match.label.slice(0, 255), selected);
-      setStatus(match ? '' : 'Đã ghim vị trí. Quý khách có thể bổ sung số nhà hoặc tên sảnh.');
+      if (match && match.label) {
+        onChange(match.label.slice(0, 255), selected);
+        setStatus('');
+      } else {
+        setStatus('Đã ghim vị trí. Quý khách có thể bổ sung số nhà hoặc tên sảnh vào ô địa chỉ.');
+      }
     } catch {
-      if (!controller.signal.aborted) setStatus('Đã ghim vị trí. Quý khách có thể bổ sung số nhà hoặc tên sảnh.');
+      if (!controller.signal.aborted) setStatus('Đã ghim vị trí. Quý khách có thể bổ sung số nhà hoặc tên sảnh vào ô địa chỉ.');
     }
   }
 
@@ -224,6 +247,14 @@ export function EventLocationField({ value, point, onChange }: {
           autoComplete="off"
           value={value}
           placeholder="Ví dụ: 56-58 Ngô Gia Tự, TP. Bắc Ninh hoặc ghim trên bản đồ..."
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              if (options.length > 0) {
+                apply(options[0]);
+              }
+            }
+          }}
           onChange={event => {
             reverse.current?.abort();
             const text = event.target.value;

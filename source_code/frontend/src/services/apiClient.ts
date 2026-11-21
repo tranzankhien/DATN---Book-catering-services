@@ -4,7 +4,7 @@ import type { ApiErrorResponse } from './types';
 export const TOKEN_STORAGE_KEY = 'banquethub_access_token';
 export const USER_STORAGE_KEY = 'banquethub_user_profile';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:8080/api/v1' : '/api/v1');
+const baseURL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 export const apiClient = axios.create({
   baseURL,
@@ -34,7 +34,7 @@ export function extractErrorMessage(error: unknown, fallback = 'Đã xảy ra l�
       return data.message;
     }
     if (axiosErr.code === 'ERR_NETWORK') {
-      return 'Không thể kết nối tới Backend API (http://localhost:8080). Vui lòng kiểm tra server Spring Boot.';
+      return 'Không thể kết nối tới Backend API. Vui lòng kiểm tra server Spring Boot.';
     }
   }
   if (error instanceof Error) {

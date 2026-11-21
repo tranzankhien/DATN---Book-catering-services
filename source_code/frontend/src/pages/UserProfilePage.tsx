@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   User,
   Shield,
@@ -15,6 +16,8 @@ import {
   EyeOff,
   Briefcase,
   Users,
+  Receipt,
+  ChevronRight,
 } from 'lucide-react';
 import { userService, type ChangePasswordPayload, type UpdateProfilePayload } from '../services/userService';
 import type { Role, UserDto } from '../services/types';
@@ -133,6 +136,18 @@ export const UserProfilePage: React.FC = () => {
     }
   };
 
+  const getRoleLabel = (role?: Role) => {
+    switch (role) {
+      case 'ROLE_ADMIN':
+        return 'Quản trị viên';
+      case 'ROLE_EMPLOYEE':
+        return 'Nhân viên điều phối';
+      case 'ROLE_USER':
+      default:
+        return 'Khách hàng thành viên';
+    }
+  };
+
   const formatDate = (isoStr?: string | null) => {
     if (!isoStr) return '—';
     try {
@@ -167,12 +182,8 @@ export const UserProfilePage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-2">
+            <div className="flex items-center">
               {getRoleBadge(user?.role)}
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Tài khoản đang hoạt động</span>
-              </span>
             </div>
           </div>
 
@@ -281,19 +292,26 @@ export const UserProfilePage: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-stone-500">Phân quyền:</span>
-                    <span className="font-semibold text-amber-800">{user?.role}</span>
+                    <span className="font-semibold text-amber-800">{getRoleLabel(user?.role)}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-amber-50/70 border border-amber-200/80 rounded-3xl p-5 text-xs space-y-2 text-amber-900">
-                <div className="flex items-center gap-1.5 font-bold">
-                  <Shield className="h-4 w-4 text-amber-700" />
-                  <span>Chính sách tài khoản</span>
+              <div className="bg-white rounded-3xl border border-stone-200/90 p-5 shadow-xs space-y-3 text-xs">
+                <div className="flex items-center gap-2 font-bold text-stone-900">
+                  <Receipt className="h-4 w-4 text-amber-700" />
+                  <span>Đơn tiệc của bạn</span>
                 </div>
-                <p className="text-[11px] leading-relaxed text-amber-800">
-                  Thông tin vai trò được phân định nghiêm ngặt bởi Quản trị viên hệ thống. Người dùng không thể tự nâng quyền hoặc thay đổi trạng thái tài khoản.
+                <p className="text-stone-500 text-[11px] leading-relaxed">
+                  Theo dõi danh sách các đơn tiệc đã đặt, kiểm tra tiến độ phục vụ và xem hóa đơn điện tử.
                 </p>
+                <Link
+                  to="/my-orders"
+                  className="inline-flex items-center justify-between w-full rounded-xl bg-amber-50 hover:bg-amber-100/80 text-amber-900 border border-amber-200/80 px-3.5 py-2.5 font-bold text-xs transition-colors"
+                >
+                  <span>Xem lịch sử đơn tiệc</span>
+                  <ChevronRight className="h-4 w-4 text-amber-700" />
+                </Link>
               </div>
             </div>
           </div>

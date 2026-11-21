@@ -339,7 +339,7 @@ export const AiMenuPage: React.FC = () => {
                 }
                 className="text-[11px] font-medium bg-stone-50 hover:bg-amber-50 hover:text-amber-900 hover:border-amber-300 text-stone-700 border border-stone-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
               >
-                🎂 Sinh nhật 5 bàn (1.500.000đ/bàn)
+                Sinh nhật 5 bàn (1.500.000đ/bàn)
               </button>
               <button
                 type="button"
@@ -350,7 +350,7 @@ export const AiMenuPage: React.FC = () => {
                 }
                 className="text-[11px] font-medium bg-stone-50 hover:bg-amber-50 hover:text-amber-900 hover:border-amber-300 text-stone-700 border border-stone-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
               >
-                🏢 Liên hoan công ty 10 bàn
+                Liên hoan công ty 10 bàn
               </button>
               <button
                 type="button"
@@ -361,7 +361,7 @@ export const AiMenuPage: React.FC = () => {
                 }
                 className="text-[11px] font-medium bg-stone-50 hover:bg-amber-50 hover:text-amber-900 hover:border-amber-300 text-stone-700 border border-stone-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
               >
-                🏡 Tiệc gia đình 3 bàn
+                Tiệc gia đình 3 bàn
               </button>
             </div>
 

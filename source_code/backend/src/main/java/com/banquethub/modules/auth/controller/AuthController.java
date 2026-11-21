@@ -35,7 +35,21 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
         AuthResponse response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Đăng ký tài khoản thành công", response));
+                .body(ApiResponse.ok("Đăng ký tài khoản thành công! Vui lòng nhập mã xác thực email.", response));
+    }
+
+    @PostMapping("/verify-email")
+    @Operation(summary = "Xác thực địa chỉ email qua mã OTP 6 số")
+    public ResponseEntity<ApiResponse<AuthResponse>> verifyEmail(@Valid @RequestBody com.banquethub.modules.auth.dto.VerifyEmailRequest request) {
+        AuthResponse response = authService.verifyEmail(request);
+        return ResponseEntity.ok(ApiResponse.ok("Xác thực email thành công! Đăng nhập hoàn tất.", response));
+    }
+
+    @PostMapping("/resend-verification")
+    @Operation(summary = "Gửi lại mã OTP xác thực email")
+    public ResponseEntity<ApiResponse<Void>> resendVerification(@Valid @RequestBody com.banquethub.modules.auth.dto.ResendVerificationRequest request) {
+        String msg = authService.resendVerification(request);
+        return ResponseEntity.ok(ApiResponse.ok(msg, null));
     }
 
     @PostMapping("/login")

@@ -96,11 +96,19 @@ export function PaymentResultPage() {
     };
   }, [reference, retry]);
 
+  const [orderLoading, setOrderLoading] = useState(true);
+
   useEffect(() => {
     if (state?.orderId) {
-      orderService.getOrderById(state.orderId).then(setOrder).catch(() => {});
+      setOrderLoading(true);
+      orderService.getOrderById(state.orderId)
+        .then(setOrder)
+        .catch(() => {})
+        .finally(() => setOrderLoading(false));
+    } else if (!waiting) {
+      setOrderLoading(false);
     }
-  }, [state?.orderId]);
+  }, [state?.orderId, waiting]);
 
   const outcome = state && reference ? paymentOutcome(state, reference) : 'pending';
   const latestTx = state?.transactions && state.transactions.length > 0 ? state.transactions[0] : undefined;
@@ -181,7 +189,7 @@ export function PaymentResultPage() {
           )}
           {reference && (
             <div className="pl-4 border-l border-stone-200">
-              <span className="text-stone-400 block font-medium text-[11px]">Mã GD VietQR</span>
+              <span className="text-stone-400 block font-medium text-[11px]">Mã GD SePay</span>
               <div className="flex items-center gap-1.5 font-semibold text-stone-800 tabular-nums">
                 <span>{reference}</span>
                 <button
@@ -303,7 +311,7 @@ export function PaymentResultPage() {
                 </div>
                 <div className="flex justify-between items-center text-emerald-800">
                   <span className="flex items-center gap-1 font-medium">
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Đã thanh toán qua VietQR Napas:
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Đã thanh toán qua cổng SePay:
                   </span>
                   <span className="font-bold tabular-nums">{formatVnd(order.totalAmount)}</span>
                 </div>
@@ -319,10 +327,36 @@ export function PaymentResultPage() {
                 <span>Chuyên viên BanquetHub sẽ liên hệ trong 24h để xác nhận điều phối sảnh và chuẩn bị tiệc.</span>
               </div>
             </div>
-          ) : (
+          ) : orderLoading && waiting ? (
             <div className="py-12 text-center text-xs text-stone-400">
               <RefreshCw className="h-5 w-5 animate-spin mx-auto text-amber-600 mb-2" />
               <span>Đang tải thông tin hợp đồng đơn tiệc...</span>
+            </div>
+          ) : (
+            <div className="py-10 text-center text-xs space-y-3">
+              <CheckCircle2 className="h-8 w-8 text-emerald-600 mx-auto" />
+              <p className="text-stone-800 font-bold text-sm">
+                Giao dịch SePay đã được hệ thống ghi nhận thành công
+              </p>
+              <p className="text-stone-500 max-w-md mx-auto leading-relaxed">
+                {authExpired
+                  ? 'Tài khoản chưa được đồng bộ trên trình duyệt này. Vui lòng bấm Đăng nhập để xem toàn bộ thông tin hợp đồng.'
+                  : 'Chi tiết đơn tiệc đã được ghi nhận. Quý khách có thể xem đầy đủ tiến độ trong mục Đơn tiệc của tôi.'}
+              </p>
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <Link
+                  to="/my-orders"
+                  className="px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-xs transition-colors"
+                >
+                  Xem danh sách đơn tiệc
+                </Link>
+                <Link
+                  to="/"
+                  className="px-4 py-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 font-semibold text-xs shadow-2xs transition-colors"
+                >
+                  Về trang chủ
+                </Link>
+              </div>
             </div>
           )}
         </section>
@@ -335,18 +369,18 @@ export function PaymentResultPage() {
               <div className="flex items-center gap-2">
                 <CreditCard className="h-4 w-4 text-amber-700" />
                 <h3 className="font-bold text-xs uppercase tracking-wider text-stone-800">
-                  Chứng từ VietQR
+                  Chứng từ giao dịch SePay
                 </h3>
               </div>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                Napas 24/7
+                SePay PG
               </span>
             </div>
 
             <div className="space-y-2.5 text-xs">
               <div className="flex justify-between items-center">
                 <span className="text-stone-400">Cổng thanh toán:</span>
-                <span className="font-semibold text-stone-800">VietQR Napas 24/7</span>
+                <span className="font-semibold text-stone-800">Cổng thanh toán SePay</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-stone-400">Thời gian ghi nhận:</span>

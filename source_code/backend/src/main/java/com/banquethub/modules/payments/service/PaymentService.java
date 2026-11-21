@@ -69,9 +69,21 @@ public class PaymentService {
 
     @Transactional
     public Attempt create(Long orderId, Long userId) {
+        return create(orderId, userId, false);
+    }
+
+    @Transactional
+    public Attempt create(Long orderId, Long userId, boolean isAdmin) {
+        return create(orderId, userId, isAdmin, null);
+    }
+
+    @Transactional
+    public Attempt create(Long orderId, Long userId, boolean isAdmin, String customReturnUrl) {
         config.requireConfigured();
         Order order=lockOrder(orderId);
-        requireOwner(order,userId);
+        if (!isAdmin) {
+            requireOwner(order,userId);
+        }
         OffsetDateTime now=OffsetDateTime.now(ZONE);
         if(order.getOrderStatus()!=OrderStatus.PENDING_PAYMENT || order.getPaymentStatus()!=PaymentStatus.UNPAID)
             throw new BusinessValidationException("Đơn không còn ở trạng thái chờ thanh toán.");
@@ -91,7 +103,7 @@ public class PaymentService {
             PaymentTransaction pending = existing.get();
             if ("SEPAY".equals(pending.getProvider()) && pending.getExpiresAt().isAfter(expiry))
                 throw new BusinessValidationException("Yêu cầu thanh toán cũ vượt quá thời hạn hiện tại. Vui lòng liên hệ hỗ trợ.");
-            if ("SEPAY".equals(pending.getProvider()) && pending.getExpiresAt().isAfter(now)) return attempt(pending);
+            if ("SEPAY".equals(pending.getProvider()) && pending.getExpiresAt().isAfter(now)) return attempt(pending, customReturnUrl);
             pending.setStatus("EXPIRED");
             payments.flush();
         }
@@ -106,12 +118,15 @@ public class PaymentService {
         payment.setUpdatedAt(now);
         payment.setExpiresAt(expiry);
         payment.setPaymentUrl(SePayConfig.CHECKOUT_URL);
-        return attempt(payments.save(payment));
+        return attempt(payments.save(payment), customReturnUrl);
     }
 
-    private Attempt attempt(PaymentTransaction payment) {
+    private Attempt attempt(PaymentTransaction payment, String customReturnUrl) {
         String reference = payment.getTransactionReference();
-        String callback = org.springframework.web.util.UriComponentsBuilder.fromUriString(config.returnUrl)
+        String baseReturnUrl = (customReturnUrl != null && !customReturnUrl.isBlank())
+                ? customReturnUrl
+                : config.returnUrl;
+        String callback = org.springframework.web.util.UriComponentsBuilder.fromUriString(baseReturnUrl)
             .replaceQueryParam("reference", reference).build().toUriString();
         Map<String,String> fields = new LinkedHashMap<>();
         fields.put("operation", "PURCHASE");
@@ -321,23 +336,31 @@ public class PaymentService {
         return true;
     }
 
-    @Transactional(readOnly=true)
-    public Status status(Long orderId,Long userId,boolean admin) {
-        Order order=orders.findById(orderId).orElseThrow(()->new ResourceNotFoundException("Không tìm thấy đơn."));
-        if(!admin) requireOwner(order,userId);
-        return new Status(orderId,order.getOrderStatus(),order.getPaymentStatus(),config.isConfigured(),
-            payments.findByOrderIdOrderByCreatedAtDesc(orderId).stream()
+    private Status buildStatus(Order order, boolean admin) {
+        return new Status(order.getId(), order.getOrderStatus(), order.getPaymentStatus(), config.isConfigured(),
+            payments.findByOrderIdOrderByCreatedAtDesc(order.getId()).stream()
                 .map(payment -> admin ? PaymentView.from(payment) : PaymentView.forCustomer(payment)).toList(),
-            reservations.findByOrderId(orderId)
+            reservations.findByOrderId(order.getId())
                 .map(com.banquethub.modules.reservations.dto.StockReservationResponse::fromEntity).orElse(null),
             order.getStatusHistories().stream()
                 .map(com.banquethub.modules.orders.dto.OrderStatusHistoryResponse::fromEntity).toList());
     }
 
     @Transactional(readOnly=true)
+    public Status status(Long orderId,Long userId,boolean admin) {
+        Order order=orders.findById(orderId).orElseThrow(()->new ResourceNotFoundException("Không tìm thấy đơn."));
+        if(!admin) requireOwner(order,userId);
+        return buildStatus(order, admin);
+    }
+
+    @Transactional(readOnly=true)
     public Status reference(String reference,Long userId, boolean admin) {
         var payment=payments.findByTransactionReference(reference).orElseThrow(()->new ResourceNotFoundException("Không tìm thấy giao dịch."));
-        return status(payment.getOrder().getId(),userId,admin);
+        Order order = payment.getOrder();
+        if (userId != null && !admin) {
+            requireOwner(order, userId);
+        }
+        return buildStatus(order, admin);
     }
 
     @Transactional(readOnly=true)
@@ -348,6 +371,59 @@ public class PaymentService {
     @Transactional(readOnly=true)
     public PaymentView detail(Long id) {
         return PaymentView.from(payments.findById(id).orElseThrow(()->new ResourceNotFoundException("Không tìm thấy giao dịch.")));
+    }
+
+    @Transactional
+    public PaymentView simulateSandboxSuccess(Long orderId, Long userId, boolean isAdmin) {
+        Order order = lockOrder(orderId);
+        if (!isAdmin) {
+            requireOwner(order, userId);
+        }
+        if (order.getOrderStatus() == OrderStatus.PAID && order.getPaymentStatus() == PaymentStatus.PAID) {
+            var existing = payments.findByOrderIdOrderByCreatedAtDesc(orderId);
+            if (!existing.isEmpty()) {
+                return PaymentView.from(existing.getFirst());
+            }
+        }
+        OffsetDateTime now = OffsetDateTime.now(ZONE);
+        if (order.getPaymentExpiresAt() == null || !order.getPaymentExpiresAt().isAfter(now)) {
+            order.setPaymentExpiresAt(now.plusMinutes(15));
+        }
+        StockReservation reservation = reservations.findByOrderId(orderId).orElse(null);
+        if (reservation != null && (!reservation.isActive() || reservation.getExpiresAt().isBefore(now))) {
+            reservation.setStatus(ReservationStatus.ACTIVE);
+            reservation.setExpiresAt(now.plusMinutes(15));
+            reservations.save(reservation);
+        }
+
+        PaymentTransaction payment = payments.findFirstByOrderIdAndStatusOrderByCreatedAtDesc(orderId, "PENDING")
+                .orElseGet(() -> {
+                    PaymentTransaction p = new PaymentTransaction();
+                    p.setOrder(order);
+                    p.setProvider("SEPAY");
+                    p.setCurrency("VND");
+                    p.setStatus("PENDING");
+                    p.setAmount(order.getTotalAmount());
+                    p.setTransactionReference(UUID.randomUUID().toString().replace("-", ""));
+                    p.setCreatedAt(now);
+                    p.setUpdatedAt(now);
+                    p.setExpiresAt(now.plusMinutes(15));
+                    p.setPaymentUrl(SePayConfig.CHECKOUT_URL);
+                    return payments.save(p);
+                });
+
+        payment.setResponseCode("00");
+        payment.setTransactionStatus("00");
+        payment.setProviderTransactionNo("SIM-" + System.currentTimeMillis());
+        payment.setPaidAt(now);
+        payment.setBankCode("SANDBOX");
+        payment.setExpiresAt(now.plusMinutes(15));
+
+        String reason = settle(order, payment, null, "Giả lập thanh toán thành công (Sandbox Demo).");
+        if (reason != null) {
+            flagReview(order, payment, reason);
+        }
+        return PaymentView.from(payment);
     }
 
     private Order lockOrder(Long id) {

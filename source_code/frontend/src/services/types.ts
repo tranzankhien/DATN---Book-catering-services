@@ -26,6 +26,7 @@ export interface UserDto {
   phone?: string | null;
   role: Role;
   active: boolean;
+  emailVerified?: boolean;
   createdAt: string;
 }
 
@@ -34,6 +35,17 @@ export interface AuthResponse {
   tokenType: string;
   expiresInMs: number;
   user: UserDto;
+  emailVerificationRequired?: boolean;
+  devVerificationCode?: string;
+}
+
+export interface VerifyEmailPayload {
+  email: string;
+  code: string;
+}
+
+export interface ResendVerificationPayload {
+  email: string;
 }
 
 export interface CategoryDto {
@@ -393,6 +405,8 @@ export interface OrderDto {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
+  contactName?: string | null;
+  contactPhone?: string | null;
   eventDateTime: string;
   tableCount: number;
   note?: string | null;
@@ -460,6 +474,8 @@ export interface CreateOrderPayload {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
+  contactName?: string;
+  contactPhone?: string;
   eventDateTime: string;
   tableCount: number;
   note?: string;

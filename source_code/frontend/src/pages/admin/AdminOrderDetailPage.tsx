@@ -286,8 +286,8 @@ export const AdminOrderDetailPage: React.FC = () => {
             <span className="text-stone-700">{order.eventLocation || 'Chưa cung cấp'}
               {order.eventLatitude != null && order.eventLongitude != null && (
                 <a className="ml-2 text-amber-800 underline" target="_blank" rel="noreferrer"
-                  href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}>
-                  Xem bản đồ
+                  href={`https://www.google.com/maps?q=${order.eventLatitude},${order.eventLongitude}`}>
+                  Xem Google Maps
                 </a>
               )}</span>
           </div>

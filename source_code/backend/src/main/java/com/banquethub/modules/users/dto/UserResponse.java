@@ -13,6 +13,7 @@ public class UserResponse {
     private String phone;
     private Role role;
     private boolean active;
+    private boolean emailVerified;
     private OffsetDateTime lastLoginAt;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
@@ -28,6 +29,7 @@ public class UserResponse {
         dto.setPhone(user.getPhone());
         dto.setRole(user.getRole());
         dto.setActive(user.isActive());
+        dto.setEmailVerified(user.isEmailVerified());
         dto.setLastLoginAt(user.getLastLoginAt());
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
@@ -80,6 +82,14 @@ public class UserResponse {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
     }
 
     public OffsetDateTime getLastLoginAt() {

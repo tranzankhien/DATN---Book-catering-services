@@ -20,8 +20,11 @@ export interface NotificationView {
   attempts: number; lastError?: string; createdAt: string; sentAt?: string;
 }
 export const paymentService = {
-  async create(orderId: number) {
-    return (await apiClient.post<ApiResponse<{ checkoutUrl: string; fields: Record<string, string>; paymentAttemptId: number; transactionReference: string; expiresAt: string }>>('/payments/sepay/create', { orderId })).data.data;
+  async create(orderId: number, returnUrl?: string) {
+    return (await apiClient.post<ApiResponse<{ checkoutUrl: string; fields: Record<string, string>; paymentAttemptId: number; transactionReference: string; expiresAt: string }>>('/payments/sepay/create', { orderId, returnUrl })).data.data;
+  },
+  async simulateSandboxPay(orderId: number) {
+    return (await apiClient.post<ApiResponse<PaymentView>>(`/payments/orders/${orderId}/simulate-sandbox-pay`)).data.data;
   },
   async status(orderId: number) {
     return (await apiClient.get<ApiResponse<PaymentState>>(`/orders/${orderId}/payment-status`)).data.data;

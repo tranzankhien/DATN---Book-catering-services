@@ -281,9 +281,16 @@ export const BookingConfirmationPage: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
               <div className="space-y-1">
-                <span className="text-stone-400 block font-medium">Khách hàng liên hệ:</span>
+                <span className="text-stone-400 block font-medium">Khách hàng đặt tiệc:</span>
                 <p className="font-bold text-stone-900 text-sm">{order.customerName}</p>
                 <p className="text-stone-600 tabular-nums">{order.customerPhone} • {order.customerEmail}</p>
+                {order.contactName && (
+                  <div className="mt-1.5 pt-1.5 border-t border-stone-100 text-[11px]">
+                    <span className="text-stone-500 font-medium">Người liên hệ tại sự kiện: </span>
+                    <span className="font-bold text-stone-900">{order.contactName}</span>
+                    {order.contactPhone && <span className="text-stone-600 font-mono ml-1">({order.contactPhone})</span>}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1">
@@ -300,10 +307,10 @@ export const BookingConfirmationPage: React.FC = () => {
                       className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 hover:text-amber-900 hover:underline"
                       target="_blank"
                       rel="noreferrer"
-                      href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}
+                      href={`https://www.google.com/maps?q=${order.eventLatitude},${order.eventLongitude}`}
                     >
                       <MapPin className="h-3 w-3" />
-                      <span>Xem bản đồ →</span>
+                      <span>Xem Google Maps →</span>
                     </a>
                   )}
                 </div>

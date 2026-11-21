@@ -90,7 +90,8 @@ export function OrderPaymentPanel({
     setBusy(true);
     setError('');
     try {
-      const result = await paymentService.create(order.id);
+      const returnUrl = `${window.location.origin}/payment/result`;
+      const result = await paymentService.create(order.id, returnUrl);
       if (result.checkoutUrl !== 'https://pay-sandbox.sepay.vn/v1/checkout/init') {
         throw new Error('URL thanh toán Sandbox không hợp lệ.');
       }
@@ -131,14 +132,14 @@ export function OrderPaymentPanel({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-bold uppercase tracking-wider text-stone-900">
-                Thanh toán trực tuyến VietQR
+                Thanh toán trực tuyến SePay
               </h2>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                Napas 24/7
+                SePay PG 24/7
               </span>
             </div>
             <p className="text-xs text-stone-500 mt-0.5">
-              Quét mã chuyển khoản liên ngân hàng tự động
+              Quét mã QR chuyển khoản liên ngân hàng tự động qua cổng SePay
             </p>
           </div>
         </div>
@@ -248,12 +249,12 @@ export function OrderPaymentPanel({
               <span>Cổng thanh toán trực tuyến đang được bảo trì. Vui lòng liên hệ hotline nhà hàng để được hỗ trợ.</span>
             </div>
           ) : (
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <button
                 type="button"
                 disabled={busy || !checkoutConfigured}
                 onClick={pay}
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm py-3.5 px-6 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm py-3.5 px-6 shadow-sm transition-all cursor-pointer disabled:opacity-50"
               >
                 {busy ? (
                   <>
@@ -263,7 +264,7 @@ export function OrderPaymentPanel({
                 ) : (
                   <>
                     <QrCode className="h-4 w-4" />
-                    <span>Thanh toán ngay qua VietQR</span>
+                    <span>Thanh toán ngay qua SePay</span>
                     <ChevronRight className="h-4 w-4" />
                   </>
                 )}
@@ -283,7 +284,7 @@ export function OrderPaymentPanel({
         <div className="pt-3 border-t border-stone-100 space-y-3">
           <div className="flex items-center justify-between text-xs font-bold text-stone-700 uppercase tracking-wider">
             <span>Lịch sử giao dịch ({state.transactions.length})</span>
-            <span className="font-normal text-stone-400 text-[11px]">VietQR Gateway</span>
+            <span className="font-normal text-stone-400 text-[11px]">Cổng thanh toán SePay</span>
           </div>
 
           <div className="divide-y divide-stone-100 rounded-xl border border-stone-200 overflow-hidden bg-stone-50/50">

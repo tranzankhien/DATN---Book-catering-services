@@ -30,7 +30,7 @@ public class PaymentController {
         this.queryService=queryService;
     }
 
-    public record CreateRequest(@NotNull @Positive Long orderId) {}
+    public record CreateRequest(@NotNull @Positive Long orderId, String returnUrl) {}
     public record ReviewRequest(
         @jakarta.validation.constraints.NotBlank String action,
         @jakarta.validation.constraints.NotBlank @jakarta.validation.constraints.Size(max=300) String reason,
@@ -44,10 +44,36 @@ public class PaymentController {
     }
 
     @PostMapping("/payments/sepay/create")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EMPLOYEE')")
     public ApiResponse<PaymentService.Attempt> create(@Valid @RequestBody CreateRequest body,
-            @AuthenticationPrincipal CustomUserDetails user) {
-        return ApiResponse.ok("Đã tạo yêu cầu thanh toán",service.create(body.orderId(),user.getId()));
+            @AuthenticationPrincipal CustomUserDetails user,
+            HttpServletRequest request) {
+        String effectiveReturnUrl = body.returnUrl();
+        if (effectiveReturnUrl == null || effectiveReturnUrl.isBlank()) {
+            String origin = request.getHeader("Origin");
+            if (origin != null && !origin.isBlank()) {
+                effectiveReturnUrl = origin + "/payment/result";
+            } else {
+                String referer = request.getHeader("Referer");
+                if (referer != null && !referer.isBlank()) {
+                    try {
+                        java.net.URI uri = java.net.URI.create(referer);
+                        effectiveReturnUrl = uri.getScheme() + "://" + uri.getAuthority() + "/payment/result";
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        }
+        return ApiResponse.ok("Đã tạo yêu cầu thanh toán",
+                service.create(body.orderId(), user.getId(), isAdmin(user), effectiveReturnUrl));
+    }
+
+    @PostMapping("/payments/orders/{id}/simulate-sandbox-pay")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EMPLOYEE')")
+    public ApiResponse<com.banquethub.modules.payments.dto.PaymentView> simulateSandboxPay(
+            @PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user) {
+        return ApiResponse.ok("Đã giả lập thanh toán Sandbox thành công",
+                service.simulateSandboxSuccess(id, user.getId(), isAdmin(user)));
     }
 
     @PostMapping("/payments/sepay/ipn")
@@ -86,8 +112,11 @@ public class PaymentController {
     }
 
     @GetMapping("/payments/reference/{reference}")
-    public ApiResponse<PaymentService.Status> reference(@PathVariable String reference,@AuthenticationPrincipal CustomUserDetails user) {
-        return ApiResponse.ok("Trạng thái thanh toán",service.reference(reference,user.getId(),isAdmin(user)));
+    public ApiResponse<PaymentService.Status> reference(@PathVariable String reference,
+            @AuthenticationPrincipal CustomUserDetails user) {
+        Long userId = user != null ? user.getId() : null;
+        boolean admin = user != null && isAdmin(user);
+        return ApiResponse.ok("Trạng thái thanh toán", service.reference(reference, userId, admin));
     }
 
     @GetMapping({"/admin/payments","/admin/payments/review"})

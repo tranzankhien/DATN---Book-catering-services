@@ -294,9 +294,9 @@ export const OrderDetailPage: React.FC = () => {
                   className="ml-2 text-amber-800 underline font-normal text-xs"
                   target="_blank"
                   rel="noreferrer"
-                  href={`https://www.openstreetmap.org/?mlat=${order.eventLatitude}&mlon=${order.eventLongitude}#map=17/${order.eventLatitude}/${order.eventLongitude}`}
+                  href={`https://www.google.com/maps?q=${order.eventLatitude},${order.eventLongitude}`}
                 >
-                  Xem bản đồ
+                  Xem Google Maps
                 </a>
               )}
             </div>
@@ -322,6 +322,14 @@ export const OrderDetailPage: React.FC = () => {
             <span className="text-stone-800 tabular-nums">{order.customerPhone}</span>
             <span>•</span>
             <span className="text-stone-500">{order.customerEmail}</span>
+            {order.contactName && (
+              <>
+                <span className="text-stone-300">|</span>
+                <span className="font-semibold text-stone-700">Người đón tiếp tại sự kiện:</span>
+                <span className="text-stone-900 font-bold">{order.contactName}</span>
+                {order.contactPhone && <span className="text-stone-800 tabular-nums font-mono">({order.contactPhone})</span>}
+              </>
+            )}
           </div>
 
           <div className="flex items-center gap-2 max-w-md">

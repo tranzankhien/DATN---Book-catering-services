@@ -5,6 +5,7 @@ import {
   Calendar,
   Clock,
   User,
+  UserCheck,
   Phone,
   Mail,
   FileText,
@@ -74,6 +75,9 @@ export const CheckoutPage: React.FC = () => {
   const [customerName, setCustomerName] = useState<string>('');
   const [customerPhone, setCustomerPhone] = useState<string>('');
   const [customerEmail, setCustomerEmail] = useState<string>('');
+  const [contactName, setContactName] = useState<string>('');
+  const [contactPhone, setContactPhone] = useState<string>('');
+  const [sameAsCustomer, setSameAsCustomer] = useState<boolean>(true);
   const [eventDate, setEventDate] = useState<string>('');
   const [eventTime, setEventTime] = useState<string>('18:00');
   const [tableCount, setTableCount] = useState<number>(
@@ -316,6 +320,18 @@ export const CheckoutPage: React.FC = () => {
       return;
     }
 
+    const finalContactName = sameAsCustomer ? customerName.trim() : contactName.trim();
+    const finalContactPhone = sameAsCustomer ? customerPhone.trim() : contactPhone.trim();
+
+    if (!finalContactName) {
+      showToast('Vui lòng nhập họ và tên người liên hệ đón tiếp tại sự kiện', 'error');
+      return;
+    }
+    if (!finalContactPhone || !/^(0|\+84)[0-9]{9,10}$/.test(finalContactPhone)) {
+      showToast('Vui lòng nhập số điện thoại người liên hệ tại sự kiện hợp lệ (10 số)', 'error');
+      return;
+    }
+
     try {
       setSubmitting(true);
       setError(null);
@@ -334,6 +350,8 @@ export const CheckoutPage: React.FC = () => {
         customerName: customerName.trim(),
         customerPhone: customerPhone.trim(),
         customerEmail: customerEmail.trim().toLowerCase(),
+        contactName: finalContactName,
+        contactPhone: finalContactPhone,
         eventDateTime: eventDateTimeIso,
         tableCount,
         guestCount: Number(guestCount),
@@ -512,6 +530,77 @@ export const CheckoutPage: React.FC = () => {
               </div>
             </div>
 
+            {/* On-site Event Contact Card */}
+            <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <UserCheck className="h-4 w-4 text-amber-700" />
+                  <h3 className="font-bold text-base text-stone-900 tracking-tight">
+                    Người liên hệ tại sự kiện <span className="text-rose-500">*</span>
+                  </h3>
+                </div>
+                <label className="inline-flex items-center gap-2 text-xs font-semibold text-stone-700 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={sameAsCustomer}
+                    onChange={(e) => {
+                      setSameAsCustomer(e.target.checked);
+                      if (e.target.checked) {
+                        setContactName(customerName);
+                        setContactPhone(customerPhone);
+                      }
+                    }}
+                    className="rounded border-stone-300 text-amber-600 focus:ring-amber-500 h-4 w-4"
+                  />
+                  <span>Giống thông tin người đặt tiệc</span>
+                </label>
+              </div>
+
+              <p className="text-xs text-stone-500">
+                Nhân sự BanquetHub và đội bếp trưởng tại sảnh sẽ trực tiếp liên hệ số này để điều phối setup bàn ghế và giờ lên món.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-stone-700">
+                    Họ và tên người đón tiếp tại sảnh <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    readOnly={sameAsCustomer}
+                    placeholder="Ví dụ: Chú rể / Đại diện gia đình / Quản lý"
+                    value={sameAsCustomer ? customerName : contactName}
+                    onChange={(e) => setContactName(e.target.value)}
+                    className={`w-full rounded-xl border px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 transition-colors shadow-xs ${
+                      sameAsCustomer
+                        ? 'border-stone-200 bg-stone-100/80 text-stone-600 cursor-not-allowed'
+                        : 'border-stone-300 bg-stone-50/50 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none'
+                    }`}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-stone-700">
+                    Số điện thoại người liên hệ <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    readOnly={sameAsCustomer}
+                    placeholder="0987654321"
+                    value={sameAsCustomer ? customerPhone : contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                    className={`w-full rounded-xl border px-3.5 py-2.5 text-xs sm:text-sm text-stone-900 transition-colors shadow-xs ${
+                      sameAsCustomer
+                        ? 'border-stone-200 bg-stone-100/80 text-stone-600 cursor-not-allowed'
+                        : 'border-stone-300 bg-stone-50/50 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 focus:outline-none'
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Event Time & Scale Card */}
             <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-xs space-y-5">
               <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
@@ -620,7 +709,7 @@ export const CheckoutPage: React.FC = () => {
                 <span>Phương thức thanh toán trực tuyến</span>
               </div>
               <p className="text-xs leading-relaxed text-amber-800">
-                Sau khi xác nhận đặt tiệc, quý khách có 15 phút để quét mã VietQR và hoàn tất thanh toán giữ chỗ thực đơn.
+                Sau khi xác nhận đặt tiệc, quý khách có 15 phút để quét mã chuyển khoản qua cổng SePay và hoàn tất thanh toán giữ chỗ thực đơn.
               </p>
             </div>
           </div>

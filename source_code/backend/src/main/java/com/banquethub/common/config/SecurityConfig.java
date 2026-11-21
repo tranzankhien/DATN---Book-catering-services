@@ -85,9 +85,10 @@ public class SecurityConfig {
                         })
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/verify-email", "/api/v1/auth/resend-verification").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/catalog/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/payments/sepay/ipn").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/payments/reference/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/menus/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/menus/*/preview").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/menus/preview").permitAll()
@@ -111,7 +112,10 @@ public class SecurityConfig {
                 "http://localhost:[*]",
                 "http://127.0.0.1:[*]",
                 "http://localhost:*",
-                "http://127.0.0.1:*"
+                "http://127.0.0.1:*",
+                "https://*.trycloudflare.com",
+                "https://*.ngrok-free.app",
+                "https://*.ngrok.io"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "Idempotency-Key"));
