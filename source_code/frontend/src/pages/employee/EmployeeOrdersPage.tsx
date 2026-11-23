@@ -17,6 +17,7 @@ import type { OrderDto, OrderStatus } from '../../services/types';
 import { formatDateTimeVn } from '../../hooks/useFormatters';
 import { LoadingState, ErrorState } from '../../components/StatusStates';
 import { extractErrorMessage } from '../../services/apiClient';
+import { Pagination } from '../../components/common/Pagination';
 
 export const EmployeeOrdersPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,7 +28,9 @@ export const EmployeeOrdersPage: React.FC = () => {
   const [fromDate, setFromDate] = useState<string>('');
   const [toDate, setToDate] = useState<string>('');
   const [page, setPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [totalElements, setTotalElements] = useState<number>(0);
 
   const fetchOrders = async () => {
     try {
@@ -38,10 +41,11 @@ export const EmployeeOrdersPage: React.FC = () => {
         fromDate: fromDate ? `${fromDate}T00:00:00+07:00` : undefined,
         toDate: toDate ? `${toDate}T23:59:59+07:00` : undefined,
         page,
-        size: 10,
+        size: pageSize,
       });
       setOrders(res.content);
       setTotalPages(res.totalPages);
+      setTotalElements(res.totalElements);
     } catch (err) {
       setError(extractErrorMessage(err));
     } finally {
@@ -51,7 +55,7 @@ export const EmployeeOrdersPage: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [statusFilter, fromDate, toDate, page]);
+  }, [statusFilter, fromDate, toDate, page, pageSize]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
@@ -229,25 +233,20 @@ export const EmployeeOrdersPage: React.FC = () => {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="p-4 border-t border-stone-100 flex justify-center items-center gap-2">
-            <button
-              disabled={page === 0}
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
-              className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors"
-            >
-              Trang trước
-            </button>
-            <span className="px-3 py-1.5 text-xs text-stone-500 font-medium">
-              Trang {page + 1} / {totalPages}
-            </span>
-            <button
-              disabled={page >= totalPages - 1}
-              onClick={() => setPage((p) => p + 1)}
-              className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors"
-            >
-              Trang sau
-            </button>
+        {!loading && !error && totalElements > 0 && (
+          <div className="p-4 border-t border-stone-100">
+            <Pagination
+              currentPage={page + 1}
+              totalItems={totalElements}
+              pageSize={pageSize}
+              onPageChange={(p) => setPage(p - 1)}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setPage(0);
+              }}
+              pageSizeOptions={[10, 20, 50]}
+              itemLabel="đơn tiệc bếp"
+            />
           </div>
         )}
       </div>

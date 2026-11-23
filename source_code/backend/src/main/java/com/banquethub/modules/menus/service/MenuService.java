@@ -86,8 +86,21 @@ public class MenuService {
 
     @Transactional(readOnly = true)
     public Page<MenuResponse> searchAdminMenus(String keyword, MenuStatus status, Pageable pageable) {
-        String kw = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
-        return menuRepository.searchMenus(kw, status, pageable).map(MenuResponse::fromEntity);
+        org.springframework.data.jpa.domain.Specification<Menu> spec = (root, query, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String pattern = "%" + keyword.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("name")), pattern),
+                        cb.like(cb.lower(root.get("code")), pattern)
+                ));
+            }
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+        return menuRepository.findAll(spec, pageable).map(MenuResponse::fromEntity);
     }
 
     @Transactional

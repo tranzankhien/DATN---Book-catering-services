@@ -23,6 +23,8 @@ import com.banquethub.modules.orders.repository.OrderStatusHistoryRepository;
 import com.banquethub.modules.reservations.dto.StockReservationResponse;
 import com.banquethub.modules.reservations.entity.StockReservation;
 import com.banquethub.modules.reservations.service.StockReservationService;
+import com.banquethub.modules.vouchers.dto.VoucherValidationResponse;
+import com.banquethub.modules.vouchers.service.VoucherService;
 import com.banquethub.modules.users.entity.Role;
 import com.banquethub.modules.users.entity.User;
 import org.springframework.data.domain.Page;
@@ -69,6 +71,7 @@ public class OrderService {
     private final TransactionTemplate transactionTemplate;
     private final SePayConfig sePayConfig;
     private final com.banquethub.modules.payments.repository.PaymentTransactionRepository paymentTransactions;
+    private final VoucherService voucherService;
 
     public OrderService(
             OrderRepository orderRepository,
@@ -77,7 +80,8 @@ public class OrderService {
             MenuRepository menuRepository,
             StockReservationService reservationService,
             PlatformTransactionManager transactionManager, SePayConfig sePayConfig,
-            com.banquethub.modules.payments.repository.PaymentTransactionRepository paymentTransactions
+            com.banquethub.modules.payments.repository.PaymentTransactionRepository paymentTransactions,
+            VoucherService voucherService
     ) {
         this.orderRepository = orderRepository;
         this.statusHistoryRepository = statusHistoryRepository;
@@ -87,6 +91,7 @@ public class OrderService {
         this.transactionTemplate = new TransactionTemplate(transactionManager);
         this.sePayConfig = sePayConfig;
         this.paymentTransactions = paymentTransactions;
+        this.voucherService = voucherService;
     }
 
     public OrderResponse createOrder(CreateOrderRequest request, User currentUser) {
@@ -241,6 +246,24 @@ public class OrderService {
             }
         }
 
+        BigDecimal subtotalAmount = totalAmount;
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        String appliedVoucherCode = null;
+
+        if (request.getVoucherCode() != null && !request.getVoucherCode().trim().isEmpty()) {
+            VoucherValidationResponse voucherResult = voucherService.validateAndCalculate(
+                    request.getVoucherCode(),
+                    subtotalAmount,
+                    currentUser != null ? currentUser.getId() : null
+            );
+            if (!voucherResult.isValid()) {
+                throw new BusinessValidationException(voucherResult.getMessage());
+            }
+            discountAmount = voucherResult.getDiscountAmount();
+            appliedVoucherCode = voucherResult.getVoucherCode();
+            totalAmount = voucherResult.getFinalAmount();
+        }
+
         sePayConfig.validateAmount(totalAmount);
 
         if (request.getExpectedTotalAmount() != null &&
@@ -277,6 +300,9 @@ public class OrderService {
         order.setGuestCount(request.getGuestCount());
         order.setMenu(selectedMenu);
         order.setMenuNameSnapshot(menuNameSnapshot);
+        order.setSubtotalAmount(subtotalAmount);
+        order.setDiscountAmount(discountAmount);
+        order.setVoucherCode(appliedVoucherCode);
         order.setTotalAmount(totalAmount);
         order.setOrderStatus(OrderStatus.PENDING_PAYMENT);
         order.setPaymentStatus(PaymentStatus.UNPAID);
@@ -309,6 +335,10 @@ public class OrderService {
         order.addStatusHistory(history);
 
         Order savedOrder = orderRepository.save(order);
+
+        if (appliedVoucherCode != null && discountAmount.compareTo(BigDecimal.ZERO) > 0) {
+            voucherService.recordVoucherUsage(appliedVoucherCode, currentUser, savedOrder, discountAmount);
+        }
 
         // 6. Check and reserve stock atomically with pessimistic row-locking (BR-05, BR-06, BR-14)
         StockReservation reservation = reservationService.checkAndReserveStock(savedOrder, totalDemandMap);

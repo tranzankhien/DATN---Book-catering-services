@@ -123,8 +123,29 @@ public class ProfitReportService {
             String label = targetMonth.format(DateTimeFormatter.ofPattern("MM/yyyy"));
             String dateStr = mStart.toString();
 
-            // value: Doanh thu, secondaryValue: Tổng chi phí, thirdValue: Lợi nhuận ước tính
-            trend.add(new TimeSeriesPoint(label, dateStr, report.getPaidRevenue(), report.getTotalExpenses(), report.getEstimatedProfit()));
+            // value: Lợi nhuận ước tính (khớp với Tooltip và Bar chart dataKey="value")
+            // secondaryValue: Doanh thu thực thu, thirdValue: Tổng chi phí tương ứng
+            trend.add(new TimeSeriesPoint(label, dateStr, report.getEstimatedProfit(), report.getPaidRevenue(), report.getTotalExpenses()));
+        }
+
+        return trend;
+    }
+
+    public List<TimeSeriesPoint> getProfitTrend(LocalDate startDate, LocalDate endDate) {
+        List<TimeSeriesPoint> trend = new ArrayList<>();
+        LocalDate curr = startDate.withDayOfMonth(1);
+        LocalDate last = endDate.withDayOfMonth(1);
+
+        while (!curr.isAfter(last)) {
+            LocalDate mStart = curr;
+            LocalDate mEnd = curr.withDayOfMonth(curr.lengthOfMonth());
+
+            ProfitReportResponse report = getProfitReport(mStart, mEnd);
+            String label = curr.format(DateTimeFormatter.ofPattern("MM/yyyy"));
+            String dateStr = mStart.toString();
+
+            trend.add(new TimeSeriesPoint(label, dateStr, report.getEstimatedProfit(), report.getPaidRevenue(), report.getTotalExpenses()));
+            curr = curr.plusMonths(1);
         }
 
         return trend;

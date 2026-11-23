@@ -39,6 +39,7 @@ import {
 import type { Role } from '../../services/types';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
+import { Pagination } from '../../components/common/Pagination';
 
 export const AdminUsersPage: React.FC = () => {
   const { user: currentUser } = useAuth();
@@ -49,7 +50,7 @@ export const AdminUsersPage: React.FC = () => {
   const [totalElements, setTotalElements] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [page, setPage] = useState<number>(0);
-  const [size] = useState<number>(10);
+  const [size, setSize] = useState<number>(10);
 
   // Filters
   const [search, setSearch] = useState<string>('');
@@ -677,29 +678,20 @@ export const AdminUsersPage: React.FC = () => {
         </div>
 
         {/* Pagination Footer */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-stone-200 bg-stone-50 text-xs">
-            <span className="text-stone-500">
-              Trang <span className="font-bold text-stone-900">{page + 1}</span> / {totalPages} (Tổng {totalElements} tài khoản)
-            </span>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-                disabled={page === 0}
-                className="px-2.5 py-1 rounded-lg border border-stone-200 bg-white font-medium text-stone-700 hover:bg-stone-50 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Trước
-              </button>
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                disabled={page >= totalPages - 1}
-                className="px-2.5 py-1 rounded-lg border border-stone-200 bg-white font-medium text-stone-700 hover:bg-stone-50 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Sau
-              </button>
-            </div>
+        {!loading && totalElements > 0 && (
+          <div className="p-4 border-t border-stone-200">
+            <Pagination
+              currentPage={page + 1}
+              totalItems={totalElements}
+              pageSize={size}
+              onPageChange={(p) => setPage(p - 1)}
+              onPageSizeChange={(s) => {
+                setSize(s);
+                setPage(0);
+              }}
+              pageSizeOptions={[10, 20, 50]}
+              itemLabel="tài khoản"
+            />
           </div>
         )}
       </div>

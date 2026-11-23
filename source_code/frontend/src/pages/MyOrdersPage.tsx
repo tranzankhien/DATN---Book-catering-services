@@ -11,7 +11,6 @@ import {
   XCircle,
   Clock4,
   RefreshCw,
-  Award,
   Plus,
   MapPin,
   Users,
@@ -26,6 +25,8 @@ import { formatVnd, formatDateTimeVn } from '../hooks/useFormatters';
 import { LoadingState, ErrorState, EmptyState } from '../components/StatusStates';
 import { extractErrorMessage } from '../services/apiClient';
 import { useToast } from '../hooks/useToast';
+import { Pagination } from '../components/common/Pagination';
+import { subscribeOrderUpdated } from '../lib/orderEvents';
 
 export const MyOrdersPage: React.FC = () => {
   const navigate = useNavigate();
@@ -35,7 +36,9 @@ export const MyOrdersPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | ''>('');
   const [page, setPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [totalElements, setTotalElements] = useState<number>(0);
 
   const fetchOrders = async () => {
     try {
@@ -44,10 +47,11 @@ export const MyOrdersPage: React.FC = () => {
       const res = await orderService.getMyOrders({
         status: selectedStatus || undefined,
         page,
-        size: 10,
+        size: pageSize,
       });
       setOrders(res.content);
       setTotalPages(res.totalPages);
+      setTotalElements(res.totalElements);
     } catch (err) {
       setError(extractErrorMessage(err));
     } finally {
@@ -57,7 +61,25 @@ export const MyOrdersPage: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [selectedStatus, page]);
+    const unsubscribe = subscribeOrderUpdated(() => {
+      fetchOrders();
+    });
+    const handleFocus = () => {
+      fetchOrders();
+    };
+    window.addEventListener('focus', handleFocus);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchOrders();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      unsubscribe();
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [selectedStatus, page, pageSize]);
 
   const copyCode = (code: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -115,31 +137,25 @@ export const MyOrdersPage: React.FC = () => {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
-      {/* Header Banner */}
-      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
-              <Award className="h-3.5 w-3.5 text-amber-600" />
-              <span>Cổng dịch vụ khách hàng yến tiệc</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
-              Đơn đặt tiệc của tôi
-            </h1>
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-              Theo dõi tình trạng giữ chỗ nguyên liệu kho, chi tiết hợp đồng và tiến độ phục vụ các buổi tiệc của bạn.
-            </p>
-          </div>
-
-          <Link
-            to="/menu-builder"
-            className="inline-flex items-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer shrink-0"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Đặt tiệc mới</span>
-          </Link>
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6 animate-fade-up-1">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-stone-900 tracking-tight">
+            Đơn đặt tiệc của tôi
+          </h1>
+          <p className="text-xs sm:text-sm text-stone-600 mt-1">
+            Theo dõi tình trạng giữ chỗ nguyên liệu kho, chi tiết hợp đồng và tiến độ phục vụ các buổi tiệc của bạn.
+          </p>
         </div>
+
+        <Link
+          to="/menu-builder"
+          className="inline-flex items-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer shrink-0 self-start sm:self-auto"
+        >
+          <Plus className="h-4 w-4" />
+          <span>Đặt tiệc mới</span>
+        </Link>
       </div>
 
       {/* Filter Toolbar */}
@@ -318,26 +334,20 @@ export const MyOrdersPage: React.FC = () => {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="pt-4 flex justify-center items-center gap-2">
-          <button
-            disabled={page === 0}
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors"
-          >
-            Trang trước
-          </button>
-          <span className="px-3 py-1.5 text-xs text-stone-500 font-medium">
-            Trang {page + 1} / {totalPages}
-          </span>
-          <button
-            disabled={page >= totalPages - 1}
-            onClick={() => setPage((p) => p + 1)}
-            className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors"
-          >
-            Trang sau
-          </button>
-        </div>
+      {!loading && !error && totalElements > 0 && (
+        <Pagination
+          currentPage={page + 1}
+          totalItems={totalElements}
+          pageSize={pageSize}
+          onPageChange={(p) => setPage(p - 1)}
+          onPageSizeChange={(s) => {
+            setPageSize(s);
+            setPage(0);
+          }}
+          pageSizeOptions={[5, 10, 20]}
+          itemLabel="đơn tiệc"
+          className="mt-6"
+        />
       )}
     </div>
   );

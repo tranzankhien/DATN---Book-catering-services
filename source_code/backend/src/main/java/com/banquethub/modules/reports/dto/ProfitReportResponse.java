@@ -102,4 +102,17 @@ public class ProfitReportResponse {
     public void setMonthlyBreakdown(List<MonthlyProfitBreakdownDto> monthlyBreakdown) {
         this.monthlyBreakdown = monthlyBreakdown;
     }
+
+    // Frontend compatibility aliases
+    public BigDecimal getEstimatedNetProfit() {
+        return estimatedProfit;
+    }
+
+    public Double getNetMargin() {
+        return estimatedProfitMargin;
+    }
+
+    public List<MonthlyProfitBreakdownDto> getMonthlyBreakdowns() {
+        return monthlyBreakdown;
+    }
 }

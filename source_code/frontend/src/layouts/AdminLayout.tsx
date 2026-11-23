@@ -23,6 +23,7 @@ import {
   Utensils,
   LayoutDashboard,
   CreditCard,
+  Ticket,
   PackageCheck,
   CalendarRange,
   Banknote,
@@ -78,7 +79,7 @@ export const AdminLayout: React.FC = () => {
   const handleLogout = () => {
     logout();
     showToast('Đã đăng xuất khỏi phiên Quản trị viên an toàn.', 'info');
-    navigate('/login');
+    navigate('/login', { replace: true, state: {} });
   };
 
   return (
@@ -394,6 +395,30 @@ export const AdminLayout: React.FC = () => {
                     {!isOpen && (
                       <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
                         Đơn đặt tiệc
+                      </div>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/vouchers"
+                    className={({ isActive }) =>
+                      `relative flex items-center rounded-lg py-2.5 text-xs font-semibold transition-all group ${
+                        isOpen ? 'gap-2.5 px-3' : 'justify-center px-0'
+                      } ${
+                        isActive
+                          ? 'bg-amber-700 text-white shadow-sm'
+                          : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                      }`
+                    }
+                    title={!isOpen ? 'Quản lý Voucher' : undefined}
+                  >
+                    <Ticket className="h-4 w-4 shrink-0 text-amber-300 group-hover:scale-110 transition-transform" />
+                    {isOpen && (
+                      <span className="whitespace-nowrap truncate">Mã ưu đãi (Voucher)</span>
+                    )}
+                    {!isOpen && (
+                      <div className="pointer-events-none absolute left-full ml-2.5 z-50 hidden rounded-lg bg-stone-900 border border-stone-700 px-2.5 py-1 text-xs font-semibold text-white shadow-xl whitespace-nowrap group-hover:block">
+                        Mã ưu đãi (Voucher)
                       </div>
                     )}
                   </NavLink>

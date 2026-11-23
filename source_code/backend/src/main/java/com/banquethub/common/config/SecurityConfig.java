@@ -93,6 +93,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/menus/*/preview").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/menus/preview").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/orders/preview").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/ai/chat").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/vouchers/apply").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/health", "/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasAuthority("ROLE_ADMIN")

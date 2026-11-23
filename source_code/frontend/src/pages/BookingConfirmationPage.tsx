@@ -262,12 +262,33 @@ export const BookingConfirmationPage: React.FC = () => {
               ))}
             </div>
 
-            <div className="pt-3 border-t border-stone-200 flex justify-between items-center text-xs sm:text-sm">
-              <span className="font-semibold text-stone-600">Tổng cộng thanh toán (Đã gồm phí dịch vụ):</span>
-              <span className="text-lg sm:text-xl font-bold text-amber-900 tabular-nums">
-                {formatVnd(order.totalAmount)}
-              </span>
-            </div>
+            {order.discountAmount && order.discountAmount > 0 ? (
+              <div className="pt-3 border-t border-stone-200 space-y-1.5 text-xs sm:text-sm">
+                <div className="flex justify-between items-center text-stone-600">
+                  <span>Tạm tính ({order.tableCount} bàn):</span>
+                  <span className="font-semibold text-stone-900 tabular-nums">
+                    {formatVnd(order.subtotalAmount || order.totalAmount)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-emerald-700 bg-emerald-50/70 px-2.5 py-1.5 rounded-lg border border-emerald-200/50">
+                  <span className="font-medium">Mã ưu đãi ({order.voucherCode}):</span>
+                  <span className="font-bold tabular-nums">-{formatVnd(order.discountAmount)}</span>
+                </div>
+                <div className="flex justify-between items-center pt-1 font-bold text-stone-900">
+                  <span className="text-stone-700">Tổng cộng thanh toán:</span>
+                  <span className="text-lg sm:text-xl font-bold text-amber-900 tabular-nums">
+                    {formatVnd(order.totalAmount)}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="pt-3 border-t border-stone-200 flex justify-between items-center text-xs sm:text-sm">
+                <span className="font-semibold text-stone-600">Tổng cộng thanh toán (Đã gồm phí dịch vụ):</span>
+                <span className="text-lg sm:text-xl font-bold text-amber-900 tabular-nums">
+                  {formatVnd(order.totalAmount)}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* 2. Event Logistics & Contact Card (Clean Key-Value, NO Double Boxes) */}

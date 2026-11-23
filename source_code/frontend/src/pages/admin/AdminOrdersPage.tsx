@@ -20,6 +20,8 @@ import type { OrderDto, OrderStatus, PaymentStatus } from '../../services/types'
 import { formatVnd, formatDateTimeVn } from '../../hooks/useFormatters';
 import { LoadingState, ErrorState } from '../../components/StatusStates';
 import { extractErrorMessage } from '../../services/apiClient';
+import { Pagination } from '../../components/common/Pagination';
+import { subscribeOrderUpdated } from '../../lib/orderEvents';
 
 export const AdminOrdersPage: React.FC = () => {
   const navigate = useNavigate();
@@ -39,6 +41,7 @@ export const AdminOrdersPage: React.FC = () => {
   const [fromDate, setFromDate] = useState<string>('');
   const [toDate, setToDate] = useState<string>('');
   const [page, setPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalElements, setTotalElements] = useState<number>(0);
 
@@ -55,7 +58,7 @@ export const AdminOrdersPage: React.FC = () => {
         fromDate: fromDate ? `${fromDate}T00:00:00+07:00` : undefined,
         toDate: toDate ? `${toDate}T23:59:59+07:00` : undefined,
         page,
-        size: 10,
+        size: pageSize,
       });
       if (request !== requestSequence.current) return;
       setOrders(res.content);
@@ -70,8 +73,24 @@ export const AdminOrdersPage: React.FC = () => {
 
   useEffect(() => {
     void fetchOrders();
-    return () => { requestSequence.current++; };
-  }, [keyword, orderStatus, paymentStatus, awaitingPayment, fromDate, toDate, page]);
+    const unsubscribe = subscribeOrderUpdated(() => {
+      void fetchOrders();
+    });
+    const handleFocus = () => {
+      void fetchOrders();
+    };
+    window.addEventListener('focus', handleFocus);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') void fetchOrders();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      requestSequence.current++;
+      unsubscribe();
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [keyword, orderStatus, paymentStatus, awaitingPayment, fromDate, toDate, page, pageSize]);
 
   const getOrderStatusBadge = (st: OrderStatus) => {
     switch (st) {
@@ -307,25 +326,20 @@ export const AdminOrdersPage: React.FC = () => {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="p-4 border-t border-stone-100 flex justify-center items-center gap-2">
-            <button
-              disabled={page === 0}
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
-              className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors"
-            >
-              Trang trước
-            </button>
-            <span className="px-3 py-1.5 text-xs text-stone-500 font-medium">
-              Trang {page + 1} / {totalPages}
-            </span>
-            <button
-              disabled={page >= totalPages - 1}
-              onClick={() => setPage((p) => p + 1)}
-              className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors"
-            >
-              Trang sau
-            </button>
+        {!loading && !error && totalElements > 0 && (
+          <div className="p-4 border-t border-stone-100">
+            <Pagination
+              currentPage={page + 1}
+              totalItems={totalElements}
+              pageSize={pageSize}
+              onPageChange={(p) => setPage(p - 1)}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setPage(0);
+              }}
+              pageSizeOptions={[10, 20, 50]}
+              itemLabel="đơn tiệc"
+            />
           </div>
         )}
       </div>

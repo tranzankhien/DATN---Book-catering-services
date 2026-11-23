@@ -25,6 +25,7 @@ import type {
   ExpenseSummaryResponse,
 } from '../../services/types';
 import { extractErrorMessage } from '../../services/apiClient';
+import { Pagination } from '../../components/common/Pagination';
 
 const CATEGORY_NAMES: Record<ExpenseCategory, string> = {
   RENT: 'Thuê mặt bằng / Cơ sở',
@@ -50,7 +51,9 @@ export const AdminExpensesPage: React.FC = () => {
   const [status, setStatus] = useState<ExpensePaymentStatus | ''>('');
   const [search, setSearch] = useState<string>('');
   const [page, setPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalElements, setTotalElements] = useState<number>(0);
 
   // Modal Form State
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -81,7 +84,7 @@ export const AdminExpensesPage: React.FC = () => {
           status: status || undefined,
           search: search || undefined,
           page,
-          size: 15,
+          size: pageSize,
         }),
         expenseService.getExpenseSummary({
           startDate: startDate || undefined,
@@ -92,6 +95,7 @@ export const AdminExpensesPage: React.FC = () => {
 
       setExpenses(listRes.data.content);
       setTotalPages(listRes.data.totalPages || 1);
+      setTotalElements(listRes.data.totalElements || listRes.data.content.length);
       setSummary(sumRes.data);
     } catch (err) {
       setError(extractErrorMessage(err, 'Không thể tải danh sách chi phí vận hành'));
@@ -464,30 +468,20 @@ export const AdminExpensesPage: React.FC = () => {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-4 border-t border-stone-100 mt-3 text-xs">
-            <span className="text-stone-500">
-              Trang <span className="font-semibold text-stone-900 tabular-nums">{page + 1}</span> /{' '}
-              <span className="tabular-nums">{totalPages}</span>
-            </span>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                disabled={page === 0}
-                onClick={() => setPage(page - 1)}
-                className="px-3 py-1 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 disabled:opacity-40 text-stone-700 font-semibold cursor-pointer"
-              >
-                Trước
-              </button>
-              <button
-                type="button"
-                disabled={page + 1 >= totalPages}
-                onClick={() => setPage(page + 1)}
-                className="px-3 py-1 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 disabled:opacity-40 text-stone-700 font-semibold cursor-pointer"
-              >
-                Sau
-              </button>
-            </div>
+        {!loading && totalElements > 0 && (
+          <div className="pt-4 border-t border-stone-100 mt-3">
+            <Pagination
+              currentPage={page + 1}
+              totalItems={totalElements}
+              pageSize={pageSize}
+              onPageChange={(p) => setPage(p - 1)}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setPage(0);
+              }}
+              pageSizeOptions={[10, 20, 50]}
+              itemLabel="khoản chi phí"
+            />
           </div>
         )}
       </div>

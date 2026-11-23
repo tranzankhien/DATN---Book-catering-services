@@ -57,15 +57,30 @@ export const LoginPage: React.FC = () => {
       const loggedInUser = authRes.user;
       showToast(`Kính chào ${loggedInUser.fullName}! Đăng nhập thành công.`, 'success');
 
-      if (fromPath) {
-        navigate(fromPath, { replace: true });
-      } else if (loggedInUser.role === 'ROLE_ADMIN') {
-        navigate('/admin/catalog', { replace: true });
-      } else if (loggedInUser.role === 'ROLE_EMPLOYEE') {
-        navigate('/employee/attendance', { replace: true });
-      } else {
-        navigate('/dishes', { replace: true });
-      }
+      const getTargetRouteForUser = (role: string, path?: string | null): string => {
+        if (role === 'ROLE_ADMIN') {
+          if (path && path.startsWith('/admin') && !path.startsWith('/admin/login')) {
+            return path;
+          }
+          return '/admin/catalog';
+        }
+
+        if (role === 'ROLE_EMPLOYEE') {
+          if (path && path.startsWith('/employee')) {
+            return path;
+          }
+          return '/employee/attendance';
+        }
+
+        // Customer / User
+        if (path && !path.startsWith('/admin') && !path.startsWith('/employee')) {
+          return path;
+        }
+        return '/dishes';
+      };
+
+      const targetRoute = getTargetRouteForUser(loggedInUser.role, fromPath);
+      navigate(targetRoute, { replace: true });
     } catch (err) {
       const msg = extractErrorMessage(err, 'Email hoặc mật khẩu không chính xác.');
       setErrorMsg(msg);

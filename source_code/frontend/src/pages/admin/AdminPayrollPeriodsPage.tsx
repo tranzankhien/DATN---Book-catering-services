@@ -32,11 +32,21 @@ import type {
 } from '../../services/types';
 import { useToast } from '../../hooks/useToast';
 import { extractErrorMessage } from '../../services/apiClient';
+import { Pagination, usePagination } from '../../components/common/Pagination';
 
 export const AdminPayrollPeriodsPage: React.FC = () => {
   const { showToast } = useToast();
   const [periods, setPeriods] = useState<PayrollPeriodDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    paginatedItems: paginatedPeriods,
+    totalItems,
+  } = usePagination(periods, 9);
 
   // Create Period Modal
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
@@ -368,7 +378,7 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
             <p className="text-xs text-stone-400 mt-1">Bấm nút "Tạo kỳ lương mới" để bắt đầu tính lương cho tháng này.</p>
           </div>
         ) : (
-          periods.map((p) => {
+          paginatedPeriods.map((p) => {
             const periodName = `Tháng ${String(p.month).padStart(2, '0')}/${p.year}`;
             const isDraft = p.status === 'DRAFT';
             const isFinalized = p.status === 'FINALIZED';
@@ -485,6 +495,19 @@ export const AdminPayrollPeriodsPage: React.FC = () => {
           })
         )}
       </div>
+
+      {periods.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={totalItems}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+          pageSizeOptions={[6, 9, 18]}
+          itemLabel="kỳ tính lương"
+          className="mt-6"
+        />
+      )}
 
       {/* CREATE PERIOD MODAL */}
       {isCreateOpen &&

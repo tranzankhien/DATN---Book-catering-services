@@ -147,9 +147,16 @@ public class AdminReportsController {
 
     @GetMapping({"/payroll/trend", "/payroll/monthly-trend"})
     public ResponseEntity<ApiResponse<List<TimeSeriesPoint>>> getPayrollTrend(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(defaultValue = "6") int months
     ) {
-        List<TimeSeriesPoint> trend = payrollReportService.getPayrollTrend(months);
+        List<TimeSeriesPoint> trend;
+        if (startDate != null && endDate != null) {
+            trend = payrollReportService.getPayrollTrend(startDate, endDate);
+        } else {
+            trend = payrollReportService.getPayrollTrend(months);
+        }
         return ResponseEntity.ok(ApiResponse.success(trend, "Tải xu hướng chi phí lương thành công"));
     }
 
@@ -170,9 +177,16 @@ public class AdminReportsController {
 
     @GetMapping({"/profit/trend", "/profit/monthly-trend"})
     public ResponseEntity<ApiResponse<List<TimeSeriesPoint>>> getProfitTrend(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(defaultValue = "6") int months
     ) {
-        List<TimeSeriesPoint> trend = profitReportService.getProfitTrend(months);
+        List<TimeSeriesPoint> trend;
+        if (startDate != null && endDate != null) {
+            trend = profitReportService.getProfitTrend(startDate, endDate);
+        } else {
+            trend = profitReportService.getProfitTrend(months);
+        }
         return ResponseEntity.ok(ApiResponse.success(trend, "Tải xu hướng lợi nhuận ước tính thành công"));
     }
 

@@ -9,7 +9,6 @@ import {
   Plus,
   Minus,
   Trash2,
-  Sparkles,
   LayoutGrid,
   List,
   Check,
@@ -22,6 +21,7 @@ import type { CategoryDto, DishSummaryDto } from '../services/types';
 import { formatVnd } from '../hooks/useFormatters';
 import { EmptyState, ErrorState, LoadingState } from '../components/StatusStates';
 import { DEFAULT_DISH_IMAGE, handleImageError } from '../lib/imageConstants';
+import { Pagination, usePagination } from '../components/common/Pagination';
 
 interface DraftMenuLine {
   dish: DishSummaryDto;
@@ -150,6 +150,19 @@ export const CatalogPage: React.FC = () => {
     return list;
   }, [dishes, sortBy]);
 
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    paginatedItems: paginatedDishes,
+    totalItems,
+  } = usePagination(sortedDishes, 12);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategoryId, keyword, sortBy, setCurrentPage]);
+
   const pricePerTable = useMemo(
     () =>
       draftLines.reduce(
@@ -167,30 +180,15 @@ export const CatalogPage: React.FC = () => {
   const estimatedGuests = tableCount * 10;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Header Banner */}
-      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
-              <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-              <span>Thực đơn công khai & định mức chuẩn hóa</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
-              Danh mục món tiệc chuẩn vị
-            </h1>
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-              Mỗi món ăn có đơn giá tính cho 01 phần trên mỗi bàn tiệc (chuẩn 10 khách). Bấm{' '}
-              <strong className="text-stone-800">Chọn món</strong> để mô phỏng tính giá toàn bộ
-              bàn tiệc theo quy chuẩn bàn tiệc tại bảng tính bên phải.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2.5 bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-xs text-stone-700 shrink-0">
-            <Info className="h-4 w-4 text-amber-600 shrink-0" />
-            <span className="font-medium">Tiêu chuẩn tiệc: 01 bàn = 10 khách</span>
-          </div>
-        </div>
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* Centered Clean Header */}
+      <div className="text-center max-w-2xl mx-auto space-y-1.5 pt-1 pb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+          Danh mục món tiệc chuẩn vị
+        </h1>
+        <p className="text-xs sm:text-sm text-stone-500 leading-relaxed">
+          Định mức nguyên liệu và đơn giá chuẩn hóa cho từng món ăn trên bàn tiệc 10 khách.
+        </p>
       </div>
 
       {/* Filter & Search Bar */}
@@ -317,7 +315,7 @@ export const CatalogPage: React.FC = () => {
           ) : viewMode === 'grid' ? (
             /* Grid View */
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              {sortedDishes.map((dish) => {
+              {paginatedDishes.map((dish) => {
                 const draftItem = draftLines.find((l) => l.dish.id === dish.id);
                 return (
                   <article
@@ -401,7 +399,7 @@ export const CatalogPage: React.FC = () => {
           ) : (
             /* List View */
             <div className="space-y-3">
-              {sortedDishes.map((dish) => {
+              {paginatedDishes.map((dish) => {
                 const draftItem = draftLines.find((l) => l.dish.id === dish.id);
                 return (
                   <article
@@ -468,6 +466,19 @@ export const CatalogPage: React.FC = () => {
                 );
               })}
             </div>
+          )}
+
+          {sortedDishes.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalItems={totalItems}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[12, 24, 48]}
+              itemLabel="món ăn"
+              className="mt-6"
+            />
           )}
         </div>
 

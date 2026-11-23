@@ -27,6 +27,7 @@ import type {
 } from '../../services/types';
 import { formatVnd } from '../../hooks/useFormatters';
 import { useToast } from '../../hooks/useToast';
+import { Pagination } from '../../components/common/Pagination';
 import { LoadingState, ErrorState } from '../../components/StatusStates';
 import { extractErrorMessage } from '../../services/apiClient';
 import { DEFAULT_MENU_IMAGE, DEFAULT_DISH_IMAGE, handleImageError } from '../../lib/imageConstants';
@@ -46,7 +47,9 @@ export const AdminMenusPage: React.FC = () => {
   const [keyword, setKeyword] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<MenuStatus | ''>('ACTIVE');
   const [page, setPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [totalElements, setTotalElements] = useState<number>(0);
 
   // Available dishes for modal
   const [allDishes, setAllDishes] = useState<DishSummaryDto[]>([]);
@@ -80,10 +83,11 @@ export const AdminMenusPage: React.FC = () => {
         keyword: keyword.trim() || undefined,
         status: statusFilter || undefined,
         page,
-        size: 10,
+        size: pageSize,
       });
-      setMenus(res.content);
-      setTotalPages(res.totalPages);
+      setMenus(res?.content || []);
+      setTotalPages(res?.totalPages || 0);
+      setTotalElements(res?.totalElements || 0);
     } catch (err) {
       setError(extractErrorMessage(err));
     } finally {
@@ -93,7 +97,7 @@ export const AdminMenusPage: React.FC = () => {
 
   useEffect(() => {
     fetchMenus();
-  }, [keyword, statusFilter, page]);
+  }, [keyword, statusFilter, page, pageSize]);
 
   const handleToggleStatus = async (menu: MenuDto) => {
     const nextStatus: MenuStatus = menu.status === 'ACTIVE' ? 'HIDDEN' : 'ACTIVE';
@@ -404,25 +408,20 @@ export const AdminMenusPage: React.FC = () => {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="p-4 border-t border-stone-100 flex justify-center items-center gap-2">
-            <button
-              disabled={page === 0}
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
-              className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors"
-            >
-              Trang trước
-            </button>
-            <span className="px-3 py-1.5 text-xs text-stone-500 font-medium">
-              Trang {page + 1} / {totalPages}
-            </span>
-            <button
-              disabled={page >= totalPages - 1}
-              onClick={() => setPage((p) => p + 1)}
-              className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors"
-            >
-              Trang sau
-            </button>
+        {!loading && !error && totalElements > 0 && (
+          <div className="p-4 border-t border-stone-100">
+            <Pagination
+              currentPage={page + 1}
+              totalItems={totalElements}
+              pageSize={pageSize}
+              onPageChange={(p) => setPage(p - 1)}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setPage(0);
+              }}
+              pageSizeOptions={[10, 20, 50]}
+              itemLabel="thực đơn"
+            />
           </div>
         )}
       </div>

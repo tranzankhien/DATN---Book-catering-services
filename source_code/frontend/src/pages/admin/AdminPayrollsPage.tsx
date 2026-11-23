@@ -29,6 +29,7 @@ import type {
 } from '../../services/types';
 import { useToast } from '../../hooks/useToast';
 import { extractErrorMessage } from '../../services/apiClient';
+import { Pagination } from '../../components/common/Pagination';
 
 const getLocalTodayDateString = () => {
   const now = new Date();
@@ -53,6 +54,7 @@ export const AdminPayrollsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'ALL' | PaymentStatus>('ALL');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [page, setPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalElements, setTotalElements] = useState<number>(0);
   const activeRequestIdRef = useRef<number>(0);
@@ -125,7 +127,7 @@ export const AdminPayrollsPage: React.FC = () => {
         paymentStatus: statusFilter === 'ALL' ? undefined : statusFilter,
         search: searchTerm.trim() || undefined,
         page,
-        size: 50,
+        size: pageSize,
       });
       if (reqId === activeRequestIdRef.current) {
         setPayrolls(res.content);
@@ -163,7 +165,7 @@ export const AdminPayrollsPage: React.FC = () => {
       setPayrolls([]);
       setPeriodSummary(null);
     }
-  }, [selectedPeriodId, statusFilter, searchTerm, page]);
+  }, [selectedPeriodId, statusFilter, searchTerm, page, pageSize]);
 
   useEffect(() => {
     if (selectedPeriodId && periods.length > 0) {
@@ -544,28 +546,20 @@ export const AdminPayrollsPage: React.FC = () => {
         )}
 
         {/* Pagination Bar */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-200 text-xs text-stone-600 bg-stone-50/50">
-            <span>Hiển thị {payrolls.length} / {totalElements} nhân viên</span>
-            <div className="flex items-center gap-1.5">
-              <button
-                disabled={page === 0}
-                onClick={() => setPage((prev) => Math.max(0, prev - 1))}
-                className="px-3 py-1.5 border border-stone-200 rounded-lg hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-medium"
-              >
-                Trang trước
-              </button>
-              <span className="px-2 font-bold text-stone-900">
-                Trang {page + 1} / {totalPages}
-              </span>
-              <button
-                disabled={page >= totalPages - 1}
-                onClick={() => setPage((prev) => prev + 1)}
-                className="px-3 py-1.5 border border-stone-200 rounded-lg hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-medium"
-              >
-                Trang sau
-              </button>
-            </div>
+        {!loading && totalElements > 0 && (
+          <div className="p-4 border-t border-stone-200">
+            <Pagination
+              currentPage={page + 1}
+              totalItems={totalElements}
+              pageSize={pageSize}
+              onPageChange={(p) => setPage(p - 1)}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setPage(0);
+              }}
+              pageSizeOptions={[10, 20, 50]}
+              itemLabel="nhân viên"
+            />
           </div>
         )}
       </div>

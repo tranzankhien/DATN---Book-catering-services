@@ -26,6 +26,7 @@ import type {
 } from '../../services/types';
 import { useToast } from '../../hooks/useToast';
 import { extractErrorMessage } from '../../services/apiClient';
+import { Pagination, usePagination } from '../../components/common/Pagination';
 
 export const AdminAttendancePage: React.FC = () => {
   const { showToast } = useToast();
@@ -37,6 +38,19 @@ export const AdminAttendancePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [summaryData, setSummaryData] = useState<CompanyAttendanceSummaryDto | null>(null);
   const [periodInfo, setPeriodInfo] = useState<PayrollPeriodDto | null>(null);
+
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    paginatedItems: paginatedEmployees,
+    totalItems,
+  } = usePagination(summaryData?.employeeSummaries || [], 10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [year, month, setCurrentPage]);
 
   // Quick edit modal for a single cell
   const [selectedCell, setSelectedCell] = useState<{
@@ -304,7 +318,8 @@ export const AdminAttendancePage: React.FC = () => {
             <p className="text-xs text-stone-400 mt-1">Vui lòng thêm nhân viên đang làm việc trong mục Hồ sơ nhân sự.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead className="bg-stone-50/90 text-stone-600 uppercase text-[10px] font-bold border-b border-stone-200 sticky top-0">
                 <tr>
@@ -344,7 +359,7 @@ export const AdminAttendancePage: React.FC = () => {
               </thead>
 
               <tbody className="divide-y divide-stone-100">
-                {summaryData.employeeSummaries.map((emp) => (
+                {paginatedEmployees.map((emp) => (
                   <tr key={emp.employeeId} className="hover:bg-amber-50/20 transition-colors">
                     <td className="py-2.5 px-3 sticky left-0 bg-white z-10 shadow-r-xs">
                       <div className="font-bold text-stone-900 truncate">{emp.employeeName}</div>
@@ -383,6 +398,21 @@ export const AdminAttendancePage: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+            {summaryData.employeeSummaries.length > 0 && (
+              <div className="p-4 border-t border-stone-100">
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  pageSize={pageSize}
+                  onPageChange={setCurrentPage}
+                  onPageSizeChange={setPageSize}
+                  pageSizeOptions={[10, 20, 50]}
+                  itemLabel="nhân viên chấm công"
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
 

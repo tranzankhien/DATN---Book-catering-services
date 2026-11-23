@@ -18,6 +18,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { Logo } from '../components/ui/Logo';
+import { ChatbotWidget } from '../components/chatbot/ChatbotWidget';
 
 export const PublicLayout: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -42,7 +43,7 @@ export const PublicLayout: React.FC = () => {
     setUserDropdownOpen(false);
     logout();
     showToast('Đã đăng xuất khỏi tài khoản an toàn.', 'info');
-    navigate('/login');
+    navigate('/login', { replace: true, state: {} });
   };
 
   const getRoleLabel = (role?: string) => {
@@ -548,7 +549,7 @@ export const PublicLayout: React.FC = () => {
                 </li>
                 <li>
                   <span className="hover:text-amber-800 transition-colors cursor-pointer">
-                    Cam kết chất lượng & bồi hoàn
+                    Cam kết chất lượng & tiêu chuẩn VSATTP
                   </span>
                 </li>
               </ul>
@@ -595,6 +596,9 @@ export const PublicLayout: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* Floating BanquetHub AI Chatbot Assistant */}
+      <ChatbotWidget />
     </div>
   );
 };

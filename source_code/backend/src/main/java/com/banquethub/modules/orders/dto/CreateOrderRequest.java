@@ -74,6 +74,8 @@ public class CreateOrderRequest {
 
     private BigDecimal expectedTotalAmount;
 
+    private String voucherCode;
+
     public CreateOrderRequest() {}
 
     public String getCustomerName() {
@@ -194,5 +196,13 @@ public class CreateOrderRequest {
 
     public void setExpectedTotalAmount(BigDecimal expectedTotalAmount) {
         this.expectedTotalAmount = expectedTotalAmount;
+    }
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
     }
 }

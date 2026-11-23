@@ -154,165 +154,174 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/60 backdrop-blur-xs p-4 animate-fade-in">
-      <div className="w-full max-w-2xl rounded-2xl border border-stone-200 bg-white shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/60 backdrop-blur-xs p-4 sm:p-6 animate-fade-in">
+      <div className="w-full max-w-4xl rounded-3xl border border-stone-200 bg-white shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-stone-200 px-6 py-4 bg-stone-50">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-600 text-white font-bold shadow-xs">
+        <div className="flex items-center justify-between border-b border-stone-200 px-6 sm:px-8 py-5 bg-stone-50/80">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-700 text-white font-bold shadow-xs">
               <UtensilsCrossed className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-stone-900">
-                {isEdit ? `Chỉnh sửa món ăn: ${initialDish?.name}` : 'Thêm món ăn mới'}
+              <h2 className="text-lg font-bold text-stone-900 tracking-tight">
+                {isEdit ? `Chỉnh sửa món ăn: ${initialDish?.name}` : 'Thêm món ăn mới vào thực đơn'}
               </h2>
-              <p className="text-xs text-stone-500">
-                Khai báo thông tin món, đơn giá 01 phần (VND) và công thức nguyên liệu chuẩn
+              <p className="text-xs text-stone-500 mt-0.5">
+                Khai báo thông tin món tiệc, đơn giá 01 phần (VND) và công thức nguyên liệu chuẩn
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-200 hover:text-stone-700 transition-colors cursor-pointer"
+            className="rounded-xl p-2 text-stone-400 hover:bg-stone-200/80 hover:text-stone-700 transition-colors cursor-pointer"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-6 text-xs">
           {errorMsg && (
-            <div className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3 text-rose-800">
+            <div className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-rose-800 text-xs">
               <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
               <span>{errorMsg}</span>
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-            <div className="sm:col-span-4">
-              <label className="block font-semibold text-stone-700 mb-1">
-                Mã món ăn <span className="text-amber-700">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="VD: DISH-011"
-                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 tabular-nums font-semibold text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
-              />
-            </div>
+          {/* Section 1: Basic Info */}
+          <div>
+            <h3 className="font-bold text-sm text-stone-900 mb-3 flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-amber-600" />
+              <span>Thông tin cơ bản món ăn</span>
+            </h3>
 
-            <div className="sm:col-span-8">
-              <label className="block font-semibold text-stone-700 mb-1">
-                Tên món ăn <span className="text-amber-700">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="VD: Bào Ngư Vi Cá Sốt Hoàng Kim"
-                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 font-semibold text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
-              />
-            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
+              <div className="sm:col-span-3">
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Mã món ăn <span className="text-amber-700">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="VD: DISH-011"
+                  className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 tabular-nums font-semibold text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
+                />
+              </div>
 
-            <div className="sm:col-span-4">
-              <label className="block font-semibold text-stone-700 mb-1">
-                Danh mục <span className="text-amber-700">*</span>
-              </label>
-              <select
-                value={categoryId}
-                onChange={(e) => setCategoryId(Number(e.target.value))}
-                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 font-medium text-stone-800 focus:border-amber-600 focus:outline-none cursor-pointer"
-              >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="sm:col-span-5">
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Tên món ăn <span className="text-amber-700">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="VD: Bào Ngư Vi Cá Sốt Hoàng Kim"
+                  className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 font-semibold text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
+                />
+              </div>
 
-            <div className="sm:col-span-4">
-              <label className="block font-semibold text-stone-700 mb-1">
-                Đơn giá / 01 phần (VND) <span className="text-amber-700">*</span>
-              </label>
-              <input
-                type="number"
-                min={1000}
-                step={1}
-                required
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 font-bold text-amber-700 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
-              />
-            </div>
+              <div className="sm:col-span-4">
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Danh mục món <span className="text-amber-700">*</span>
+                </label>
+                <select
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(Number(e.target.value))}
+                  className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 font-medium text-stone-800 focus:border-amber-600 focus:outline-none cursor-pointer"
+                >
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="sm:col-span-4">
-              <label className="block font-semibold text-stone-700 mb-1">
-                Trạng thái phục vụ
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as DishStatus)}
-                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 font-medium text-stone-800 focus:border-amber-600 focus:outline-none cursor-pointer"
-              >
-                <option value="ACTIVE">Phục vụ (ACTIVE)</option>
-                <option value="HIDDEN">Tạm ẩn (HIDDEN)</option>
-              </select>
-            </div>
+              <div className="sm:col-span-4">
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Đơn giá / 01 phần (VND) <span className="text-amber-700">*</span>
+                </label>
+                <input
+                  type="number"
+                  min={1000}
+                  step={1}
+                  required
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 font-bold text-amber-700 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
+                />
+              </div>
 
-            <div className="sm:col-span-12">
-              <label className="block font-semibold text-stone-700 mb-1">
-                Đường dẫn hình ảnh (URL)
-              </label>
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://images.unsplash.com/..."
-                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
-              />
-            </div>
+              <div className="sm:col-span-4">
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Trạng thái phục vụ
+                </label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as DishStatus)}
+                  className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 font-medium text-stone-800 focus:border-amber-600 focus:outline-none cursor-pointer"
+                >
+                  <option value="ACTIVE">Phục vụ (ACTIVE)</option>
+                  <option value="HIDDEN">Tạm ẩn (HIDDEN)</option>
+                </select>
+              </div>
 
-            <div className="sm:col-span-12">
-              <label className="block font-semibold text-stone-700 mb-1">
-                Mô tả hương vị & thành phần
-              </label>
-              <textarea
-                rows={2}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Mô tả tóm tắt món ăn phục vụ theo chuẩn tiệc cưới..."
-                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
-              />
+              <div className="sm:col-span-4">
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Đường dẫn hình ảnh (URL)
+                </label>
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="https://images.unsplash.com/..."
+                  className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
+                />
+              </div>
+
+              <div className="sm:col-span-12">
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Mô tả hương vị & thành phần món ăn
+                </label>
+                <textarea
+                  rows={2}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Mô tả tóm tắt món ăn phục vụ theo chuẩn tiệc cưới sang trọng..."
+                  className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-600"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Recipe Configuration Table */}
-          <div className="border-t border-stone-200 pt-3 space-y-2.5">
-            <div className="flex items-center justify-between">
+          {/* Section 2: Recipe Configuration */}
+          <div className="border-t border-stone-200 pt-5 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div>
-                <h3 className="font-bold text-stone-900">
-                  Công thức định lượng nguyên liệu (01 phần)
+                <h3 className="font-bold text-sm text-stone-900 flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-amber-600" />
+                  <span>Công thức định lượng nguyên liệu (01 phần tiệc)</span>
                 </h3>
-                <p className="text-[11px] text-stone-500">
-                  Quy chuẩn định mức: Định lượng bắt buộc &gt; 0, dùng đơn vị chuẩn của kho
+                <p className="text-[11px] text-stone-500 mt-0.5">
+                  Định mức sử dụng kho: Khi khách đặt tiệc, hệ thống nhân tự động số lượng bàn để khóa giữ kho
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={addRecipeRow}
-                className="inline-flex items-center gap-1 rounded-lg border border-stone-300 bg-stone-50 px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-100 cursor-pointer shadow-xs"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-100 transition-colors cursor-pointer shadow-2xs self-start sm:self-auto"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Thêm nguyên liệu</span>
               </button>
             </div>
 
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+            <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
               {recipeRows.map((row, idx) => {
                 const selectedIng = ingredients.find(
                   (i) => i.id === Number(row.ingredientId)
@@ -320,23 +329,27 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                 return (
                   <div
                     key={idx}
-                    className="flex items-center gap-2 rounded-lg border border-stone-200 bg-stone-50 p-2"
+                    className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 rounded-xl border border-stone-200/90 bg-stone-50/80 p-3 hover:bg-stone-50 transition-colors"
                   >
-                    <select
-                      value={row.ingredientId}
-                      onChange={(e) =>
-                        updateRecipeRow(idx, 'ingredientId', Number(e.target.value))
-                      }
-                      className="flex-1 rounded-lg border border-stone-300 bg-white px-2 py-1 text-xs font-medium text-stone-800 focus:outline-none focus:border-amber-600 cursor-pointer shadow-2xs"
-                    >
-                      {ingredients.map((ing) => (
-                        <option key={ing.id} value={ing.id}>
-                          {ing.code} - {ing.name} ({ing.unit})
-                        </option>
-                      ))}
-                    </select>
+                    {/* Ingredient Select */}
+                    <div className="flex-1 min-w-0">
+                      <select
+                        value={row.ingredientId}
+                        onChange={(e) =>
+                          updateRecipeRow(idx, 'ingredientId', Number(e.target.value))
+                        }
+                        className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs font-semibold text-stone-800 focus:outline-none focus:border-amber-600 cursor-pointer shadow-2xs"
+                      >
+                        {ingredients.map((ing) => (
+                          <option key={ing.id} value={ing.id}>
+                            {ing.code} - {ing.name} ({ing.unit})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                    <div className="flex items-center gap-1 w-28 shrink-0">
+                    {/* Quantity + Unit Badge */}
+                    <div className="flex items-center gap-1.5 w-full sm:w-44 shrink-0">
                       <input
                         type="number"
                         step="0.01"
@@ -346,26 +359,30 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
                         onChange={(e) =>
                           updateRecipeRow(idx, 'quantity', Number(e.target.value))
                         }
-                        className="w-full rounded-lg border border-stone-300 bg-white px-2 py-1 text-xs text-right font-bold text-amber-700 focus:outline-none focus:border-amber-600 shadow-2xs"
+                        className="flex-1 rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs text-right font-bold text-amber-800 focus:outline-none focus:border-amber-600 shadow-2xs tabular-nums"
                       />
-                      <span className="text-[11px] font-semibold text-stone-500 w-8">
-                        {selectedIng?.unit || ''}
+                      <span className="inline-flex items-center justify-center px-2.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-600 font-bold text-xs shrink-0 shadow-2xs">
+                        {selectedIng?.unit || 'đv'}
                       </span>
                     </div>
 
-                    <input
-                      type="text"
-                      value={row.note || ''}
-                      onChange={(e) => updateRecipeRow(idx, 'note', e.target.value)}
-                      placeholder="Ghi chú chế biến..."
-                      className="w-36 rounded-lg border border-stone-300 bg-white px-2 py-1 text-xs text-stone-700 focus:outline-none focus:border-amber-600 hidden sm:block shadow-2xs"
-                    />
+                    {/* Note */}
+                    <div className="w-full sm:w-56 shrink-0">
+                      <input
+                        type="text"
+                        value={row.note || ''}
+                        onChange={(e) => updateRecipeRow(idx, 'note', e.target.value)}
+                        placeholder="Ghi chú sơ chế..."
+                        className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs text-stone-700 focus:outline-none focus:border-amber-600 shadow-2xs"
+                      />
+                    </div>
 
+                    {/* Delete */}
                     <button
                       type="button"
                       onClick={() => removeRecipeRow(idx)}
                       disabled={recipeRows.length <= 1}
-                      className="p-1 text-stone-400 hover:text-rose-600 disabled:opacity-30 cursor-pointer"
+                      className="p-2 text-stone-400 hover:text-rose-600 disabled:opacity-30 cursor-pointer rounded-lg hover:bg-rose-50 transition-colors self-end sm:self-auto shrink-0"
                       title="Xóa dòng"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -377,7 +394,7 @@ export const DishFormModal: React.FC<DishFormModalProps> = ({
           </div>
 
           {/* Footer Controls */}
-          <div className="flex items-center justify-end gap-2.5 border-t border-stone-200 pt-3">
+          <div className="flex items-center justify-end gap-3 border-t border-stone-200 pt-5">
             <button
               type="button"
               onClick={onClose}

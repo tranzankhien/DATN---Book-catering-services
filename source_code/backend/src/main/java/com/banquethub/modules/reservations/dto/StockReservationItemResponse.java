@@ -75,4 +75,9 @@ public class StockReservationItemResponse {
     public void setReservedQuantity(BigDecimal reservedQuantity) {
         this.reservedQuantity = reservedQuantity;
     }
+
+    // Frontend compatibility alias
+    public BigDecimal getQuantity() {
+        return reservedQuantity;
+    }
 }

@@ -40,6 +40,11 @@ export const EmployeeOrderDetailPage: React.FC = () => {
     })();
   }, [id]);
 
+  const formatQuantity = (val?: number | null) => {
+    if (val === undefined || val === null || isNaN(Number(val))) return '0';
+    return Number(val).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+  };
+
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-16">
@@ -175,7 +180,7 @@ export const EmployeeOrderDetailPage: React.FC = () => {
 
                 <div className="text-right">
                   <span className="text-lg font-bold text-amber-900 block tabular-nums">
-                    {it.totalQuantity}
+                    {it.totalQuantity || (it.quantityPerTable * order.tableCount)}
                   </span>
                   <span className="text-[10px] text-stone-400 uppercase tracking-wider font-semibold">
                     Tổng số phần
@@ -188,12 +193,34 @@ export const EmployeeOrderDetailPage: React.FC = () => {
 
         {/* Ingredients to issue (5 Cols) */}
         <div className="lg:col-span-5 bg-white rounded-2xl p-6 border border-stone-200/90 shadow-xs space-y-4">
-          <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
-            <Package className="h-4 w-4 text-emerald-600" />
-            <h3 className="font-bold text-base text-stone-900 tracking-tight">
-              Nguyên liệu xuất kho
-            </h3>
+          <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+            <div className="flex items-center gap-2">
+              <Package className="h-4 w-4 text-emerald-600" />
+              <h3 className="font-bold text-base text-stone-900 tracking-tight">
+                Nguyên liệu xuất kho
+              </h3>
+            </div>
+            {order.reservation && (
+              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                order.reservation.status === 'ACTIVE'
+                  ? 'bg-amber-100 text-amber-900 border border-amber-200'
+                  : order.reservation.status === 'RELEASED'
+                  ? 'bg-stone-100 text-stone-600'
+                  : 'bg-emerald-100 text-emerald-800'
+              }`}>
+                {order.reservation.status === 'ACTIVE' ? 'Đang giữ kho' : order.reservation.status === 'RELEASED' ? 'Đã giải phóng' : 'Đã xuất kho'}
+              </span>
+            )}
           </div>
+
+          {order.reservation && (
+            <div className="text-[11px] text-stone-500 bg-stone-50 p-2.5 rounded-xl border border-stone-200/70 space-y-0.5">
+              <div>Hạn giữ kho: <strong className="text-stone-800">{formatDateTimeVn(order.reservation.expiresAt)}</strong></div>
+              {order.reservation.releasedAt && (
+                <div className="text-stone-600">Đã giải phóng kho: {formatDateTimeVn(order.reservation.releasedAt)}</div>
+              )}
+            </div>
+          )}
 
           {order.reservation && order.reservation.items.length > 0 ? (
             <div className="divide-y divide-stone-100 max-h-96 overflow-y-auto pr-1">
@@ -205,8 +232,8 @@ export const EmployeeOrderDetailPage: React.FC = () => {
                       {resItem.ingredientCode}
                     </div>
                   </div>
-                  <div className="font-bold text-stone-900 text-sm tabular-nums">
-                    {resItem.quantity} {resItem.unit}
+                  <div className="font-bold text-amber-900 bg-amber-50/80 border border-amber-200/80 px-2.5 py-1 rounded-lg text-xs tabular-nums shrink-0">
+                    {formatQuantity(resItem.reservedQuantity ?? resItem.quantity)} {resItem.unit}
                   </div>
                 </div>
               ))}

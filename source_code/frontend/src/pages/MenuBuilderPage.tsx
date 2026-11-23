@@ -11,12 +11,10 @@ import {
   CheckCircle2,
   ArrowRight,
   RefreshCw,
-  Sparkles,
   ShoppingBag,
   X,
   ShieldCheck,
   ChefHat,
-  Receipt,
   Layers,
   ExternalLink,
 } from 'lucide-react';
@@ -319,56 +317,15 @@ export const MenuBuilderPage: React.FC = () => {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
-      {/* Header Banner - Inspired by PITO Clean Banquet Hero */}
-      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-2.5 max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900">
-              <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-              <span>Studio phối thực đơn yến tiệc độc bản</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
-              Tùy biến thực đơn bàn tiệc
-            </h1>
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-              Các món ăn được phân chia theo từng danh mục rõ ràng (Khai vị, Món chính, Lẩu & Canh, Tráng miệng, Nước uống). Quý khách dễ dàng lựa chọn khẩu vị riêng cho sự kiện với chi phí và tồn kho tự động kiểm tra theo thời gian thực.
-            </p>
-
-            {/* Quick highlight pills */}
-            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-stone-600">
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-stone-100 font-medium">
-                <ChefHat className="h-3.5 w-3.5 text-amber-700" />
-                Tiêu chuẩn bàn 10 khách
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-medium border border-emerald-200/70">
-                <Receipt className="h-3.5 w-3.5 text-emerald-600" />
-                Xuất hóa đơn VAT
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-900 font-medium border border-amber-200/70">
-                <Layers className="h-3.5 w-3.5 text-amber-700" />
-                Đã chọn: <strong className="ml-0.5">{selectedItems.length} món</strong>
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0">
-            {preview && preview.pricePerTable > 0 && (
-              <div className="text-right">
-                <span className="text-[11px] text-stone-500 font-medium block">Tạm tính 01 bàn:</span>
-                <span className="text-xl sm:text-2xl font-bold text-amber-900 tabular-nums">
-                  {formatVnd(preview.pricePerTable)}
-                </span>
-              </div>
-            )}
-            <Link
-              to="/menus"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-xs font-semibold text-stone-700 shadow-xs transition-colors"
-            >
-              ← Chọn mẫu thực đơn có sẵn
-            </Link>
-          </div>
-        </div>
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6 animate-fade-up-1">
+      {/* Centered Clean Header */}
+      <div className="text-center max-w-2xl mx-auto space-y-1.5 pt-1 pb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+          Tùy biến thực đơn bàn tiệc
+        </h1>
+        <p className="text-xs sm:text-sm text-stone-500 leading-relaxed">
+          Tự do lựa chọn từng món ăn theo khẩu vị riêng với định mức chi phí và tồn kho tự động kiểm tra theo thời gian thực.
+        </p>
       </div>
 
       {/* Main Workspace: 7 Cols Dishes Catalog, 5 Cols Custom Basket */}
@@ -377,7 +334,8 @@ export const MenuBuilderPage: React.FC = () => {
         <div className="lg:col-span-7 space-y-6">
           {/* Search Bar & Sticky Category Pills Navigation */}
           <div className="rounded-2xl border border-stone-200/90 bg-white p-4 shadow-xs space-y-3.5 sticky top-20 z-20 backdrop-blur-md bg-white/95">
-            <div className="relative">
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
               <input
                 type="text"
@@ -397,6 +355,15 @@ export const MenuBuilderPage: React.FC = () => {
                 </button>
               )}
             </div>
+
+            <Link
+              to="/menus"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-stone-200 bg-stone-50 hover:bg-stone-100 text-xs font-semibold text-stone-700 transition-colors shrink-0"
+              title="Xem các bộ thực đơn chuẩn sẵn có"
+            >
+              ← Mẫu có sẵn
+            </Link>
+          </div>
 
             {/* Category Pills Navigation with Selected Indicators */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-0.5">

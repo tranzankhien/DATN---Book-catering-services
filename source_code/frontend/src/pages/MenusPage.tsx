@@ -5,9 +5,7 @@ import {
   ArrowRight,
   Sliders,
   CheckCircle2,
-  Sparkles,
   Calendar,
-  ChefHat,
   Search,
   X,
   Info,
@@ -21,6 +19,7 @@ import { formatVnd } from '../hooks/useFormatters';
 import { LoadingState, ErrorState, EmptyState } from '../components/StatusStates';
 import { extractErrorMessage } from '../services/apiClient';
 import { DEFAULT_MENU_IMAGE, handleImageError } from '../lib/imageConstants';
+import { Pagination, usePagination } from '../components/common/Pagination';
 
 export const MenusPage: React.FC = () => {
   const navigate = useNavigate();
@@ -75,44 +74,32 @@ export const MenusPage: React.FC = () => {
     return list;
   }, [menus, keyword, sortBy]);
 
-  return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
-      {/* Header Banner - Sang trọng đồng bộ với Phase 1/2 */}
-      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
-              <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-              <span>Bộ sưu tập thực đơn tiệc tiêu chuẩn</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
-              Thực đơn tiệc mẫu định sẵn
-            </h1>
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-              Các set menu được nghiên cứu kỹ lưỡng bởi bếp trưởng BanquetHub, cân bằng dinh dưỡng, phối vị hài hòa cho bàn tiệc 10 khách. Quý khách có thể chọn đặt ngay hoặc chuyển sang công cụ phối món để thay đổi theo khẩu vị riêng.
-            </p>
-          </div>
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    paginatedItems: paginatedMenus,
+    totalItems,
+  } = usePagination(filteredMenus, 9);
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <Link
-              to="/menu-builder"
-              className="inline-flex items-center gap-2 rounded-xl bg-amber-700 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-amber-800 transition-all cursor-pointer"
-            >
-              <Sliders className="h-4 w-4" />
-              <span>Tự phối thực đơn mới</span>
-            </Link>
-            <Link
-              to="/dishes"
-              className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-all shadow-xs"
-            >
-              <ChefHat className="h-4 w-4 text-stone-500" />
-              <span>Khám phá món ăn</span>
-            </Link>
-          </div>
-        </div>
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [keyword, sortBy, setCurrentPage]);
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6 animate-fade-up-1">
+      {/* Centered Clean Header */}
+      <div className="text-center max-w-2xl mx-auto space-y-1.5 pt-1 pb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+          Thực đơn tiệc mẫu định sẵn
+        </h1>
+        <p className="text-xs sm:text-sm text-stone-500 leading-relaxed">
+          Các set menu được nghiên cứu kỹ lưỡng bởi bếp trưởng BanquetHub, cân bằng dinh dưỡng cho bàn tiệc 10 khách.
+        </p>
       </div>
 
-      {/* Toolbar: Search, Sort and Counter */}
+      {/* Toolbar: Search, Sort and Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
@@ -149,9 +136,17 @@ export const MenusPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="text-xs text-stone-500 font-medium px-2">
+          <div className="text-xs text-stone-500 font-medium px-1">
             Hiển thị <span className="font-bold text-stone-900">{filteredMenus.length}</span> thực đơn
           </div>
+
+          <Link
+            to="/menu-builder"
+            className="inline-flex items-center gap-2 rounded-xl bg-amber-700 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-amber-800 transition-all cursor-pointer whitespace-nowrap"
+          >
+            <Sliders className="h-3.5 w-3.5" />
+            <span>Tự phối thực đơn mới</span>
+          </Link>
         </div>
       </div>
 
@@ -177,8 +172,9 @@ export const MenusPage: React.FC = () => {
 
       {/* Menu Cards Grid */}
       {!loading && !error && filteredMenus.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMenus.map((menu) => (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paginatedMenus.map((menu) => (
             <div
               key={menu.id}
               className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-xs hover:border-amber-400 hover:shadow-lg transition-all duration-300"
@@ -294,7 +290,19 @@ export const MenusPage: React.FC = () => {
             </div>
           ))}
         </div>
-      )}
+
+        <Pagination
+          currentPage={currentPage}
+          totalItems={totalItems}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+          pageSizeOptions={[6, 9, 18]}
+          itemLabel="thực đơn"
+          className="mt-8"
+        />
+      </>
+    )}
     </div>
   );
 };

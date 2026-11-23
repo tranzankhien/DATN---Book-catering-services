@@ -25,6 +25,7 @@ import type { OrderDto } from '../services/types';
 import { extractErrorMessage } from '../services/apiClient';
 import { paymentOutcome, paymentReference } from '../lib/paymentResult';
 import { formatVnd, formatDateTimeVn } from '../hooks/useFormatters';
+import { notifyOrderUpdated } from '../lib/orderEvents';
 
 const messages = {
   success: 'Thanh toán yến tiệc đã được xác nhận thành công!',
@@ -70,6 +71,9 @@ export function PaymentResultPage() {
         setError('');
         if (paymentOutcome(data, reference!) !== 'pending') {
           setWaiting(false);
+          if (data.orderId) {
+            notifyOrderUpdated(data.orderId, 'ORDER_PAID');
+          }
           return;
         }
       } catch (e) {
@@ -118,6 +122,17 @@ export function PaymentResultPage() {
       navigator.clipboard.writeText(reference);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleSimulatePay = async () => {
+    if (!state?.orderId) return;
+    try {
+      await paymentService.simulateSandboxPay(state.orderId);
+      notifyOrderUpdated(state.orderId, 'ORDER_PAID');
+      setRetry((r) => r + 1);
+    } catch (e) {
+      setError(extractErrorMessage(e));
     }
   };
 
@@ -448,15 +463,28 @@ export function PaymentResultPage() {
               >
                 Đăng nhập lại để kiểm tra
               </Link>
-            ) : reference && !waiting && outcome === 'pending' ? (
-              <button
-                type="button"
-                onClick={() => setRetry((v) => v + 1)}
-                className="w-full inline-flex items-center justify-center gap-1.5 h-11 px-5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
-              >
-                <RefreshCw className="h-3.5 w-3.5" />
-                <span>Kiểm tra lại kết quả</span>
-              </button>
+            ) : reference && outcome === 'pending' ? (
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setRetry((v) => v + 1)}
+                  className="w-full inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 font-semibold text-xs shadow-2xs transition-colors cursor-pointer"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  <span>Kiểm tra lại kết quả</span>
+                </button>
+                {state?.orderId && (
+                  <button
+                    type="button"
+                    onClick={handleSimulatePay}
+                    className="w-full inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                    title="Mô phỏng xác nhận thanh toán thành công (Môi trường Sandbox / Test)"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Xác nhận thanh toán Sandbox</span>
+                  </button>
+                )}
+              </div>
             ) : null}
 
             <Link

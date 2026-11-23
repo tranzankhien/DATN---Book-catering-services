@@ -23,6 +23,7 @@ import { employeeService } from '../../services/employeeService';
 import type { EmployeeDto, CreateEmployeePayload, UpdateEmployeePayload, EmployeeStatus } from '../../services/types';
 import { useToast } from '../../hooks/useToast';
 import { extractErrorMessage } from '../../services/apiClient';
+import { Pagination, usePagination } from '../../components/common/Pagination';
 
 export const AdminEmployeesPage: React.FC = () => {
   const { showToast } = useToast();
@@ -30,6 +31,19 @@ export const AdminEmployeesPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | EmployeeStatus>('ALL');
+
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    paginatedItems: paginatedEmployees,
+    totalItems,
+  } = usePagination(employees, 10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, setCurrentPage]);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -321,7 +335,8 @@ export const AdminEmployeesPage: React.FC = () => {
             <p className="text-xs text-stone-400 mt-1">Hãy thử điều chỉnh bộ lọc hoặc thêm mới nhân sự.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-stone-50/80 text-[11px] font-bold text-stone-500 uppercase tracking-wider border-b border-stone-200">
                 <tr>
@@ -336,7 +351,7 @@ export const AdminEmployeesPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
-                {employees.map((emp) => (
+                {paginatedEmployees.map((emp) => (
                   <tr key={emp.id} className="hover:bg-amber-50/30 transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
@@ -430,6 +445,21 @@ export const AdminEmployeesPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+            {employees.length > 0 && (
+              <div className="p-4 border-t border-stone-100">
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  pageSize={pageSize}
+                  onPageChange={setCurrentPage}
+                  onPageSizeChange={setPageSize}
+                  pageSizeOptions={[10, 20, 50]}
+                  itemLabel="nhân viên"
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
 

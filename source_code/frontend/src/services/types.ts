@@ -383,7 +383,8 @@ export interface StockReservationItemDto {
   ingredientCode: string;
   ingredientName: string;
   unit: string;
-  quantity: number;
+  quantity?: number;
+  reservedQuantity?: number;
 }
 
 export interface StockReservationDto {
@@ -416,6 +417,9 @@ export interface OrderDto {
   guestCount?: number | null;
   menuId?: number | null;
   menuNameSnapshot?: string | null;
+  voucherCode?: string | null;
+  discountAmount?: number | null;
+  subtotalAmount?: number | null;
   totalAmount: number;
   orderStatus: OrderStatus;
   paymentStatus: PaymentStatus;
@@ -487,6 +491,7 @@ export interface CreateOrderPayload {
   items: CreateOrderItemPayload[];
   idempotencyKey?: string;
   expectedTotalAmount?: number;
+  voucherCode?: string;
 }
 
 export interface OrderPreviewPayload {
@@ -764,6 +769,8 @@ export interface PayrollDto {
   id: number;
   employeeId: number;
   payrollPeriodId: number;
+  year?: number;
+  month?: number;
   employeeCodeSnapshot: string;
   employeeNameSnapshot: string;
   baseSalarySnapshot: number;
@@ -780,6 +787,7 @@ export interface PayrollDto {
   paidAmount?: number | null;
   paymentNote?: string | null;
   paidBy?: string | null;
+  adjustments?: PayrollAdjustmentDto[];
 }
 
 export interface RecordSalaryPaymentPayload {
@@ -1031,4 +1039,64 @@ export interface CashFlowReportResponse {
   unpaidOperatingExpenses: number;
   dailyPoints: TimeSeriesPoint[];
 }
+
+export type DiscountType = 'FIXED' | 'PERCENTAGE';
+
+export interface VoucherDto {
+  id: number;
+  code: string;
+  name: string;
+  description?: string | null;
+  discountType: DiscountType;
+  discountValue: number;
+  maxDiscountAmount?: number | null;
+  minOrderAmount: number;
+  startDate?: string | null;
+  endDate?: string | null;
+  usageLimit?: number | null;
+  usedCount: number;
+  limitPerUser: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateVoucherRequest {
+  code: string;
+  name: string;
+  description?: string;
+  discountType: DiscountType;
+  discountValue: number;
+  maxDiscountAmount?: number | null;
+  minOrderAmount?: number;
+  startDate?: string | null;
+  endDate?: string | null;
+  usageLimit?: number | null;
+  limitPerUser?: number;
+  isActive?: boolean;
+}
+
+export interface UpdateVoucherRequest {
+  name: string;
+  description?: string;
+  discountType: DiscountType;
+  discountValue: number;
+  maxDiscountAmount?: number | null;
+  minOrderAmount?: number;
+  startDate?: string | null;
+  endDate?: string | null;
+  usageLimit?: number | null;
+  limitPerUser?: number;
+  isActive?: boolean;
+}
+
+export interface VoucherValidationResponse {
+  valid: boolean;
+  message: string;
+  voucherCode?: string;
+  voucherName?: string;
+  discountAmount: number;
+  finalAmount?: number;
+}
+
 

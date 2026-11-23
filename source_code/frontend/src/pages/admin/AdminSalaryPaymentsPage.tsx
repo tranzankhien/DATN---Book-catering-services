@@ -15,6 +15,7 @@ import { employeeService } from '../../services/employeeService';
 import type { SalaryPaymentDto } from '../../services/types';
 import { useToast } from '../../hooks/useToast';
 import { extractErrorMessage } from '../../services/apiClient';
+import { Pagination, usePagination } from '../../components/common/Pagination';
 
 export const AdminSalaryPaymentsPage: React.FC = () => {
   const { showToast } = useToast();
@@ -48,6 +49,19 @@ export const AdminSalaryPaymentsPage: React.FC = () => {
         (p.note && p.note.toLowerCase().includes(term))
     );
   }, [payments, searchTerm]);
+
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    paginatedItems: paginatedPayments,
+    totalItems,
+  } = usePagination(filteredPayments, 10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, setCurrentPage]);
 
   // Statistics
   const totalAmount = useMemo(() => payments.reduce((s, p) => s + (p.amount || 0), 0), [payments]);
@@ -147,7 +161,8 @@ export const AdminSalaryPaymentsPage: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-stone-50/80 text-[10px] font-bold text-stone-500 uppercase tracking-wider border-b border-stone-200">
                 <tr>
@@ -162,7 +177,7 @@ export const AdminSalaryPaymentsPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
-                {filteredPayments.map((pay) => (
+                {paginatedPayments.map((pay) => (
                   <tr key={pay.id} className="hover:bg-amber-50/20 transition-colors">
                     <td className="py-3.5 px-4 font-mono font-bold text-stone-700 tabular-nums">
                       #{String(pay.id).padStart(5, '0')}
@@ -216,6 +231,21 @@ export const AdminSalaryPaymentsPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+            {filteredPayments.length > 0 && (
+              <div className="p-4 border-t border-stone-100">
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  pageSize={pageSize}
+                  onPageChange={setCurrentPage}
+                  onPageSizeChange={setPageSize}
+                  pageSizeOptions={[10, 20, 50]}
+                  itemLabel="giao dịch chi lương"
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

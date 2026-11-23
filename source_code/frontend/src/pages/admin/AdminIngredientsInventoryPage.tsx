@@ -26,6 +26,7 @@ import type {
   StockAdjustmentPayload,
 } from '../../services/types';
 import { useToast } from '../../hooks/useToast';
+import { Pagination, usePagination } from '../../components/common/Pagination';
 
 export const AdminIngredientsInventoryPage: React.FC = () => {
   const [ingredients, setIngredients] = useState<IngredientDto[]>([]);
@@ -57,6 +58,19 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
   const [submittingCreate, setSubmittingCreate] = useState<boolean>(false);
 
   const { showToast } = useToast();
+
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    paginatedItems: paginatedIngredients,
+    totalItems,
+  } = usePagination(ingredients, 10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchKeyword, activeFilter, lowStockOnly, setCurrentPage]);
 
   const loadIngredients = async () => {
     try {
@@ -375,7 +389,7 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                ingredients.map((item) => {
+                paginatedIngredients.map((item) => {
                   const isLow = item.currentStock <= item.minStockThreshold;
                   return (
                     <tr
@@ -477,6 +491,20 @@ export const AdminIngredientsInventoryPage: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        {ingredients.length > 0 && (
+          <div className="p-4 border-t border-stone-100">
+            <Pagination
+              currentPage={currentPage}
+              totalItems={totalItems}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[10, 20, 50]}
+              itemLabel="nguyên liệu"
+            />
+          </div>
+        )}
       </div>
 
       {/* Ingredient Detail & Recipe Usage Modal */}

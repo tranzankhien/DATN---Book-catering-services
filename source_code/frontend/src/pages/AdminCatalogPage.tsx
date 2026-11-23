@@ -26,6 +26,7 @@ import { DishFormModal } from '../features/admin/DishFormModal';
 import { RecipeConfigModal } from '../features/admin/RecipeConfigModal';
 import { IngredientFormModal } from '../features/admin/IngredientFormModal';
 import { DEFAULT_DISH_IMAGE, handleImageError } from '../lib/imageConstants';
+import { Pagination, usePagination } from '../components/common/Pagination';
 
 export const AdminCatalogPage: React.FC = () => {
   const { showToast } = useToast();
@@ -118,6 +119,28 @@ export const AdminCatalogPage: React.FC = () => {
       lowStockCount,
     };
   }, [dishes, ingredients]);
+
+  const {
+    currentPage: dishPage,
+    setCurrentPage: setDishPage,
+    pageSize: dishPageSize,
+    setPageSize: setDishPageSize,
+    paginatedItems: paginatedDishes,
+    totalItems: totalDishesCount,
+  } = usePagination(dishes, 10);
+
+  const {
+    currentPage: ingPage,
+    setCurrentPage: setIngPage,
+    pageSize: ingPageSize,
+    setPageSize: setIngPageSize,
+    paginatedItems: paginatedIngredients,
+    totalItems: totalIngredientsCount,
+  } = usePagination(ingredients, 10);
+
+  useEffect(() => {
+    setDishPage(1);
+  }, [selectedCategoryId, selectedStatus, keyword, setDishPage]);
 
   return (
     <div className="space-y-6">
@@ -316,7 +339,7 @@ export const AdminCatalogPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100 text-xs">
-                    {dishes.map((dish) => (
+                    {paginatedDishes.map((dish) => (
                       <tr key={dish.id} className="hover:bg-stone-50/70 transition-colors align-top">
                         <td className="py-3.5 px-4">
                           <div className="flex items-start gap-3">
@@ -428,6 +451,20 @@ export const AdminCatalogPage: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+
+              {dishes.length > 0 && (
+                <div className="p-4 border-t border-stone-100">
+                  <Pagination
+                    currentPage={dishPage}
+                    totalItems={totalDishesCount}
+                    pageSize={dishPageSize}
+                    onPageChange={setDishPage}
+                    onPageSizeChange={setDishPageSize}
+                    pageSizeOptions={[10, 20, 50]}
+                    itemLabel="món ăn"
+                  />
+                </div>
+              )}
             </div>
           )}
         </>
@@ -448,7 +485,7 @@ export const AdminCatalogPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100 text-xs">
-                {ingredients.map((ing) => (
+                {paginatedIngredients.map((ing) => (
                   <tr key={ing.id} className="hover:bg-amber-50/20 transition-colors group">
                     <td className="py-3.5 px-4 font-bold text-stone-800 whitespace-nowrap bg-stone-50/40 tabular-nums">
                       {ing.code}
@@ -488,6 +525,20 @@ export const AdminCatalogPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+          {ingredients.length > 0 && (
+            <div className="p-4 border-t border-stone-100">
+              <Pagination
+                currentPage={ingPage}
+                totalItems={totalIngredientsCount}
+                pageSize={ingPageSize}
+                onPageChange={setIngPage}
+                onPageSizeChange={setIngPageSize}
+                pageSizeOptions={[10, 20, 50]}
+                itemLabel="nguyên liệu"
+              />
+            </div>
+          )}
         </div>
       )}
 

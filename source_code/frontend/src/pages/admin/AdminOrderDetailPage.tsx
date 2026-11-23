@@ -24,6 +24,7 @@ import {
   RefreshCw,
   X,
   ClipboardList,
+  Tag,
 } from 'lucide-react';
 import { orderService } from '../../services/orderService';
 import type { PaymentState } from '../../services/paymentService';
@@ -32,6 +33,7 @@ import { formatVnd, formatDateTimeVn, formatQuantity } from '../../hooks/useForm
 import { LoadingState, ErrorState } from '../../components/StatusStates';
 import { useToast } from '../../hooks/useToast';
 import { extractErrorMessage } from '../../services/apiClient';
+import { subscribeOrderUpdated } from '../../lib/orderEvents';
 
 export const AdminOrderDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,23 +60,41 @@ export const AdminOrderDetailPage: React.FC = () => {
     : hasOpenAttempt ? 'Phiên SePay đang mở. Hãy đợi kết quả từ SePay hoặc đợi phiên hết hạn.' : '';
   const canCancel = eligibleToCancel && !cancelHint;
 
-  const fetchOrderDetail = async () => {
+  const fetchOrderDetail = async (showLoading = true) => {
     if (!id) return;
     setPaymentSnapshot(undefined);
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       setError(null);
       const data = await orderService.getAdminOrderById(Number(id));
       setOrder(data);
     } catch (err) {
-      setError(extractErrorMessage(err));
+      if (showLoading) setError(extractErrorMessage(err));
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchOrderDetail();
+    const unsubscribe = subscribeOrderUpdated((event) => {
+      if (!event.orderId || event.orderId === Number(id)) {
+        void fetchOrderDetail(false);
+      }
+    });
+    const handleFocus = () => {
+      void fetchOrderDetail(false);
+    };
+    window.addEventListener('focus', handleFocus);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') void fetchOrderDetail(false);
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      unsubscribe();
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [id]);
 
   useEffect(() => {
@@ -162,7 +182,7 @@ export const AdminOrderDetailPage: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             type="button"
-            onClick={fetchOrderDetail}
+            onClick={() => void fetchOrderDetail(true)}
             className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 transition-colors shadow-xs cursor-pointer"
           >
             <RefreshCw className="h-3.5 w-3.5" />
@@ -337,12 +357,36 @@ export const AdminOrderDetailPage: React.FC = () => {
             ))}
           </div>
 
-          <div className="border-t border-stone-200 pt-3 flex justify-between items-baseline text-sm font-bold text-stone-900">
-            <span>Tổng cộng:</span>
-            <span className="text-xl font-bold text-amber-900 tabular-nums">
-              {formatVnd(order.totalAmount)}
-            </span>
-          </div>
+          {order.discountAmount && order.discountAmount > 0 ? (
+            <div className="border-t border-stone-200 pt-3 space-y-1.5 text-xs sm:text-sm">
+              <div className="flex justify-between items-center text-stone-600">
+                <span>Tạm tính ({order.tableCount} bàn):</span>
+                <span className="font-semibold text-stone-900 tabular-nums">
+                  {formatVnd(order.subtotalAmount || order.totalAmount)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-emerald-700 bg-emerald-50/70 px-2.5 py-1.5 rounded-lg border border-emerald-200/50">
+                <span className="font-medium flex items-center gap-1.5">
+                  <Tag className="h-3.5 w-3.5" />
+                  <span>Mã ưu đãi ({order.voucherCode}):</span>
+                </span>
+                <span className="font-bold tabular-nums">-{formatVnd(order.discountAmount)}</span>
+              </div>
+              <div className="flex justify-between items-baseline pt-1 text-sm font-bold text-stone-900">
+                <span>Tổng thanh toán:</span>
+                <span className="text-xl font-bold text-amber-900 tabular-nums">
+                  {formatVnd(order.totalAmount)}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="border-t border-stone-200 pt-3 flex justify-between items-baseline text-sm font-bold text-stone-900">
+              <span>Tổng cộng:</span>
+              <span className="text-xl font-bold text-amber-900 tabular-nums">
+                {formatVnd(order.totalAmount)}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Right Column: Reservation & Audit Trail (5 Cols) */}
@@ -392,7 +436,7 @@ export const AdminOrderDetailPage: React.FC = () => {
                   <div key={resItem.id} className="py-2 px-2 flex items-center justify-between hover:bg-white rounded-lg transition-colors">
                     <span className="text-stone-800 font-medium truncate pr-2">{resItem.ingredientName}</span>
                     <span className="font-bold text-amber-900 bg-white border border-stone-200/90 px-2.5 py-0.5 rounded-lg shrink-0 shadow-2xs tabular-nums">
-                      {formatQuantity(resItem.quantity)} {resItem.unit}
+                      {formatQuantity(resItem.reservedQuantity ?? resItem.quantity)} {resItem.unit}
                     </span>
                   </div>
                 ))}

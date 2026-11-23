@@ -69,4 +69,9 @@ public class PayrollReportResponse {
     public void setTotalDeductions(BigDecimal totalDeductions) {
         this.totalDeductions = totalDeductions;
     }
+
+    // Frontend compatibility alias
+    public BigDecimal getOutstandingPayrollDebt() {
+        return totalUnpaidSalary;
+    }
 }

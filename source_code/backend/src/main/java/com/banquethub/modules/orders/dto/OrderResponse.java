@@ -36,6 +36,9 @@ public class OrderResponse {
     private Long menuId;
     private String menuNameSnapshot;
     private BigDecimal totalAmount;
+    private String voucherCode;
+    private BigDecimal discountAmount;
+    private BigDecimal subtotalAmount;
     private OrderStatus orderStatus;
     private PaymentStatus paymentStatus;
     private OffsetDateTime paymentExpiresAt;
@@ -72,6 +75,9 @@ public class OrderResponse {
         }
         resp.setMenuNameSnapshot(order.getMenuNameSnapshot());
         resp.setTotalAmount(order.getTotalAmount());
+        resp.setVoucherCode(order.getVoucherCode());
+        resp.setDiscountAmount(order.getDiscountAmount());
+        resp.setSubtotalAmount(order.getSubtotalAmount());
         resp.setOrderStatus(order.getOrderStatus());
         resp.setPaymentStatus(order.getPaymentStatus());
         resp.setPaymentExpiresAt(order.getPaymentExpiresAt());
@@ -315,5 +321,29 @@ public class OrderResponse {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return discountAmount != null ? discountAmount : BigDecimal.ZERO;
+    }
+
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public BigDecimal getSubtotalAmount() {
+        return subtotalAmount != null ? subtotalAmount : totalAmount;
+    }
+
+    public void setSubtotalAmount(BigDecimal subtotalAmount) {
+        this.subtotalAmount = subtotalAmount;
     }
 }

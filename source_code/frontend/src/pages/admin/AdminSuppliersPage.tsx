@@ -20,6 +20,7 @@ import {
 import { supplierService } from '../../services/supplierService';
 import type { StockReceiptDto, SupplierDto, SupplierUpsertPayload } from '../../services/types';
 import { useToast } from '../../hooks/useToast';
+import { Pagination, usePagination } from '../../components/common/Pagination';
 
 export const AdminSuppliersPage: React.FC = () => {
   const [suppliers, setSuppliers] = useState<SupplierDto[]>([]);
@@ -46,6 +47,19 @@ export const AdminSuppliersPage: React.FC = () => {
   const [loadingReceipts, setLoadingReceipts] = useState<boolean>(false);
 
   const { showToast } = useToast();
+
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    paginatedItems: paginatedSuppliers,
+    totalItems,
+  } = usePagination(suppliers, 10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [keyword, activeFilter, setCurrentPage]);
 
   const loadSuppliers = async () => {
     try {
@@ -324,7 +338,7 @@ export const AdminSuppliersPage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                suppliers.map((sup) => {
+                paginatedSuppliers.map((sup) => {
                   const count = sup.totalReceiptsCount ?? sup.stockReceiptsCount ?? 0;
                   return (
                     <tr key={sup.id} className="hover:bg-amber-50/30 transition-colors group">
@@ -431,6 +445,20 @@ export const AdminSuppliersPage: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        {suppliers.length > 0 && (
+          <div className="p-4 border-t border-stone-100">
+            <Pagination
+              currentPage={currentPage}
+              totalItems={totalItems}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[10, 20, 50]}
+              itemLabel="nhà cung cấp"
+            />
+          </div>
+        )}
       </div>
 
       {/* Upsert Supplier Modal */}

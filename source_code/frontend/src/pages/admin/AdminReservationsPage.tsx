@@ -25,6 +25,7 @@ import type {
 import { formatQuantity, formatDateTimeVn } from '../../hooks/useFormatters';
 import { LoadingState, ErrorState } from '../../components/StatusStates';
 import { extractErrorMessage } from '../../services/apiClient';
+import { Pagination, usePagination } from '../../components/common/Pagination';
 
 export const AdminReservationsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'availability' | 'reservations'>('availability');
@@ -39,7 +40,9 @@ export const AdminReservationsPage: React.FC = () => {
   const [loadingRes, setLoadingRes] = useState<boolean>(true);
   const [resStatus, setResStatus] = useState<ReservationStatus | ''>('');
   const [page, setPage] = useState<number>(0);
+  const [resPageSize, setResPageSize] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [totalResElements, setTotalResElements] = useState<number>(0);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -63,10 +66,11 @@ export const AdminReservationsPage: React.FC = () => {
       const res = await reservationService.getReservations({
         status: resStatus || undefined,
         page,
-        size: 10,
+        size: resPageSize,
       });
       setReservations(res.content);
       setTotalPages(res.totalPages);
+      setTotalResElements(res.totalElements);
     } catch (err) {
       setError(extractErrorMessage(err));
     } finally {
@@ -84,7 +88,7 @@ export const AdminReservationsPage: React.FC = () => {
     } else {
       fetchReservations();
     }
-  }, [activeTab, resStatus, page]);
+  }, [activeTab, resStatus, page, resPageSize]);
 
   const totalTracked = availabilities.length;
   const inReservationCount = availabilities.filter((a) => a.reservedStock > 0).length;
@@ -99,6 +103,19 @@ export const AdminReservationsPage: React.FC = () => {
       a.ingredientCode.toLowerCase().includes(kw)
     );
   });
+
+  const {
+    currentPage: availPage,
+    setCurrentPage: setAvailPage,
+    pageSize: availPageSize,
+    setPageSize: setAvailPageSize,
+    paginatedItems: paginatedAvailabilities,
+    totalItems: totalAvailCount,
+  } = usePagination(filteredAvailabilities, 10);
+
+  useEffect(() => {
+    setAvailPage(1);
+  }, [availKeyword, setAvailPage]);
 
   return (
     <div className="w-full max-w-[1720px] mx-auto space-y-6 animate-fade-up-1">
@@ -268,7 +285,7 @@ export const AdminReservationsPage: React.FC = () => {
                       </td>
                     </tr>
                   ) : (
-                    filteredAvailabilities.map((it) => {
+                    paginatedAvailabilities.map((it) => {
                       const reservedRatio = it.physicalStock > 0 ? Math.min(100, Math.round((it.reservedStock / it.physicalStock) * 100)) : 0;
                       return (
                       <tr key={it.ingredientId} className="hover:bg-amber-50/30 transition-colors">
@@ -325,6 +342,20 @@ export const AdminReservationsPage: React.FC = () => {
                 </tbody>
               </table>
             </div>
+
+            {filteredAvailabilities.length > 0 && (
+              <div className="p-4 border-t border-stone-100">
+                <Pagination
+                  currentPage={availPage}
+                  totalItems={totalAvailCount}
+                  pageSize={availPageSize}
+                  onPageChange={setAvailPage}
+                  onPageSizeChange={setAvailPageSize}
+                  pageSizeOptions={[10, 20, 50]}
+                  itemLabel="nguyên liệu"
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -442,25 +473,21 @@ export const AdminReservationsPage: React.FC = () => {
               </table>
             </div>
 
-            {totalPages > 1 && (
-              <div className="p-4 border-t border-stone-100 flex justify-center items-center gap-2">
-                <button
-                  disabled={page === 0}
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors"
-                >
-                  Trang trước
-                </button>
-                <span className="px-3 py-1.5 text-xs text-stone-500 font-medium">
-                  Trang {page + 1} / {totalPages}
-                </span>
-                <button
-                  disabled={page >= totalPages - 1}
-                  onClick={() => setPage((p) => p + 1)}
-                  className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors"
-                >
-                  Trang sau
-                </button>
+            {/* Pagination */}
+            {!loadingRes && !error && totalResElements > 0 && (
+              <div className="p-4 border-t border-stone-100">
+                <Pagination
+                  currentPage={page + 1}
+                  totalItems={totalResElements}
+                  pageSize={resPageSize}
+                  onPageChange={(p) => setPage(p - 1)}
+                  onPageSizeChange={(s) => {
+                    setResPageSize(s);
+                    setPage(0);
+                  }}
+                  pageSizeOptions={[10, 20, 50]}
+                  itemLabel="lệnh giữ chỗ"
+                />
               </div>
             )}
           </div>

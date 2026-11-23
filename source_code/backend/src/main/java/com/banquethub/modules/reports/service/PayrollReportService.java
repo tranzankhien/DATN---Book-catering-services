@@ -97,4 +97,32 @@ public class PayrollReportService {
         java.util.Collections.reverse(sorted);
         return sorted;
     }
+
+    public List<TimeSeriesPoint> getPayrollTrend(LocalDate startDate, LocalDate endDate) {
+        int startYear = startDate.getYear();
+        int startMonth = startDate.getMonthValue();
+        int endYear = endDate.getYear();
+        int endMonth = endDate.getMonthValue();
+
+        String sql = "SELECT pp.year, pp.month, " +
+                     "       COALESCE(SUM(p.net_salary), 0) AS total_net, " +
+                     "       COUNT(p.id) AS emp_count " +
+                     "FROM payroll_periods pp " +
+                     "JOIN payrolls p ON p.payroll_period_id = pp.id " +
+                     "WHERE pp.status IN ('FINALIZED', 'CLOSED') " +
+                     "  AND (pp.year * 100 + pp.month) >= (? * 100 + ?) " +
+                     "  AND (pp.year * 100 + pp.month) <= (? * 100 + ?) " +
+                     "GROUP BY pp.year, pp.month " +
+                     "ORDER BY pp.year ASC, pp.month ASC";
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            int y = rs.getInt("year");
+            int m = rs.getInt("month");
+            BigDecimal net = rs.getBigDecimal("total_net");
+            long cnt = rs.getLong("emp_count");
+            String label = String.format("T%02d/%d", m, y);
+            String dateStr = String.format("%04d-%02d-01", y, m);
+            return new TimeSeriesPoint(label, dateStr, net, cnt);
+        }, startYear, startMonth, endYear, endMonth);
+    }
 }

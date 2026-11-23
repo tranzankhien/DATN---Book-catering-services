@@ -134,4 +134,33 @@ public class CashFlowReportResponse {
     public void setDailyCashFlow(List<TimeSeriesPoint> dailyCashFlow) {
         this.dailyCashFlow = dailyCashFlow;
     }
+
+    // Frontend compatibility aliases
+    public BigDecimal getInflows() {
+        return simulatedInflow;
+    }
+
+    public BigDecimal getOutflows() {
+        return recordedOutflow;
+    }
+
+    public BigDecimal getSupplierPayments() {
+        return paidToSuppliers;
+    }
+
+    public BigDecimal getSalaryPayments() {
+        return paidSalaries;
+    }
+
+    public BigDecimal getUnpaidSupplierDebt() {
+        return outstandingSupplierDebt;
+    }
+
+    public BigDecimal getUnpaidSalaryDebt() {
+        return unpaidSalaries;
+    }
+
+    public List<TimeSeriesPoint> getDailyPoints() {
+        return dailyCashFlow;
+    }
 }

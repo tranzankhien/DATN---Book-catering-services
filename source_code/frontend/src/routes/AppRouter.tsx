@@ -37,6 +37,7 @@ import { AdminMenusPage } from '../pages/admin/AdminMenusPage';
 import { AdminOrdersPage } from '../pages/admin/AdminOrdersPage';
 import { AdminOrderDetailPage } from '../pages/admin/AdminOrderDetailPage';
 import { AdminReservationsPage } from '../pages/admin/AdminReservationsPage';
+import { AdminVouchersPage } from '../pages/admin/AdminVouchersPage';
 
 // Employee Phase 3 Pages
 import { EmployeeOrdersPage } from '../pages/employee/EmployeeOrdersPage';
@@ -185,6 +186,7 @@ export const AppRouter: React.FC = () => {
           <Route path="menus" element={<AdminMenusPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="orders/:id" element={<AdminOrderDetailPage />} />
+          <Route path="vouchers" element={<AdminVouchersPage />} />
           <Route path="payments" element={<AdminPaymentsPage />} />
           <Route path="employees" element={<AdminEmployeesPage />} />
           <Route path="attendance" element={<AdminAttendancePage />} />

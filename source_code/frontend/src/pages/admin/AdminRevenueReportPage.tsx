@@ -28,6 +28,7 @@ import type {
   TopDishReportDto,
 } from '../../services/types';
 import { ReportDateFilter, type DateRange } from '../../components/ReportDateFilter';
+import { Pagination } from '../../components/common/Pagination';
 import { extractErrorMessage } from '../../services/apiClient';
 
 export const AdminRevenueReportPage: React.FC = () => {
@@ -389,30 +390,16 @@ export const AdminRevenueReportPage: React.FC = () => {
           </div>
 
           {/* Pagination */}
-          {ordersPage.totalPages > 1 && (
-            <div className="flex items-center justify-between pt-4 border-t border-stone-100 mt-3 text-xs">
-              <span className="text-stone-500">
-                Trang <span className="font-semibold text-stone-900 tabular-nums">{page + 1}</span> /{' '}
-                <span className="tabular-nums">{ordersPage.totalPages}</span>
-              </span>
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  disabled={page === 0}
-                  onClick={() => handlePageChange(page - 1)}
-                  className="px-2.5 py-1 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 disabled:opacity-40 text-stone-700 font-semibold cursor-pointer"
-                >
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  disabled={page + 1 >= ordersPage.totalPages}
-                  onClick={() => handlePageChange(page + 1)}
-                  className="px-2.5 py-1 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 disabled:opacity-40 text-stone-700 font-semibold cursor-pointer"
-                >
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
+          {ordersPage.totalElements > 0 && (
+            <div className="pt-4 border-t border-stone-100 mt-3">
+              <Pagination
+                currentPage={page + 1}
+                totalItems={ordersPage.totalElements}
+                pageSize={10}
+                onPageChange={(p) => handlePageChange(p - 1)}
+                itemLabel="đơn tiệc"
+                showPageSizeSelector={false}
+              />
             </div>
           )}
         </div>

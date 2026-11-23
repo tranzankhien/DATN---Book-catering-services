@@ -25,6 +25,7 @@ import {
 } from '../../services/paymentService';
 import { extractErrorMessage } from '../../services/apiClient';
 import { formatDateTimeVn, formatVnd } from '../../hooks/useFormatters';
+import { Pagination } from '../../components/common/Pagination';
 
 type Tab = 'payments' | 'review' | 'notifications';
 const tabs: { key: Tab; label: string; icon: typeof CreditCard }[] = [
@@ -44,6 +45,7 @@ export function AdminPaymentsPage() {
   const [notifications, setNotifications] = useState<NotificationView[]>([]);
   const [page, setPage] = useState(0);
   const [pages, setPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [refresh, setRefresh] = useState(0);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -57,7 +59,7 @@ export function AdminPaymentsPage() {
     setError('');
     async function load() {
       let changingPage = false;
-      function acceptPage(totalPages: number) {
+      function acceptPage(totalPages: number, totalCount: number) {
         const lastPage = Math.max(0, totalPages - 1);
         if (page > lastPage) {
           changingPage = true;
@@ -65,15 +67,16 @@ export function AdminPaymentsPage() {
           return false;
         }
         setPages(totalPages);
+        setTotalElements(totalCount);
         return true;
       }
       try {
         if (tab === 'notifications') {
           const result = await paymentService.notifications(page, notificationStatus);
-          if (active && acceptPage(result.totalPages)) setNotifications(result.content);
+          if (active && acceptPage(result.totalPages, result.totalElements)) setNotifications(result.content);
         } else {
           const result = await paymentService.list(page, tab === 'review');
-          if (active && acceptPage(result.totalPages)) setPayments(result.content);
+          if (active && acceptPage(result.totalPages, result.totalElements)) setPayments(result.content);
         }
       } catch (cause) {
         if (active) setError(extractErrorMessage(cause));
@@ -519,25 +522,16 @@ export function AdminPaymentsPage() {
         )}
 
         {/* Pagination */}
-        {pages > 1 && (
-          <div className="p-4 border-t border-stone-100 flex justify-center items-center gap-2">
-            <button
-              disabled={loading || page === 0}
-              onClick={() => setPage(page - 1)}
-              className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors cursor-pointer"
-            >
-              Trang trước
-            </button>
-            <span className="px-3 py-1.5 text-xs text-stone-500 font-medium">
-              Trang {page + 1} / {pages}
-            </span>
-            <button
-              disabled={loading || page + 1 >= pages}
-              onClick={() => setPage(page + 1)}
-              className="px-3.5 py-1.5 rounded-xl border border-stone-300 bg-white text-xs font-semibold text-stone-700 disabled:opacity-40 hover:bg-stone-50 shadow-xs transition-colors cursor-pointer"
-            >
-              Trang sau
-            </button>
+        {!loading && !error && totalElements > 0 && (
+          <div className="p-4 border-t border-stone-100">
+            <Pagination
+              currentPage={page + 1}
+              totalItems={totalElements}
+              pageSize={10}
+              onPageChange={(p) => setPage(p - 1)}
+              itemLabel={tab === 'notifications' ? 'thư thông báo' : 'giao dịch'}
+              showPageSizeSelector={false}
+            />
           </div>
         )}
       </div>

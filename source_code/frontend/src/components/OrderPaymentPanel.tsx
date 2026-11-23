@@ -19,6 +19,7 @@ import { paymentService, transactionLabels, type PaymentState } from '../service
 import { extractErrorMessage } from '../services/apiClient';
 import { formatDateTimeVn, formatVnd } from '../hooks/useFormatters';
 import type { OrderDto } from '../services/types';
+import { notifyOrderUpdated, subscribeOrderUpdated } from '../lib/orderEvents';
 
 export function OrderPaymentPanel({
   order,
@@ -58,8 +59,16 @@ export function OrderPaymentPanel({
   useEffect(() => {
     const refresh = () => setReload((value) => value + 1);
     window.addEventListener('focus', refresh);
-    return () => window.removeEventListener('focus', refresh);
-  }, []);
+    const unsubscribe = subscribeOrderUpdated((payload) => {
+      if (!payload.orderId || payload.orderId === order.id) {
+        setReload((v) => v + 1);
+      }
+    });
+    return () => {
+      window.removeEventListener('focus', refresh);
+      unsubscribe();
+    };
+  }, [order.id]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -249,27 +258,25 @@ export function OrderPaymentPanel({
               <span>Cổng thanh toán trực tuyến đang được bảo trì. Vui lòng liên hệ hotline nhà hàng để được hỗ trợ.</span>
             </div>
           ) : (
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <button
-                type="button"
-                disabled={busy || !checkoutConfigured}
-                onClick={pay}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm py-3.5 px-6 shadow-sm transition-all cursor-pointer disabled:opacity-50"
-              >
-                {busy ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Đang tạo mã QR thanh toán...</span>
-                  </>
-                ) : (
-                  <>
-                    <QrCode className="h-4 w-4" />
-                    <span>Thanh toán ngay qua SePay</span>
-                    <ChevronRight className="h-4 w-4" />
-                  </>
-                )}
-              </button>
-            </div>
+            <button
+              type="button"
+              disabled={busy || !checkoutConfigured}
+              onClick={pay}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm py-3 px-6 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+            >
+              {busy ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Đang tạo mã QR thanh toán...</span>
+                </>
+              ) : (
+                <>
+                  <QrCode className="h-4 w-4" />
+                  <span>Thanh toán ngay qua SePay</span>
+                  <ChevronRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
           )}
 
           <div className="flex items-center gap-2 text-[11px] text-stone-500 pt-1">

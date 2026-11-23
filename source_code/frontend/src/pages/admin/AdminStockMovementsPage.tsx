@@ -19,6 +19,7 @@ import {
 import { inventoryService } from '../../services/inventoryService';
 import type { IngredientDto, MovementType, StockMovementDto } from '../../services/types';
 import { useToast } from '../../hooks/useToast';
+import { Pagination } from '../../components/common/Pagination';
 
 export const AdminStockMovementsPage: React.FC = () => {
   const [movements, setMovements] = useState<StockMovementDto[]>([]);
@@ -374,41 +375,23 @@ export const AdminStockMovementsPage: React.FC = () => {
           </table>
         </div>
 
-        {/* Database-Level Pagination Controls */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-stone-50/70 border-t border-stone-200 text-xs text-stone-600">
-          <div>
-            <span>
-              Tổng số <strong className="tabular-nums text-stone-900">{totalCount}</strong> bản ghi biến động kho
-              {totalPages > 1 && ` (Trang ${page + 1} / ${totalPages})`}
-            </span>
+        {/* Pagination */}
+        {!loading && totalCount > 0 && (
+          <div className="p-4 border-t border-stone-100">
+            <Pagination
+              currentPage={page + 1}
+              totalItems={totalCount}
+              pageSize={pageSize}
+              onPageChange={(p) => setPage(p - 1)}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setPage(0);
+              }}
+              pageSizeOptions={[10, 20, 50]}
+              itemLabel="biến động kho"
+            />
           </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={page <= 0 || loading}
-              onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-stone-200 bg-white font-semibold text-stone-700 hover:bg-stone-100 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-colors cursor-pointer"
-            >
-              <ChevronLeft className="h-3.5 w-3.5" />
-              <span>Trang trước</span>
-            </button>
-
-            <span className="px-2 tabular-nums font-bold text-stone-800 text-xs">
-              {page + 1} / {Math.max(totalPages, 1)}
-            </span>
-
-            <button
-              type="button"
-              disabled={page >= totalPages - 1 || loading}
-              onClick={() => setPage((prev) => prev + 1)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-stone-200 bg-white font-semibold text-stone-700 hover:bg-stone-100 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-colors cursor-pointer"
-            >
-              <span>Trang sau</span>
-              <ChevronRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

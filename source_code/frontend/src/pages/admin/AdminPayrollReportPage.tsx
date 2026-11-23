@@ -165,7 +165,7 @@ export const AdminPayrollReportPage: React.FC = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyTrends} margin={{ top: 10, right: 20, left: 20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f4" />
-                <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#78716c' }} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#78716c' }} />
                 <YAxis
                   tick={{ fontSize: 11, fill: '#78716c' }}
                   tickFormatter={(val) => `${(val / 1000000).toFixed(1)}M`}

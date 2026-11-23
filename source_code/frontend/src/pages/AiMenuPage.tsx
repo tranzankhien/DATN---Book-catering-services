@@ -248,60 +248,41 @@ export const AiMenuPage: React.FC = () => {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-up-1">
-      {/* Header Banner - Sang trọng đồng bộ với hệ thống giao diện BanquetHub */}
-      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900">
-              <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-              <span>Trợ lý ẩm thực yến tiệc AI Gemini</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
-              AI gợi ý thực đơn tiệc thông minh
-            </h1>
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-              Nhập mô tả bữa tiệc bằng ngôn ngữ tự nhiên. Trí tuệ nhân tạo Gemini kết hợp với cơ sở dữ liệu định mức món ăn và tồn kho nguyên liệu thực tế tại BanquetHub để gợi ý các set menu tối ưu chi phí, ngon miệng và sẵn sàng phục vụ.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-            {!isAuthenticated ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 flex items-center gap-3">
-                <Info className="h-4 w-4 text-amber-700 shrink-0" />
-                <div className="text-xs">
-                  <span className="font-semibold text-stone-800">Cần đăng nhập thành viên</span>
-                  <Link
-                    to="/login?redirect=/ai-menu"
-                    className="ml-2 font-bold text-amber-800 hover:underline inline-flex items-center gap-0.5"
-                  >
-                    Đăng nhập ngay <ChevronRight className="h-3 w-3" />
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2.5 bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-xs text-stone-700">
-                <ChefHat className="h-4 w-4 text-amber-700 shrink-0" />
-                <span className="font-medium">Tự động đối soát tồn kho nguyên liệu</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6 animate-fade-up-1">
       {/* Main Input Form */}
       <section className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="border-b border-stone-100 pb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-amber-700" />
-              <h2 className="text-base sm:text-lg font-bold text-stone-900 tracking-tight">
-                Thiết lập thông tin & Nhu cầu tổ chức tiệc
-              </h2>
+          <div className="border-b border-stone-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="h-9 w-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                <Sparkles className="h-5 w-5 text-amber-700" />
+              </div>
+              <div>
+                <h1 className="text-base sm:text-lg font-bold text-stone-900 tracking-tight">
+                  AI gợi ý thực đơn tiệc thông minh
+                </h1>
+                <p className="text-xs text-stone-500">
+                  Nhập mô tả bữa tiệc, AI Gemini sẽ đối soát định mức và tồn kho nguyên liệu thực tế.
+                </p>
+              </div>
             </div>
-            <span className="text-xs text-stone-500 font-medium hidden sm:inline-block">
-              Tự động trích xuất số bàn, khách và ngân sách
-            </span>
+
+            {!isAuthenticated ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50/80 px-3.5 py-1.5 flex items-center gap-2 text-xs shrink-0">
+                <Info className="h-3.5 w-3.5 text-amber-700 shrink-0" />
+                <span className="font-semibold text-stone-800">Cần đăng nhập</span>
+                <Link
+                  to="/login?redirect=/ai-menu"
+                  className="font-bold text-amber-800 hover:underline inline-flex items-center gap-0.5 ml-1"
+                >
+                  Đăng nhập ngay <ChevronRight className="h-3 w-3" />
+                </Link>
+              </div>
+            ) : (
+              <span className="text-xs text-stone-500 font-medium hidden sm:inline-block">
+                Tự động trích xuất số bàn, khách và ngân sách
+              </span>
+            )}
           </div>
 
           {/* Requirement Description Textarea */}

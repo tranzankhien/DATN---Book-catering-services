@@ -19,16 +19,21 @@ import {
   Info,
   RotateCw,
   Loader2,
+  Ticket,
+  Tag,
+  X,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { menuService } from '../services/menuService';
 import { catalogService } from '../services/catalogService';
 import { orderService } from '../services/orderService';
+import { voucherService } from '../services/voucherService';
 import type {
   CreateOrderItemPayload,
   CreateOrderPayload,
   OrderPreviewResponseDto,
+  VoucherValidationResponse,
 } from '../services/types';
 import { formatVnd, formatQuantity } from '../hooks/useFormatters';
 import { LoadingState, ErrorState } from '../components/StatusStates';
@@ -131,6 +136,12 @@ export const CheckoutPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const previewSeqRef = useRef<number>(0);
 
+  // Voucher State (Strictly manual code entry, no presets list)
+  const [voucherInput, setVoucherInput] = useState<string>('');
+  const [appliedVoucher, setAppliedVoucher] = useState<VoucherValidationResponse | null>(null);
+  const [voucherLoading, setVoucherLoading] = useState<boolean>(false);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
+
   // Preview chỉ được coi là hợp lệ khi thành công, khớp chính xác số bàn hiện tại và không có lỗi
   const isPreviewSynchronized = Boolean(
     preview &&
@@ -144,6 +155,10 @@ export const CheckoutPage: React.FC = () => {
     isPreviewSynchronized &&
     preview?.canProceed
   );
+
+  const subtotalAmount = preview?.totalAmount || 0;
+  const discountAmount = appliedVoucher?.discountAmount || 0;
+  const finalTotalAmount = Math.max(0, subtotalAmount - discountAmount);
 
   // Auto-fill user information if logged in
   useEffect(() => {
@@ -261,6 +276,26 @@ export const CheckoutPage: React.FC = () => {
             }))
           );
         }
+        // Tự động kiểm tra lại điều kiện voucher khi thay đổi số lượng bàn / tổng tiền
+        if (appliedVoucher && appliedVoucher.voucherCode) {
+          voucherService
+            .applyVoucher(appliedVoucher.voucherCode, prev.totalAmount)
+            .then((recheck) => {
+              if (seq === previewSeqRef.current) {
+                if (recheck.valid) {
+                  setAppliedVoucher(recheck);
+                } else {
+                  setAppliedVoucher(null);
+                  setVoucherError(`Mã ${appliedVoucher.voucherCode} đã tự động gỡ: ${recheck.message}`);
+                }
+              }
+            })
+            .catch(() => {
+              if (seq === previewSeqRef.current) {
+                setAppliedVoucher(null);
+              }
+            });
+        }
       }
     } catch (err) {
       if (seq === previewSeqRef.current) {
@@ -271,6 +306,45 @@ export const CheckoutPage: React.FC = () => {
         setPreviewLoading(false);
       }
     }
+  };
+
+  const handleApplyVoucher = async () => {
+    const code = voucherInput.trim().toUpperCase();
+    if (!code) {
+      setVoucherError('Vui lòng nhập mã voucher.');
+      return;
+    }
+    if (!preview || !preview.totalAmount) {
+      setVoucherError('Vui lòng đợi hệ thống tải xong báo giá trước khi áp dụng voucher.');
+      return;
+    }
+    try {
+      setVoucherLoading(true);
+      setVoucherError(null);
+      const res = await voucherService.applyVoucher(code, preview.totalAmount);
+      if (res.valid) {
+        setAppliedVoucher(res);
+        showToast(`Đã áp dụng mã ${res.voucherCode}: Giảm ${formatVnd(res.discountAmount)}`, 'success');
+      } else {
+        setAppliedVoucher(null);
+        setVoucherError(res.message || 'Mã voucher không hợp lệ.');
+        showToast(res.message || 'Mã voucher không hợp lệ.', 'error');
+      }
+    } catch (err) {
+      const msg = extractErrorMessage(err);
+      setAppliedVoucher(null);
+      setVoucherError(msg);
+      showToast(msg, 'error');
+    } finally {
+      setVoucherLoading(false);
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setVoucherInput('');
+    setVoucherError(null);
+    showToast('Đã gỡ bỏ mã voucher.', 'info');
   };
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
@@ -373,7 +447,8 @@ export const CheckoutPage: React.FC = () => {
         guestCount: Number(guestCount),
         eventLocation: eventLocation.trim(),
         idempotencyKey: effectiveKey,
-        expectedTotalAmount: preview.totalAmount,
+        expectedTotalAmount: finalTotalAmount,
+        voucherCode: appliedVoucher ? appliedVoucher.voucherCode : undefined,
       };
 
       const createdOrder = await orderService.createOrder(payload, effectiveKey);
@@ -442,30 +517,24 @@ export const CheckoutPage: React.FC = () => {
         <span className="font-semibold text-stone-900">Xác nhận đặt tiệc</span>
       </nav>
 
-      {/* Header Banner */}
-      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
-              <Lock className="h-3.5 w-3.5 text-amber-600" />
-              <span>Bảo mật & Giữ nguyên liệu tức thì</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
-              Xác nhận thông tin & Đặt tiệc
-            </h1>
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-              Vui lòng kiểm tra lại thông tin liên hệ và lịch tổ chức. Sau khi xác nhận, hệ thống sẽ kích hoạt lệnh khóa giữ nguyên liệu tồn kho cho tiệc của bạn tối đa 15 phút và không quá giờ tổ chức.
-            </p>
-          </div>
-
-          <Link
-            to="/menu-builder"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-xs font-semibold text-stone-700 shadow-xs transition-colors shrink-0"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            <span>Quay lại chỉnh sửa thực đơn</span>
-          </Link>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-stone-900 tracking-tight">
+            Xác nhận thông tin & Đặt tiệc
+          </h1>
+          <p className="text-xs sm:text-sm text-stone-600 mt-1">
+            Vui lòng kiểm tra lại thông tin liên hệ và lịch tổ chức. Hệ thống sẽ khóa giữ nguyên liệu tối đa 15 phút.
+          </p>
         </div>
+
+        <Link
+          to="/menu-builder"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-xs font-semibold text-stone-700 shadow-xs transition-colors shrink-0 self-start sm:self-auto"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Quay lại chỉnh sửa thực đơn</span>
+        </Link>
       </div>
 
       {/* Main Form & Summary Grid */}
@@ -834,6 +903,90 @@ export const CheckoutPage: React.FC = () => {
                 </div>
               )}
 
+              {/* Voucher Code Manual Input Section */}
+              {isPreviewSynchronized && preview && (
+                <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-2xs space-y-3 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-stone-900 flex items-center gap-1.5">
+                      <Ticket className="h-4 w-4 text-amber-700" />
+                      <span>Mã ưu đãi / Voucher</span>
+                    </span>
+                    {appliedVoucher && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                        Đã áp dụng
+                      </span>
+                    )}
+                  </div>
+
+                  {appliedVoucher ? (
+                    <div className="flex items-center justify-between rounded-xl bg-emerald-50/80 border border-emerald-200 p-3">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-xs text-emerald-900 tracking-wider">
+                            {appliedVoucher.voucherCode}
+                          </span>
+                          <span className="text-[11px] font-semibold text-emerald-700">
+                            (-{formatVnd(appliedVoucher.discountAmount)})
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-emerald-700">
+                          {appliedVoucher.voucherName}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveVoucher}
+                        className="rounded-lg p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                        title="Gỡ mã giảm giá"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            value={voucherInput}
+                            onChange={(e) => {
+                              setVoucherInput(e.target.value.toUpperCase());
+                              if (voucherError) setVoucherError(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleApplyVoucher();
+                              }
+                            }}
+                            placeholder="Nhập mã voucher (vd: TIECXUAN2026)"
+                            className="w-full rounded-xl border border-stone-200 bg-stone-50/60 px-3 py-2 text-xs uppercase font-semibold text-stone-900 placeholder:normal-case placeholder:font-normal placeholder:text-stone-400 focus:border-amber-600 focus:bg-white focus:outline-none transition-colors"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          disabled={voucherLoading || !voucherInput.trim()}
+                          onClick={handleApplyVoucher}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-amber-700 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-amber-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer shrink-0"
+                        >
+                          {voucherLoading ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Tag className="h-3.5 w-3.5" />
+                          )}
+                          <span>Áp dụng</span>
+                        </button>
+                      </div>
+                      {voucherError && (
+                        <p className="text-[11px] text-rose-600 font-medium">
+                          {voucherError}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Price Calculation Box */}
               {isPreviewSynchronized && preview && (
                 <div className="rounded-xl bg-stone-50 p-4 border border-stone-100 space-y-2.5 text-xs">
@@ -845,12 +998,31 @@ export const CheckoutPage: React.FC = () => {
                     <span>Số lượng bàn:</span>
                     <span className="font-semibold text-stone-900">{preview.tableCount} bàn</span>
                   </div>
+                  <div className="flex justify-between text-stone-600">
+                    <span>Tạm tính đơn tiệc:</span>
+                    <span className="font-semibold text-stone-900">{formatVnd(subtotalAmount)}</span>
+                  </div>
+
+                  {/* Voucher Discount Row */}
+                  {appliedVoucher && (
+                    <div className="flex justify-between items-center text-emerald-700 bg-emerald-50/80 px-2.5 py-1.5 rounded-lg border border-emerald-200/70 font-medium">
+                      <span className="flex items-center gap-1.5">
+                        <Tag className="h-3.5 w-3.5" />
+                        <span>Giảm giá voucher ({appliedVoucher.voucherCode}):</span>
+                      </span>
+                      <span className="font-bold tabular-nums">-{formatVnd(discountAmount)}</span>
+                    </div>
+                  )}
+
                   <div className="border-t border-stone-200 pt-3 flex justify-between items-baseline text-sm font-bold text-stone-900">
-                    <span>Tổng giá trị đơn tiệc:</span>
-                    <span className="text-xl font-bold text-amber-900">
-                      {formatVnd(preview.totalAmount)}
+                    <span>Tổng thanh toán (100%):</span>
+                    <span className="text-xl font-bold text-amber-900 tabular-nums">
+                      {formatVnd(finalTotalAmount)}
                     </span>
                   </div>
+                  <p className="text-[11px] text-stone-500 leading-tight">
+                    * Đơn hàng thanh toán 100% qua Napas 24/7 QR để kích hoạt lệnh giữ chỗ kho nguyên liệu trong 15 phút. Không phát sinh đặt cọc.
+                  </p>
                 </div>
               )}
 

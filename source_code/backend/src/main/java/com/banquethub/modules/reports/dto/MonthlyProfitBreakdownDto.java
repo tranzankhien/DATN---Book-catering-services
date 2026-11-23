@@ -93,4 +93,25 @@ public class MonthlyProfitBreakdownDto {
     public void setEstimatedProfit(BigDecimal estimatedProfit) {
         this.estimatedProfit = estimatedProfit;
     }
+
+    // Frontend compatibility aliases
+    public String getMonthKey() {
+        return monthYear;
+    }
+
+    public BigDecimal getCogs() {
+        return materialCost;
+    }
+
+    public BigDecimal getPayroll() {
+        return payrollCost;
+    }
+
+    public BigDecimal getExpenses() {
+        return operatingExpense;
+    }
+
+    public BigDecimal getNetProfit() {
+        return estimatedProfit;
+    }
 }

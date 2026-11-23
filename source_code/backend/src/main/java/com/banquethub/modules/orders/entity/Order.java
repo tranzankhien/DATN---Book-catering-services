@@ -85,6 +85,15 @@ public class Order {
     @Column(name = "menu_name_snapshot", length = 200)
     private String menuNameSnapshot;
 
+    @Column(name = "voucher_code", length = 50)
+    private String voucherCode;
+
+    @Column(name = "discount_amount", precision = 15, scale = 2)
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    @Column(name = "subtotal_amount", precision = 15, scale = 2)
+    private BigDecimal subtotalAmount;
+
     @Column(name = "total_amount", nullable = false, precision = 15, scale = 2)
     private BigDecimal totalAmount = BigDecimal.ZERO;
 
@@ -385,5 +394,29 @@ public class Order {
 
     public void setPaidAt(OffsetDateTime paidAt) {
         this.paidAt = paidAt;
+    }
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return discountAmount != null ? discountAmount : BigDecimal.ZERO;
+    }
+
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public BigDecimal getSubtotalAmount() {
+        return subtotalAmount != null ? subtotalAmount : totalAmount;
+    }
+
+    public void setSubtotalAmount(BigDecimal subtotalAmount) {
+        this.subtotalAmount = subtotalAmount;
     }
 }

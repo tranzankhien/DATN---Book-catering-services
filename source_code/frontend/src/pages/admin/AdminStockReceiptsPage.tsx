@@ -20,6 +20,7 @@ import { inventoryService } from '../../services/inventoryService';
 import { supplierService } from '../../services/supplierService';
 import type { StockReceiptDto, SupplierDto } from '../../services/types';
 import { useToast } from '../../hooks/useToast';
+import { Pagination, usePagination } from '../../components/common/Pagination';
 
 export const AdminStockReceiptsPage: React.FC = () => {
   const [receipts, setReceipts] = useState<StockReceiptDto[]>([]);
@@ -37,6 +38,19 @@ export const AdminStockReceiptsPage: React.FC = () => {
   const [downloadingPdfId, setDownloadingPdfId] = useState<number | null>(null);
 
   const { showToast } = useToast();
+
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    paginatedItems: paginatedReceipts,
+    totalItems,
+  } = usePagination(receipts, 10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [keyword, selectedSupplierId, statusFilter, paymentFilter, fromDate, toDate, setCurrentPage]);
 
   const loadSuppliers = async () => {
     try {
@@ -344,7 +358,7 @@ export const AdminStockReceiptsPage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                receipts.map((r) => {
+                paginatedReceipts.map((r) => {
                   const isConfirmed = r.status === 'CONFIRMED';
                   return (
                     <tr
@@ -447,6 +461,20 @@ export const AdminStockReceiptsPage: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        {receipts.length > 0 && (
+          <div className="p-4 border-t border-stone-100">
+            <Pagination
+              currentPage={currentPage}
+              totalItems={totalItems}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[10, 20, 50]}
+              itemLabel="phiếu nhập"
+            />
+          </div>
+        )}
       </div>
     </div>
   );
