@@ -2,14 +2,82 @@
 ## HỆ THỐNG QUẢN TRỊ ẨM THỰC VÀ ĐẶT TIỆC BANQUETHUB
 
 - **Dự án áp dụng**: BanquetHub - Nền tảng Đặt Tiệc Cưới & Quản Trị Vận Hành Ẩm Thực Tập Trung
-- **Tài liệu dùng cho**: Báo cáo Đồ án Tốt nghiệp / Tài liệu Thiết kế Hệ thống
+- **Tài liệu dùng cho**: Báo cáo Đồ án Tốt nghiệp / Tài liệu Thiết kế & Đặc tả Hệ thống
 - **Tác giả biên soạn**: Trần Văn Khiên (tranzankhien@gmail.com)
-- **Hình thức trình bày**: Liệt kê tên Use Case và mô tả chi tiết các luồng chính bằng văn xuôi tiếng Việt (Tuyệt đối không chèn mã code, không chèn cú pháp vẽ hình).
+- **Hình thức trình bày**: Liệt kê tên Luồng chính, tên Use Case và mô tả chi tiết bằng văn xuôi tiếng Việt (Tuyệt đối không chèn mã code, không chèn cú pháp vẽ hình).
 - **Ngày hoàn thiện**: 24/11/2026
 
 ---
 
-## PHẦN I: TỔNG QUAN CÁC TÁC NHÂN (ACTORS)
+## PHẦN I: TỔNG HỢP 6 LUỒNG NGHIỆP VỤ CHÍNH TOÀN HỆ THỐNG (CORE BUSINESS FLOWS)
+
+Hệ thống BanquetHub vận hành xoay quanh 6 Luồng nghiệp vụ xương sống, liên kết chặt chẽ giữa Khách hàng, Bếp điều phối và Quản trị viên:
+
+### 1. Luồng chính 1: Đặt tiệc và Thanh toán trực tuyến 100% (Order & Payment Flow)
+- **Tên luồng**: Luồng Khách hàng Tự phối thực đơn -> Kiểm tra kho tự động -> Nhập mã giảm giá Voucher -> Định vị địa chỉ tổ chức trên bản đồ Mapbox -> Khóa giữ chỗ kho nguyên liệu 15 phút -> Quét mã Napas 24/7 QR SePay thanh toán 100% -> Kích hoạt đơn tiệc tức thì.
+- **Tác nhân tham gia**: Khách hàng, Cổng thanh toán SePay, Hệ thống kiểm tra tồn kho tự động.
+- **Mô tả diễn tiến luồng**:
+  - Khách hàng khám phá các món ăn và sử dụng công cụ Tự phối thực đơn (Menu Builder) để tạo set menu theo số lượng bàn tiệc mong muốn.
+  - Ngay khi chọn món, hệ thống tự động bóc tách định mức nguyên liệu (BOM) và kiểm tra đối soát với tồn kho thực tế. Nếu đủ nguyên liệu, hệ thống cho phép tiếp tục.
+  - Khách hàng nhập mã Voucher giảm giá (nếu có); hệ thống thẩm định tính hợp lệ và trừ chiết khấu trực tiếp vào tổng tiền.
+  - Khách hàng tìm kiếm địa điểm và ghim vị trí tổ chức tiệc trên bản đồ số Mapbox.
+  - Khi bấm Xác nhận đặt tiệc, hệ thống tạo đơn tiệc mới và tự động kích hoạt Lệnh giữ chỗ nguyên liệu kho (Hold Stock) trong thời hạn 15 phút.
+  - Khách hàng mở ứng dụng ngân hàng quét mã QR Napas SePay thanh toán 100% giá trị đơn hàng.
+  - SePay phát tín hiệu Webhook xác nhận tiền đã vào tài khoản; BanquetHub tự động chuyển trạng thái đơn sang Đã thanh toán, khóa vĩnh viễn nguyên liệu cho tiệc và xuất biên lai/hợp đồng điện tử cho khách.
+  - *(Trường hợp ngoại lệ)*: Nếu quá 15 phút khách không thanh toán, tác vụ tự động của hệ thống sẽ hủy lệnh giữ chỗ và hoàn trả 100% nguyên liệu về kho.
+
+### 2. Luồng chính 2: Điều phối và Chế biến món tiệc tại Bếp (Kitchen Order Processing & Fulfillment Flow)
+- **Tên luồng**: Luồng Tiếp nhận đơn tiệc đã thanh toán -> Bóc tách khối lượng nguyên liệu nấu -> Cập nhật trạng thái Bếp đang nấu -> Hoàn tất phục vụ sự kiện tiệc -> Trừ xuất kho thực tế & Ghi nhận giá vốn tiệc.
+- **Tác nhân tham gia**: Nhân viên Bếp, Điều phối viên, Hệ thống Quản trị kho.
+- **Mô tả diễn tiến luồng**:
+  - Đội ngũ Bếp mở màn hình Quản lý đơn tiệc bếp để theo dõi danh sách các đơn tiệc đã thanh toán thành công và sắp tới ngày tổ chức.
+  - Nhân viên bếp xem chi tiết định mức: số lượng bàn, từng món ăn cần chế biến và tổng khối lượng từng loại nguyên liệu cần lấy từ kho.
+  - Nhân viên bấm nút Bắt đầu chế biến; đơn hàng chuyển trạng thái sang Đang chuẩn bị tiệc (IN_PROGRESS).
+  - Sau khi các món tiệc được nấu chín, vận chuyển đến địa điểm tổ chức và phục vụ hoàn tất cho khách hàng, nhân viên bấm Xác nhận hoàn thành tiệc.
+  - Hệ thống chuyển trạng thái đơn sang Hoàn thành (COMPLETED), chính thức trừ kho vật lý đối với lượng nguyên liệu đã dùng và ghi nhận chi phí giá vốn (COGS) vào sổ sách kế toán.
+
+### 3. Luồng chính 3: Quản trị kho và Nhập hàng nguyên liệu từ Nhà cung cấp (Inventory & Purchasing Flow)
+- **Tên luồng**: Luồng Giám sát tồn kho an toàn & Cảnh báo sắp hết -> Lập phiếu nhập kho từ Nhà cung cấp -> Cập nhật tăng tồn kho vật lý -> Tính toán lại giá vốn bình quân gia quyền -> Thanh toán công nợ nhà cung cấp.
+- **Tác nhân tham gia**: Quản trị viên, Thủ kho, Nhà cung cấp thực phẩm.
+- **Mô tả diễn tiến luồng**:
+  - Quản trị viên giám sát bảng điều khiển tồn kho; hệ thống tự động gắn nhãn Cảnh báo đỏ đối với các nguyên liệu có số lượng tồn rơi xuống dưới ngưỡng an toàn.
+  - Quản trị viên tạo Phiếu nhập kho mới, lựa chọn Nhà cung cấp thực phẩm và nhập chi tiết từng loại nguyên liệu kèm số lượng và đơn giá mua thực tế.
+  - Khi xác nhận nhập hàng, hệ thống tự động cộng dồn số lượng vào tồn kho thực tế, đồng thời áp dụng công thức Bình quân gia quyền để tính lại đơn giá vốn bình quân cho từng mặt hàng.
+  - Quản trị viên ghi nhận thanh toán tiền cho nhà cung cấp; hệ thống ghi nhật ký biến động kho và cập nhật dòng tiền chi vào hệ thống báo cáo.
+
+### 4. Luồng chính 4: Quản trị Nhân sự, Chấm công và Tính lương tự động (HR, Attendance & Payroll Flow)
+- **Tên luồng**: Luồng Nhân viên chấm công hàng ngày -> Quản lý giám sát & Duyệt công -> Tạo kỳ lương tháng mới -> Hệ thống tự động tính lương theo ngày công và phụ cấp -> Ban giám đốc phê duyệt & Chi trả lương.
+- **Tác nhân tham gia**: Nhân viên, Quản trị viên / Phòng Nhân sự, Kế toán.
+- **Mô tả diễn tiến luồng**:
+  - Nhân viên đăng nhập vào hệ thống mỗi ngày để bấm Chấm công vào ca khi đến làm việc và Chấm công tan ca khi hết giờ.
+  - Quản lý theo dõi bảng tổng hợp chấm công của toàn bộ nhân sự để kiểm tra tính chuyên cần.
+  - Đến cuối tháng, Quản trị viên tạo Kỳ lương mới và kích hoạt lệnh Tính toán bảng lương tự động.
+  - Hệ thống tự động tổng hợp số ngày công thực tế của từng người, nhân với mức lương cơ bản, cộng thêm các khoản phụ cấp trách nhiệm/thưởng sự kiện và trừ đi các khoản phạt/tạm ứng.
+  - Ban giám đốc kiểm tra và bấm Phê duyệt bảng lương.
+  - Nhân viên có thể mở mục Phiếu lương của tôi để tra cứu chi tiết mức lương thực nhận; hệ thống ghi nhận chi phí lương vào báo cáo tài chính.
+
+### 5. Luồng chính 5: Quản trị Chương trình Ưu đãi & Voucher (Voucher Campaign & Discount Flow)
+- **Tên luồng**: Luồng Thiết lập mã khuyến mại -> Khách hàng nhập mã thủ công khi đặt tiệc -> Hệ thống kiểm tra điều kiện & Trừ tiền trực tiếp -> Cập nhật số lượt dùng của voucher.
+- **Tác nhân tham gia**: Quản trị viên, Khách hàng.
+- **Mô tả diễn tiến luồng**:
+  - Quản trị viên tạo mới mã Voucher trong mục Quản trị: đặt mã định danh (ví dụ: TIECVIP2026), hình thức giảm (giảm tiền mặt hoặc giảm theo %), mức giảm, giới hạn giảm tối đa, giá trị đơn tối thiểu, tổng số lượt sử dụng và hạn dùng.
+  - Khi Khách hàng tiến hành đặt tiệc tại bước thanh toán, khách hàng tự nhập mã voucher vào ô khuyến mãi (hệ thống không cung cấp danh sách chọn sẵn để bảo đảm tính bảo mật của mã ưu đãi).
+  - Hệ thống kiểm tra tính hợp lệ: thời hạn, số lượt dùng còn lại, giá trị đơn tiệc hiện tại có đạt ngưỡng tối thiểu hay không.
+  - Nếu đủ điều kiện, hệ thống hiển thị số tiền được giảm màu xanh và trừ trực tiếp vào tổng tiền cần thanh toán.
+  - Khi đơn tiệc được thanh toán thành công, hệ thống tăng số lượt đã dùng của voucher lên 1 đơn vị.
+
+### 6. Luồng chính 6: Đối soát Dòng tiền và Báo cáo Tài chính Lãi Lỗ P&L (Cashflow Reconciliation & P&L Reporting Flow)
+- **Tên luồng**: Luồng Tiếp nhận giao dịch ngân hàng SePay -> Đối soát dòng tiền vào -> Tổng hợp Chi phí nhập kho & Chi phí lương nhân viên -> Tự động sinh Báo cáo Dòng tiền (Cashflow) và Báo cáo Lợi nhuận (P&L).
+- **Tác nhân tham gia**: Quản trị viên, Kế toán, Giám đốc điều hành.
+- **Mô tả diễn tiến luồng**:
+  - Mọi khoản tiền khách chuyển khoản qua SePay đều được ghi nhận vào Sổ đối soát giao dịch ngân hàng. Kế toán có thể rà soát mã tham chiếu và kiểm tra trạng thái khớp đơn tự động.
+  - Định kỳ hàng tháng, Quản trị viên truy cập vào phân hệ Báo cáo tài chính.
+  - Hệ thống tự động tổng hợp: Doanh thu thuần (tổng tiền các đơn tiệc hoàn thành sau khi trừ voucher), Giá vốn hàng bán (tổng chi phí nguyên liệu bóc tách từ các bữa tiệc theo giá bình quân), Chi phí nhân sự (tổng quỹ lương đã duyệt trong kỳ) và Chi phí vận hành khác.
+  - Hệ thống tự động tính ra Lợi nhuận gộp và Lợi nhuận ròng (Net Profit), đồng thời hiển thị bằng biểu đồ trực quan giúp lãnh đạo đưa ra chiến lược kinh doanh chính xác.
+
+---
+
+## PHẦN II: TỔNG QUAN CÁC TÁC NHÂN (ACTORS)
 
 1. **Khách hàng (Customer)**: Người dùng truy cập trang web để tìm kiếm món ăn, tự phối set menu tiệc, nhận tư vấn AI, chọn địa điểm tổ chức, nhập mã giảm giá, đặt tiệc và thanh toán 100% qua Napas QR.
 2. **Nhân viên bếp & Điều phối (Employee)**: Đội ngũ phục vụ và đầu bếp tiếp nhận đơn tiệc đã thanh toán thành công, thực hiện chuẩn bị nguyên liệu, chuyển trạng thái nấu tiệc, hoàn thành tiệc, chấm công hàng ngày và tra cứu bảng lương.
@@ -19,7 +87,7 @@
 
 ---
 
-## PHẦN II: CÁC USE CASE PHÂN HỆ KHÁCH HÀNG (CUSTOMER PORTAL)
+## PHẦN III: CÁC USE CASE PHÂN HỆ KHÁCH HÀNG (CUSTOMER PORTAL)
 
 ### UC-01: Đăng ký tài khoản và xác thực mã OTP qua Email
 - **Tác nhân thực hiện**: Khách hàng mới (Guest / Customer)
@@ -85,7 +153,7 @@
 
 ---
 
-### UC-06: Chọn địa điểm và định vị vị trí tổ chức tiệc trên bản đồ
+### UC-06: Chọn địa điểm và định vị vị trí tổ chức tiệc trên bản đồ số Mapbox
 - **Tác nhân thực hiện**: Khách hàng (Customer)
 - **Mô tả tóm tắt**: Hỗ trợ khách hàng nhập địa chỉ tổ chức tiệc chính xác thông qua hệ thống gợi ý địa điểm và bản đồ số trực quan.
 - **Luồng hoạt động chính từng bước (Main Flow)**:
@@ -108,13 +176,13 @@
   - **Bước 5**: Nếu hợp lệ, hệ thống tính toán số tiền được giảm (giảm tiền mặt cố định hoặc giảm theo tỷ lệ phần trăm) và hiển thị dòng giảm giá màu xanh nổi bật ngay dưới phần tạm tính.
   - **Bước 6**: Hệ thống tự động trừ tiền giảm giá vào tổng tiền cần thanh toán của đơn tiệc.
   - **Bước 7**: Khách hàng có thể bấm nút gỡ bỏ mã bất cứ lúc nào nếu muốn đổi sang mã ưu đãi khác.
-- **Lưu ý quan trọng**: Hệ thống chỉ cho phép nhập mã thủ công, không có danh sách chọn sẵn để đảm bảo tính độc quyền của các chương trình ưu đãi. Nếu khách hàng thay đổi số lượng bàn làm tổng tiền rớt xuống dưới mức tối thiểu của voucher, hệ thống sẽ tự động hủy áp dụng mã và thông báo rõ ràng.
+- **Lưu ý quan trọng**: Hệ thống chỉ cho phép nhập mã thủ công, không có danh sách chọn sẵn để đảm bảo tính độc quyền của các chương trình ưu đãi.
 
 ---
 
 ### UC-08: Xác nhận đặt tiệc và kích hoạt lệnh khóa giữ kho 15 phút
 - **Tác nhân thực hiện**: Khách hàng (Customer)
-- **Mô tả tóm tắt**: Chốt hợp đồng đặt tiệc, kích hoạt cơ chế giữ chỗ kho nguyên liệu trong 15 phút để đảm bảo không ai khác tranh mua mất nguyên liệu trong lúc khách chuẩn bị thanh toán.
+- **Mô tả tóm tắt**: Chốt thông tin đặt tiệc, kích hoạt cơ chế giữ chỗ kho nguyên liệu trong 15 phút để đảm bảo không ai khác tranh mua mất nguyên liệu trong lúc khách chuẩn bị thanh toán.
 - **Luồng hoạt động chính từng bước (Main Flow)**:
   - **Bước 1**: Khách hàng rà soát lại thông tin: người đặt, số điện thoại đón tiếp sự kiện, thời gian tổ chức tiệc, địa điểm bản đồ, số bàn tiệc, danh sách món và số tiền thanh toán cuối cùng.
   - **Bước 2**: Khách hàng bấm nút Xác nhận đặt tiệc.
@@ -163,7 +231,7 @@
 
 ---
 
-## PHẦN III: CÁC USE CASE PHÂN HỆ NHÂN VIÊN & BẾP (EMPLOYEE PORTAL)
+## PHẦN IV: CÁC USE CASE PHÂN HỆ NHÂN VIÊN & BẾP (EMPLOYEE PORTAL)
 
 ### UC-12: Tiếp nhận đơn tiệc và chuẩn bị nguyên liệu nấu bếp
 - **Tác nhân thực hiện**: Nhân viên bếp / Điều phối (Employee)
@@ -209,7 +277,7 @@
 
 ---
 
-## PHẦN IV: CÁC USE CASE PHÂN HỆ QUẢN TRỊ TRUNG TÂM (ADMIN PORTAL)
+## PHẦN V: CÁC USE CASE PHÂN HỆ QUẢN TRỊ TRUNG TÂM (ADMIN PORTAL)
 
 ### UC-16: Quản lý danh mục món ăn và công thức định mức nguyên liệu (BOM)
 - **Tác nhân thực hiện**: Quản trị viên (Admin)
@@ -243,7 +311,7 @@
   - **Bước 1**: Admin truy cập trang Tổng quan kho & Nguyên liệu.
   - **Bước 2**: Hệ thống hiển thị danh mục toàn bộ nguyên liệu kèm các chỉ số quan trọng: Tổng số lượng tồn vật lý trong kho, Số lượng đang bị các đơn đặt tiệc khóa giữ chỗ, và Số lượng tồn thực tế còn sẵn sàng nhận tiệc.
   - **Bước 3**: Những nguyên liệu có số tồn thấp hơn mức an toàn tối thiểu được hệ thống tự động gắn nhãn cảnh báo đỏ Cần nhập thêm hàng.
-  - **Bước 4**: Admin có thể xem lịch sử chi tiết mọi lần biến động của nguyên liệu (Nhập kho từ ai, Xuất kho nấu cho đơn tiệc nào, Điều chỉnh kiểm kê do ai làm) trong mục Sổ biến động kho.
+  - **Bước 4**: Admin có thể xem lịch sử chi tiết mọi lần biến động của nguyên liệu trong mục Sổ biến động kho.
 
 ---
 
@@ -289,15 +357,15 @@
 - **Luồng hoạt động chính từng bước (Main Flow)**:
   - **Bước 1**: Quản trị viên truy cập trang Báo cáo lợi nhuận (P&L) hoặc Báo cáo dòng tiền.
   - **Bước 2**: Admin chọn khoảng thời gian cần phân tích (theo tháng, theo quý hoặc theo năm).
-  - **Bước 3**: Hệ thống tự động tổng hợp số liệu từ các phân hệ: Doanh thu thực tế từ các đơn tiệc đã phục vụ hoàn tất (sau khi trừ chiết khấu voucher), Chi phí giá vốn nguyên liệu xuất kho theo giá bình quân, Chi phí lương nhân viên đã trả trong kỳ, và Chi phí vận hành khác (mặt bằng, điện nước).
+  - **Bước 3**: Hệ thống tự động tổng hợp số liệu từ các phân hệ: Doanh thu thực tế từ các đơn tiệc đã phục vụ hoàn tất (sau khi trừ chiết khấu voucher), Chi phí giá vốn nguyên liệu xuất kho theo giá bình quân, Chi phí lương nhân viên đã trả trong kỳ, và Chi phí vận hành khác.
   - **Bước 4**: Hệ thống tính toán các chỉ số kinh doanh then chốt: Lợi nhuận gộp, Tỷ suất lợi nhuận gộp và Lợi nhuận thuần thực tế.
   - **Bước 5**: Giao diện biểu diễn bằng biểu đồ trực quan (cơ cấu doanh thu chi phí, biểu đồ tăng trưởng qua các tháng) và bảng số liệu phân tích chi tiết để hỗ trợ việc ra quyết định kinh doanh.
 
 ---
 
-## PHẦN V: TỔNG KẾT VÀ GIÁ TRỊ THỰC TIỄN CỦA HỆ THỐNG
+## PHẦN VI: TỔNG KẾT VÀ GIÁ TRỊ THỰC TIỄN CỦA HỆ THỐNG
 
-Toàn bộ 22 Use Case trên được xây dựng gắn liền với thực tế vận hành của hệ thống BanquetHub:
+Toàn bộ 6 Luồng chính và 22 Use Case trên được xây dựng gắn liền với thực tế vận hành của hệ thống BanquetHub:
 - **Tính tự động hóa cao**: Khách tự phối món -> kho tự kiểm tra -> hệ thống tự khóa giữ nguyên liệu 15 phút -> SePay tự nhận tiền Napas QR và kích hoạt đơn mà không cần sự can thiệp thủ công của con người.
 - **Chống thất thoát và gián đoạn vận hành**: Cơ chế tự động hoàn kho khi hết hạn thanh toán bảo đảm nguyên liệu không bị giam ảo; định mức nguyên liệu (BOM) và giá vốn bình quân gia quyền giúp nhà hàng kiểm soát chính xác 100% chi phí giá vốn của từng bữa tiệc.
 - **Phân quyền bảo mật chặt chẽ**: Ranh giới rõ ràng giữa quyền lợi của Khách hàng, trách nhiệm của Nhân viên bếp và quyền hạn tối cao của Quản trị viên điều hành.
