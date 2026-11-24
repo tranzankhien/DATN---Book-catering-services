@@ -16,8 +16,8 @@
 | Tác nhân (Actor) | Phân loại | Mô tả vai trò & Trách nhiệm trong hệ thống |
 | :--- | :--- | :--- |
 | **Khách hàng (Customer)** | Tác nhân người dùng (Bên ngoài) | Người dùng truy cập website: duyệt món, chọn thực đơn mẫu hoặc tự phối set menu, nhận tư vấn AI Gemini, chọn địa điểm tổ chức trên bản đồ Mapbox, nhập mã ưu đãi Voucher, thanh toán 100% qua Napas QR SePay và theo dõi tiến độ đơn tiệc. |
-| **Nhân viên Bếp & Điều phối (Employee)** | Tác nhân nội bộ (Nhà hàng) | Đội ngũ chế biến và phục vụ: tiếp nhận đơn tiệc đã thanh toán thành công, kiểm tra phiếu chế biến và định mức nguyên liệu đã xuất kho, cập nhật tiến độ nấu tiệc (PREPARING -> COMPLETED), chấm công hàng ngày và tra cứu bảng lương. |
-| **Quản trị viên (Admin)** | Tác nhân nội bộ (Ban quản lý) | Chủ nhà hàng / Ban điều hành nắm toàn quyền: quản lý thực đơn & định mức BOM, nhập kho nguyên liệu và quản lý giá vốn bình quân, cấu hình voucher, đối soát tiền SePay, duyệt bảng lương và theo dõi báo cáo P&L. |
+| **Nhân viên Bếp & Điều phối (Employee)** | Tác nhân nội bộ (Nhà hàng) | Đội ngũ chế biến và phục vụ: tiếp nhận đơn tiệc đã thanh toán thành công, kiểm tra phiếu chế biến và định mức nguyên liệu đã xuất kho, cập nhật tiến độ nấu tiệc (PREPARING -> COMPLETED), tra cứu lịch sử chấm công cá nhân và tra cứu bảng lương. |
+| **Quản trị viên (Admin)** | Tác nhân nội bộ (Ban quản lý) | Chủ nhà hàng / Ban điều hành nắm toàn quyền: quản lý thực đơn & định mức BOM, nhập kho nguyên liệu và quản lý giá vốn bình quân, cấu hình voucher, đối soát tiền SePay, trực tiếp chấm công hàng ngày cho nhân viên, duyệt bảng lương và theo dõi báo cáo P&L. |
 | **Cổng thanh toán SePay PG** | Tác nhân hệ thống (Bên thứ ba) | Hệ thống trung gian thanh toán tự động, cung cấp mã QR chuyển khoản liên ngân hàng 24/7 và phát tín hiệu Webhook tức thì về BanquetHub khi có biến động số dư thành công. |
 | **Trợ lý AI Google Gemini** | Tác nhân trí tuệ nhân tạo | Mô hình ngôn ngữ lớn tiếp nhận dữ liệu tồn kho và danh mục món ăn thực tế để tư vấn tối đa 3 phương án set menu tiệc tối ưu theo ngân sách, khẩu vị và giải đáp các quy định của nhà hàng. |
 
@@ -84,19 +84,20 @@
 
 ### ★ FLOW-04: Luồng Quản trị Nhân sự, Chấm công & Tính lương tự động (HR, Attendance & Payroll Flow)
 
-- **Mục tiêu nghiệp vụ**: Minh bạch hóa việc chấm công, loại bỏ sai sót tính toán thủ công bằng công thức tính lương tự động dựa trên ngày công thực tế và ngày công chuẩn.
-- **Tác nhân tham gia**: Nhân viên nhà hàng (Employee), Quản trị viên / Phòng Nhân sự (Admin), Kế toán trưởng
-- **Điểm kích hoạt**: Nhân viên thực hiện công việc hàng ngày và chu kỳ quyết toán lương vào cuối mỗi tháng.
-- **Kết quả đầu ra**: Bảng lương tháng được phê duyệt, phiếu lương cá nhân phát hành cho nhân viên và chi phí tiền lương được ghi nhận vào báo cáo tài chính.
+- **Mục tiêu nghiệp vụ**: Quản lý công nhật nhân viên tập trung tại Admin, minh bạch hóa cho nhân viên tra cứu tự phục vụ và tự động hóa tính lương theo công thức chuẩn.
+- **Tác nhân tham gia**: Quản trị viên / Phòng Nhân sự (Admin), Nhân viên nhà hàng (Employee), Kế toán trưởng
+- **Điểm kích hoạt**: Quản lý chấm công hàng ngày cho nhân viên và chu kỳ quyết toán bảng lương vào cuối mỗi tháng.
+- **Kết quả đầu ra**: Bảng lương tháng được phê duyệt, nhân viên tra cứu phiếu lương cá nhân và chi phí tiền lương được ghi nhận vào báo cáo tài chính.
 
 | Bước thực hiện | Chi tiết diễn tiến & Phản hồi của Hệ thống BanquetHub |
 | :--- | :--- |
-| **Bước 1: Chấm công hàng ngày** | Nhân viên mở trang Chấm công cá nhân (/employee/my-attendance) để bấm Chấm công vào ca / Chấm công tan ca, hoặc Admin chấm công hàng ngày cho nhân viên với các mức 0 công, 0.5 công, hoặc 1 công. |
-| **Bước 2: Khởi tạo Kỳ lương tháng mới** | Đến cuối tháng, Admin vào mục Kỳ lương, tạo kỳ lương cho tháng tương ứng với Ngày công chuẩn mặc định là 26 ngày (có thể tùy chỉnh). |
-| **Bước 3: Nhập các khoản Phụ cấp & Khấu trừ** | Admin khai báo các khoản phụ cấp trách nhiệm, tiền thưởng phục vụ sự kiện tiệc hoặc các khoản khấu trừ vi phạm/tạm ứng cho từng nhân viên. |
-| **Bước 4: Tự động tính toán bảng lương** | Admin bấm Tính toán bảng lương. Hệ thống tự động áp dụng công thức chuẩn: Thực lĩnh = (Lương tháng cố định x Tổng công thực tế / Công chuẩn) + Phụ cấp - Khấu trừ. |
-| **Bước 5: Phê duyệt & Đánh dấu chi trả lương** | Ban giám đốc kiểm tra bảng tổng hợp lương, bấm Phê duyệt kỳ lương để phát hành phiếu lương cho nhân viên tra cứu trên cổng Self-Service, sau đó đánh dấu Đã thanh toán để ghi nhận chi phí lương vào dòng tiền. |
-| **Xử lý ngoại lệ / Quy tắc nghiệp vụ** | *Nếu có sai sót ngày công, Admin có thể điều chỉnh lại bảng chấm công của nhân viên trước khi bấm chốt phê duyệt bảng lương.* |
+| **Bước 1: Quản trị viên chấm công hàng ngày** | Quản trị viên (Admin) truy cập trang Quản lý Chấm công (/admin/attendance), chọn tháng và xem ma trận ngày công của toàn bộ nhân viên. Admin bấm vào từng ô ngày của nhân viên để ghi nhận: Đi đủ 1 công (FULL_DAY), Nửa ngày 0.5 công (HALF_DAY), hoặc Nghỉ 0 công (ABSENT) kèm ghi chú, hoặc dùng tính năng Chấm công hàng loạt. |
+| **Bước 2: Nhân viên tra cứu lịch sử công cá nhân** | Nhân viên đăng nhập vào hệ thống, mở trang Lịch sử chấm công của tôi (/employee/my-attendance) để theo dõi minh bạch số ngày công và trạng thái điểm danh thực tế trong tháng do quản lý đã ghi nhận. |
+| **Bước 3: Khởi tạo Kỳ lương tháng mới** | Đến cuối tháng, Admin vào mục Kỳ lương, tạo kỳ lương cho tháng tương ứng với Ngày công chuẩn mặc định là 26 ngày (có thể tùy chỉnh). |
+| **Bước 4: Nhập các khoản Phụ cấp & Khấu trừ** | Admin khai báo các khoản phụ cấp trách nhiệm, tiền thưởng phục vụ sự kiện tiệc hoặc các khoản khấu trừ vi phạm/tạm ứng cho từng nhân viên. |
+| **Bước 5: Tự động tính toán bảng lương** | Admin bấm Tính toán bảng lương. Hệ thống tự động áp dụng công thức chuẩn: Thực lĩnh = (Lương tháng cố định x Tổng công thực tế / Công chuẩn) + Phụ cấp - Khấu trừ. |
+| **Bước 6: Phê duyệt & Đánh dấu chi trả lương** | Ban giám đốc kiểm tra bảng tổng hợp lương, bấm Phê duyệt kỳ lương để phát hành phiếu lương cho nhân viên tra cứu trên trang cá nhân (/employee/my-payrolls), sau đó đánh dấu Đã thanh toán để ghi nhận chi phí lương vào dòng tiền. |
+| **Xử lý ngoại lệ / Quy tắc nghiệp vụ** | *Nhân viên KHÔNG tự chấm công vào ca/tan ca trên web. Quyền ghi nhận chấm công thuộc về Admin để bảo đảm tính kỷ luật lao động và đúng quy chế vận hành cơ sở ẩm thực.* |
 
 ---
 
@@ -153,14 +154,14 @@
 | **UC-11** | Theo dõi tiến độ chuẩn bị tiệc và in hợp đồng biên lai điện tử | Khách hàng | Phân hệ Khách hàng |
 | **UC-12** | Tiếp nhận đơn tiệc đã thanh toán và kiểm tra định mức nấu | Nhân viên Bếp, Điều phối viên | Phân hệ Nhân viên & Bếp |
 | **UC-13** | Cập nhật tiến độ chế biến và hoàn thành bàn giao tiệc | Nhân viên Bếp, Quản trị viên | Phân hệ Nhân viên & Bếp |
-| **UC-14** | Nhân viên thực hiện chấm công ca làm việc hàng ngày | Nhân viên nhà hàng | Phân hệ Nhân viên |
+| **UC-14** | Tra cứu lịch sử chấm công cá nhân (employee self-service) | Nhân viên nhà hàng | Phân hệ Nhân viên |
 | **UC-15** | Nhân viên tra cứu phiếu lương cá nhân hàng tháng | Nhân viên nhà hàng | Phân hệ Nhân viên |
 | **UC-16** | Quản lý danh mục món ăn và định mức nguyên liệu (bom) | Quản trị viên | Phân hệ Quản trị |
 | **UC-17** | Lập phiếu nhập kho nguyên liệu và tính giá vốn bình quân gia quyền | Quản trị viên, Thủ kho | Phân hệ Quản trị |
 | **UC-18** | Giám sát tồn kho khả dụng và cảnh báo nguyên liệu sắp hết | Quản trị viên | Phân hệ Quản trị |
 | **UC-19** | Quản lý chiến dịch ưu đãi và cấu hình hạn mức voucher | Quản trị viên | Phân hệ Quản trị |
 | **UC-20** | Giám sát và đối soát dòng tiền giao dịch ngân hàng sepay | Quản trị viên, Kế toán trưởng | Phân hệ Quản trị & Tài chính |
-| **UC-21** | Quản trị hồ sơ nhân sự, duyệt công và tự động tính bảng lương | Quản trị viên, Trưởng phòng Nhân sự | Phân hệ Quản trị & Nhân sự |
+| **UC-21** | Quản trị hồ sơ nhân sự, chấm công hàng ngày và tính bảng lương | Quản trị viên, Trưởng phòng Nhân sự | Phân hệ Quản trị & Nhân sự |
 | **UC-22** | Báo cáo tài chính doanh thu, chi phí giá vốn và lợi nhuận (p&l) | Quản trị viên, Giám đốc điều hành | Phân hệ Quản trị & Báo cáo |
 
 ---
@@ -366,18 +367,18 @@
 
 ---
 
-#### UC-14: NHÂN VIÊN THỰC HIỆN CHẤM CÔNG CA LÀM VIỆC HÀNG NGÀY
+#### UC-14: TRA CỨU LỊCH SỬ CHẤM CÔNG CÁ NHÂN (EMPLOYEE SELF-SERVICE)
 
 | Thuộc tính đặc tả | Nội dung chi tiết |
 | :--- | :--- |
-| **Mã & Tên Use Case** | **UC-14: NHÂN VIÊN THỰC HIỆN CHẤM CÔNG CA LÀM VIỆC HÀNG NGÀY** |
+| **Mã & Tên Use Case** | **UC-14: TRA CỨU LỊCH SỬ CHẤM CÔNG CÁ NHÂN (EMPLOYEE SELF-SERVICE)** |
 | **Phân hệ phụ trách** | Phân hệ Nhân viên (Employee Portal) |
 | **Tác nhân chính (Primary Actor)** | Nhân viên nhà hàng (Employee) |
-| **Mô tả tóm tắt (Description)** | Ghi nhận ngày làm việc thực tế của nhân viên trên giao diện Self-Service làm căn cứ tính bảng lương tự động vào cuối tháng. |
-| **Tiền điều kiện (Preconditions)** | Nhân viên đã đến nhà hàng hoặc địa điểm tổ chức tiệc làm việc. |
-| **Luồng hoạt động chính (Main Flow)** | • <b>Bước 1</b>: Nhân viên đăng nhập và truy cập trang Chấm công cá nhân (/employee/my-attendance).<br>• <b>Bước 2</b>: Nhân viên bấm nút Chấm công vào ca khi bắt đầu làm việc.<br>• <b>Bước 3</b>: Hệ thống ghi nhận thời gian vào ca thực tế.<br>• <b>Bước 4</b>: Khi kết thúc ca làm việc, nhân viên bấm Chấm công tan ca.<br>• <b>Bước 5</b>: Hệ thống lưu lại bản ghi ngày công (Đủ ca, Nửa ca) vào cơ sở dữ liệu để phục vụ kỳ tính lương. |
-| **Hậu điều kiện (Postconditions)** | Dữ liệu chấm công trong ngày của nhân viên được lưu lại minh bạch. |
-| **Quy tắc nghiệp vụ & Lưu ý** | *Admin cũng có thể chấm công trực tiếp cho nhân viên trên màn hình quản trị chấm công với các mức 0 công, 0.5 công hoặc 1 công.* |
+| **Mô tả tóm tắt (Description)** | Cho phép nhân viên tra cứu minh bạch bảng chấm công cá nhân theo từng tháng: xem lịch trực quan, trạng thái công từng ngày do Quản lý chấm và tổng số ngày công tích lũy. |
+| **Tiền điều kiện (Preconditions)** | Nhân viên đăng nhập tài khoản nhân viên được cấp (ROLE_EMPLOYEE). |
+| **Luồng hoạt động chính (Main Flow)** | • <b>Bước 1</b>: Nhân viên truy cập mục Lịch sử chấm công của tôi tại cổng /employee/my-attendance.<br>• <b>Bước 2</b>: Hệ thống hiển thị giao diện lịch tháng trực quan thể hiện trạng thái từng ngày: Đi đủ ca (FULL_DAY - 1 công), Nửa ngày (HALF_DAY - 0.5 công), hoặc Nghỉ (ABSENT - 0 công).<br>• <b>Bước 3</b>: Nhân viên sử dụng nút chuyển tháng để xem dữ liệu công của các tháng trước đó.<br>• <b>Bước 4</b>: Nhân viên xem bảng tổng kết thống kê: Tổng số ngày đi làm, Số ngày nửa ca, Số ngày vắng và Tổng số ngày công thực tế tích lũy trong tháng.<br>• <b>Bước 5</b>: Nhân viên xem danh sách các ngày có ghi chú đặc biệt từ Quản trị viên (nếu có giải trình lý do). |
+| **Hậu điều kiện (Postconditions)** | Nhân viên nắm rõ dữ liệu ngày công của mình, đảm bảo minh bạch trước khi chốt tính lương. |
+| **Quy tắc nghiệp vụ & Lưu ý** | *Nhân viên KHÔNG tự chấm công vào ca/tan ca trên web. Quyền ghi nhận chấm công thuộc về Quản trị viên (Admin) tại mục Quản lý Chấm công.* |
 
 ---
 
@@ -388,7 +389,7 @@
 | **Mã & Tên Use Case** | **UC-15: NHÂN VIÊN TRA CỨU PHIẾU LƯƠNG CÁ NHÂN HÀNG THÁNG** |
 | **Phân hệ phụ trách** | Phân hệ Nhân viên (Employee Portal) |
 | **Tác nhân chính (Primary Actor)** | Nhân viên nhà hàng (Employee) |
-| **Mô tả tóm tắt (Description)** | Giúp nhân viên minh bạch theo dõi chi tiết số ngày công, lương cơ bản, các khoản phụ cấp, thưởng phạt và mức lương thực nhận mỗi tháng. |
+| **Mô tả tóm tắt (Description)** | Giúp nhân viên minh bạch theo dõi chi tiết số ngày công, lương cơ bản, các khoản phụ cấp, thưởng phạt và mức lương thực nhận mỗi tháng sau khi Admin phê duyệt. |
 | **Tiền điều kiện (Preconditions)** | Ban giám đốc đã phê duyệt bảng lương của kỳ tháng tương ứng. |
 | **Luồng hoạt động chính (Main Flow)** | • <b>Bước 1</b>: Nhân viên truy cập mục Phiếu lương của tôi (/employee/my-payrolls).<br>• <b>Bước 2</b>: Hệ thống hiển thị danh sách các kỳ lương hàng tháng đã được Ban giám đốc phê duyệt.<br>• <b>Bước 3</b>: Nhân viên bấm xem chi tiết kỳ lương mong muốn: hệ thống hiển thị rõ ràng số ngày công thực tế, lương tháng cơ bản, tiền phụ cấp trách nhiệm, tiền thưởng sự kiện tiệc, các khoản giảm trừ và tổng số tiền thực nhận. |
 | **Hậu điều kiện (Postconditions)** | Nhân viên nắm rõ thu nhập hàng tháng một cách rõ ràng, không có tranh chấp khiếu nại. |
@@ -473,18 +474,18 @@
 
 ---
 
-#### UC-21: QUẢN TRỊ HỒ SƠ NHÂN SỰ, DUYỆT CÔNG VÀ TỰ ĐỘNG TÍNH BẢNG LƯƠNG
+#### UC-21: QUẢN TRỊ HỒ SƠ NHÂN SỰ, CHẤM CÔNG HÀNG NGÀY VÀ TÍNH BẢNG LƯƠNG
 
 | Thuộc tính đặc tả | Nội dung chi tiết |
 | :--- | :--- |
-| **Mã & Tên Use Case** | **UC-21: QUẢN TRỊ HỒ SƠ NHÂN SỰ, DUYỆT CÔNG VÀ TỰ ĐỘNG TÍNH BẢNG LƯƠNG** |
+| **Mã & Tên Use Case** | **UC-21: QUẢN TRỊ HỒ SƠ NHÂN SỰ, CHẤM CÔNG HÀNG NGÀY VÀ TÍNH BẢNG LƯƠNG** |
 | **Phân hệ phụ trách** | Phân hệ Quản trị & Nhân sự |
 | **Tác nhân chính (Primary Actor)** | Quản trị viên, Trưởng phòng Nhân sự (Admin) |
-| **Mô tả tóm tắt (Description)** | Quản lý nhân viên nhà hàng, phê duyệt dữ liệu chấm công và tự động tính toán bảng lương thực nhận mỗi tháng theo công thức chuẩn. |
-| **Tiền điều kiện (Preconditions)** | Đến kỳ tổng kết công và tính lương cuối tháng của nhà hàng. |
-| **Luồng hoạt động chính (Main Flow)** | • <b>Bước 1</b>: Admin mở trang Quản lý nhân viên để quản lý hồ sơ nhân sự: hợp đồng, chức vụ, mức lương cơ bản và tài khoản hệ thống.<br>• <b>Bước 2</b>: Cuối tháng, Admin mở trang Chấm công để rà soát và duyệt bảng công tổng hợp của toàn thể nhân viên.<br>• <b>Bước 3</b>: Admin chuyển sang mục Kỳ lương, tạo kỳ lương tháng mới và bấm nút Tính toán bảng lương tự động.<br>• <b>Bước 4</b>: Hệ thống tự động quét số ngày công thực tế của từng nhân viên, tính ra lương thời gian theo công thức: Lương cơ bản x Công thực tế / Công chuẩn (26) + Phụ cấp - Khấu trừ.<br>• <b>Bước 5</b>: Admin kiểm tra lại các con số, sau đó bấm Phê duyệt bảng lương để phát hành phiếu lương cho nhân viên và chuyển số liệu sang kế toán chi tiền. |
-| **Hậu điều kiện (Postconditions)** | Bảng lương tháng được duyệt, phiếu lương cá nhân được phát hành và chi phí nhân sự được ghi nhận vào báo cáo tài chính. |
-| **Quy tắc nghiệp vụ & Lưu ý** | *Hệ thống cho phép cấu hình linh hoạt các mức phụ cấp chức vụ và tiền thưởng sự kiện tiệc cho từng nhân viên.* |
+| **Mô tả tóm tắt (Description)** | Quản lý nhân viên nhà hàng, trực tiếp chấm công hàng ngày cho từng nhân viên và tự động tính toán bảng lương thực nhận mỗi tháng theo công thức chuẩn. |
+| **Tiền điều kiện (Preconditions)** | Quản trị viên truy cập trang Quản lý Chấm công (/admin/attendance) hoặc Kỳ lương (/admin/payrolls). |
+| **Luồng hoạt động chính (Main Flow)** | • <b>Bước 1</b>: Admin mở trang Quản lý nhân viên để quản lý hồ sơ nhân sự: hợp đồng, chức vụ, mức lương cơ bản và tài khoản hệ thống.<br>• <b>Bước 2</b>: Hàng ngày, Admin mở trang Chấm công (/admin/attendance), bấm vào từng ô ngày của nhân viên để ghi nhận: Đi đủ 1 công (FULL_DAY), Nửa ca 0.5 công (HALF_DAY), Nghỉ 0 công (ABSENT) kèm ghi chú giải trình, hoặc bấm Chấm công hàng loạt.<br>• <b>Bước 3</b>: Cuối tháng, Admin chuyển sang mục Kỳ lương, tạo kỳ lương tháng mới với Ngày công chuẩn (mặc định 26 ngày), nhập phụ cấp và các khoản khấu trừ.<br>• <b>Bước 4</b>: Admin bấm nút Tính toán bảng lương tự động. Hệ thống tự động quét số ngày công thực tế của từng nhân viên đã được Admin chấm trong tháng, tính ra lương theo công thức: Lương cơ bản x Công thực tế / Công chuẩn (26) + Phụ cấp - Khấu trừ.<br>• <b>Bước 5</b>: Admin kiểm tra lại các con số, sau đó bấm Phê duyệt bảng lương để phát hành phiếu lương cho nhân viên và chuyển số liệu sang kế toán chi tiền. |
+| **Hậu điều kiện (Postconditions)** | Dữ liệu chấm công được ghi nhận chuẩn xác, bảng lương tháng được duyệt và chi phí nhân sự được ghi nhận vào báo cáo tài chính. |
+| **Quy tắc nghiệp vụ & Lưu ý** | *Quyền chấm công chỉ dành riêng cho Admin (ROLE_ADMIN). Nhân viên chỉ có quyền tra cứu lịch sử công của mình tại cổng Self-Service.* |
 
 ---
 
